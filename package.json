@@ -20,7 +20,11 @@
   "devDependencies": {
     "@melt-ui/pp": "^0.3.2",
     "@melt-ui/svelte": "^0.86.6",
-    "nx": "20.0.0"
+    "nx": "20.7.1",
+    "@types/bun": "latest"
   },
-  "nx": {}
+  "nx": {},
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
 }
