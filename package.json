@@ -2,6 +2,9 @@
   "name": "@proper-proxima/source",
   "type": "module",
   "version": "0.0.1",
+  "scripts": {
+    "serve:stack:portal": "bun run run-stack"
+  },
   "dependencies": {
     "@astrojs/mdx": "^4.2.3",
     "@astrojs/rss": "^4.0.11",

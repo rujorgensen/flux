@@ -1,12 +1,12 @@
 {
-  "name": "proper-proxima",
+  "name": "frontend-portal",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "targets": {
     "serve": {
       "executor": "nx:run-script",
       "options": {
         "script": "astro dev",
-        "proxyConfig": "apps/frontend/proper-proxima/proxy.conf.json"
+        "proxyConfig": "apps/frontend/portal/proxy.conf.json"
       }
     }
   }

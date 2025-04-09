@@ -1,0 +1,18 @@
+import type { SpawnOptions } from "bun"
+
+const spawnOptions: SpawnOptions.OptionsObject = {
+    stdin: "inherit",
+    stdout: "inherit",
+    stderr: "inherit",
+}
+
+const run = async () => {
+    Bun.spawn(["nx", "serve", "frontend-portal"], spawnOptions)
+    Bun.spawn(["nx", "serve", "backend-server"], spawnOptions)
+
+    process.on("SIGINT", async () => {
+        console.log("Cleaning up...")
+    })
+}
+
+run()
