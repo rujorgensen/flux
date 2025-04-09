@@ -1,6 +1,7 @@
 ---
 import Button from "../components/svelte/Button.svelte";
 import ApiCall from "../components/svelte/ApiCall.svelte";
+import Counter from "../components/svelte/Counter.svelte";
 import MeltUI from "../components/svelte/melt-ui/MeltUI.svelte";
 import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
@@ -16,6 +17,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 	<body>
 		<Header />
 		<Button color="darkred" client:load />
+		<Counter client:load />
 		<ApiCall client:load />
 		<MeltUI client:load />
 		<main>

@@ -8,7 +8,7 @@ const spawnOptions: SpawnOptions.OptionsObject = {
 
 const run = async () => {
     Bun.spawn(["nx", "serve", "frontend-portal"], spawnOptions)
-    Bun.spawn(["nx", "serve", "backend-server"], spawnOptions)
+    Bun.spawn(["nx", "serve", "backend-portal"], spawnOptions)
 
     process.on("SIGINT", async () => {
         console.log("Cleaning up...")
