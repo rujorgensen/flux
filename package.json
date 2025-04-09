@@ -9,7 +9,8 @@
     "@astrojs/svelte": "^7.0.9",
     "astro": "^5.6.1",
     "svelte": "^5.25.8",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "elysia": "latest"
   },
   "devDependencies": {
     "@melt-ui/pp": "^0.3.2",

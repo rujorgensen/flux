@@ -5,7 +5,8 @@
     "serve": {
       "executor": "nx:run-script",
       "options": {
-        "script": "astro dev"
+        "script": "astro dev",
+        "proxyConfig": "apps/frontend/proper-proxima/proxy.conf.json"
       }
     }
   }
