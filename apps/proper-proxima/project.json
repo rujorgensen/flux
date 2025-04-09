@@ -1,0 +1,12 @@
+{
+  "name": "proper-proxima",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-script",
+      "options": {
+        "script": "astro dev"
+      }
+    }
+  }
+}

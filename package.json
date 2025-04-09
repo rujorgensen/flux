@@ -1,13 +1,7 @@
 {
-  "name": "proper-proxima",
+  "name": "@proper-proxima/source",
   "type": "module",
   "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
   "dependencies": {
     "@astrojs/mdx": "^4.2.3",
     "@astrojs/rss": "^4.0.11",
@@ -20,6 +14,7 @@
   "devDependencies": {
     "@melt-ui/pp": "^0.3.2",
     "@melt-ui/svelte": "^0.86.6",
+    "@nx/workspace": "^20.7.2",
     "nx": "20.7.1",
     "@types/bun": "latest"
   },
