@@ -65,6 +65,10 @@
     justify-content: space-between;
     align-items: center;
     background-color: var(--surface-1);
+
+    padding: var(--padding-medium);
+    border: 1px solid var(--outline-1);
+    border-radius: 0 var(--roundness-medium) var(--roundness-medium) 0;
   }
 
   .avatar {

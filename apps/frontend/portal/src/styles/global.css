@@ -52,7 +52,8 @@
 	/* --roundness-large: 20px; */
 
 	/*
-		Light mode
+		Space
+		--space-medium: 20px;
 	*/
 }
 
@@ -73,7 +74,7 @@
 [data-theme="dark"] {
 	--pop-color-1: rgb(75, 192, 192);
 	--pop-color-2: rgba(75, 192, 192, 0.2);
-	
+
 	color-scheme: dark;
 
 	--brand-1: var(--brand-dark-1);
@@ -91,18 +92,17 @@
 	--success-1: var(--success-1-dark);
 	--text-discrete: var(--text-1-discrete-dark);
 
-	--surface-1: var(--surface-1-dark);
-	--surface-2: var(--surface-2-dark);
-	--surface-3: var(--surface-3-dark);
+	--surface-0: var(--gray-8);
+	--surface-1: var(--gray-10);
+	--surface-2: var(--gray-8);
 
 	--outline-1: var(--outline-1-dark);
 	--outline-2: var(--outline-2-dark);
 
 	--surface-shadow: var(--surface-shadow-dark);
 	--shadow-strength: var(--shadow-strength-dark);
-
-
 }
+
 
 
 @font-face {
