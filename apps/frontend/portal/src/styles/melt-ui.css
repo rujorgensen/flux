@@ -1,3 +1,4 @@
+
 :root {
     --color-inherit: inherit;
     --color-current: currentColor;
@@ -63,11 +64,11 @@
       border-color: rgb(var(--color-gray-200) / 1);
     }
    
-    ::before,
+    /* ::before,
     ::after {
       content: '';
     }
-   
+    */
     html {
       line-height: 1.5;
       -webkit-text-size-adjust: 100%;

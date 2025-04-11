@@ -7,7 +7,14 @@
     "serve": {
       "executor": "nx:run-script",
       "options": {
-        "script": "bun run --watch src/main.ts --tsconfig-override=tsconfig.app.json"
+        "script": "bun run --watch src/main.ts --tsconfig-override=tsconfig.app.json",
+        "script-": "bun --hot src/main.ts --tsconfig-override=tsconfig.app.json"
+      }
+    },
+    "serve-static": {
+      "executor": "nx:run-script",
+      "options": {
+        "script": "bunx run ../../../dist/apps/frontend/portal/server/entry.mjs"
       }
     }
   },

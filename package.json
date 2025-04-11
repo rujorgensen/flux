@@ -3,7 +3,8 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "serve:stack:portal": "bun run run-stack"
+    "serve:stack:portal": "bun run run-stack",
+    "prisma:migrate": "bunx prisma migrate dev --name init"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.2.3",
@@ -11,17 +12,30 @@
     "@astrojs/rss": "^4.0.11",
     "@astrojs/sitemap": "^3.3.0",
     "@astrojs/svelte": "^7.0.9",
+    "@elysiajs/jwt": "^1.2.0",
+    "@elysiajs/swagger": "^1.2.2",
+    "@lucide/svelte": "^0.487.0",
+    "@prisma/client": "^6.6.0",
     "astro": "^5.6.1",
+    "chart.js": "^4.4.8",
+    "elysia": "latest",
+    "flowbite": "^3.1.2",
+    "flowbite-svelte": "^0.48.6",
+    "flowbite-svelte-icons": "^2.1.1",
+    "open-props": "^1.7.15",
+    "rollup-plugin-visualizer": "^5.14.0",
     "svelte": "^5.25.8",
     "typescript": "^5.8.3",
-    "elysia": "latest"
+    "webpack-bundle-analyzer": "^4.10.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@melt-ui/pp": "^0.3.2",
     "@melt-ui/svelte": "^0.86.6",
     "@nx/workspace": "^20.7.2",
+    "@types/bun": "latest",
     "nx": "20.7.2",
-    "@types/bun": "latest"
+    "prisma": "^6.6.0"
   },
   "packageManager": "bun@1.2.7",
   "nx": {},
