@@ -24,11 +24,6 @@ export class FluxAgent {
 
     public readonly id: string = nanoid();
 
-    // Switch this to CB style for lightweightness
-    public readonly networkState$$: BehaviorSubject<TNetworkConnectionState> = new BehaviorSubject<TNetworkConnectionState>('disconnected');
-
-    private readonly webRTCConnectionState$$: BehaviorSubject<TRTCState> = new BehaviorSubject<TRTCState>('idle');
-
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
     private readonly fluxClientData: FluxClientData = new FluxClientData();
 
@@ -118,10 +113,7 @@ export class FluxAgent {
             webRTCConncetionState: TRTCState,
         ) => void,
     ): void {
-        this.webRTCConnectionState$$
-            .subscribe({
-                next: fn,
-            });
+        // = new BehaviorSubject<TRTCState>('idle');
     }
 
     /**
@@ -135,10 +127,7 @@ export class FluxAgent {
             networkState: TNetworkConnectionState,
         ) => void,
     ): void {
-        this.networkState$$
-            .subscribe({
-                next: fn,
-            });
+        // = new BehaviorSubject<TNetworkConnectionState>('disconnected');
     }
 
     public onMessage(

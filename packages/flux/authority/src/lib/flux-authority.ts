@@ -11,16 +11,13 @@ import { nanoid } from 'nanoid';
 import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import { retry } from './utils/promises.utils';
+import { TNetworkConnectionState } from './connector/flux-ws-connection';
+import { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
 
 
 export class FluxAuthority {
 
     public readonly id: string = nanoid();
-
-    // Switch this to CB style for lightweightness
-    public readonly networkState$$: BehaviorSubject<TNetworkConnectionState> = new BehaviorSubject<TNetworkConnectionState>('disconnected');
-
-    private readonly webRTCConnectionState$$: BehaviorSubject<TRTCState> = new BehaviorSubject<TRTCState>('idle');
 
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
     private readonly fluxClientData: FluxClientData = new FluxClientData();
@@ -120,10 +117,7 @@ export class FluxAuthority {
             webRTCConncetionState: TRTCState,
         ) => void,
     ): void {
-        this.webRTCConnectionState$$
-            .subscribe({
-                next: fn,
-            });
+        // private readonly webRTCConnectionState$$: BehaviorSubject<TRTCState> = new BehaviorSubject<TRTCState>('idle');
     }
 
     /**
@@ -137,10 +131,7 @@ export class FluxAuthority {
             networkState: TNetworkConnectionState,
         ) => void,
     ): void {
-        this.networkState$$
-            .subscribe({
-                next: fn,
-            });
+    // public readonly networkState$$: BehaviorSubject<TNetworkConnectionState> = new BehaviorSubject<TNetworkConnectionState>('disconnected');
     }
 
     public onMessage(
