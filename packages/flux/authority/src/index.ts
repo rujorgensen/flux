@@ -1,3 +1,3 @@
 export {
     FluxAuthority,
-} from './lib/flux';
+} from './lib/flux-authority';

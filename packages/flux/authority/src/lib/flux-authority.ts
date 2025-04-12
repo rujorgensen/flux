@@ -6,21 +6,11 @@ globalThis.count++;
 
 console.log(`Reloaded ${globalThis.count} time(s)`);
 
-import type { TCallback2, TNetworkId_S } from '@flux/shared';
-import { FluxNetworkConnection } from './flux-network.class';
-import {
-    type TNetworkConnectionState,
-    createWSConnection,
-    FluxWebSocketConnection,
-} from './connector/flux-ws-connection';
+import type { TCallback2 } from '@flux/shared';
 import { nanoid } from 'nanoid';
-import { BehaviorSubject } from 'rxjs';
-import { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
 import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
-import { TChannnelAuthCallback } from './channel/channel.type';
 import { retry } from './utils/promises.utils';
-import { TAuthorizeCallback } from 'apps/flux/shared/src/lib/auth/auth.fn';
 
 
 export class FluxAuthority {
@@ -53,7 +43,7 @@ export class FluxAuthority {
         };
 
     constructor(
-        private readonly networkId: TNetworkId_S,
+        private readonly networkId: string,
         private readonly options?: {
             domain?: string,
             secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.

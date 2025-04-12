@@ -1,4 +1,7 @@
-import { TAuthenticationTicket, TNetworkAuthorityAuthenticationTicket } from './auth.types';
+import {
+    TAuthenticationTicket,
+    TNetworkAuthorityAuthenticationTicket,
+} from './auth.types';
 
 /**
  * Soft check on the general shape of the ticket.

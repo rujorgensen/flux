@@ -7,8 +7,14 @@ import jwt from '@elysiajs/jwt';
 // ****************************************************************************
 import { FluxAuthority } from '@persistica/flux-authority';
 
+console.log('🔑 Registering authority');
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+const CODE_TO_ACCESS_NETWORK: any = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
+const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
+
 const fluxAuthority = new FluxAuthority(
-  'network-id' as unknown as TNetworkId_S,
+  'network-id',
   {
     //         domain?: string,
     //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.

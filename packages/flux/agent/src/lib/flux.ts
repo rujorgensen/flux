@@ -14,7 +14,6 @@ import {
     FluxWebSocketConnection,
 } from './connector/flux-ws-connection';
 import { nanoid } from 'nanoid';
-import { BehaviorSubject } from 'rxjs';
 import { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
 import { authenticateOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';

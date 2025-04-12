@@ -1,4 +1,3 @@
-import { TProcessAddress } from "../routing.type";
 
 export type TCallback = (result: any) => void;
 export type TCallback2 = (result: string) => void;

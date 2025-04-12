@@ -23,7 +23,6 @@ import {
 } from './low-level-com/websocket/ws-client';
 import { FluxNetworkConnection } from '../flux-network.class';
 import { FluxNetworkChannel } from '../flux-network-channel.class';
-import { BehaviorSubject } from 'rxjs';
 import { TRTCState } from './low-level-com/web-rtc/ice-connection';
 import { TChannnelAuthCallback } from '../channel/channel.type';
 import { TAuthorizeCallback } from 'apps/flux/shared/src/lib/auth/auth.fn';

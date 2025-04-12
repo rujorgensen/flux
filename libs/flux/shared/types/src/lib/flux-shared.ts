@@ -1,5 +1,3 @@
-import { RPCResponse } from "./rpc/rpc.interfaces";
-
 export type TNetworkId_S = string & { __brand: 'TNetworkId'; };
 
 // export interface ISocketPackage {
@@ -42,8 +40,4 @@ export interface IConnectedNode {
 
 export type TCallbackFunction = (
     message: string,
-) => void;
-
-export type TRPCResponseCallbackFunction = (
-    response: RPCResponse,
 ) => void;
