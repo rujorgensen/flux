@@ -1,0 +1,18 @@
+/**
+ * The lowest level if WebSocket interactions.
+ */
+export const RPC_REQUEST: string = 'rpc-request';
+export const RPC_RESPONSE: string = 'rpc-response';
+export const CONNECT_TO_CLIENT: string = 'connect-to-client';
+
+export const SET_OWN_UID: string = 'set-own-uid';
+
+// * Channel
+export const NETWORK_CHANNEL_PUBLISH: string = 'nc-pub';
+export const ON_NETWORK_CHANNEL_PUBLISH: string = 'nc-on-pub';
+export const SUBSCRIBE_NETWORK_CHANNEL_TOPIC: string = 'subscribe-to-nc-topic';
+export const SUBSCRIBED_NETWORK_CHANNEL_TOPIC: string = 'subscribed-to-nc-topic';
+export const UNSUBSCRIBE_NETWORK_CHANNEL_TOPIC: string = 'unsubscribe-nc-topic';
+export const UNSUBSCRIBED_NETWORK_CHANNEL_TOPIC: string = 'unsubscribed-nc-topic';
+
+export const ERROR: string = 'e';

@@ -17,7 +17,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@persistica/flux-authority": [
+        "packages/flux/authority/src/index.ts"
+      ]
+    }
   },
   "exclude": [
     "node_modules",
