@@ -11,9 +11,6 @@ import { nanoid } from 'nanoid';
 import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import { retry } from './utils/promises.utils';
-import { TNetworkConnectionState } from './connector/flux-ws-connection';
-import { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
-
 
 export class FluxAuthority {
 
@@ -21,6 +18,7 @@ export class FluxAuthority {
 
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
     private readonly fluxClientData: FluxClientData = new FluxClientData();
+    private readonly stateListeners: Set<(rtcState: TRTCState) => void> = new Set();
 
     // Has the client preivously connected to the network or registered as an authority?
     // ! TODO  MOVE 
@@ -67,7 +65,9 @@ export class FluxAuthority {
             authorizeNetworkChannel,
         };
 
-        this.networkState$$.next('authorizing');
+        for (const listener of this.stateListeners) {
+            listener('authorizing');
+        }
 
         const ticket: string = await retry<any>(
             () => authenticateNetworkAuthorityOrThrow(
@@ -117,6 +117,9 @@ export class FluxAuthority {
             webRTCConncetionState: TRTCState,
         ) => void,
     ): void {
+        this.stateListeners.add(fn);
+        //     listener('authorizing');
+        
         // private readonly webRTCConnectionState$$: BehaviorSubject<TRTCState> = new BehaviorSubject<TRTCState>('idle');
     }
 
@@ -131,7 +134,7 @@ export class FluxAuthority {
             networkState: TNetworkConnectionState,
         ) => void,
     ): void {
-    // public readonly networkState$$: BehaviorSubject<TNetworkConnectionState> = new BehaviorSubject<TNetworkConnectionState>('disconnected');
+        // public readonly networkState$$: BehaviorSubject<TNetworkConnectionState> = new BehaviorSubject<TNetworkConnectionState>('disconnected');
     }
 
     public onMessage(
