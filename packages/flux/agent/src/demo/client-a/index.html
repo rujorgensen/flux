@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Client A</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+    <link
+        rel="icon"
+        type="image/x-icon"
+        href="favicon.ico"
+    >
+    <script
+        type="module"
+        src="web-rtc.ts"
+    ></script>
+    <script
+        type="module"
+        src="main-a.ts"
+    ></script>
+    <script
+        type="module"
+        src="main-b.ts"
+    ></script>
+</head>
+
+<body style="display:flex; flex-direction:column; gap:20px">
+    <div x-data="webRTCApplication()">
+        <div id="panel-container">
+
+            <h1>Peer A</h1>
+
+            <div class="container">
+                <button @click="createOffer">Create Offer</button>
+                <button @click="setRemoteAnswer(offerSDP)">Set Remote Answer</button>
+                <textarea
+                    x-model="offerSDP"
+                    placeholder="Offer SDP"
+                ></textarea>
+            </div>
+
+            <h1>Peer B</h1>
+
+            <div class="container">
+
+                <button @click="setRemoteOffer(answerSDP)">Set Remote Offer and crete answer</button>
+                <textarea
+                    x-model="answerSDP"
+                    placeholder="Answer SDP"
+                ></textarea>
+            </div>
+
+            <h1>Messages</h1>
+
+            <div class="container">
+                <input
+                    x-model="message"
+                    placeholder="Type a message"
+                />
+                <button @click="sendMessage">Send</button>
+                <div>
+                    <strong>Received:</strong>
+                    <p x-text="receivedMessage"></p>
+                </div>
+                
+
+            </div>
+        </div>
+
+    </div>
+    <div x-data="fluxApplicationA()">
+
+        <div id="panel-container">
+            <h1>Client A</h1>
+
+            <header class="statuses">
+                <label for="network-state">network:</label>
+                <label for="webtrc-state">WebRTC Connection:</label>
+                <!-- 
+                <label for="nw-state">network:</label>
+                <label for="syn-state">synchronizer:</label> -->
+                <span
+                    id="network-state"
+                    x-text="networkState"
+                ></span>
+                <span
+                    id="webtrc-state"
+                    x-text="webRTCConncetionState"
+                ></span>
+                <!-- 
+                <span id="nw-state" x-text="networkState"></span>
+                <span id="syn-state" x-text="synchronizerState"></span> -->
+
+                <!-- <button @click="persistica.joinNetwork()">
+            Connect to network
+        </button> -->
+            </header>
+            <div class="container">
+                <code>
+                    <template x-for="log in clientLog">
+                        <p x-text="log"></p>
+                    </template>
+                </code>
+                <button @click="connectToNamedClient('client-b-unique-identification-token')">
+                    Connect to Client B
+                </button>
+
+                <button @click="joinChannel('channel-abc')">
+                    Join Channel 'channel-abc'
+                </button>
+                
+                <!-- <input id="new-todo" type="text" x-model="message" @keyup.enter="enter()"
+                    placeholder="Add a new todo..."> -->
+                <!-- <ul id="todo-list">
+                    <template x-for="todo in todos">
+                        <li class="todo-item" :class="todo.isCompleted ? 'done' : ''">
+                            <span x-text="todo.description" @click="toggleState(todo)"></span>
+                            <button class="delete" @click="remove(todo)">
+                                ✕
+                            </button>
+                        </li>
+                    </template>
+                </ul> -->
+            </div>
+        </div>
+    </div>
+
+    <div x-data="fluxApplicationB()">
+
+        <div id="panel-container">
+
+            <h1>Client B</h1>
+
+            <header class="statuses">
+                <label for="network-state">network:</label>
+                <label for="webtrc-state">WebRTC Connection:</label>
+                <!-- 
+                <label for="nw-state">network:</label>
+                <label for="syn-state">synchronizer:</label> -->
+                <span
+                    id="network-state"
+                    x-text="networkState"
+                ></span>
+                <span
+                    id="webtrc-state"
+                    x-text="webRTCConncetionState"
+                ></span>
+                <!-- 
+                <span id="nw-state" x-text="networkState"></span>
+                <span id="syn-state" x-text="synchronizerState"></span> -->
+                <!-- <button @click="persistica.joinNetwork()">
+            Connect to network
+        </button> -->
+            </header>
+            <div class="container">
+                <code>
+                    <template x-for="log in clientLog">
+                        <p x-text="log"></p>
+                    </template>
+                </code>
+
+                <button @click="joinChannel('channel-abc')">
+                    Join Channel 'channel-abc' and start broadcasting
+                </button>
+                
+                
+                <!-- <input id="new-todo" type="text" x-model="message" @keyup.enter="enter()"
+                    placeholder="Add a new todo..."> -->
+                <!-- <ul id="todo-list">
+                    <template x-for="todo in todos">
+                        <li class="todo-item" :class="todo.isCompleted ? 'done' : ''">
+                            <span x-text="todo.description" @click="toggleState(todo)"></span>
+                            <button class="delete" @click="remove(todo)">
+                                ✕
+                            </button>
+                        </li>
+                    </template>
+                </ul> -->
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

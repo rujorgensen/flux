@@ -1,12 +1,63 @@
-import { Elysia, error, t } from "elysia";
-// import { $ } from "bun";
-import jwt from "@elysiajs/jwt";
+import { Elysia, error, t } from 'elysia';
+// import { $ } from 'bun';
+import jwt from '@elysiajs/jwt';
 
+// ****************************************************************************
+// * Setup Authority
+// ****************************************************************************
+import { FluxAuthority } from '@persistica/flux-authority';
+
+const fluxAuthority = new FluxAuthority(
+  'network-id' as unknown as TNetworkId_S,
+  {
+    //         domain?: string,
+    //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
+    //         retries?: number; // Number of times to retry a failed message
+  },
+);
+
+await fluxAuthority
+  .registerAuthority(
+    NETWORK_AUTHORITY_KEY,
+    (
+      auth: unknown,
+    ): Promise<string> => {
+      // Test the agents claim to access network
+      if (
+        ((auth as any).code !== CODE_TO_ACCESS_NETWORK)
+      ) {
+        return Promise.reject('Not allowed');
+      }
+
+      // console.log('✅ Network access authorized');
+
+      return Promise.resolve(jwt.sign({
+        userId: (<any>auth).user,
+      }, secret, { expiresIn: 120_000 }));
+    },
+
+    (
+      channelTopic: TChannelTopic,
+      identification: string,
+    ): Promise<boolean> => {
+
+      console.log(`🔒 A client is trying to subscribe to topic '${channelTopic}', using identification '${identification}'`);
+
+      console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
+
+      return Promise.resolve(true);
+    },
+  );
+
+
+// ****************************************************************************
+// * Start server
+// ****************************************************************************
 
 // make TypeScript happy
-// ½declare global {
-// ½  var count: number;
-// ½}
+// declare global {
+//   var count: number;
+// }
 
 // globalThis.count ??= 0;
 // console.log(`Reloaded ${globalThis.count} times`);
@@ -32,11 +83,11 @@ import { swagger } from '@elysiajs/swagger';
 // try {
 //   $`HOST=0.0.0.0 PORT=3001 bunx run ../../../dist/apps/frontend/portal/server/entry.mjs`
 //     .then(() => {
-//       console.log("Frontend server started on port 3001");
+//       console.log('Frontend server started on port 3001');
 //     })
 //     ;
 // } catch {
-//   // console.error("Server might be runnning");
+//   // console.error('Server might be runnning');
 // }
 
 // * Host the api
@@ -73,7 +124,7 @@ const app = new Elysia()
 
   .post('/auth', async ({ jwt, query, cookie: { auth }, body, redirect }) => {
 
-    console.log("BODY", { pass: body.password });
+    console.log('BODY', { pass: body.password });
 
     // Check if the user is already authenticated
     const value = await jwt.sign({ token: query.token as string })
@@ -116,7 +167,7 @@ const app = new Elysia()
   // * Proxy all other requests to the frontend server
   .get('/*', proxy, {
     beforeHandle({ set, cookie: { session }, error }) {
-      console.log("validate");
+      console.log('validate');
       // if (!validateSession(session.value)) return error(401)
     }
   })

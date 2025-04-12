@@ -1,0 +1,25 @@
+{
+  "name": "@persistica/flux-mesh",
+  "version": "0.0.1",
+  "description": "Persistica Flux Mesh",
+  "type": "module",
+  "keywords": [],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./index.cjs",
+  "types": "./index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rujorgensen/persistica.git"
+  },
+  "author": "pixl.prophet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rujorgensen/persistica/issues"
+  },
+  "homepage": "https://github.com/rujorgensen/persistica#readme",
+  "dependencies": {
+    "alpinejs": "^3.14.9"
+  }
+}
