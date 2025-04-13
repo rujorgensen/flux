@@ -6,7 +6,7 @@ globalThis.count++;
 
 console.log(`Reloaded ${globalThis.count} time(s)`);
 
-import type { TCallback2, TClientOwnUId, TNetworkId_S } from '@flux/shared';
+import type { TCallback2, TClientOwnUId, TNetworkId_S } from '@flux/shared/types';
 import { FluxNetworkConnection } from './flux-network.class';
 import {
     type TNetworkConnectionState,

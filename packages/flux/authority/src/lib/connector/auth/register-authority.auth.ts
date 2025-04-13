@@ -2,7 +2,7 @@ import {
     type TNetworkId_S,
     // TNetworkAuthorityAuthenticationTicket,
     // checkNAATTicketShape,
-} from '@flux/shared';
+} from '@flux/shared/types';
 
 export class RetryableError extends Error { }
 export class ConnectionError extends RetryableError { }

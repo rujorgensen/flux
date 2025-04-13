@@ -2,7 +2,7 @@
 
 import {
     RPCClient,
-} from '@flux/shared';
+} from '@flux/shared/types';
 
 export class AuthorityClient extends RPCClient<'authorize'> {
     public authorize(

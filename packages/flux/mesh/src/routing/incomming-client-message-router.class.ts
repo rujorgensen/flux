@@ -1,7 +1,7 @@
 /**
  * Route messages to the correct destination.
  */
-import type { TClientId } from '@flux/shared';
+import type { TClientId } from '@flux/shared/types';
 import {
     getRedisConnection,
     RedisConnection,

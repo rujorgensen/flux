@@ -4,28 +4,23 @@
 
 import {
     type TChannelTopic,
-    type TClientOwnUId,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
     RPC_REQUEST,
     RPC_RESPONSE,
-    RPCRequest,
-    RPCResponse,
     SET_OWN_UID,
-    TCallback2,
     SUBSCRIBED_NETWORK_CHANNEL_TOPIC,
     NETWORK_CHANNEL_PUBLISH,
     validateTopic,
     ON_NETWORK_CHANNEL_PUBLISH,
-} from '@flux/shared';
+} from '@flux/shared/types';
 import {
     FluxWebSocketClientConnection,
 } from './low-level-com/websocket/ws-client';
 import { FluxNetworkConnection } from '../flux-network.class';
 import { FluxNetworkChannel } from '../flux-network-channel.class';
-import { TRTCState } from './low-level-com/web-rtc/ice-connection';
-import { TChannnelAuthCallback } from '../channel/channel.type';
-import { TAuthorizeCallback } from 'apps/flux/shared/src/lib/auth/auth.fn';
+import type { TRTCState } from './low-level-com/web-rtc/ice-connection';
+import type { TChannnelAuthCallback } from '../channel/channel.type';
 
 export type TNetworkConnectionState = 'disconnected' | 'connected' | 'connecting' | 'authorizing' | 'denied';
 
@@ -53,7 +48,7 @@ const previousNetworkActions: {
 export const createWSConnection = <T, M>(
     id: string,
     ticket: string,
-    webRTCConnectionState$$: BehaviorSubject<TRTCState>,
+    webRTCConnectionStateCB: () => void,
     registerAuthority: (
         authorityKey: string,
         cb: (
@@ -84,16 +79,13 @@ export const createWSConnection = <T, M>(
                 }
             }
         },
-        webRTCConnectionState$$.next.bind(webRTCConnectionState$$),
+        webRTCConnectionStateCB,
         ticket,
         options,
     );
 };
 
 export class FluxWebSocketConnection {
-    // public readonly connectionState$$: BehaviorSubject<TWSConnectionState> = new BehaviorSubject<TWSConnectionState>('disconnected');
-    public readonly networkState$$: BehaviorSubject<TNetworkConnectionState> = new BehaviorSubject<TNetworkConnectionState>('disconnected');
-
     private readonly socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TCallback2> = new Set();
 

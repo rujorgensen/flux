@@ -32,4 +32,10 @@ export {
     IPackageStatus,
 } from './lib/package-status.interfaces';
 
-export * from './lib/routing.type';
+export type {
+    TProcessId,
+    TProcessAddress,
+    TMachineAddress,
+    TClientId,
+    TAddress,
+} from './lib/routing.type';

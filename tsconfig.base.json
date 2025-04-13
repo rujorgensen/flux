@@ -10,16 +10,33 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": ["es2020", "dom"],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@flux/shared/types": ["libs/flux/shared/types/src/index.ts"],
-      "@flux/shared/utils": ["libs/flux/shared/utils/src/index.ts"],
-      "@flux/shared/ws": ["libs/flux/shared/ws/src/index.ts"],
-      "@persistica/flux-authority": ["packages/flux/authority/src/index.ts"]
+      "@flux/shared/types": [
+        "libs/flux/shared/types/src/index.ts"
+      ],
+      "@flux/shared/utils": [
+        "libs/flux/shared/utils/src/index.ts"
+      ],
+      "@flux/shared/ws": [
+        "libs/flux/shared/ws/src/index.ts"
+      ],
+      "@persistica/flux-authority": [
+        "packages/flux/authority/src/index.ts"
+      ],
+      "@flux/mesh": [
+        "packages/flux/mesh/src/index.ts"
+      ]
     }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
 }

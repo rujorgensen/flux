@@ -1,59 +1,71 @@
 import { Elysia, error, t } from 'elysia';
 // import { $ } from 'bun';
 import jwt from '@elysiajs/jwt';
-
-// ****************************************************************************
-// * Setup Authority
-// ****************************************************************************
+import { FluxMeshServer } from '@flux/mesh';
 import { FluxAuthority } from '@persistica/flux-authority';
+import * as jjwt from 'jsonwebtoken';
 
-console.log('🔑 Registering authority');
+// ****************************************************************************
+// * Setup Mesh Server
+// ****************************************************************************
+const fluxMeshServer: FluxMeshServer = new FluxMeshServer();
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-const CODE_TO_ACCESS_NETWORK: any = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
-const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
+fluxMeshServer.onReady(async () => {
 
-const fluxAuthority = new FluxAuthority(
-  'network-id',
-  {
-    //         domain?: string,
-    //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
-    //         retries?: number; // Number of times to retry a failed message
-  },
-);
+  // ****************************************************************************
+  // * Setup Authority
+  // ****************************************************************************
 
-await fluxAuthority
-  .registerAuthority(
-    NETWORK_AUTHORITY_KEY,
-    (
-      auth: unknown,
-    ): Promise<string> => {
-      // Test the agents claim to access network
-      if (
-        ((auth as any).code !== CODE_TO_ACCESS_NETWORK)
-      ) {
-        return Promise.reject('Not allowed');
-      }
+  console.log('🔑 Registering authority');
 
-      // console.log('✅ Network access authorized');
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const CODE_TO_ACCESS_NETWORK: any = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
+  const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
-      return Promise.resolve(jwt.sign({
-        userId: (<any>auth).user,
-      }, secret, { expiresIn: 120_000 }));
+  const fluxAuthority = new FluxAuthority(
+    'network-id',
+    {
+      //         domain?: string,
+      //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
+      //         retries?: number; // Number of times to retry a failed message
     },
 
-    (
-      channelTopic: TChannelTopic,
-      identification: string,
-    ): Promise<boolean> => {
-
-      console.log(`🔒 A client is trying to subscribe to topic '${channelTopic}', using identification '${identification}'`);
-
-      console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
-
-      return Promise.resolve(true);
-    },
   );
+  await fluxAuthority
+    .registerAuthority(
+      NETWORK_AUTHORITY_KEY,
+      (
+        auth: unknown,
+      ): Promise<string> => {
+        // Test the agents claim to access network
+        if (
+          ((auth as any).code !== CODE_TO_ACCESS_NETWORK)
+        ) {
+          return Promise.reject('Not allowed');
+        }
+
+        // console.log('✅ Network access authorized');
+
+        return Promise.resolve(jjwt.sign({
+          userId: (<any>auth).user,
+        }, secret, { expiresIn: 120_000 }));
+      },
+
+      (
+        channelTopic: string,
+        identification: string,
+      ): Promise<boolean> => {
+
+        console.log(`🔒 A client is trying to subscribe to topic '${channelTopic}', using identification '${identification}'`);
+
+        console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
+
+        return Promise.resolve(true);
+      },
+    );
+});
+
+
 
 
 // ****************************************************************************

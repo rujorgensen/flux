@@ -6,11 +6,24 @@ globalThis.count++;
 
 console.log(`Reloaded ${globalThis.count} time(s)`);
 
-import type { TCallback2 } from '@flux/shared';
+import type { TCallback2 } from '@flux/shared/types';
 import { nanoid } from 'nanoid';
 import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import { retry } from './utils/promises.utils';
+import {
+    createWSConnection,
+    TNetworkConnectionState,
+    type FluxWebSocketConnection,
+} from './connector/flux-ws-connection';
+import type {
+    TRTCState,
+} from './connector/low-level-com/web-rtc/ice-connection';
+import type {
+    TChannnelAuthCallback,
+} from './channel/channel.type';
+import type { TAuthorizeCallback } from '@flux/shared/types';
+import type { FluxNetworkConnection } from './flux-network.class';
 
 export class FluxAuthority {
 
@@ -119,7 +132,7 @@ export class FluxAuthority {
     ): void {
         this.stateListeners.add(fn);
         //     listener('authorizing');
-        
+
         // private readonly webRTCConnectionState$$: BehaviorSubject<TRTCState> = new BehaviorSubject<TRTCState>('idle');
     }
 

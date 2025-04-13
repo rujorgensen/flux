@@ -1,6 +1,6 @@
 import {
     RPCServer,
-} from '@flux/shared';
+} from '@flux/shared/types';
 
 export class AuthorityClient extends RPCServer<'authorize'> {
     public authorize(

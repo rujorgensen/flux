@@ -3,7 +3,7 @@ import type {
     TMachineAddress,
     TProcessId,
     TProcessAddress,
-} from '@flux/shared';
+} from '@flux/shared/types';
 
 export const readProcessId = (): TProcessId => {
     return process.pid as TProcessId;

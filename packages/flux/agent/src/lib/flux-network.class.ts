@@ -1,7 +1,7 @@
 import type {
     TChannelTopic,
     TClientOwnUId,
-} from '@flux/shared';
+} from '@flux/shared/types';
 import type {
     FluxWebSocketConnection,
 } from './connector/flux-ws-connection';

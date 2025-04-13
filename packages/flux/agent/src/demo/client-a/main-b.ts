@@ -1,6 +1,6 @@
 import Alpine from 'alpinejs';
 import { FluxAgent } from '../../lib/flux';
-import { TNetworkId_S } from '@flux/shared';
+import { TNetworkId_S } from '@flux/shared/types';
 import { TNetworkConnectionState } from '../../lib/connector/flux-ws-connection';
 import { TRTCState } from '../../lib/connector/low-level-com/web-rtc/ice-connection';
 import { FluxNetworkConnection } from '../../lib/flux-network.class';

@@ -7,7 +7,7 @@ import {
     TClientId,
     TMachineAddress,
     TProcessId,
-} from '@flux/shared';
+} from '@flux/shared/types';
 import { readMachineAddress, readProcessId } from './addressing.utils';
 import {
     getRedisConnection,

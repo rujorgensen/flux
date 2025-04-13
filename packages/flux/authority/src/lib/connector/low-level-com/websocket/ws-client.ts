@@ -4,7 +4,7 @@
 
 import {
     RPCServer,
-} from '@flux/shared';
+} from '@flux/shared/types';
 // import { decrypt } from '../../utils/obscuring/decrypt.utils';
 // import { encrypt } from '../../utils/obscuring/encyprt.utils';
 

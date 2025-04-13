@@ -17,7 +17,7 @@ import {
     NETWORK_CHANNEL_PUBLISH,
     validateTopic,
     ON_NETWORK_CHANNEL_PUBLISH,
-} from '@flux/shared';
+} from '@flux/shared/types';
 import {
     FluxWebSocketClientConnection,
 } from './low-level-com/websocket/ws-client';

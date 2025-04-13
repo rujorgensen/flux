@@ -1,5 +1,5 @@
 import { RedisClientType } from 'redis';
-import { TAddress, TClientOwnUId, TNetworkId_S } from '@flux/shared';
+import { TAddress, TClientOwnUId, TNetworkId_S } from '@flux/shared/types';
 
 export class NetworkClientHash {
     constructor(private readonly client: RedisClientType) {}

@@ -1,3 +1,6 @@
+import type {
+    TProcessAddress,
+ } from '@flux/shared/types';
 
 export type TCallback = (result: any) => void;
 export type TCallback2 = (result: string) => void;

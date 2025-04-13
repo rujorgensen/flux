@@ -1,6 +1,6 @@
 import * as Bun from 'bun';
 import * as nodeURL from 'node:url';
-import { TAddress, TNetworkId_S } from '@flux/shared';
+import { TAddress, TNetworkId_S } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 import { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
 import { NetworkAuthorityManager } from '../../register/register-network-authority.class';

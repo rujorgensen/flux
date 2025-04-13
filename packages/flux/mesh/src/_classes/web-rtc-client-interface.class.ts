@@ -2,7 +2,7 @@ import {
     RPCClient,
     TProcessAddress,
     TRPCResponseCallbackFunction,
-} from '@flux/shared';
+} from '@flux/shared/types';
 import { GlobalRPCClient2 } from '../routing/rpc/core/global-rpc-client.class';
 
 export class WebRTCClient extends RPCClient<

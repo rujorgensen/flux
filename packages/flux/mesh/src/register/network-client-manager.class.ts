@@ -3,7 +3,7 @@ import {
     RedisConnection,
 } from '../routing/redis/redis-connection.class';
 import { NetworkClientHash } from '../routing/redis/hash/network-client.redis.hash';
-import { TAddress, TClientOwnUId, TNetworkId_S } from '@flux/shared';
+import { TAddress, TClientOwnUId, TNetworkId_S } from '@flux/shared/types';
 
 export class NetworkClientManager {
     private readonly redisConnection: RedisConnection = getRedisConnection();

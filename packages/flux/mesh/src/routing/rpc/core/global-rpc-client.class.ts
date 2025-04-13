@@ -9,7 +9,7 @@ import {
     TAddress,
     TCallback,
     TProcessAddress,
-} from '@flux/shared';
+} from '@flux/shared/types';
 import { OutgoingMessageRouter } from '../../outgoing-message-router.class';
 import { ProcessMessageRouter } from '../../process-message-router.class';
 import { readProcessAddress } from '../../addressing.utils';

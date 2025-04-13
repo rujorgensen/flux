@@ -7,8 +7,6 @@
 import { IPackageStatus } from "@flux/shared";
 import { FluxWebSocketConnection } from "./connector/flux-ws-connection";
 
-
-
 export class FluxInterface {
 
     constructor(

@@ -1,5 +1,5 @@
 import { RedisClientType } from 'redis';
-import { TAddress, TClientId, TNetworkId_S } from '@flux/shared';
+import { TAddress, TClientId, TNetworkId_S } from '@flux/shared/types';
 import { readMachineAddress, readProcessId } from '../../addressing.utils';
 
 export class RedisHash {

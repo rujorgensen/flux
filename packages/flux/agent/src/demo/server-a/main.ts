@@ -1,7 +1,7 @@
 
-import { TChannelTopic } from '../../lib/channel/channel.type';
+import type { TChannelTopic } from '../../lib/channel/channel.type';
 import { FluxAgent } from '../../lib/flux';
-import { TNetworkId_S } from '@flux/shared';
+import type { TNetworkId_S } from '@flux/shared/types';
 import jwt from 'jsonwebtoken';
 
 const secret = 'your-very-secure-secret'; // keep this secret safe!
@@ -37,7 +37,7 @@ await flux1
             }
 
             // console.log('✅ Network access authorized');
-        
+
             return Promise.resolve(jwt.sign({
                 userId: (<any>auth).user,
             }, secret, { expiresIn: 120_000 }));
@@ -51,7 +51,7 @@ await flux1
             console.log(`🔒 A client is trying to subscribe to topic '${channelTopic}', using identification '${identification}'`);
 
             console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
-            
+
             return Promise.resolve(true);
         },
     );

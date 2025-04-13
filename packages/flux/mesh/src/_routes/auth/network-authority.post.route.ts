@@ -1,6 +1,6 @@
 import * as Bun from 'bun';
 import * as nodeURL from 'node:url';
-import { TNetworkId_S } from '@flux/shared';
+import { TNetworkId_S } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 
 export const authorizeNetworkAuthority = async (request: Bun.BunRequest) => {

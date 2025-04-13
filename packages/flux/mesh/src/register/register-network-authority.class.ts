@@ -1,4 +1,4 @@
-import type { TAddress, TClientId, TNetworkId_S } from '@flux/shared';
+import type { TAddress, TClientId, TNetworkId_S } from '@flux/shared/types';
 import {
     getRedisConnection,
     RedisConnection,
