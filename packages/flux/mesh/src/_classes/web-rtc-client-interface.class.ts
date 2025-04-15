@@ -2,6 +2,10 @@ import type {
     TProcessAddress,
 } from '@flux/shared/types';
 import { GlobalRPCClient2 } from '../routing/rpc/core/global-rpc-client.class';
+import {
+    type TRPCResponseCallbackFunction,
+    RPCClient,
+} from '@flux/shared/ws';
 
 export class WebRTCClient extends RPCClient<
     'createOffer' | 'acceptOffer' | 'acceptAnswer' | 'answerAcceptedByInitiator'

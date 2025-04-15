@@ -39,12 +39,11 @@ Alpine.data('fluxApplicationB', () => ({
             });
 
         this.flux
-            .networkState$$
-            .subscribe({
-                next: (networkState: TNetworkConnectionState) => {
+            .onNetworkState(
+                (networkState: TNetworkConnectionState) => {
                     this.networkState = networkState;
                 },
-            });
+            );
 
         this.fluxNetworkConnection = await this.flux.connect(
             {

@@ -31,6 +31,8 @@ export class FluxAgent {
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
     private readonly fluxClientData: FluxClientData = new FluxClientData();
 
+    private readonly networkStateCallbacks: Set<(networkState: TNetworkConnectionState,) => void> = new Set();
+
     // Has the client preivously connected to the network or registered as an authority?
     // ! TODO  MOVE 
     private readonly previousNetworkActions: {
@@ -73,7 +75,9 @@ export class FluxAgent {
             clientUUIDToken: clientUUIDToken,
         };
 
-        this.networkState$$.next('authorizing');
+        for (const fn of this.networkStateCallbacks) {
+            fn('authorizing');
+        }
 
         const ticket = await authenticateOrThrow(
             this.networkId,
@@ -131,7 +135,7 @@ export class FluxAgent {
             networkState: TNetworkConnectionState,
         ) => void,
     ): void {
-        // = new BehaviorSubject<TNetworkConnectionState>('disconnected');
+        this.networkStateCallbacks.add(fn);
     }
 
     public onMessage(
