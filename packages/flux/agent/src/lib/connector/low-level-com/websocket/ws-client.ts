@@ -4,7 +4,7 @@
 
 import {
     RPCServer,
-} from '@flux/shared/types';
+} from '@flux/shared/ws';
 // import { decrypt } from '../../utils/obscuring/decrypt.utils';
 // import { encrypt } from '../../utils/obscuring/encyprt.utils';
 
@@ -166,7 +166,7 @@ export class FluxWebSocketClientConnection extends WebSocketClient<
     'authorizeNetworkChannel' |
     'createOffer' |
     'acceptOffer' |
-    'acceptAnswer'|
+    'acceptAnswer' |
     'answerAcceptedByInitiator'
 > {
     constructor(

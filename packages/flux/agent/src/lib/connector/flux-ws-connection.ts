@@ -5,6 +5,7 @@
 import {
     type TChannelTopic,
     type TClientOwnUId,
+    type TCallback2,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
     RPC_REQUEST,
@@ -12,7 +13,6 @@ import {
     RPCRequest,
     RPCResponse,
     SET_OWN_UID,
-    TCallback2,
     SUBSCRIBED_NETWORK_CHANNEL_TOPIC,
     NETWORK_CHANNEL_PUBLISH,
     validateTopic,

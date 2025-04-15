@@ -17,25 +17,31 @@ export type {
 } from './lib/auth/auth.types';
 
 export {
-    IValidationSocketPackage,
-    IRegisterAutoritySocketPackage,
+    type IValidationSocketPackage,
+    type IRegisterAutoritySocketPackage,
+    type IConnectedNode,
+    type TCallbackFunction,
     VALIDATION_ERROR_SOCKET_PACKAGE,
     VALIDATION_ERROR_NO_NETWORK_SOCKET_PACKAGE,
     VALIDATION_ERROR_WS_DATA_SOCKET_PACKAGE,
-    IConnectedNode,
-    TCallbackFunction,
 } from './lib/flux-shared';
 
 export * from './lib/low-level-ws.interfaces';
 
-export {
+export type {
     IPackageStatus,
 } from './lib/package-status.interfaces';
 
 export type {
-    TProcessId,
-    TProcessAddress,
-    TMachineAddress,
-    TClientId,
-    TAddress,
+    TClientOwnUId,
+} from './lib/client.type';
+
+export {
+    type TProcessId,
+    type TProcessAddress,
+    type TMachineAddress,
+    type TClientId,
+    type TAddress,
+    splitAddress,
+    splitProcessAddress,
 } from './lib/routing.type';

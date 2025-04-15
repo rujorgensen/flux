@@ -1,11 +1,14 @@
-import { RedisClientType, createClient } from 'redis';
+import {
+    type RedisClientType,
+    createClient,
+} from 'redis';
 import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
 import { RedisSortedSet } from './hash/network-authority.redis.sorted-set';
 import { NetworkClientHash } from './hash/network-client.redis.hash';
 
 let redisConnection: RedisConnection | undefined;
 
-const FLUX_REDIS_URL: string | undefined = process.env.FLUX_REDIS_URL;
+const FLUX_REDIS_URL: string | undefined = process.env['FLUX_REDIS_URL'];
 
 if (!FLUX_REDIS_URL) {
     throw new Error('Missing FLUX_REDIS_URL in .env');
@@ -45,7 +48,9 @@ export class RedisConnection {
         this.publisher = createClient({
             url: this.url,
             socket: {
-                reconnectStrategy: (retries) => {
+                reconnectStrategy: (
+                    retries: number,
+                ) => {
                     // if (retries > 10) {
                     //     console.error('❌ Redis reconnect failed after 10 attempts.');
                     //     return new Error('Redis reconnect limit reached');

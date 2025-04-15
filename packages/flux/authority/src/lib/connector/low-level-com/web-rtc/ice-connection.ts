@@ -5,7 +5,7 @@
  * Once connected, messages can be sent between devices.
  */
 
-import { FluxWebSocketClientConnection } from '../websocket/ws-client';
+import type { FluxWebSocketClientConnection } from '../websocket/ws-client';
 
 const peerConnectionConfig = {
     iceServers: [
@@ -42,7 +42,7 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
             event: any,
         ) => {
             console.log("*********** GOT DATAT SCHANNNEL ");
-            
+
             this.dataChannel = event.channel;
             this.dataChannel.onopen = () => console.log('ReceiveChannel opened');
             // this.dataChannel.onmessage = (e: any) => this.receivedMessage = e.data;

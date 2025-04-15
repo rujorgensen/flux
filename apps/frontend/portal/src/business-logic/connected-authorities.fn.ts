@@ -15,7 +15,7 @@ fetch('api/ping')
     dataStore.set(val);
   })
   .catch(err => {
-    console.error('Error fetching initial data:');
+    console.error('Error fetching initial data:', err);
     // dataStore.set({ error: 'Failed to fetch initial data' });
   })
   ;

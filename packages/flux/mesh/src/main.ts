@@ -21,18 +21,19 @@ if (!process.env['FLUX_DOMAIN']) {
 }
 
 import {
+    type TNetworkId_S,
+    type TAddress,
+    type TChannelTopic,
+    type TClientId,
+    type TMachineAddress,
+    type TProcessAddress,
+    type TProcessId,
+    type TClientOwnUId,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
     ERROR,
     RPC_RESPONSE,
     SET_OWN_UID,
-    TAddress,
-    TChannelTopic,
-    TClientId,
-    TMachineAddress,
-    TProcessAddress,
-    TProcessId,
-    type TNetworkId_S,
     SUBSCRIBED_NETWORK_CHANNEL_TOPIC,
     NETWORK_CHANNEL_PUBLISH,
     validateTopic,
@@ -63,6 +64,7 @@ import { NetworkClientManager } from './register/network-client-manager.class';
 import { OPTIONS_RESPONSE } from './_routes/options.route';
 import { authorizeNetworkAuthority } from './_routes/auth/network-authority.post.route';
 import { authorizeNetworkClient } from './_routes/auth/network-client.post.route';
+import type { RPCClient } from '@flux/shared/ws';
 import * as nodeURL from 'node:url';
 
 const networkAuthorityManager: NetworkAuthorityManager =

@@ -3,8 +3,8 @@
  */
 import type { RPCRequest, RPCResponse, TCallback } from './rpc.interfaces';
 import { RPC_REQUEST } from '../low-level-ws.interfaces';
-import { TRPCResponseCallbackFunction } from '../flux-shared';
-import { TProcessAddress } from '../routing.type';
+import type { TRPCResponseCallbackFunction } from '../flux-shared';
+import type { TProcessAddress } from '../routing.type';
 
 export abstract class RPCClient<TMethods> {
 

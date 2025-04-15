@@ -1,4 +1,4 @@
-import { RPCServer } from '@flux/shared/types';
+import { RPCServer } from '@flux/shared/ws';
 
 export class ConnectToRemoteClient extends RPCServer<'createOffer' | 'acceptOffer'> {
     private peerConnection = new RTCPeerConnection();

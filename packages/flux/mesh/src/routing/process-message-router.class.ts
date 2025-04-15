@@ -2,15 +2,15 @@
  * Route messages to the correct process if necessary.
  */
 import {
-    splitProcessAddress,
-    TCallbackFunction,
-    TMachineAddress,
-    TProcessId,
+    type TCallbackFunction,
+    type TMachineAddress,
+    type TProcessId,
     type TProcessAddress,
+    splitProcessAddress,
 } from '@flux/shared/types';
 import {
+    type RedisConnection,
     getRedisConnection,
-    RedisConnection,
 } from './redis/redis-connection.class';
 import {
     readMachineAddress,
@@ -33,7 +33,10 @@ export class ProcessMessageRouter {
      *
      * @returns
      */
-    public message(address: TProcessAddress, message: string): void {
+    public message(
+        address: TProcessAddress,
+        message: string,
+    ): void {
         const [machineAddress, processId] = splitProcessAddress(address);
 
         // * Not on the same machine
@@ -68,7 +71,9 @@ export class ProcessMessageRouter {
      *
      * @returns { void }
      */
-    public subscribe(onMessage: TCallbackFunction): void {
+    public subscribe(
+        onMessage: TCallbackFunction,
+    ): void {
         console.log('subscreibing process', this.processAddress);
 
         this.localCallbacks.add(onMessage);

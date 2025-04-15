@@ -1,7 +1,5 @@
-import {
-    RPCClient,
+import type {
     TProcessAddress,
-    TRPCResponseCallbackFunction,
 } from '@flux/shared/types';
 import { GlobalRPCClient2 } from '../routing/rpc/core/global-rpc-client.class';
 
@@ -17,7 +15,7 @@ export class WebRTCClient extends RPCClient<
 
         // Handle the response from the RPC server
         private readonly _handleResponseMessage: (
-            fn: TRPCResponseCallbackFunction
+            fn: TRPCResponseCallbackFunction,
         ) => void
     ) {
         super(_sendToRPCServer, _handleResponseMessage);

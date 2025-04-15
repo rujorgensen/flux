@@ -3,15 +3,15 @@
  */
 import {
     splitAddress,
-    TAddress,
-    TClientId,
-    TMachineAddress,
-    TProcessId,
+    type TAddress,
+    type TClientId,
+    type TMachineAddress,
+    type TProcessId,
 } from '@flux/shared/types';
 import { readMachineAddress, readProcessId } from './addressing.utils';
 import {
+    type RedisConnection,
     getRedisConnection,
-    RedisConnection,
 } from './redis/redis-connection.class';
 
 export class OutgoingMessageRouter {

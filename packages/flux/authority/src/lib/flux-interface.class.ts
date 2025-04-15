@@ -4,8 +4,8 @@
  * Requires socket connectivity to the Flux platform, and a verified network.
  */
 
-import { IPackageStatus } from "@flux/shared";
-import { FluxWebSocketConnection } from "./connector/flux-ws-connection";
+import type { IPackageStatus } from '@flux/shared/types';
+import type { FluxWebSocketConnection } from './connector/flux-ws-connection';
 
 export class FluxInterface {
 

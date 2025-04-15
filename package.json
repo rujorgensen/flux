@@ -27,12 +27,13 @@
     "flowbite": "^3.1.2",
     "flowbite-svelte": "^0.48.6",
     "flowbite-svelte-icons": "^2.1.1",
+    "jsonwebtoken": "9.0.2",
     "open-props": "^1.7.15",
+    "redis": "^4.7.0",
     "rollup-plugin-visualizer": "^5.14.0",
     "svelte": "^5.27.0",
     "typescript": "^5.8.3",
-    "webpack-bundle-analyzer": "^4.10.2",
-    "jsonwebtoken": "9.0.2"
+    "webpack-bundle-analyzer": "^4.10.2"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
