@@ -2,9 +2,12 @@
  * The class to handling the *calling* side of the RPC.
  */
 import type { RPCRequest, RPCResponse, TCallback } from './rpc.interfaces';
-import { RPC_REQUEST } from '../low-level-ws.interfaces';
 import type { TRPCResponseCallbackFunction } from '../flux-shared';
-import type { TProcessAddress } from '../routing.type';
+import {
+    RPC_REQUEST,
+    type TProcessAddress,
+} from '@flux/shared/types';
+
 
 export abstract class RPCClient<TMethods> {
 

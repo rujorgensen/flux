@@ -4,12 +4,14 @@
 
 import {
     RPC_REQUEST,
+    type TAddress,
+    type TProcessAddress,
+} from '@flux/shared/types';
+import type {
+    TCallback,
     RPCRequest,
     RPCResponse,
-    TAddress,
-    TCallback,
-    TProcessAddress,
-} from '@flux/shared/types';
+} from '@flux/shared/ws';
 import { OutgoingMessageRouter } from '../../outgoing-message-router.class';
 import { ProcessMessageRouter } from '../../process-message-router.class';
 import { readProcessAddress } from '../../addressing.utils';
