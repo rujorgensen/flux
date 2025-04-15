@@ -1,7 +1,6 @@
 import { RedisClientType, createClient } from 'redis';
 import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
 import { RedisSortedSet } from './hash/network-authority.redis.sorted-set';
-import { RedisClientSortedSet } from './hash/client-authority.redis.sorted-set';
 import { NetworkClientHash } from './hash/network-client.redis.hash';
 
 let redisConnection: RedisConnection | undefined;

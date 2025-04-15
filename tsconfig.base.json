@@ -30,6 +30,9 @@
       "@persistica/flux-authority": [
         "packages/flux/authority/src/index.ts"
       ],
+      "@persistica/flux-agent": [
+        "packages/flux/agent/src/index.ts"
+      ],
       "@flux/mesh": [
         "packages/flux/mesh/src/index.ts"
       ]

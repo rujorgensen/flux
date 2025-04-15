@@ -1,1 +1,3 @@
-export * from './lib/persistica-flux-agent';
+export {
+    FluxAgent,
+} from './lib/flux-agent';

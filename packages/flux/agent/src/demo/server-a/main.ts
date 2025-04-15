@@ -1,6 +1,6 @@
 
 import type { TChannelTopic } from '../../lib/channel/channel.type';
-import { FluxAgent } from '../../lib/flux';
+import { FluxAgent } from '../../lib/flux-agent';
 import type { TNetworkId_S } from '@flux/shared/types';
 import jwt from 'jsonwebtoken';
 

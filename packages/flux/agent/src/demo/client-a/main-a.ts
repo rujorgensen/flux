@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs';
-import { FluxAgent } from '../../lib/flux';
+import { FluxAgent } from '../../lib/flux-agent';
 import { TNetworkId_S } from '@flux/shared/types';
 import { FluxNetworkConnection } from '../../lib/flux-network.class';
 import { TNetworkConnectionState } from '../../lib/connector/flux-ws-connection';
