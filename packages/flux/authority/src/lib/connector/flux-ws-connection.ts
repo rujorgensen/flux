@@ -4,6 +4,7 @@
 
 import {
     type TChannelTopic,
+    type TClientOwnUId,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
     RPC_REQUEST,
@@ -93,6 +94,7 @@ export const createWSConnection = <T, M>(
 export class FluxWebSocketConnection {
     private readonly socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TCallback2> = new Set();
+    private readonly networkStateListeners: Set<(networkState: TNetworkConnectionState) => void> = new Set();
 
     private readonly topicCallbacks: Map<TChannelTopic, Set<TCallback2>> = new Map();
 
@@ -146,7 +148,7 @@ export class FluxWebSocketConnection {
                 .on('open', () => {
                     console.log('🔌✅ Socket connected');
 
-                    this.networkState$$.next('connected');
+                    this.emitNetworkState('connected');
 
                     this.webSocketClient = this.socket;
 
@@ -228,12 +230,12 @@ export class FluxWebSocketConnection {
 
                 .on('close', () => {
                     this.webSocketClient = undefined;
-                    this.networkState$$.next('disconnected');
+                    this.emitNetworkState('disconnected');
                     console.log('🔌🔴 Disconnected', this.fluxInstanceId);
                 })
 
                 .on('connecting', (retryAttempt: number) => {
-                    this.networkState$$.next('disconnected');
+                    this.emitNetworkState('disconnected');
 
                     console.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options!.retries}`, this.fluxInstanceId);
                 })
@@ -242,7 +244,7 @@ export class FluxWebSocketConnection {
                 })
                 ;
 
-            this.networkState$$.next('connecting');
+            this.emitNetworkState('connecting');
 
             this.socket.connect();
         });
@@ -377,6 +379,20 @@ export class FluxWebSocketConnection {
     }
 
     /**
+     *
+     * @param fn
+     *
+     * @returns { void }
+     */
+    public onNetworkState(
+        fn: (
+            networkState: TNetworkConnectionState,
+        ) => void,
+    ): void {
+        this.networkStateListeners.add(fn);
+    }
+
+    /**
      * 
      * @param { TCallback2 } cb
      * 
@@ -399,4 +415,17 @@ export class FluxWebSocketConnection {
         return Promise.resolve();
     }
 
+    /**
+     *
+     * @param fn
+     *
+     * @returns { void }
+     */
+    private emitNetworkState(
+        networkState: TNetworkConnectionState,
+    ): void {
+        for (const fn of this.networkStateListeners) {
+            fn(networkState);
+        }
+    }
 }

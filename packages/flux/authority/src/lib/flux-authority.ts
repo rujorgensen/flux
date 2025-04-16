@@ -107,12 +107,6 @@ export class FluxAuthority {
 
         this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
 
-        this.fluxWebSocketConnection
-            .networkState$$
-            .subscribe((nst) => {
-                this.networkState$$.next(nst);
-            });
-
         return this
             .fluxWebSocketConnection
             .registerAuthority(
@@ -149,7 +143,7 @@ export class FluxAuthority {
             networkState: TNetworkConnectionState,
         ) => void,
     ): void {
-        // public readonly networkState$$: BehaviorSubject<TNetworkConnectionState> = new BehaviorSubject<TNetworkConnectionState>('disconnected');
+        this.fluxWebSocketConnection.onNetworkState(fn);
     }
 
     public onMessage(

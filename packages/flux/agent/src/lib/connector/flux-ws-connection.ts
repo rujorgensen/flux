@@ -5,12 +5,11 @@
 import {
     type TChannelTopic,
     type TClientOwnUId,
+    type TAuthorizeCallback,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
     RPC_REQUEST,
     RPC_RESPONSE,
-    RPCRequest,
-    RPCResponse,
     SET_OWN_UID,
     SUBSCRIBED_NETWORK_CHANNEL_TOPIC,
     NETWORK_CHANNEL_PUBLISH,
@@ -18,6 +17,8 @@ import {
     ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
 import type {
+    RPCRequest,
+    RPCResponse,
     TCallback2,
 } from '@flux/shared/ws';
 import {
@@ -25,9 +26,8 @@ import {
 } from './low-level-com/websocket/ws-client';
 import { FluxNetworkConnection } from '../flux-network.class';
 import { FluxNetworkChannel } from '../flux-network-channel.class';
-import { TRTCState } from './low-level-com/web-rtc/ice-connection';
-import { TChannnelAuthCallback } from '../channel/channel.type';
-import { TAuthorizeCallback } from 'apps/flux/shared/src/lib/auth/auth.fn';
+import type { TRTCState } from './low-level-com/web-rtc/ice-connection';
+import type { TChannnelAuthCallback } from '../channel/channel.type';
 
 export type TNetworkConnectionState = 'disconnected' | 'connected' | 'connecting' | 'authorizing' | 'denied';
 
@@ -89,10 +89,10 @@ export const createWSConnection = <T, M>(
 
 export class FluxWebSocketConnection {
     // public readonly connectionState$$: BehaviorSubject<TWSConnectionState> = new BehaviorSubject<TWSConnectionState>('disconnected');
-    public readonly networkState$$: BehaviorSubject<TNetworkConnectionState> = new BehaviorSubject<TNetworkConnectionState>('disconnected');
 
     private readonly socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TCallback2> = new Set();
+    private readonly networkStateListeners: Set<(networkConnectionState: TNetworkConnectionState) => void> = new Set();
 
     private readonly topicCallbacks: Map<TChannelTopic, Set<TCallback2>> = new Map();
 
@@ -146,7 +146,7 @@ export class FluxWebSocketConnection {
                 .on('open', () => {
                     console.log('🔌✅ Socket connected');
 
-                    this.networkState$$.next('connected');
+                    this.emitNetworkState('connected');
 
                     this.webSocketClient = this.socket;
 
@@ -228,12 +228,12 @@ export class FluxWebSocketConnection {
 
                 .on('close', () => {
                     this.webSocketClient = undefined;
-                    this.networkState$$.next('disconnected');
+                    this.emitNetworkState('disconnected');
                     console.log('🔌🔴 Disconnected', this.fluxInstanceId);
                 })
 
                 .on('connecting', (retryAttempt: number) => {
-                    this.networkState$$.next('disconnected');
+                    this.emitNetworkState('disconnected');
 
                     console.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options!.retries}`, this.fluxInstanceId);
                 })
@@ -242,7 +242,7 @@ export class FluxWebSocketConnection {
                 })
                 ;
 
-            this.networkState$$.next('connecting');
+            this.emitNetworkState('connecting');
 
             this.socket.connect();
         });
@@ -397,6 +397,14 @@ export class FluxWebSocketConnection {
         }
 
         return Promise.resolve();
+    }
+
+    private emitNetworkState(
+        networkState: TNetworkConnectionState,
+    ) {
+        for (const networkStateListener of this.networkStateListeners) {
+            networkStateListener(networkState);
+        }
     }
 
 }

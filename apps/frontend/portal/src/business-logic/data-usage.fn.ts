@@ -1,13 +1,14 @@
+
 import { writable } from 'svelte/store';
+import { apiFetch } from '../utils/fetch.util';
+const dataStore = writable<number | undefined>();
 
 // import { onMount } from "svelte";
-
-const dataStore = writable<number | undefined>();
 
 // dataStore.set();
 let val = 0;
 // Fetch initial data
-fetch('api/ping')
+apiFetch('api/ping')
   .then(res => res.text())
   .then(initialData => {
     console.log("[initialData]", initialData);
@@ -39,4 +40,6 @@ setInterval(() => {
 // });
 
 // Export the store directly
+
+
 export const c = dataStore;

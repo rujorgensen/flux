@@ -126,7 +126,6 @@ const app = new Elysia()
     console.log('1')
   })
 
-
   .use(swagger({
     path: '/api/docs',
   }))
@@ -139,6 +138,7 @@ const app = new Elysia()
   })
 
   .get('/api/ping', () => 'pong')
+  .get('/api/connected-authorities', () => 9999)
 
   .post('/auth', async ({ jwt, query, cookie: { auth }, body, redirect }) => {
 

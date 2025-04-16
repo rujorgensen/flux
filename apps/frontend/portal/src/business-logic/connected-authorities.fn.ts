@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { apiFetch } from '../utils/fetch.util';
 
 // import { onMount } from "svelte";
 
@@ -7,11 +8,11 @@ const dataStore = writable<number | undefined>();
 // dataStore.set();
 let val = 0;
 // Fetch initial data
-fetch('api/ping')
+apiFetch('api/connected-authorities')
   .then(res => res.text())
   .then(initialData => {
     console.log("[initialData]", initialData);
-    val = 23;
+//    val = 2223;
     dataStore.set(val);
   })
   .catch(err => {

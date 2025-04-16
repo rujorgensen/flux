@@ -13,17 +13,17 @@ import type {
 import type {
     TCallback2,
 } from '@flux/shared/ws';
-import { FluxNetworkConnection } from './flux-network.class';
+import type { FluxNetworkConnection } from './flux-network.class';
 import {
     type TNetworkConnectionState,
+    type FluxWebSocketConnection,
     createWSConnection,
-    FluxWebSocketConnection,
 } from './connector/flux-ws-connection';
 import { nanoid } from 'nanoid';
-import { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
+import type { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
 import { authenticateOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
-import { TChannnelAuthCallback } from './channel/channel.type';
+import type { TChannnelAuthCallback } from './channel/channel.type';
 
 
 export class FluxAgent {
@@ -97,12 +97,6 @@ export class FluxAgent {
 
         this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
 
-        this.fluxWebSocketConnection
-            .networkState$$
-            .subscribe((nst) => {
-                this.networkState$$.next(nst);
-            });
-
         const fluxNetworkConnection: FluxNetworkConnection = await this
             .fluxWebSocketConnection
             .connectToNetwork(
@@ -132,12 +126,26 @@ export class FluxAgent {
      *
      * @returns { void }
      */
+    // public onNetworkState(
+    //     fn: (
+    //         networkState: TNetworkConnectionState,
+    //     ) => void,
+    // ): void {
+    //     this.networkStateCallbacks.add(fn);
+    // }
+
+    /**
+     *
+     * @param fn
+     *
+     * @returns { void }
+     */
     public onNetworkState(
         fn: (
             networkState: TNetworkConnectionState,
         ) => void,
     ): void {
-        this.networkStateCallbacks.add(fn);
+        this.fluxWebSocketConnection.onNetworkState(fn);
     }
 
     public onMessage(
