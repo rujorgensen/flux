@@ -21,7 +21,11 @@ import { FluxNetworkConnection } from '../flux-network.class';
 import { FluxNetworkChannel } from '../flux-network-channel.class';
 import type { TRTCState } from './low-level-com/web-rtc/ice-connection';
 import type { TChannnelAuthCallback } from '../channel/channel.type';
-import { RPCRequest, RPCResponse, TCallback2 } from '@flux/shared/ws';
+import type {
+    RPCRequest,
+    RPCResponse,
+    TCallback2,
+} from '@flux/shared/ws';
 
 export type TNetworkConnectionState = 'disconnected' | 'connected' | 'connecting' | 'authorizing' | 'denied';
 

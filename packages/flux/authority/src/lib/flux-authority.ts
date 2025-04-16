@@ -6,7 +6,9 @@ globalThis.count++;
 
 console.log(`Reloaded ${globalThis.count} time(s)`);
 
-import type { TCallback2 } from '@flux/shared/types';
+import type {
+    TCallback2,
+} from '@flux/shared/ws';
 import { nanoid } from 'nanoid';
 import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
 import { FluxClientData } from './connector/flux-client-data.class';

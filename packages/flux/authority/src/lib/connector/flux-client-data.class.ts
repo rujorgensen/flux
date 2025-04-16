@@ -2,8 +2,8 @@
  * Collects data from any source (currently WS or WebRTC) 
  */
 
-import { TCallback2 } from '@flux/shared/types';
-import { FluxWebSocketConnection } from './flux-ws-connection';
+import type { TCallback2 } from '@flux/shared/ws';
+import type { FluxWebSocketConnection } from './flux-ws-connection';
 
 export class FluxClientData {
     private readonly callbacks: Set<TCallback2> = new Set();

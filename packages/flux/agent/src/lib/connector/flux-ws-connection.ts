@@ -5,7 +5,6 @@
 import {
     type TChannelTopic,
     type TClientOwnUId,
-    type TCallback2,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
     RPC_REQUEST,
@@ -18,6 +17,9 @@ import {
     validateTopic,
     ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
+import type {
+    TCallback2,
+} from '@flux/shared/ws';
 import {
     FluxWebSocketClientConnection,
 } from './low-level-com/websocket/ws-client';

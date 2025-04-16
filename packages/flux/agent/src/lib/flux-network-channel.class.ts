@@ -2,8 +2,15 @@
  * A connected channel.
  */
 
-import { TCallback2, TChannelTopic } from "@flux/shared";
-import { FluxWebSocketConnection } from "./connector/flux-ws-connection";
+import type {
+    TChannelTopic,
+} from "@flux/shared/types";
+import type {
+    TCallback2,
+} from '@flux/shared/ws';
+import type {
+    FluxWebSocketConnection,
+} from "./connector/flux-ws-connection";
 
 export class FluxNetworkChannel {
 
