@@ -3,30 +3,24 @@ import { treaty } from '@elysiajs/eden'
 import type {
   App
 } from '../../../../backend/portal/src/main'
-import { isServer } from '../utils/is-server.util';
+import { isBrowser } from '../utils/is-browser.util';
 
 const dataStore = writable<number | undefined>();
 const app = treaty<App>('localhost:3000')
 
-if (isServer()) {
+const { data: initialValue } = await app.api['connected-authorities'].get();
 
-  app.api['connected-authorities']
-    .get()
-    .then(({ data }) => {
-      dataStore.set(data ?? 0);
-    });
+dataStore.set(initialValue ?? 0);
 
-} else {
-    const { data: initialValue } = await app.api['connected-authorities'].get();
-    dataStore.set(initialValue ?? 0);
+if (isBrowser()) {
+  let data = initialValue ?? 0;
 
-    let data = initialValue ?? 0;
+  setInterval(() => {
 
-    setInterval(() => {
+    data = (data ?? 0) + 1;
+    dataStore.set(data);
 
-      data = (data ?? 0) + 1;
-      dataStore.set(data++);
-    }, 1_000);
+  }, 1_000);
 }
 
 // Export the store directly

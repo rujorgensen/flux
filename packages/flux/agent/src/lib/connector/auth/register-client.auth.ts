@@ -1,6 +1,6 @@
 import {
     type TAuthenticationTicket,
-    TNetworkId_S,
+    type TNetworkId_S,
     checkAuthTicketShape,
 } from '@flux/shared/types';
 import { encrypt } from '../../utils/obscuring/encyprt.utils';

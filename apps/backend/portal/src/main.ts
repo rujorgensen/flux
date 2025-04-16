@@ -30,8 +30,8 @@ fluxMeshServer.onReady(async () => {
       //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
       //         retries?: number; // Number of times to retry a failed message
     },
-
   );
+
   await fluxAuthority
     .registerAuthority(
       NETWORK_AUTHORITY_KEY,
@@ -64,8 +64,29 @@ fluxMeshServer.onReady(async () => {
         return Promise.resolve(true);
       },
     );
-});
 
+  // ****************************************************************************
+  // * Setup Agent
+  // ****************************************************************************
+
+
+  const fluxAgent = new FluxAgent(
+    'network-id',
+    {
+      //         domain?: string,
+      //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
+      //         retries?: number; // Number of times to retry a failed message
+    },
+  );
+
+  const fluxNetworkConnection: FluxNetworkConnection = await fluxAgent
+    .connect(
+        CODE_TO_ACCESS_NETWORK,
+      'backend-agent',
+    );
+
+  console.log(`✅ Agent connected to network ID: "${fluxNetworkConnection.id}"`);
+});
 
 
 
@@ -96,6 +117,8 @@ const proxy = async ({ request }: {
 
 }
 import { swagger } from '@elysiajs/swagger';
+import { FluxAgent } from '@persistica/flux-agent';
+import { FluxNetworkConnection } from 'packages/flux/agent/src/lib/flux-network.class';
 
 
 // * Host the frontend and static resources 

@@ -53,7 +53,7 @@ export class FluxAgent {
         };
 
     constructor(
-        private readonly networkId: TNetworkId_S,
+        private readonly networkId: string,
         private readonly options?: {
             domain?: string,
             secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -82,7 +82,7 @@ export class FluxAgent {
         }
 
         const ticket = await authenticateOrThrow(
-            this.networkId,
+            this.networkId as TNetworkId_S,
             this.options?.domain ?? 'http://localhost:8080',
             identification,
         );
@@ -119,20 +119,6 @@ export class FluxAgent {
     ): void {
         // = new BehaviorSubject<TRTCState>('idle');
     }
-
-    /**
-     *
-     * @param fn
-     *
-     * @returns { void }
-     */
-    // public onNetworkState(
-    //     fn: (
-    //         networkState: TNetworkConnectionState,
-    //     ) => void,
-    // ): void {
-    //     this.networkStateCallbacks.add(fn);
-    // }
 
     /**
      *
