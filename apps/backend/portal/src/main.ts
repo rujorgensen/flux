@@ -4,6 +4,7 @@ import jwt from '@elysiajs/jwt';
 import { FluxMeshServer } from '@flux/mesh';
 import { FluxAuthority } from '@persistica/flux-authority';
 import * as jjwt from 'jsonwebtoken';
+import { cors } from '@elysiajs/cors';
 
 // ****************************************************************************
 // * Setup Mesh Server
@@ -126,6 +127,11 @@ const app = new Elysia()
     console.log('1')
   })
 
+  .use(cors({
+    origin: 'localhost:4321',
+    methods: ['GET'],
+  }))
+
   .use(swagger({
     path: '/api/docs',
   }))
@@ -194,3 +200,4 @@ const app = new Elysia()
 
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
 
+export type App = typeof app;

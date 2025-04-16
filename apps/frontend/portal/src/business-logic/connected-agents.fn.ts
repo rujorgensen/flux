@@ -23,6 +23,7 @@ apiFetch('api/ping')
 
 setInterval(() => {
   dataStore.set(val++);
+
 }, 1_000);
 // onMount(async () => {
 //   // const socket = new WebSocket('wss://example.com');

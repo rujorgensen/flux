@@ -1,43 +1,33 @@
 import { writable } from 'svelte/store';
-import { apiFetch } from '../utils/fetch.util';
-
-// import { onMount } from "svelte";
+import { treaty } from '@elysiajs/eden'
+import type {
+  App
+} from '../../../../backend/portal/src/main'
+import { isServer } from '../utils/is-server.util';
 
 const dataStore = writable<number | undefined>();
+const app = treaty<App>('localhost:3000')
 
-// dataStore.set();
-let val = 0;
-// Fetch initial data
-apiFetch('api/connected-authorities')
-  .then(res => res.text())
-  .then(initialData => {
-    console.log("[initialData]", initialData);
-//    val = 2223;
-    dataStore.set(val);
-  })
-  .catch(err => {
-    console.error('Error fetching initial data:', err);
-    // dataStore.set({ error: 'Failed to fetch initial data' });
-  })
-  ;
+if (isServer()) {
 
-setInterval(() => {
-  dataStore.set(val++);
-}, 1_000);
-// onMount(async () => {
-//   // const socket = new WebSocket('wss://example.com');
+  app.api['connected-authorities']
+    .get()
+    .then(({ data }) => {
+      dataStore.set(data ?? 0);
+    });
 
-//   // socket.addEventListener('message', (event) => {
-//   //   const newData = JSON.parse(event.data);
+} else {
+    const { data: initialValue } = await app.api['connected-authorities'].get();
+    dataStore.set(initialValue ?? 0);
 
-//   //   dataStore.update(current => ({
-//   //     ...current,
-//   //     ...newData
-//   //   }));
-//   // });
+    let data = initialValue ?? 0;
 
-//   //    return () => socket.close();
-// });
+    setInterval(() => {
+
+      data = (data ?? 0) + 1;
+      dataStore.set(data++);
+    }, 1_000);
+}
 
 // Export the store directly
 export const connectedAuthorities = dataStore;

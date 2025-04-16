@@ -42,4 +42,4 @@ setInterval(() => {
 // Export the store directly
 
 
-export const c = dataStore;
+export const dataUsage = dataStore;
