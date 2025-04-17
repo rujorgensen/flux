@@ -1,5 +1,4 @@
 ---
-import Button from "../components/svelte/Button.svelte";
 import MeltUI from "../components/svelte/melt-ui/MeltUI.svelte";
 
 // Dahsboard tiles
@@ -14,6 +13,16 @@ import Footer from "../components/Footer.astro";
 import Menu from "../components/Menu.svelte";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 import Pane from "../layouts/dashboard/Pane.astro";
+
+
+import { treaty } from '@elysiajs/eden'
+import type {
+  App
+} from '../../../../backend/portal/src/main'
+const app = treaty<App>('localhost:3000')
+
+const { data: initialValue } = await app.api['connected-authorities'].get();
+
 ---
 
 <!doctype html>
@@ -26,6 +35,7 @@ import Pane from "../layouts/dashboard/Pane.astro";
 				grid-template-columns: auto 1fr;
 				grid-template-rows: 100vh;
 				grid-template-areas: "menu main";
+				background: linear-gradient(var(--gray-gradient)) no-repeat;
 			}
 
 			nav {
@@ -64,7 +74,7 @@ import Pane from "../layouts/dashboard/Pane.astro";
 			<main id="grid">
 				<Pane id="connected-authorities" area="a">
 					<h2 slot="header">Connected Authotities</h2>
-					<ConnectedAuthorities client:load />
+					<ConnectedAuthorities initialData={initialValue} client:load />
 				</Pane>
 				
 				<Pane  area="b">
@@ -91,7 +101,6 @@ import Pane from "../layouts/dashboard/Pane.astro";
 				</Pane>
 			</main>
 
-			<Button color="darkred" client:load />
 			<MeltUI client:load />
 			<Footer />
 		</main>
