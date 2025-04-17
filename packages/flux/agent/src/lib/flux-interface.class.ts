@@ -5,7 +5,7 @@
  */
 
 import type { IPackageStatus } from '@flux/shared/types';
-import type { FluxWebSocketConnection } from './connector/flux-ws-connection';
+import type { FluxWebSocketConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 
 export class FluxInterface {
 

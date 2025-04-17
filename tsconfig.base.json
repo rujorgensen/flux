@@ -27,6 +27,9 @@
       "@flux/shared/ws": [
         "libs/flux/shared/ws/src/index.ts"
       ],
+      "@flux/shared/connection": [
+        "libs/flux/shared/connection/src/index.ts"
+      ],
       "@persistica/flux-authority": [
         "packages/flux/authority/src/index.ts"
       ],

@@ -10,7 +10,7 @@ import type {
 } from '@flux/shared/ws';
 import type {
     FluxWebSocketConnection,
-} from "./connector/flux-ws-connection";
+} from "../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection";
 
 export class FluxNetworkChannel {
 

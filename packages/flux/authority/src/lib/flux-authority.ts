@@ -13,19 +13,16 @@ import { nanoid } from 'nanoid';
 import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import { retry } from './utils/promises.utils';
-import {
-    createWSConnection,
-    TNetworkConnectionState,
-    type FluxWebSocketConnection,
-} from './connector/flux-ws-connection';
-import type {
-    TRTCState,
-} from './connector/low-level-com/web-rtc/ice-connection';
 import type {
     TChannnelAuthCallback,
 } from './channel/channel.type';
-import type { TAuthorizeCallback } from '@flux/shared/types';
-import type { FluxNetworkConnection } from './flux-network.class';
+import type { TAuthorizeCallback, TNetworkId_S } from '@flux/shared/types';
+import { StateManager } from '@flux/shared/utils';
+import {
+    createWSConnection,
+    type FluxNetworkConnection,
+    type FluxWebSocketConnection,
+} from '@flux/shared/connection';
 
 export class FluxAuthority {
 
@@ -33,7 +30,8 @@ export class FluxAuthority {
 
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
     private readonly fluxClientData: FluxClientData = new FluxClientData();
-    private readonly stateListeners: Set<(rtcState: TRTCState) => void> = new Set();
+
+    private readonly stateManager: StateManager = new StateManager();
 
     // Has the client preivously connected to the network or registered as an authority?
     // ! TODO  MOVE 
@@ -80,13 +78,11 @@ export class FluxAuthority {
             authorizeNetworkChannel,
         };
 
-        for (const listener of this.stateListeners) {
-            listener('authorizing');
-        }
+        this.stateManager.emitNetworkState('authorizing');
 
         const ticket: string = await retry<any>(
             () => authenticateNetworkAuthorityOrThrow(
-                this.networkId,
+                this.networkId as TNetworkId_S,
                 this.options?.domain ?? 'http://localhost:8080',
                 authorityKey,
             ),
@@ -100,8 +96,14 @@ export class FluxAuthority {
         this.fluxWebSocketConnection = createWSConnection(
             this.id,
             ticket,
-            this.webRTCConnectionState$$,
-            this.registerAuthority.bind(this),
+            this.stateManager,
+            async () => {
+                this.registerAuthority(
+                    authorityKey,
+                    authorizeNetworkClient,
+                    authorizeNetworkChannel,
+                );
+            },
             this.options,
         );
 
@@ -115,22 +117,6 @@ export class FluxAuthority {
             );
     }
 
-    /**
-     *
-     * @param fn
-     *
-     * @returns { void }
-     */
-    public onWebRTConnectionState(
-        fn: (
-            webRTCConncetionState: TRTCState,
-        ) => void,
-    ): void {
-        this.stateListeners.add(fn);
-        //     listener('authorizing');
-
-        // private readonly webRTCConnectionState$$: BehaviorSubject<TRTCState> = new BehaviorSubject<TRTCState>('idle');
-    }
 
     /**
      *
@@ -138,13 +124,15 @@ export class FluxAuthority {
      *
      * @returns { void }
      */
-    public onNetworkState(
-        fn: (
-            networkState: TNetworkConnectionState,
-        ) => void,
-    ): void {
-        this.fluxWebSocketConnection.onNetworkState(fn);
-    }
+    public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
+
+    /**
+     *
+     * @param fn
+     *
+     * @returns { void }
+     */
+    public onNetworkState = this.stateManager.attachNetworkStateListener;
 
     public onMessage(
         cb: TCallback2,

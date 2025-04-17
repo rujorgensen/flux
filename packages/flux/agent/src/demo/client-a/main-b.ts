@@ -1,9 +1,9 @@
 import Alpine from 'alpinejs';
 import { FluxAgent } from '../../lib/flux-agent';
 import { TNetworkId_S } from '@flux/shared/types';
-import { TNetworkConnectionState } from '../../lib/connector/flux-ws-connection';
+import { TNetworkConnectionState } from '../../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 import { TRTCState } from '../../lib/connector/low-level-com/web-rtc/ice-connection';
-import { FluxNetworkConnection } from '../../lib/flux-network.class';
+import { FluxNetworkConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
 import { FluxNetworkChannel } from '../../lib/flux-network-channel.class';
 
 // Define observable component

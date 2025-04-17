@@ -5,6 +5,15 @@ import { FluxMeshServer } from '@flux/mesh';
 import { FluxAuthority } from '@persistica/flux-authority';
 import * as jjwt from 'jsonwebtoken';
 import { cors } from '@elysiajs/cors';
+import { swagger } from '@elysiajs/swagger';
+import { FluxAgent } from '@persistica/flux-agent';
+import type { FluxNetworkConnection } from '@flux/shared/connection';
+
+if (!process.env['FLUX_AUTHORITY_JWT_SECRET']) {
+  throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
+}
+
+const AUTHORITY_JWT_SECRET: string = process.env['FLUX_AUTHORITY_JWT_SECRET'];
 
 // ****************************************************************************
 // * Setup Mesh Server
@@ -38,9 +47,11 @@ fluxMeshServer.onReady(async () => {
       (
         auth: unknown,
       ): Promise<string> => {
+        console.log('🔑 A client is trying to access the network', auth);
+
         // Test the agents claim to access network
         if (
-          ((auth as any).code !== CODE_TO_ACCESS_NETWORK)
+          (auth !== CODE_TO_ACCESS_NETWORK)
         ) {
           return Promise.reject('Not allowed');
         }
@@ -49,7 +60,7 @@ fluxMeshServer.onReady(async () => {
 
         return Promise.resolve(jjwt.sign({
           userId: (<any>auth).user,
-        }, secret, { expiresIn: 120_000 }));
+        }, AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
       },
 
       (
@@ -81,7 +92,7 @@ fluxMeshServer.onReady(async () => {
 
   const fluxNetworkConnection: FluxNetworkConnection = await fluxAgent
     .connect(
-        CODE_TO_ACCESS_NETWORK,
+      CODE_TO_ACCESS_NETWORK,
       'backend-agent',
     );
 
@@ -116,9 +127,6 @@ const proxy = async ({ request }: {
   });
 
 }
-import { swagger } from '@elysiajs/swagger';
-import { FluxAgent } from '@persistica/flux-agent';
-import { FluxNetworkConnection } from 'packages/flux/agent/src/lib/flux-network.class';
 
 
 // * Host the frontend and static resources 

@@ -17,14 +17,6 @@ const peerConnectionConfig = {
     ],
 };
 
-export type TRTCState = 'idle' |
-    'creating-offer' |
-    'setting-remote-offer' |
-    'creating-answer' |
-    'setting-remote-answer' |
-    'connected' |
-    'failed'
-    ;
 
 export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 'acceptAnswer'> {
     //  public readonly state$$: TRTCState = 'idle';

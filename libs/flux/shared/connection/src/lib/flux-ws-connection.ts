@@ -5,6 +5,7 @@
 import {
     type TChannelTopic,
     type TClientOwnUId,
+    type TAuthorizeCallback,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
     RPC_REQUEST,
@@ -15,20 +16,19 @@ import {
     validateTopic,
     ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
-import {
-    FluxWebSocketClientConnection,
-} from './low-level-com/websocket/ws-client';
-import { FluxNetworkConnection } from '../flux-network.class';
-import { FluxNetworkChannel } from '../flux-network-channel.class';
-import type { TRTCState } from './low-level-com/web-rtc/ice-connection';
-import type { TChannnelAuthCallback } from '../channel/channel.type';
 import type {
     RPCRequest,
     RPCResponse,
     TCallback2,
 } from '@flux/shared/ws';
+import {
+    FluxWebSocketClientConnection,
+} from '../../../../../../packages/flux/agent/src/lib/connector/low-level-com/websocket/ws-client';
+import { FluxNetworkConnection } from './flux-network.class';
+import { FluxNetworkChannel } from '../../../../../../packages/flux/agent/src/lib/flux-network-channel.class';
+import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
+import type { StateManager } from '@flux/shared/utils';
 
-export type TNetworkConnectionState = 'disconnected' | 'connected' | 'connecting' | 'authorizing' | 'denied';
 
 interface IOptions {
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -36,32 +36,26 @@ interface IOptions {
 }
 
 // Has the client preivously connected to the network or registered as an authority?
-const previousNetworkActions: {
-    networkConnection: {
-        identification: unknown,
-        clientName?: string,
-    } | null;
-    registerAuthority: {
-        authorityKey: string,
-        cb: (...args: any) => Promise<boolean>;
-        authorizeNetworkChannel: TChannnelAuthCallback<any>,
-    } | null;
-} = {
-    networkConnection: null,
-    registerAuthority: null,
-};
+// const previousNetworkActions: {
+//     networkConnection: {
+//         identification: unknown,
+//         clientName?: string,
+//     } | null;
+//     registerAuthority: {
+//         authorityKey: string,
+//         cb: (...args: any) => Promise<boolean>;
+//         authorizeNetworkChannel: TChannnelAuthCallback<any>,
+//     } | null;
+// } = {
+//     networkConnection: null,
+//     registerAuthority: null,
+// };
 
 export const createWSConnection = <T, M>(
     id: string,
     ticket: string,
-    webRTCConnectionStateCB: () => void,
-    registerAuthority: (
-        authorityKey: string,
-        cb: (
-            jwt: T,
-        ) => Promise<boolean>,
-        registerNetworkChannelAuthority: TChannnelAuthCallback<M>,
-    ) => Promise<FluxNetworkConnection>,
+    stateManager: StateManager,
+    cb: () => void,
     options?: {
         domain?: string,
         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -70,22 +64,8 @@ export const createWSConnection = <T, M>(
 ): FluxWebSocketConnection => {
     return new FluxWebSocketConnection(
         id,
-        // Reconnected to WebSocket
-        async () => {
-            if (previousNetworkActions.registerAuthority || previousNetworkActions.networkConnection) {
-                console.log('🔗 Re-connected to WebSocket');
-
-                if (previousNetworkActions.registerAuthority) {
-                    console.log('⭕🗝️ Re-registering authority');
-                    await registerAuthority(
-                        previousNetworkActions.registerAuthority.authorityKey,
-                        previousNetworkActions.registerAuthority.cb,
-                        previousNetworkActions.registerAuthority.authorizeNetworkChannel,
-                    );
-                }
-            }
-        },
-        webRTCConnectionStateCB,
+        cb,
+        stateManager,
         ticket,
         options,
     );
@@ -94,7 +74,6 @@ export const createWSConnection = <T, M>(
 export class FluxWebSocketConnection {
     private readonly socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TCallback2> = new Set();
-    private readonly networkStateListeners: Set<(networkState: TNetworkConnectionState) => void> = new Set();
 
     private readonly topicCallbacks: Map<TChannelTopic, Set<TCallback2>> = new Map();
 
@@ -104,9 +83,7 @@ export class FluxWebSocketConnection {
     constructor(
         private readonly fluxInstanceId: string,
         private readonly onReconnectCallback: () => void,
-        private readonly onWebRTCStateChange: (
-            state: TRTCState,
-        ) => void,
+        private readonly stateManager: StateManager,
         private readonly token: string,
         private readonly options?: IOptions,
     ) {
@@ -148,7 +125,7 @@ export class FluxWebSocketConnection {
                 .on('open', () => {
                     console.log('🔌✅ Socket connected');
 
-                    this.emitNetworkState('connected');
+                    this.stateManager.emitNetworkState('connected');
 
                     this.webSocketClient = this.socket;
 
@@ -230,12 +207,12 @@ export class FluxWebSocketConnection {
 
                 .on('close', () => {
                     this.webSocketClient = undefined;
-                    this.emitNetworkState('disconnected');
+                    this.stateManager.emitNetworkState('disconnected');
                     console.log('🔌🔴 Disconnected', this.fluxInstanceId);
                 })
 
                 .on('connecting', (retryAttempt: number) => {
-                    this.emitNetworkState('disconnected');
+                    this.stateManager.emitNetworkState('disconnected');
 
                     console.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options!.retries}`, this.fluxInstanceId);
                 })
@@ -244,7 +221,7 @@ export class FluxWebSocketConnection {
                 })
                 ;
 
-            this.emitNetworkState('connecting');
+            this.stateManager.emitNetworkState('connecting');
 
             this.socket.connect();
         });
@@ -379,20 +356,6 @@ export class FluxWebSocketConnection {
     }
 
     /**
-     *
-     * @param fn
-     *
-     * @returns { void }
-     */
-    public onNetworkState(
-        fn: (
-            networkState: TNetworkConnectionState,
-        ) => void,
-    ): void {
-        this.networkStateListeners.add(fn);
-    }
-
-    /**
      * 
      * @param { TCallback2 } cb
      * 
@@ -413,19 +376,5 @@ export class FluxWebSocketConnection {
         }
 
         return Promise.resolve();
-    }
-
-    /**
-     *
-     * @param fn
-     *
-     * @returns { void }
-     */
-    private emitNetworkState(
-        networkState: TNetworkConnectionState,
-    ): void {
-        for (const fn of this.networkStateListeners) {
-            fn(networkState);
-        }
     }
 }

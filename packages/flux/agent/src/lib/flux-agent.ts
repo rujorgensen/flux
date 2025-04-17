@@ -13,17 +13,18 @@ import type {
 import type {
     TCallback2,
 } from '@flux/shared/ws';
-import type { FluxNetworkConnection } from './flux-network.class';
+import type { FluxNetworkConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
 import {
     type TNetworkConnectionState,
     type FluxWebSocketConnection,
     createWSConnection,
-} from './connector/flux-ws-connection';
+} from '../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 import { nanoid } from 'nanoid';
 import type { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
 import { authenticateOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import type { TChannnelAuthCallback } from './channel/channel.type';
+import { StateManager } from '@flux/shared/utils';
 
 
 export class FluxAgent {
@@ -33,7 +34,7 @@ export class FluxAgent {
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
     private readonly fluxClientData: FluxClientData = new FluxClientData();
 
-    private readonly networkStateCallbacks: Set<(networkState: TNetworkConnectionState,) => void> = new Set();
+    private readonly stateManager: StateManager = new StateManager();
 
     // Has the client preivously connected to the network or registered as an authority?
     // ! TODO  MOVE 
@@ -77,9 +78,7 @@ export class FluxAgent {
             clientUUIDToken: clientUUIDToken,
         };
 
-        for (const fn of this.networkStateCallbacks) {
-            fn('authorizing');
-        }
+        this.stateManager.emitNetworkState('authorizing');
 
         const ticket = await authenticateOrThrow(
             this.networkId as TNetworkId_S,
@@ -90,8 +89,20 @@ export class FluxAgent {
         this.fluxWebSocketConnection = createWSConnection(
             this.id,
             ticket,
-            this.webRTCConnectionState$$,
-            this.connect.bind(this),
+            this.stateManager,
+            async () => {
+                // if (previousNetworkActions.registerAuthority || previousNetworkActions.networkConnection) {
+                //     console.log('🔗 Re-connected to WebSocket');
+                //     if (previousNetworkActions.networkConnection?.identification) {
+                //         console.log('⭕ Reconnecting to network');
+                await this.connect(
+                    identification,
+                    clientUUIDToken,
+                );
+
+                // }
+            },
+            // this.connect.bind(this),
             this.options,
         );
 
@@ -112,13 +123,7 @@ export class FluxAgent {
      *
      * @returns { void }
      */
-    public onWebRTConnectionState(
-        fn: (
-            webRTCConncetionState: TRTCState,
-        ) => void,
-    ): void {
-        // = new BehaviorSubject<TRTCState>('idle');
-    }
+    public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
 
     /**
      *
@@ -126,13 +131,7 @@ export class FluxAgent {
      *
      * @returns { void }
      */
-    public onNetworkState(
-        fn: (
-            networkState: TNetworkConnectionState,
-        ) => void,
-    ): void {
-        this.fluxWebSocketConnection.onNetworkState(fn);
-    }
+    public onNetworkState = this.stateManager.attachNetworkStateListener;
 
     public onMessage(
         cb: TCallback2,

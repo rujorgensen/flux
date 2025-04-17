@@ -4,15 +4,16 @@ import type {
 } from '@flux/shared/types';
 import type {
     FluxWebSocketConnection,
-} from './connector/flux-ws-connection';
-import { ICEConnection, type TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
-import { FluxWebSocketClientConnection } from './connector/low-level-com/websocket/ws-client';
+} from './flux-ws-connection';
 import type {
     FluxNetworkChannel,
-} from './flux-network-channel.class';
+} from '../../../../../../packages/flux/agent/src/lib/flux-network-channel.class';
 import {
     FluxRemoteClient,
-} from './flux-remote-client.class';
+} from '../../../../../../packages/flux/agent/src/lib/flux-remote-client.class';
+import { ICEConnection } from 'packages/flux/agent/src/lib/connector/low-level-com/web-rtc/ice-connection';
+import { FluxWebSocketClientConnection } from 'packages/flux/agent/src/lib/connector/low-level-com/websocket/ws-client';
+import { TRTCState } from '@flux/shared/utils';
 
 export class FluxNetworkConnection {
 
