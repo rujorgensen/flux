@@ -6,7 +6,7 @@ import type {
     TChannelTopic,
 } from '@flux/shared/types';
 import type {
-    TCallback2,
+    TMessageCallback,
 } from '@flux/shared/ws';
 import type {
     FluxWebSocketConnection,
@@ -29,8 +29,6 @@ export class FluxNetworkChannel {
     public publish(
         message: string,
     ): void {
-        //  console.log(`Broadcasting on channel '${this._channelName}'`, message);
-
         this._fluxWebSocketConnection
             .publish(
                 this._channelName,
@@ -41,12 +39,12 @@ export class FluxNetworkChannel {
     /**
      * Listen to messages on this channel.
      * 
-     * @param { TCallback2 } fn
+     * @param { TMessageCallback } fn
      * 
      * @returns { void }
      */
     public onPublish(
-        fn: TCallback2,
+        fn: TMessageCallback,
     ): void {
         this._fluxWebSocketConnection
             .onPublish(

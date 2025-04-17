@@ -2,11 +2,11 @@
  * Collects data from any source (currently WS or WebRTC) 
  */
 
-import type { TCallback2 } from '@flux/shared/ws';
+import type { TMessageCallback } from '@flux/shared/ws';
 import type { FluxWebSocketConnection } from './flux-ws-connection';
 
 export class FluxClientData {
-    private readonly callbacks: Set<TCallback2> = new Set();
+    private readonly callbacks: Set<TMessageCallback> = new Set();
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
 
     public updateWsConnection(
@@ -21,7 +21,7 @@ export class FluxClientData {
     }
 
     public onMessage(
-        cb: TCallback2,
+        cb: TMessageCallback,
     ): void {
         this.callbacks.add(cb);
     }

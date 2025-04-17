@@ -7,7 +7,7 @@ globalThis.count++;
 console.log(`Reloaded ${globalThis.count} time(s)`);
 
 import type {
-    TCallback2,
+    TMessageCallback,
 } from '@flux/shared/ws';
 import { nanoid } from 'nanoid';
 import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
@@ -135,7 +135,7 @@ export class FluxAuthority {
     public onNetworkState = this.stateManager.attachNetworkStateListener;
 
     public onMessage(
-        cb: TCallback2,
+        cb: TMessageCallback,
     ): void {
         this.fluxClientData.onMessage(cb);
     }

@@ -19,7 +19,7 @@ import {
 import {
     type RPCRequest,
     type RPCResponse,
-    type TCallback2,
+    type TMessageCallback,
     FluxWebSocketClientConnection,
 } from '@flux/shared/ws';
 import { FluxNetworkConnection } from './flux-network.class';
@@ -70,9 +70,9 @@ export const createWSConnection = <T, M>(
 
 export class FluxWebSocketConnection {
     private readonly socket: FluxWebSocketClientConnection;
-    private readonly callbacks: Set<TCallback2> = new Set();
+    private readonly callbacks: Set<TMessageCallback> = new Set();
 
-    private readonly topicCallbacks: Map<TChannelTopic, Set<TCallback2>> = new Map();
+    private readonly topicCallbacks: Map<TChannelTopic, Set<TMessageCallback>> = new Map();
 
     private webSocketClient: FluxWebSocketClientConnection | undefined;
     private first: boolean = true;
@@ -163,7 +163,7 @@ export class FluxWebSocketConnection {
                             if (validateTopic(channelTopic)) {
                                 const data: string = message_.slice(secondColon + 1);
 
-                                const topicCallbacks: Set<TCallback2> | undefined = this.topicCallbacks.get(channelTopic);
+                                const topicCallbacks: Set<TMessageCallback> | undefined = this.topicCallbacks.get(channelTopic);
                                 if (topicCallbacks) {
                                     for (const cb of topicCallbacks) {
                                         cb(data);
@@ -323,13 +323,13 @@ export class FluxWebSocketConnection {
      */
     public onPublish(
         channelTopic: TChannelTopic,
-        fn: TCallback2,
+        fn: TMessageCallback,
     ): void {
-        const existingSubscriber: Set<TCallback2> | undefined = this.topicCallbacks.get(channelTopic);
+        const existingSubscriber: Set<TMessageCallback> | undefined = this.topicCallbacks.get(channelTopic);
         if (existingSubscriber) {
             existingSubscriber.add(fn);
         } else {
-            const newSubscriber: Set<TCallback2> = new Set();
+            const newSubscriber: Set<TMessageCallback> = new Set();
             newSubscriber.add(fn);
             this.topicCallbacks.set(channelTopic, newSubscriber);
         }
@@ -354,12 +354,12 @@ export class FluxWebSocketConnection {
 
     /**
      * 
-     * @param { TCallback2 } cb
+     * @param { TMessageCallback } cb
      * 
      * @returns { void } 
      */
     public onMessage(
-        cb: TCallback2,
+        cb: TMessageCallback,
     ): void {
         this.callbacks.add(cb);
     }

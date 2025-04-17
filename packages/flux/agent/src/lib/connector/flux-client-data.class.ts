@@ -3,12 +3,12 @@
  */
 
 import type {
-    TCallback2,
+    TMessageCallback,
 } from '@flux/shared/ws';
 import { FluxWebSocketConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 
 export class FluxClientData {
-    private readonly callbacks: Set<TCallback2> = new Set();
+    private readonly callbacks: Set<TMessageCallback> = new Set();
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
 
     public updateWsConnection(
@@ -23,7 +23,7 @@ export class FluxClientData {
     }
 
     public onMessage(
-        cb: TCallback2,
+        cb: TMessageCallback,
     ): void {
         this.callbacks.add(cb);
     }

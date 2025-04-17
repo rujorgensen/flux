@@ -4,7 +4,7 @@ export type {
 
 export type {
     TCallback,
-    TCallback2,
+    TMessageCallback,
     TRPCId,
     RPCRequest,
     RPCResponse,

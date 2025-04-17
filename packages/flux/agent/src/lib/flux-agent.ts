@@ -11,7 +11,7 @@ import type {
     TNetworkId_S,
 } from '@flux/shared/types';
 import type {
-    TCallback2,
+    TMessageCallback,
 } from '@flux/shared/ws';
 import type { FluxNetworkConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
 import {
@@ -134,7 +134,7 @@ export class FluxAgent {
     public onNetworkState = this.stateManager.attachNetworkStateListener;
 
     public onMessage(
-        cb: TCallback2,
+        cb: TMessageCallback,
     ): void {
         this.fluxClientData.onMessage(cb);
     }
