@@ -29,7 +29,7 @@ fluxMeshServer.onReady(async () => {
   console.log('🔑 Registering authority');
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const CODE_TO_ACCESS_NETWORK: any = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
+  const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
   const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
   const fluxAuthority = new FluxAuthority(
@@ -79,7 +79,6 @@ fluxMeshServer.onReady(async () => {
   // ****************************************************************************
   // * Setup Agent
   // ****************************************************************************
-
 
   const fluxAgent = new FluxAgent(
     'network-id',
