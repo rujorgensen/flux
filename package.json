@@ -24,7 +24,7 @@
     "@nx/js": "20.8.0",
     "@prisma/client": "^6.6.0",
     "@types/jsonwebtoken": "^9.0.9",
-    "astro": "^5.7.0",
+    "astro": "^5.7.3",
     "chart.js": "^4.4.9",
     "elysia": "latest",
     "flowbite": "^3.1.2",
@@ -34,7 +34,7 @@
     "open-props": "^1.7.15",
     "redis": "^4.7.0",
     "rollup-plugin-visualizer": "^5.14.0",
-    "svelte": "^5.27.0",
+    "svelte": "^5.27.1",
     "typescript": "^5.8.3",
     "webpack-bundle-analyzer": "^4.10.2"
   },
@@ -55,14 +55,13 @@
     "@vitest/ui": "^3.1.1",
     "jiti": "2.4.2",
     "nx": "20.8.0",
-    "prettier": "^2.6.2",
     "prisma": "^6.6.0",
     "tslib": "^2.8.1",
-    "vite": "^6.2.6",
+    "vite": "^6.3.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.1"
   },
-  "packageManager": "bun@1.2.9",
+  "packageManager": "bun@1.2.10",
   "nx": {},
   "peerDependencies": {
     "typescript": "^5.0.0"
