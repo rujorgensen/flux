@@ -12,8 +12,10 @@ import {
     FluxRemoteClient,
 } from '../../../../../../packages/flux/agent/src/lib/flux-remote-client.class';
 import { ICEConnection } from 'packages/flux/agent/src/lib/connector/low-level-com/web-rtc/ice-connection';
-import { FluxWebSocketClientConnection } from 'packages/flux/agent/src/lib/connector/low-level-com/websocket/ws-client';
-import { TRTCState } from '@flux/shared/utils';
+import type { TRTCState } from '@flux/shared/utils';
+import type {
+    FluxWebSocketClientConnection,
+} from '@flux/shared/ws';
 
 export class FluxNetworkConnection {
 

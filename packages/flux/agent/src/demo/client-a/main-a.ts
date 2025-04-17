@@ -5,7 +5,6 @@ import { FluxNetworkConnection } from '../../../../../../libs/flux/shared/connec
 import { TNetworkConnectionState } from '../../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 import { TRTCState } from '../../lib/connector/low-level-com/web-rtc/ice-connection';
 import { FluxRemoteClient } from '../../lib/flux-remote-client.class';
-import { FluxNetworkChannel } from '../../lib/flux-network-channel.class';
 
 // Define observable component
 Alpine.data('fluxApplicationA', () => ({

@@ -16,19 +16,16 @@ import {
     validateTopic,
     ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
-import type {
-    RPCRequest,
-    RPCResponse,
-    TCallback2,
-} from '@flux/shared/ws';
 import {
+    type RPCRequest,
+    type RPCResponse,
+    type TCallback2,
     FluxWebSocketClientConnection,
-} from '../../../../../../packages/flux/agent/src/lib/connector/low-level-com/websocket/ws-client';
+} from '@flux/shared/ws';
 import { FluxNetworkConnection } from './flux-network.class';
-import { FluxNetworkChannel } from '../../../../../../packages/flux/agent/src/lib/flux-network-channel.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
 import type { StateManager } from '@flux/shared/utils';
-
+import { FluxNetworkChannel } from './flux-network-channel.class';
 
 interface IOptions {
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.

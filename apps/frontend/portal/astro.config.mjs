@@ -6,6 +6,7 @@ import svelte from '@astrojs/svelte';
 import proxy from './proxy.conf.json' assert { type: 'json' };
 import node from '@astrojs/node';
 import { visualizer } from 'rollup-plugin-visualizer';
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://astro.build/config
 export default defineConfig({
@@ -23,10 +24,13 @@ export default defineConfig({
 
     // Add Vite configuration with proxy settings
     vite: {
-        plugins: [visualizer({
-            emitFile: true,
-            filename: 'stats.html',
-        })],
+        plugins: [
+            tsconfigPaths(),
+            visualizer({
+                emitFile: true,
+                filename: 'stats.html',
+            }),
+        ],
         server: {
             proxy: {
                 ...proxy,

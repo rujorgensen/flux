@@ -263,8 +263,6 @@ export class FluxMeshServer {
                             ) as TChannelTopic;
                             const data: string = message_.slice(secondColon + 1);
 
-                            console.log('recived broadcast:', channelTopic, data);
-
                             if (validateTopic(channelTopic)) {
                                 if (ws.data.channelTopics.has(channelTopic)) {
                                     // Don't publish to self

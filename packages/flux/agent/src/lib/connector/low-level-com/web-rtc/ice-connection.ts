@@ -7,7 +7,7 @@
 
 import type {
     FluxWebSocketClientConnection,
-} from '../websocket/ws-client';
+} from '@flux/shared/ws';
 
 const peerConnectionConfig = {
     iceServers: [
@@ -16,7 +16,6 @@ const peerConnectionConfig = {
         { urls: 'stun:stun.l.google.com:19302' },
     ],
 };
-
 
 export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 'acceptAnswer'> {
     //  public readonly state$$: TRTCState = 'idle';

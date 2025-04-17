@@ -4,7 +4,8 @@ import type {
   App
 } from '../../../../backend/portal/src/main'
 import { isBrowser } from '../utils/is-browser.util';
-import { FluxAgent } from '@persistica/flux-agent';
+import type { FluxNetworkChannel, FluxNetworkConnection } from '../../../../../libs/flux/shared/connection/src';
+import { FluxAgent } from '../../../../../packages/flux/agent/src';
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 
 const dataStore = writable<number | undefined>();
@@ -16,8 +17,7 @@ dataStore.set(initialValue ?? 0);
 
 if (isBrowser()) {
   let data = initialValue ?? 0;
-
-
+  
   const fluxAgent = new FluxAgent(
     'network-id',
     {
@@ -33,13 +33,13 @@ if (isBrowser()) {
       'portal-agent',
     );
 
+  const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
+    .joinChannel('connected-authorities');
 
-  setInterval(() => {
-
-    data = (data ?? 0) + 1;
-    dataStore.set(data);
-
-  }, 1_000);
+  fluxNetworkChannel
+    .onPublish((message: string) => {
+      dataStore.set(Number.parseInt(message, 10));
+    });
 }
 
 // Export the store directly

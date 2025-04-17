@@ -5,7 +5,12 @@
  * Once connected, messages can be sent between devices.
  */
 
-import type { FluxWebSocketClientConnection } from '../websocket/ws-client';
+import type {
+    TRTCState,
+} from '@flux/shared/utils';
+import type {
+    FluxWebSocketClientConnection,
+} from '@flux/shared/ws';
 
 const peerConnectionConfig = {
     iceServers: [

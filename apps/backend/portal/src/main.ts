@@ -7,7 +7,7 @@ import * as jjwt from 'jsonwebtoken';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { FluxAgent } from '@persistica/flux-agent';
-import type { FluxNetworkConnection } from '@flux/shared/connection';
+import type { FluxNetworkChannel, FluxNetworkConnection } from '@flux/shared/connection';
 
 if (!process.env['FLUX_AUTHORITY_JWT_SECRET']) {
   throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
@@ -96,6 +96,19 @@ fluxMeshServer.onReady(async () => {
     );
 
   console.log(`✅ Agent connected to network ID: "${fluxNetworkConnection.id}"`);
+
+
+  const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
+    .joinChannel('connected-authorities');
+  console.log(`✅ Agent connected to network channel topic: "connected-authorities"`);
+  let num: number = 0;
+
+  setInterval(() => {
+    num++;
+    fluxNetworkChannel
+      .publish(`${num++}`);
+  }, 3_000);
+
 });
 
 

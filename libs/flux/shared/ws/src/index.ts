@@ -17,3 +17,7 @@ export {
 export {
     RPCClient,
 } from './lib/rpc/rpc-client.class';
+export {
+    WebSocketClient,
+    FluxWebSocketClientConnection,
+} from './lib/ws-client';

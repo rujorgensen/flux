@@ -4,7 +4,7 @@ import { TNetworkId_S } from '@flux/shared/types';
 import { TNetworkConnectionState } from '../../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 import { TRTCState } from '../../lib/connector/low-level-com/web-rtc/ice-connection';
 import { FluxNetworkConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
-import { FluxNetworkChannel } from '../../lib/flux-network-channel.class';
+import type { FluxNetworkChannel } from '../../lib/flux-network-channel.class';
 
 // Define observable component
 Alpine.data('fluxApplicationB', () => ({

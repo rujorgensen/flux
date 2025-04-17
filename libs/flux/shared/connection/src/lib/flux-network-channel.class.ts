@@ -4,13 +4,13 @@
 
 import type {
     TChannelTopic,
-} from "@flux/shared/types";
+} from '@flux/shared/types';
 import type {
     TCallback2,
 } from '@flux/shared/ws';
 import type {
     FluxWebSocketConnection,
-} from "../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection";
+} from './flux-ws-connection';
 
 export class FluxNetworkChannel {
 
@@ -29,7 +29,7 @@ export class FluxNetworkChannel {
     public publish(
         message: string,
     ): void {
-        console.log(`Broadcasting on channel "${this._channelName}"`, message);
+        //  console.log(`Broadcasting on channel '${this._channelName}'`, message);
 
         this._fluxWebSocketConnection
             .publish(

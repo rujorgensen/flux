@@ -160,13 +160,12 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 }
 
 // Defines possible RPC methods (should possibly be free)
-
 export class FluxWebSocketClientConnection extends WebSocketClient<
     'authorize' |
     'authorizeNetworkChannel' |
     'createOffer' |
     'acceptOffer' |
-    'acceptAnswer' |
+    'acceptAnswer'|
     'answerAcceptedByInitiator'
 > {
     constructor(
