@@ -24,29 +24,13 @@ import {
 } from '@flux/shared/ws';
 import { FluxNetworkConnection } from './flux-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
-import type { StateManager } from '@flux/shared/utils';
+import type { StateManager, TRTCState } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
 
 interface IOptions {
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
     retries?: number; // Number of times to retry a failed message
 }
-
-// Has the client preivously connected to the network or registered as an authority?
-// const previousNetworkActions: {
-//     networkConnection: {
-//         identification: unknown,
-//         clientName?: string,
-//     } | null;
-//     registerAuthority: {
-//         authorityKey: string,
-//         cb: (...args: any) => Promise<boolean>;
-//         authorizeNetworkChannel: TChannnelAuthCallback<any>,
-//     } | null;
-// } = {
-//     networkConnection: null,
-//     registerAuthority: null,
-// };
 
 export const createWSConnection = <T, M>(
     id: string,
@@ -211,7 +195,7 @@ export class FluxWebSocketConnection {
                 .on('connecting', (retryAttempt: number) => {
                     this.stateManager.emitNetworkState('disconnected');
 
-                    console.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options!.retries}`, this.fluxInstanceId);
+                    console.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options?.retries ?? 'none'}`, this.fluxInstanceId);
                 })
                 .on('error', (error: Error) => {
                     console.log(`❌ Error: "${error.message}".`, this.fluxInstanceId);
@@ -253,7 +237,10 @@ export class FluxWebSocketConnection {
             .registerMethod('authorizeNetworkChannel', authorizeNetworkChannel);
 
         // TODO: WAIT FOR CONNECTION TO BE ACCEPTED
-        return Promise.resolve(new FluxNetworkConnection(this, webSocketClient, this.onWebRTCStateChange));
+        return Promise.resolve(new FluxNetworkConnection(
+            this, webSocketClient,
+            this.stateManager.emitWebRTCState.bind(this.stateManager),
+        ));
     }
 
     /**
@@ -273,7 +260,10 @@ export class FluxWebSocketConnection {
             await this.setClientUUIDToken(clientUUIDToken);
         }
 
-        return Promise.resolve(new FluxNetworkConnection(this, webSocketClient, this.onWebRTCStateChange));
+        return Promise.resolve(new FluxNetworkConnection(
+            this, webSocketClient,
+            this.stateManager.emitWebRTCState.bind(this.stateManager),
+        ));
     }
 
     /**

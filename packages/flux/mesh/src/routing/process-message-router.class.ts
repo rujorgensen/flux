@@ -43,7 +43,7 @@ export class ProcessMessageRouter {
         if (machineAddress !== this.machineAddress) {
             console.log('🛣️ Routing message to machine');
 
-            this.redisConnection.send(address, message);
+            this.redisConnection.publish(address, message);
 
             return;
         }
@@ -52,7 +52,7 @@ export class ProcessMessageRouter {
         if (processId !== this.processId) {
             console.log('🛣️ Routing message to process');
             // ! Route through Redis for now, but change to direct process connection
-            this.redisConnection.send(address, message);
+            this.redisConnection.publish(address, message);
 
             return;
         }

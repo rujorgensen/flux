@@ -8,10 +8,10 @@ import { NetworkClientHash } from './hash/network-client.redis.hash';
 
 let redisConnection: RedisConnection | undefined;
 
-const FLUX_REDIS_URL: string | undefined = process.env['FLUX_REDIS_URL'];
+const FLUX_MESH_REDIS_URL: string | undefined = process.env['FLUX_MESH_REDIS_URL'];
 
-if (!FLUX_REDIS_URL) {
-    throw new Error('Missing FLUX_REDIS_URL in .env');
+if (!FLUX_MESH_REDIS_URL) {
+    throw new Error('Missing FLUX_MESH_REDIS_URL in .env');
 }
 
 /**
@@ -23,7 +23,7 @@ export const getRedisConnection = (
 
 ) => {
     if (!redisConnection) {
-        redisConnection = new RedisConnection(FLUX_REDIS_URL);
+        redisConnection = new RedisConnection(FLUX_MESH_REDIS_URL);
     }
 
     return redisConnection;
@@ -124,7 +124,7 @@ export class RedisConnection {
      * 
      * @returns { void }
      */
-    public async send(
+    public async publish(
         address: TAddress | TProcessAddress,
         message: string,
     ): Promise<void> {
