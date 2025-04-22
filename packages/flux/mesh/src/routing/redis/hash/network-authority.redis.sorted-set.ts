@@ -1,5 +1,5 @@
 import { RedisClientType } from 'redis';
-import {
+import type {
     TAddress,
     TClientId,
     TMachineAddress,
@@ -12,7 +12,9 @@ export class RedisSortedSet {
     private readonly processId: TProcessId = readProcessId();
     private readonly machineAddress: TMachineAddress = readMachineAddress();
 
-    constructor(private readonly client: RedisClientType) {}
+    constructor(
+        private readonly client: RedisClient,
+    ) { }
 
     public async registerNetworkAuthority(
         networkId: TNetworkId_S,
@@ -33,6 +35,13 @@ export class RedisSortedSet {
         await this.client.expire(key, 500);
     }
 
+    /**
+     * Unregisters a network authority from the sorted set.
+     * 
+     * @param networkId 
+     * @param _socketId 
+     * @returns 
+     */
     public async unregister(
         networkId: TNetworkId_S,
         _socketId: TClientId
@@ -47,7 +56,8 @@ export class RedisSortedSet {
     }
 
     /**
-     *
+     * Reads the network authority address from the sorted set.
+     * 
      * @param networkId
      *
      * @returns { Promise<TAddress> }

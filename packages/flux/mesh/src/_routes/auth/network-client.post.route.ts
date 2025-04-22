@@ -1,9 +1,9 @@
 import * as Bun from 'bun';
 import * as nodeURL from 'node:url';
-import { TAddress, TNetworkId_S } from '@flux/shared/types';
+import type { TAddress, TNetworkId_S } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
-import { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
-import { NetworkAuthorityManager } from '../../register/register-network-authority.class';
+import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
+import type { NetworkAuthorityManager } from '../../register/register-network-authority.class';
 
 export const authorizeNetworkClient = async (
     request: Bun.BunRequest,
@@ -45,7 +45,6 @@ export const authorizeNetworkClient = async (
     if (authorizedJWT) {
         const cookies = request.cookies;
 
-        console.log('THE CLAIM', authorizedJWT);
         // Set a cookie with various options
         cookies.set('claim', authorizedJWT, {
             maxAge: 60 * 60 * 24 * 7, // 1 week

@@ -19,7 +19,9 @@ if (!FLUX_REDIS_URL) {
  *
  * @returns
  */
-export const getRedisConnection = () => {
+export const getRedisConnection = (
+
+) => {
     if (!redisConnection) {
         redisConnection = new RedisConnection(FLUX_REDIS_URL);
     }
@@ -43,7 +45,9 @@ export class RedisConnection {
     public readonly networkAuthoritySet: RedisSortedSet;
     public readonly networkClientHash: NetworkClientHash;
 
-    constructor(private readonly url: string) {
+    constructor(
+        private readonly url: string,
+    ) {
         this.subscribers = new Map();
         this.publisher = createClient({
             url: this.url,
@@ -82,7 +86,6 @@ export class RedisConnection {
             })
             .on('ready', () => {
                 console.log('✅ Redis client ready');
-                // RESUBSCRIBE REGEGE
             })
             .on('end', () => {
                 console.warn('🚫 Redis connection closed');
@@ -92,10 +95,18 @@ export class RedisConnection {
         this.networkClientHash = new NetworkClientHash(this.publisher);
 
         // *** Create Redis subscriber
-        this.subscriber = this.publisher.duplicate();
-    }
 
-    public send(address: TAddress | TProcessAddress, message: string): void {
+    /**
+     * 
+     * @param address
+     * @param message
+     * 
+     * @returns { void }
+     */
+    public send(
+        address: TAddress | TProcessAddress,
+        message: string,
+    ): void {
         console.log('about to publish');
 
         try {
@@ -107,7 +118,9 @@ export class RedisConnection {
         }
     }
 
-    public async setConnected(address: string): Promise<void> {
+    public async setConnected(
+        address: string,
+    ): Promise<void> {
         //  await this.client
         //      .set([address], '1', { EX: 5 });
         // console.log("setting", new Date().toISOString());
@@ -134,7 +147,10 @@ export class RedisConnection {
         }
     }
 
-    public unsubscribe(channelId: string, callback: MessageCallback): void {
+    public unsubscribe(
+        channelId: string,
+        callback: MessageCallback,
+    ): void {
         try {
             const redisCallback = this.subscribers.get(callback);
 
