@@ -1,8 +1,10 @@
 import {
+    type RedisConnection,
     getRedisConnection,
-    RedisConnection,
 } from '../routing/redis/redis-connection.class';
-import { NetworkClientHash } from '../routing/redis/hash/network-client.redis.hash';
+import type {
+    NetworkClientHash,
+} from '../routing/redis/hash/network-client.redis.hash';
 import type {
     TAddress,
     TClientOwnUId,

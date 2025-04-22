@@ -8,12 +8,67 @@ import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { FluxAgent } from '@persistica/flux-agent';
 import type { FluxNetworkChannel, FluxNetworkConnection } from '@flux/shared/connection';
+import { RedisStatusService } from './_services/redis-status.service';
+import { BunRedisClientType } from '@core/redis/bun';
 
-if (!process.env['FLUX_AUTHORITY_JWT_SECRET']) {
+// ****************************************************************************
+// * Env
+// ****************************************************************************
+const AUTHORITY_JWT_SECRET: string | undefined = process.env['FLUX_AUTHORITY_JWT_SECRET'];
+if (!AUTHORITY_JWT_SECRET) {
   throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
 }
 
-const AUTHORITY_JWT_SECRET: string = process.env['FLUX_AUTHORITY_JWT_SECRET'];
+const FLUX_MESH_REDIS_URL: string | undefined = process.env['FLUX_MESH_REDIS_URL'];
+
+if (!FLUX_MESH_REDIS_URL) {
+  throw new Error('Missing FLUX_MESH_REDIS_URL in .env');
+}
+
+const FLUX_PORTAL_REDIS_URL: string | undefined = process.env['FLUX_PORTAL_REDIS_URL'];
+
+if (!FLUX_PORTAL_REDIS_URL) {
+  throw new Error('Missing FLUX_PORTAL_REDIS_URL in .env');
+}
+
+// ****************************************************************************
+// * Connections to Stores
+// ****************************************************************************
+
+// * Connect to Redis
+const meshRedis: BunRedisClientType = new BunRedisClientType({
+  url: FLUX_MESH_REDIS_URL,
+  socket: {
+    reconnectStrategy: (
+      retries: number,
+    ) => {
+      console.warn(`🔄 Redis reconnection attempt #${retries}`);
+
+      // Backoff in ms
+      return Math.min(retries * 100, 3_000);
+    },
+  },
+});
+
+const portalRedis: BunRedisClientType = new BunRedisClientType({
+  url: FLUX_PORTAL_REDIS_URL,
+  socket: {
+    reconnectStrategy: (
+      retries: number,
+    ) => {
+      console.warn(`🔄 Redis reconnection attempt #${retries}`);
+
+      // Backoff in ms
+      return Math.min(retries * 100, 3_000);
+    },
+  },
+});
+
+// ****************************************************************************
+// * Setup Services
+// ****************************************************************************
+const portalRedisStatusService: RedisStatusService = new RedisStatusService(portalRedis.getClient());
+const meshRedisStatusService: RedisStatusService = new RedisStatusService(meshRedis.getClient());
 
 // ****************************************************************************
 // * Setup Mesh Server
@@ -72,6 +127,11 @@ fluxMeshServer.onReady(async () => {
 
         console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
 
+        if (channelTopic.startsWith('protected')) {
+          console.log("TODO: chcek if this agent is allowed to access the channel");
+          return Promise.resolve(false);
+        }
+
         return Promise.resolve(true);
       },
     );
@@ -97,9 +157,9 @@ fluxMeshServer.onReady(async () => {
 
   console.log(`✅ Agent connected to network ID: "${fluxNetworkConnection.id}"`);
 
-
   const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
     .joinChannel('connected-authorities');
+
   console.log(`✅ Agent connected to network channel topic: "connected-authorities"`);
   let num: number = 0;
 
@@ -109,9 +169,25 @@ fluxMeshServer.onReady(async () => {
       .publish(`${num++}`);
   }, 3_000);
 
+  // * Listen to Redis health
+  const portalRedisHealthChannel: FluxNetworkChannel = await fluxNetworkConnection
+    .joinChannel('protected-portal-redis-health-alerts');
+
+  const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
+    .joinChannel('protected-mesh-redis-health-alerts');
+
+  console.log(`✅ Agent connected to network channel topics: "portal-redis-health-alerts", "mesh-redis-health-alerts"`);
+
+  portalRedisStatusService
+    .onAlert((alerts: string[]) => {
+      portalRedisHealthChannel.publish(JSON.stringify(alerts));
+    });
+
+  meshRedisStatusService
+    .onAlert((alerts: string[]) => {
+      meshRedisHealthAlertChannel.publish(JSON.stringify(alerts));
+    });
 });
-
-
 
 // ****************************************************************************
 // * Start server
@@ -130,7 +206,6 @@ const proxy = async ({ request }: {
   request: Bun.BunRequest,
 }) => {
   const original = new URL(request.url);
-
 
   const proxyUrl = `http://localhost:3001${original.pathname}`;
 
@@ -188,6 +263,12 @@ const app = new Elysia()
 
   .get('/api/ping', () => 'pong')
   .get('/api/connected-authorities', () => 9999)
+  .get('/api/status', () => {
+    return [
+      meshRedisStatusService.getRedisStatus(),
+      portalRedisStatusService.getRedisStatus(),
+    ];
+  })
 
   .post('/auth', async ({ jwt, query, cookie: { auth }, body, redirect }) => {
 

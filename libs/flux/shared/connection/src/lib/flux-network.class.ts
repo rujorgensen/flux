@@ -5,9 +5,6 @@ import type {
 import type {
     FluxWebSocketConnection,
 } from './flux-ws-connection';
-import type {
-    FluxNetworkChannel,
-} from '../../../../../../packages/flux/agent/src/lib/flux-network-channel.class';
 import {
     FluxRemoteClient,
 } from '../../../../../../packages/flux/agent/src/lib/flux-remote-client.class';
@@ -16,6 +13,7 @@ import type { TRTCState } from '@flux/shared/utils';
 import type {
     FluxWebSocketClientConnection,
 } from '@flux/shared/ws';
+import type { FluxNetworkChannel } from './flux-network-channel.class';
 
 export class FluxNetworkConnection {
 
