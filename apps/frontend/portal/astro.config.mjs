@@ -5,6 +5,8 @@ import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
 import proxy from './proxy.conf.json' assert { type: 'json' };
 import node from '@astrojs/node';
+import { visualizer } from 'rollup-plugin-visualizer';
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,8 +24,27 @@ export default defineConfig({
 
     // Add Vite configuration with proxy settings
     vite: {
+        plugins: [
+            tsconfigPaths(),
+            visualizer({
+                emitFile: true,
+                filename: 'stats.html',
+            }),
+        ],
         server: {
-            proxy,
+            proxy: {
+                ...proxy,
+                '/auth': {
+                    target: 'http://localhost:3000',
+                    changeOrigin: true,
+                    secure: false,
+                },
+                "/api": {
+                    target: "http://localhost:3000",
+                    changeOrigin: true,
+                    secure: false
+                }
+            },
         }
     }
 });

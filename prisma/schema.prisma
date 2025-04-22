@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/@prisma-types/flux"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("FLUX_DATABASE_URL")
+}
+
+model User {
+  id                   Int           @id @default(autoincrement())
+  email                String        @unique
+  magicLink            String?       @unique
+  magicLinkExpiryAt    DateTime?
+  magicLinkRequestedAt DateTime?
+  userSessions         UserSession[]
+}
+
+model UserSession {
+  id        String   @id @default(nanoid())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  ip        String
+  userAgent String
+}

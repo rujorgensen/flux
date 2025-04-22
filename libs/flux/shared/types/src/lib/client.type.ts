@@ -1,0 +1,1 @@
+export type TClientOwnUId = string & { __brand: 'ClientOwnUId' };

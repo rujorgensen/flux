@@ -1,0 +1,19 @@
+{
+  "name": "flux-shared-types",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/flux/shared/types/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/flux/shared/types",
+        "main": "libs/flux/shared/types/src/index.ts",
+        "tsConfig": "libs/flux/shared/types/tsconfig.lib.json",
+        "assets": []
+      }
+    }
+  },
+  "tags": ["type:type", "scope:shared"]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "core-redis-bun-wrapper",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/core/redis/bun-wrapper/src",
+  "projectType": "library",
+  "tags": [
+    "type:core",
+    "scope:backend"
+  ],
+  "targets": {}
+}

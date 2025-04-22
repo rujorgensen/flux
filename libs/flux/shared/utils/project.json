@@ -1,0 +1,19 @@
+{
+  "name": "flux-shared-utils",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/flux/shared/utils/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/flux/shared/utils",
+        "main": "libs/flux/shared/utils/src/index.ts",
+        "tsConfig": "libs/flux/shared/utils/tsconfig.lib.json",
+        "assets": []
+      }
+    }
+  },
+  "tags": ["type:utils", "scope:shared"]
+}

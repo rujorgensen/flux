@@ -1,0 +1,141 @@
+// Check env
+// const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;
+
+globalThis.count ??= 0;
+globalThis.count++;
+
+console.log(`Reloaded ${globalThis.count} time(s)`);
+
+import type {
+    TClientOwnUId,
+    TNetworkId_S,
+} from '@flux/shared/types';
+import type {
+    TMessageCallback,
+} from '@flux/shared/ws';
+import type { FluxNetworkConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
+import {
+    type TNetworkConnectionState,
+    type FluxWebSocketConnection,
+    createWSConnection,
+} from '../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
+import { nanoid } from 'nanoid';
+import type { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
+import { authenticateOrThrow } from './connector/auth/register-client.auth';
+import { FluxClientData } from './connector/flux-client-data.class';
+import type { TChannnelAuthCallback } from './channel/channel.type';
+import { StateManager } from '@flux/shared/utils';
+
+
+export class FluxAgent {
+
+    public readonly id: string = nanoid();
+
+    private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
+    private readonly fluxClientData: FluxClientData = new FluxClientData();
+
+    private readonly stateManager: StateManager = new StateManager();
+
+    // Has the client preivously connected to the network or registered as an authority?
+    // ! TODO  MOVE 
+    private readonly previousNetworkActions: {
+        networkConnection: {
+            identification: unknown,
+            clientUUIDToken?: string,
+        } | null;
+        registerAuthority: {
+            authorityKey: string,
+            cb: (...args: any) => Promise<string>;
+            authorizeNetworkChannel: TChannnelAuthCallback<any>,
+        } | null;
+    } = {
+            networkConnection: null,
+            registerAuthority: null,
+        };
+
+    constructor(
+        private readonly networkId: string,
+        private readonly options?: {
+            domain?: string,
+            secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
+            retries?: number; // Number of times to retry a failed message
+        },
+    ) { }
+
+    /**
+     *
+     * @param { unknown }   identification
+     * @param { string }    [clientUUIDToken]
+     *
+     * @returns { Promise<FluxNetworkConnection> }
+     */
+    public async connect(
+        identification: unknown,
+        clientUUIDToken?: string,
+    ): Promise<FluxNetworkConnection> {
+        this.previousNetworkActions.networkConnection = {
+            identification,
+            clientUUIDToken: clientUUIDToken,
+        };
+
+        this.stateManager.emitNetworkState('authorizing');
+
+        const ticket = await authenticateOrThrow(
+            this.networkId as TNetworkId_S,
+            this.options?.domain ?? 'http://localhost:8080',
+            identification,
+        );
+
+        this.fluxWebSocketConnection = createWSConnection(
+            this.id,
+            ticket,
+            this.stateManager,
+            async () => {
+                // if (previousNetworkActions.registerAuthority || previousNetworkActions.networkConnection) {
+                //     console.log('🔗 Re-connected to WebSocket');
+                //     if (previousNetworkActions.networkConnection?.identification) {
+                //         console.log('⭕ Reconnecting to network');
+                await this.connect(
+                    identification,
+                    clientUUIDToken,
+                );
+
+                // }
+            },
+            // this.connect.bind(this),
+            this.options,
+        );
+
+        this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
+
+        const fluxNetworkConnection: FluxNetworkConnection = await this
+            .fluxWebSocketConnection
+            .connectToNetwork(
+                clientUUIDToken as TClientOwnUId,
+            );
+
+        return fluxNetworkConnection;
+    }
+
+    /**
+     *
+     * @param fn
+     *
+     * @returns { void }
+     */
+    public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
+
+    /**
+     *
+     * @param fn
+     *
+     * @returns { void }
+     */
+    public onNetworkState = this.stateManager.attachNetworkStateListener;
+
+    public onMessage(
+        cb: TMessageCallback,
+    ): void {
+        this.fluxClientData.onMessage(cb);
+    }
+}

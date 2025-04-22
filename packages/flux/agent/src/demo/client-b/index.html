@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Client B</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+    <link
+        rel="icon"
+        type="image/x-icon"
+        href="favicon.ico"
+    >
+    <script
+        type="module"
+        src="main.ts"
+    ></script>
+</head>
+
+<body>
+    <div x-data="todoApplication()">
+
+        <div id="panel-container">
+
+            <h1>Client B</h1>
+
+            <header class="statuses">
+                <!-- 
+                <label for="store-state">store:</label>
+                <label for="nw-state">network:</label>
+                <label for="syn-state">synchronizer:</label> -->
+                <!-- 
+                <span id="store-state" x-text="storeState"></span>
+                <span id="nw-state" x-text="networkState"></span>
+                <span id="syn-state" x-text="synchronizerState"></span> -->
+
+                <!-- <button @click="persistica.joinNetwork()">
+            Connect to network
+        </button> -->
+            </header>
+            <div class="container">
+
+                <!-- <input id="new-todo" type="text" x-model="message" @keyup.enter="enter()"
+                    placeholder="Add a new todo..."> -->
+                <!-- <ul id="todo-list">
+                    <template x-for="todo in todos">
+                        <li class="todo-item" :class="todo.isCompleted ? 'done' : ''">
+                            <span x-text="todo.description" @click="toggleState(todo)"></span>
+                            <button class="delete" @click="remove(todo)">
+                                ✕
+                            </button>
+                        </li>
+                    </template>
+                </ul> -->
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
