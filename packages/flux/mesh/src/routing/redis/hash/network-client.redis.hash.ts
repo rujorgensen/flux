@@ -1,4 +1,4 @@
-import { RedisClientType } from 'redis';
+import type { RedisClient } from 'bun';
 import type {
     TAddress,
     TClientOwnUId,
@@ -6,7 +6,10 @@ import type {
 } from '@flux/shared/types';
 
 export class NetworkClientHash {
-    constructor(private readonly client: RedisClientType) { }
+
+    constructor(
+        private readonly client: RedisClient,
+    ) { }
 
     public async registerNetworkClient(
         networkId: TNetworkId_S,
@@ -17,9 +20,10 @@ export class NetworkClientHash {
         //  await this.client
         //      .set([address], '1', { EX: 5 });
 
-        await this.client.hSet(key, {
-            [uid]: clientId,
-        });
+        await this.client.hmset(key, [
+            uid,
+            clientId
+        ]);
 
         await this.client.expire(key, 500);
     }
@@ -36,18 +40,17 @@ export class NetworkClientHash {
     ): Promise<TAddress> {
         const key: string = `networks/${networkId}/client-uid`;
 
-        const data = await this.client.hGet(key, clientOwnUId);
+        const data = await this.client.hmget(key, [clientOwnUId]);
 
-        console.log('GOT HAHSHS', data);
 
-        if (!data) {
+        if (!data[0]) {
             console.error('data', data, 'key', key);
             throw new Error(
                 `Network authority not found for networkId: "${networkId}"`
             );
         }
 
-        return data as TAddress;
+        return data[0] as TAddress;
     }
 
     // public async unregister(
@@ -88,3 +91,22 @@ export class NetworkClientHash {
     //     return `${data.machineAddress}/${data.processId}/${data.socketId}` as TAddress;
     // }
 }
+
+
+// async function rateLimit(ip, limit = 100, windowSecs = 3600) {
+//     const key = `ratelimit:${ip}`;
+  
+//     // Increment counter
+//     const count = await redis.incr(key);
+  
+//     // Set expiry if this is the first request in window
+//     if (count === 1) {
+//       await redis.expire(key, windowSecs);
+//     }
+  
+//     // Check if limit exceeded
+//     return {
+//       limited: count > limit,
+//       remaining: Math.max(0, limit - count),
+//     };
+//   }

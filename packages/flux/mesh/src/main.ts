@@ -64,7 +64,7 @@ import { NetworkClientManager } from './register/network-client-manager.class';
 import { OPTIONS_RESPONSE } from './_routes/options.route';
 import { authorizeNetworkAuthority } from './_routes/auth/network-authority.post.route';
 import { authorizeNetworkClient } from './_routes/auth/network-client.post.route';
-import type { RPCClient } from '@flux/shared/ws';
+import type { RPCClient, TRPCResponseCallbackFunction } from '@flux/shared/ws';
 import * as nodeURL from 'node:url';
 
 const networkAuthorityManager: NetworkAuthorityManager =

@@ -18,6 +18,15 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@core/redis/bun": [
+        "libs/core/redis/bun-wrapper/src/index.ts"
+      ],
+      "@flux/mesh": [
+        "packages/flux/mesh/src/index.ts"
+      ],
+      "@flux/shared/connection": [
+        "libs/flux/shared/connection/src/index.ts"
+      ],
       "@flux/shared/types": [
         "libs/flux/shared/types/src/index.ts"
       ],
@@ -27,17 +36,11 @@
       "@flux/shared/ws": [
         "libs/flux/shared/ws/src/index.ts"
       ],
-      "@flux/shared/connection": [
-        "libs/flux/shared/connection/src/index.ts"
-      ],
-      "@persistica/flux-authority": [
-        "packages/flux/authority/src/index.ts"
-      ],
       "@persistica/flux-agent": [
         "packages/flux/agent/src/index.ts"
       ],
-      "@flux/mesh": [
-        "packages/flux/mesh/src/index.ts"
+      "@persistica/flux-authority": [
+        "packages/flux/authority/src/index.ts"
       ]
     }
   },

@@ -3,8 +3,8 @@
  */
 import type { TClientId } from '@flux/shared/types';
 import {
+    type RedisConnection,
     getRedisConnection,
-    RedisConnection,
 } from './redis/redis-connection.class';
 
 export class IncommingClientMessageRouter {
@@ -15,7 +15,7 @@ export class IncommingClientMessageRouter {
             clientId: TClientId,
             onMessage: (message: string) => void
         ) => void
-    ) {}
+    ) { }
 
     /**
      *

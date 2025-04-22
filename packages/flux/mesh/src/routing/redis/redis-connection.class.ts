@@ -1,7 +1,7 @@
 import {
-    type RedisClientType,
-    createClient,
-} from 'redis';
+    BunRedisClientType,
+    BunRedisPubSub,
+} from '@core/redis/bun';
 import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
 import { RedisSortedSet } from './hash/network-authority.redis.sorted-set';
 import { NetworkClientHash } from './hash/network-client.redis.hash';
@@ -39,8 +39,8 @@ export class RedisConnection {
     >;
 
     // Needs two clients, one for publishing and one for subscribing
-    private readonly publisher: RedisClientType;
-    private readonly subscriber: RedisClientType;
+    private readonly cache: BunRedisClientType;
+    private readonly pubSub: BunRedisPubSub;
 
     public readonly networkAuthoritySet: RedisSortedSet;
     public readonly networkClientHash: NetworkClientHash;
@@ -49,7 +49,7 @@ export class RedisConnection {
         private readonly url: string,
     ) {
         this.subscribers = new Map();
-        this.publisher = createClient({
+        this.cache = new BunRedisClientType({
             url: this.url,
             socket: {
                 reconnectStrategy: (
@@ -69,12 +69,12 @@ export class RedisConnection {
         });
 
         try {
-            this.publisher.connect();
+            this.cache.connect();
         } catch {
             console.log('caught');
         }
 
-        this.publisher
+        this.cache
             .on('error', (error) => {
                 console.error('❌ Redis client error:', error.message);
 
@@ -91,10 +91,31 @@ export class RedisConnection {
                 console.warn('🚫 Redis connection closed');
             });
 
-        this.networkAuthoritySet = new RedisSortedSet(this.publisher);
-        this.networkClientHash = new NetworkClientHash(this.publisher);
+        this.networkAuthoritySet = new RedisSortedSet(this.cache.getClient());
+        this.networkClientHash = new NetworkClientHash(this.cache.getClient());
 
         // *** Create Redis subscriber
+        this.pubSub = new BunRedisPubSub(
+            {
+                url: this.url,
+                socket: {
+                    reconnectStrategy: (
+                        retries: number,
+                    ) => {
+                        console.warn(`🔄 Redis reconnection attempt #${retries}`);
+
+                        // Backoff in ms
+                        return Math.min(retries * 100, 3_000);
+                    },
+                },
+            });
+
+        try {
+            this.pubSub.connect();
+        } catch {
+            console.log('caught');
+        }
+    }
 
     /**
      * 
@@ -103,18 +124,14 @@ export class RedisConnection {
      * 
      * @returns { void }
      */
-    public send(
+    public async send(
         address: TAddress | TProcessAddress,
         message: string,
-    ): void {
-        console.log('about to publish');
-
+    ): Promise<void> {
         try {
-            this.publisher.publish(address, message).catch(() => {
-                console.log(`Error caught while publishing to channel`);
-            });
+            await this.pubSub.publish(address, message);
         } catch {
-            console.log('publish failde');
+            console.error(`Publish failed on address: ${address}`);
         }
     }
 
@@ -124,13 +141,12 @@ export class RedisConnection {
         //  await this.client
         //      .set([address], '1', { EX: 5 });
         // console.log("setting", new Date().toISOString());
+        await this.cache.getClient().hmset(`machines/processes/${address}`, [
+            'status', 'connected',
+            'updatedAt', new Date().toISOString(),
+        ]);
 
-        await this.publisher.hSet(`machines/processes/${address}`, {
-            status: 'connected',
-            updatedAt: new Date().toISOString(),
-        });
-
-        await this.publisher.expire(address, 5);
+        await this.cache.getClient().expire(address, 5);
     }
 
     public subscribe(
@@ -140,7 +156,7 @@ export class RedisConnection {
         try {
             const redisCallback = (message: string) => callback(message);
 
-            this.subscriber.subscribe(channelId, redisCallback);
+            this.pubSub.subscribe(channelId, redisCallback);
             this.subscribers.set(callback, redisCallback);
         } catch {
             console.log('error caught #2');
@@ -158,7 +174,7 @@ export class RedisConnection {
                 return;
             }
 
-            this.publisher.unsubscribe(channelId, redisCallback);
+            this.pubSub.unsubscribe(channelId, redisCallback);
             this.subscribers.delete(callback);
         } catch {
             console.log('error caught #1');

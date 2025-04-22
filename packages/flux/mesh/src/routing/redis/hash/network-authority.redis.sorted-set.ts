@@ -1,4 +1,4 @@
-import { RedisClientType } from 'redis';
+import type { RedisClient } from 'bun';
 import type {
     TAddress,
     TClientId,
@@ -27,10 +27,7 @@ export class RedisSortedSet {
 
         const address: TAddress = `${this.machineAddress}/${this.processId}/${socketId}`;
 
-        await this.client.zAdd(key, {
-            value: address,
-            score: Date.now(),
-        });
+        await this.client.send("ZADD", [key, `${Date.now()}`, address]);
 
         await this.client.expire(key, 500);
     }
@@ -52,7 +49,7 @@ export class RedisSortedSet {
 
         const address: TAddress = `${this.machineAddress}/${this.processId}/${_socketId}`;
 
-        return this.client.zRem(key, address);
+        return await this.client.send("ZREM", [key, address]);
     }
 
     /**
@@ -67,13 +64,8 @@ export class RedisSortedSet {
     ): Promise<TAddress> {
         const key: string = `networks/${networkId}/authorities`;
 
-        const list = await this.client.zRangeWithScores(
+        const list = await this.client.zrandmember(
             key,
-            0,
-            -1,
-            {
-                REV: true,
-            }
             //         {
             //         BY: 'SCORE',
             //         // LIMIT: {
@@ -81,19 +73,18 @@ export class RedisSortedSet {
             //         //     offset: 0,
             //         // }
             //     },
-        );
+        ) as unknown as string[];
 
         // console.log('list', list, key);
-        const data = list[0]!.value;
+        const data = list[0];
 
         if (!data) {
             console.error('data', data, 'key', key);
-            throw new Error(
-                `Network authority not found for networkId: "${networkId}"`
-            );
+
+            throw new Error(`Network authority not found for networkId: "${networkId}"`);
         }
 
-        return data as unknown as TAddress;
+        return data as TAddress;
         // return `${data.machineAddress}/${data.processId}/${data.socketId}` as TAddress;
 
         // map((list: string[]) =>
