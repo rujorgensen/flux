@@ -127,6 +127,11 @@ fluxMeshServer.onReady(async () => {
 
         console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
 
+        if (channelTopic.startsWith('protected')) {
+          console.log("TODO: chcek if this agent is allowed to access the channel");
+          return Promise.resolve(false);
+        }
+
         return Promise.resolve(true);
       },
     );
@@ -166,10 +171,10 @@ fluxMeshServer.onReady(async () => {
 
   // * Listen to Redis health
   const portalRedisHealthChannel: FluxNetworkChannel = await fluxNetworkConnection
-    .joinChannel('portal-redis-health-alerts');
+    .joinChannel('protected-portal-redis-health-alerts');
 
   const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
-    .joinChannel('mesh-redis-health-alerts');
+    .joinChannel('protected-mesh-redis-health-alerts');
 
   console.log(`✅ Agent connected to network channel topics: "portal-redis-health-alerts", "mesh-redis-health-alerts"`);
 
