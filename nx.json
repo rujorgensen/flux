@@ -41,5 +41,13 @@
         "watchDepsTargetName": "watch-deps"
       }
     }
-  ]
+  ],
+  "namedInputs": {
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/e2e.yml"
+    ],
+    "default": [
+      "sharedGlobals"
+    ]
+  }
 }
