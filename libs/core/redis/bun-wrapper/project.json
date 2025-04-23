@@ -7,5 +7,12 @@
     "type:core",
     "scope:backend"
   ],
-  "targets": {}
+  "targets": {
+    "bun-test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun test {projectRoot}"
+      }
+    }
+  }
 }
