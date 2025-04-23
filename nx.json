@@ -16,6 +16,13 @@
         "default",
         "^default"
       ]
+    },
+    "bun-test": {
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "cache": true
     }
   },
   "defaultBase": "master",
@@ -35,5 +42,13 @@
       }
     }
   ],
+  "namedInputs": {
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/e2e.yml"
+    ],
+    "default": [
+      "sharedGlobals"
+    ]
+  },
   "nxCloudId": "6809319308a2a647ce903863"
 }

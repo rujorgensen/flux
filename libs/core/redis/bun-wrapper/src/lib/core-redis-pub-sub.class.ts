@@ -1,7 +1,122 @@
-import { BunRedisClient } from './bun-redis-client-wrapper';
+import {
+  type RedisClientType,
+  createClient,
+} from 'redis';
 
-type MessageHandler = (channel: string, message: string) => void;
+export type MessageCallback = (message: string) => unknown;
 
+export class BunRedisPubSub {
+
+  // implements Notifier
+  private readonly subscribers: Map<
+    MessageCallback,
+    (data: string, channel: string) => unknown
+  >;
+
+  // Needs two clients, one for publishing and one for subscribing
+  private readonly publisher: RedisClientType;
+  private readonly subscriber: RedisClientType;
+
+  constructor(
+    private readonly _options: {
+      url: string,
+      socket: {
+        reconnectStrategy: (
+          retries: number,
+        ) => number,
+      },
+    },
+  ) {
+    this.subscribers = new Map();
+    this.publisher = createClient(this._options);
+
+    this.publisher
+      .on('error', (error) => {
+        console.error('❌ Redis client error:', error.message);
+      })
+      .on('reconnecting', () => {
+        console.log('🔄 Redis reconnecting...');
+      })
+      .on('ready', () => {
+        console.log('✅ Redis client ready');
+      })
+      .on('end', () => {
+        console.warn('🚫 Redis connection closed');
+      });
+
+    // * Create Redis subscriber
+    this.subscriber = this.publisher.duplicate();
+  }
+
+  public async connect(
+
+  ) {
+    await Promise.all([
+      this.publisher.connect(),
+      this.subscriber.connect(),
+    ]);
+  }
+
+  /**
+   * 
+   * @param address
+   * @param message
+   * 
+   * @returns { void }
+   */
+  public async publish(
+    address: string,
+    message: string,
+  ): Promise<void> {
+    try {
+      await this.publisher.publish(address, message);
+    } catch {
+      console.log('publish failed');
+    }
+  }
+
+  public async subscribe(
+    channelId: string,
+    callback: MessageCallback
+  ): Promise<void> {
+    try {
+      const redisCallback = (message: string) => callback(message);
+
+      await this.subscriber.subscribe(channelId, redisCallback);
+      this.subscribers.set(callback, redisCallback);
+    } catch {
+      console.log('error caught #2');
+    }
+  }
+
+  public unsubscribe(
+    channelId: string,
+    callback: MessageCallback,
+  ): void {
+    try {
+      const redisCallback = this.subscribers.get(callback);
+
+      if (!redisCallback) {
+        return;
+      }
+
+      this.publisher.unsubscribe(channelId, redisCallback);
+      this.subscribers.delete(callback);
+    } catch {
+      console.log('error caught #1');
+    }
+  }
+
+  public async disconnect(
+
+  ) {
+    this.subscribers.clear();
+    this.subscriber.disconnect();
+    this.publisher.disconnect();
+  }
+}
+
+/*
 export class BunRedisPubSub {
   private readonly subClient: BunRedisClient;
   private readonly pubClient: BunRedisClient;
@@ -106,3 +221,4 @@ export class BunRedisPubSub {
     this.pubClient.disconnect();
   }
 }
+   */
