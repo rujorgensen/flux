@@ -2,13 +2,27 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
-      "outputs": ["{projectRoot}/dist"],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
       "cache": true
     },
     "@nx/js:swc": {
       "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["default", "^default"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "default",
+        "^default"
+      ]
+    },
+    "bun-test": {
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "cache": true
     }
   },
   "defaultBase": "master",
@@ -24,7 +38,10 @@
         "serveStaticTargetName": "serve-static",
         "typecheckTargetName": "typecheck",
         "buildDepsTargetName": "build-deps",
-        "watchDepsTargetName": "watch-deps"
+        "watchDepsTargetName": "watch-deps",
+        "externalDependencies": [
+          "vitest"
+        ]
       }
     }
   ]

@@ -18,6 +18,9 @@ export class RedisStatusService {
         private readonly _redisClient: RedisClient,
     ) { }
 
+    /**
+     * Subscribe to 
+     */
     public onAlert(
         cb: (alerts: string[]) => void,
     ): void {
