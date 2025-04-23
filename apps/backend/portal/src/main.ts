@@ -212,9 +212,7 @@ const proxy = async ({ request }: {
   return await fetch(proxyUrl, {
     headers: request.headers,
   });
-
 }
-
 
 // * Host the frontend and static resources 
 // try {
