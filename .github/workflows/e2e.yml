@@ -45,4 +45,5 @@ jobs:
 
       - name: Run tests
         # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true npx nx affected -t bun-test --no-agents
+        #run: TESTCONTAINERS_RYUK_DISABLED=true npx nx affected -t bun-test --no-agents
+        run: TESTCONTAINERS_RYUK_DISABLED=true npx nx run-many -t bun-test --no-agents --skip-nx-cache
