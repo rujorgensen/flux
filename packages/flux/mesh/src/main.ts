@@ -29,6 +29,7 @@ import {
     type TProcessAddress,
     type TProcessId,
     type TClientOwnUId,
+    UnknownClientError,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
     ERROR,
@@ -90,6 +91,11 @@ export type TConnectedClientSocket = Bun.ServerWebSocket<{
 
 const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
 
+const processId: TProcessId = readProcessId();
+const machineAddress: TMachineAddress = readMachineAddress();
+const processAddress: TProcessAddress = readProcessAddress();
+
+
 const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
     // passToLocalClient:
     (
@@ -100,7 +106,7 @@ const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
             clientMap.get(clientId);
 
         if (!client) {
-            throw new Error(`WS client not found, with ID '${clientId}'`);
+            throw new UnknownClientError(clientId, processAddress);
         }
 
         client.send(message);
@@ -127,10 +133,6 @@ const processMessageRouter: ProcessMessageRouter = new ProcessMessageRouter();
 const globalRPCClient: GlobalRPCClient<
     'authorize' | 'authorizeNetworkChannel'
 > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
-
-const processId: TProcessId = readProcessId();
-const machineAddress: TMachineAddress = readMachineAddress();
-const processAddress: TProcessAddress = readProcessAddress();
 
 export class FluxMeshServer {
     private readonly onReadyListeners: Set<() => void> = new Set();
@@ -308,29 +310,31 @@ export class FluxMeshServer {
                                     ws.data.networkId
                                 );
 
-                            const authorize: boolean = await globalRPCClient.call(
-                                networkAuthorityAddress,
-                                'authorizeNetworkChannel',
-                                channelTopic,
-                                ws.data.claim
-                            );
+                            try {
+                                const authorize: boolean = await globalRPCClient.call(
+                                    networkAuthorityAddress,
+                                    'authorizeNetworkChannel',
+                                    channelTopic,
+                                    ws.data.claim
+                                );
 
-                            if (authorize) {
-                                ws.subscribe(
-                                    `networks/${ws.data.networkId}/channels/${channelTopic}`
-                                );
-                                ws.send(
-                                    `${SUBSCRIBED_NETWORK_CHANNEL_TOPIC}:${channelTopic}`
-                                );
-                                ws.data.channelTopics.add(channelTopic);
-                                console.log(
-                                    `🎉 Client was authorized on channel topic '${channelTopic}'`
-                                );
-                            } else {
-                                console.error(
-                                    `Client was not authorized to connect to channel topic '${channelTopic}'`
-                                );
-                                ws.send(`${ERROR}:Not authorized`);
+                                if (authorize) {
+                                    ws.subscribe(`networks/${ws.data.networkId}/channels/${channelTopic}`);
+                                    ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_TOPIC}:${channelTopic}`);
+                                    ws.data.channelTopics.add(channelTopic);
+                                    console.log(`🎉 Client was authorized on channel topic '${channelTopic}'`);
+                                } else {
+                                    console.error(`Client was not authorized to connect to channel topic '${channelTopic}'`);
+                                    ws.send(`${ERROR}:Not authorized`);
+                                }
+                            } catch (error) {
+                                if (error instanceof Error) {
+                                    ws.send(`${ERROR}:${error.message}`);
+                                    break;
+                                }
+
+                                console.error('Unknown error');
+                                ws.send(`${ERROR}:Unknown error`);
                             }
 
                             break;
@@ -429,7 +433,7 @@ export class FluxMeshServer {
                     if (ws.data.isAuthority) {
                         networkAuthorityManager.unregister(
                             ws.data.networkId,
-                            ws.data.id
+                            ws.data.address,
                         );
                     } else {
                         // Unsubscribe from topics

@@ -2,11 +2,11 @@
  * Route messages to the correct destination.
  */
 import {
-    splitAddress,
     type TAddress,
     type TClientId,
     type TMachineAddress,
     type TProcessId,
+    splitAddressOrThrow,
 } from '@flux/shared/types';
 import { readMachineAddress, readProcessId } from './addressing.utils';
 import {
@@ -21,7 +21,7 @@ export class OutgoingMessageRouter {
     private readonly redisConnection: RedisConnection = getRedisConnection();
 
     constructor(
-        private readonly passToLocalClient: (
+        private readonly passToLocalClientOrThrowUnknownClient: (
             clientId: TClientId,
             message: string,
         ) => void,
@@ -46,7 +46,7 @@ export class OutgoingMessageRouter {
         address: TAddress,
         message: string,
     ): void {
-        const [machineAddress, processId, clientId] = splitAddress(address);
+        const [machineAddress, processId, clientId] = splitAddressOrThrow(address);
 
         // * Not on the same machine
         if (machineAddress !== this.machineAddress) {
@@ -59,7 +59,7 @@ export class OutgoingMessageRouter {
 
         // * On the same machine, but not on the same process
         if (processId !== this.processId) {
-            console.log(`🛣️  Routing message to process ID: ${processId}`);
+            console.log(`🛣️  Routing message to from process ID '${this.processId}' to process ID: '${processId}'`);
 
             // ! Route through Redis for now, but change to direct process connection
             this.redisConnection.publish(address, message);
@@ -70,6 +70,6 @@ export class OutgoingMessageRouter {
         // * On the same machine and process
         console.log('🛣️ Routing message to local client');
 
-        this.passToLocalClient(clientId, message);
+        this.passToLocalClientOrThrowUnknownClient(clientId, message);
     }
 }

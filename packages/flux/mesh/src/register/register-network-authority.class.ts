@@ -1,4 +1,4 @@
-import type { TAddress, TClientId, TNetworkId_S } from '@flux/shared/types';
+import { splitAddressOrThrow, type TAddress, type TClientId, type TNetworkId_S } from '@flux/shared/types';
 import {
     type RedisConnection,
     getRedisConnection,
@@ -21,14 +21,34 @@ export class NetworkAuthorityManager {
 
     public unregister(
         networkId: TNetworkId_S,
-        socketId: TClientId,
+        networkAuthorityAddress: TAddress,
     ): void {
-        this.cache.delete(networkId);
+        const cached: Set<TAddress> | undefined = this.cache.get(networkId);
+        if (cached) {
+            cached.delete(networkAuthorityAddress);
+        }
+        const [_machineAddress, _processId, clientId] = splitAddressOrThrow(networkAuthorityAddress);
 
         this.redisConnection.networkAuthoritySet.unregister(
             networkId,
-            socketId,
+            clientId,
         );
+    }
+
+    public unregisterGlobal(
+        networkId: TNetworkId_S,
+        networkAuthorityAddress: TAddress,
+    ): void {
+        const cached: Set<TAddress> | undefined = this.cache.get(networkId);
+        if (cached) {
+            cached.delete(networkAuthorityAddress);
+        }
+
+        this.redisConnection.networkAuthoritySet
+            .unregisterGlobal(
+                networkId,
+                networkAuthorityAddress,
+            );
     }
 
     /**
@@ -52,18 +72,38 @@ export class NetworkAuthorityManager {
             }
         }
 
-        const address: TAddress = await this.redisConnection
+        const address: TAddress[] = await this.redisConnection
             .networkAuthoritySet
             .resolveNetworkAuthorityAddressOrThrow(
                 networkId,
             );
 
         if (cached) {
-            cached.add(address);
+            for (const a of address) {
+                cached.add(a);
+            }
         } else {
-            this.cache.set(networkId, new Set([address]));
+            this.cache.set(networkId, new Set(address));
         }
 
-        return address;
+        const cached_: Set<TAddress> = this.cache.get(networkId) as Set<TAddress>;
+        const randomItem = [...cached_][Math.floor(Math.random() * [...cached_].length)];
+
+        return randomItem;
+    }
+
+    /**
+     * Removes a client.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TAddress }      networkAuthorityAddress
+     * 
+     * @returns { void }
+     */
+    public removeUnresponsiveClient(
+        networkId: TNetworkId_S,
+        networkAuthorityAddress: TAddress,
+    ): void {
+        this.unregisterGlobal(networkId, networkAuthorityAddress);
     }
 }

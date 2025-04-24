@@ -3,7 +3,7 @@ export {
     UnknownClientError,
 } from './lib/errors/unknown-client.error';
 export {
-    GlobalRPCTimeoutError as RPCTimeoutError,
+    GlobalRPCTimeoutError,
 } from './lib/errors/global-rpc-timeout.error';
 
 export * from './lib/flux-shared';
@@ -50,6 +50,6 @@ export {
     type TMachineAddress,
     type TClientId,
     type TAddress,
-    splitAddress,
+    splitAddressOrThrow,
     splitProcessAddress,
 } from './lib/routing.type';

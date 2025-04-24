@@ -88,22 +88,4 @@ export class NetworkClientManager {
     //         );
     // }
 
-    // public async resolveNetworkAuthorityAddressOrThrow(
-    //     networkId: TNetworkId_S,
-    //     // retryWithDelay?: number,
-    // ): Promise<TAddress> {
-    //     const cached: TAddress | undefined = this.cache.get(networkId);
-
-    //     if (cached) {
-    //         return cached;
-    //     }
-
-    //     const address: TAddress = await this.redisConnection
-    //         .networkAuthoritySet
-    //         .resolveNetworkAuthorityAddressOrThrow(networkId);
-
-    //     this.cache.set(networkId, address);
-
-    //     return address;
-    // }
 }
