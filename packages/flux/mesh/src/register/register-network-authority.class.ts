@@ -1,21 +1,27 @@
 import type { TAddress, TClientId, TNetworkId_S } from '@flux/shared/types';
 import {
+    type RedisConnection,
     getRedisConnection,
-    RedisConnection,
 } from '../routing/redis/redis-connection.class';
 
 export class NetworkAuthorityManager {
     private readonly redisConnection: RedisConnection = getRedisConnection();
     private readonly cache: Map<TNetworkId_S, TAddress> = new Map(); // ! TODO MANY RESOLVERS
 
-    public register(networkId: TNetworkId_S, socketId: TClientId): void {
+    public register(
+        networkId: TNetworkId_S,
+        socketId: TClientId,
+    ): void {
         this.redisConnection.networkAuthoritySet.registerNetworkAuthority(
             networkId,
             socketId
         );
     }
 
-    public unregister(networkId: TNetworkId_S, socketId: TClientId): void {
+    public unregister(
+        networkId: TNetworkId_S,
+        socketId: TClientId,
+    ): void {
         this.cache.delete(networkId);
 
         this.redisConnection.networkAuthoritySet.unregister(
