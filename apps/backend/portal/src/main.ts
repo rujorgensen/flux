@@ -14,18 +14,18 @@ import { BunRedisClientType } from '@core/redis/bun';
 // ****************************************************************************
 // * Env
 // ****************************************************************************
-const AUTHORITY_JWT_SECRET: string | undefined = process.env['FLUX_AUTHORITY_JWT_SECRET'];
+const AUTHORITY_JWT_SECRET: string | undefined = process.env.FLUX_AUTHORITY_JWT_SECRET;
 if (!AUTHORITY_JWT_SECRET) {
   throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
 }
 
-const FLUX_MESH_REDIS_URL: string | undefined = process.env['FLUX_MESH_REDIS_URL'];
+const FLUX_MESH_REDIS_URL: string | undefined = process.env.FLUX_MESH_REDIS_URL;
 
 if (!FLUX_MESH_REDIS_URL) {
   throw new Error('Missing FLUX_MESH_REDIS_URL in .env');
 }
 
-const FLUX_PORTAL_REDIS_URL: string | undefined = process.env['FLUX_PORTAL_REDIS_URL'];
+const FLUX_PORTAL_REDIS_URL: string | undefined = process.env.FLUX_PORTAL_REDIS_URL;
 
 if (!FLUX_PORTAL_REDIS_URL) {
   throw new Error('Missing FLUX_PORTAL_REDIS_URL in .env');

@@ -28,8 +28,6 @@ export const authorizeNetworkClient = async (
             networkId
         );
 
-    console.log('found networkAuthorityAddress at', networkAuthorityAddress);
-
     const text = await request.text();
 
     const contentType = request.headers
