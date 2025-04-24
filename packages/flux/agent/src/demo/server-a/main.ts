@@ -16,7 +16,7 @@ const CODE_TO_ACCESS_NETWORK: any = 'code-to-access-network'; // Key to connect 
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
 const flux1: FluxAgent = new FluxAgent(
-    'network-id' as unknown as TNetworkId_S,
+    'rAnD0M-network-id' as unknown as TNetworkId_S,
     {
         // p2p encryption
         secretKey: '$Ap~yI,y^:Hsqca',

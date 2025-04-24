@@ -19,7 +19,7 @@
 
   onMount(async () => {
     // if (isBrowser()) {
-    const fluxAgent = new FluxAgent('network-id', {
+    const fluxAgent = new FluxAgent('rAnD0M-network-id', {
       //         domain?: string,
       //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
       //         retries?: number; // Number of times to retry a failed message

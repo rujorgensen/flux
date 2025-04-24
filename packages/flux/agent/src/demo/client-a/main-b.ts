@@ -9,7 +9,7 @@ import type { FluxNetworkChannel } from '../../lib/flux-network-channel.class';
 // Define observable component
 Alpine.data('fluxApplicationB', () => ({
     flux: new FluxAgent(
-        'network-id' as unknown as TNetworkId_S,
+        'rAnD0M-network-id' as unknown as TNetworkId_S,
         {
             //         domain?: string,
             //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.

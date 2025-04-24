@@ -11,6 +11,8 @@ import type { FluxNetworkChannel, FluxNetworkConnection } from '@flux/shared/con
 import { RedisStatusService } from './_services/redis-status.service';
 import { BunRedisClientType } from '@core/redis/bun';
 
+const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux
+
 // ****************************************************************************
 // * Env
 // ****************************************************************************
@@ -88,7 +90,7 @@ fluxMeshServer.onReady(async () => {
   const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
   const fluxAuthority = new FluxAuthority(
-    'network-id',
+    NETWORK_ID,
     {
       //         domain?: string,
       //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -141,7 +143,7 @@ fluxMeshServer.onReady(async () => {
   // ****************************************************************************
 
   const fluxAgent = new FluxAgent(
-    'network-id',
+    NETWORK_ID,
     {
       //         domain?: string,
       //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.

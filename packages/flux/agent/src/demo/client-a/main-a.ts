@@ -9,7 +9,7 @@ import { FluxRemoteClient } from '../../lib/flux-remote-client.class';
 // Define observable component
 Alpine.data('fluxApplicationA', () => ({
     flux: new FluxAgent(
-        'network-id' as TNetworkId_S,
+        'rAnD0M-network-id' as TNetworkId_S,
         {
             //         domain?: string,
             //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
