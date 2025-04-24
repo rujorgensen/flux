@@ -46,7 +46,7 @@ export const authenticateOrThrow = async (
     }
 
     // * 2. Encrypt the payload, if a password is defined
-    if (password) {
+    if (password !== undefined) {
         customPayload = JSON.stringify(await encrypt(customPayload, password));
     }
 

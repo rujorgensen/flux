@@ -27,6 +27,7 @@ export class NetworkAuthorityManager {
         if (cached) {
             cached.delete(networkAuthorityAddress);
         }
+
         const [_machineAddress, _processId, clientId] = splitAddressOrThrow(networkAuthorityAddress);
 
         this.redisConnection.networkAuthoritySet.unregister(
@@ -74,7 +75,7 @@ export class NetworkAuthorityManager {
 
         const address: TAddress[] = await this.redisConnection
             .networkAuthoritySet
-            .resolveNetworkAuthorityAddressOrThrow(
+            .resolveNetworkAuthorityAddressesOrThrow(
                 networkId,
             );
 
