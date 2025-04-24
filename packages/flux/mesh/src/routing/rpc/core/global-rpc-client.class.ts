@@ -12,8 +12,8 @@ import type {
     RPCRequest,
     RPCResponse,
 } from '@flux/shared/ws';
-import { OutgoingMessageRouter } from '../../outgoing-message-router.class';
-import { ProcessMessageRouter } from '../../process-message-router.class';
+import type { OutgoingMessageRouter } from '../../outgoing-message-router.class';
+import type { ProcessMessageRouter } from '../../process-message-router.class';
 import { readProcessAddress } from '../../addressing.utils';
 
 export class GlobalRPCClient<TMethods> {
@@ -28,7 +28,7 @@ export class GlobalRPCClient<TMethods> {
 
     constructor(
         private readonly _outgoingMessageRouter: OutgoingMessageRouter,
-        private readonly _processMessageRouter: ProcessMessageRouter
+        private readonly _processMessageRouter: ProcessMessageRouter,
     ) {
         this._processMessageRouter.subscribe((message: string): void => {
             const message_: RPCResponse = JSON.parse(
@@ -89,7 +89,9 @@ export class GlobalRPCClient<TMethods> {
      *
      * @returns { boolean }
      */
-    private handleResponseMessage(response: RPCResponse): void {
+    private handleResponseMessage(
+        response: RPCResponse,
+    ): void {
         const cb: [TCallback, TCallback] | undefined = this.pendingRequests.get(
             response.id
         );
@@ -179,7 +181,9 @@ export class GlobalRPCClient2<TMethods> {
      *
      * @returns { boolean }
      */
-    private handleResponseMessage(response: RPCResponse): void {
+    private handleResponseMessage(
+        response: RPCResponse,
+    ): void {
         const cb: [TCallback, TCallback] | undefined = this.pendingRequests.get(
             response.id
         );

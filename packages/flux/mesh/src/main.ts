@@ -92,7 +92,10 @@ const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
 
 const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
     // passToLocalClient:
-    (clientId: TClientId, message: string) => {
+    (
+        clientId: TClientId,
+        message: string,
+    ) => {
         const client: TConnectedClientSocket | undefined =
             clientMap.get(clientId);
 

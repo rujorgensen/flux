@@ -77,7 +77,7 @@ export class BunRedisPubSub {
 
   public async subscribe(
     channelId: string,
-    callback: MessageCallback
+    callback: MessageCallback,
   ): Promise<void> {
     try {
       const redisCallback = (message: string) => callback(message);

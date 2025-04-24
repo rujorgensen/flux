@@ -23,9 +23,9 @@ export const authorizeNetworkClient = async (
         });
     }
 
-    const networkAuthorityAddress: TAddress =
-        await networkAuthorityManager.resolveNetworkAuthorityAddressOrThrow(
-            networkId
+    const networkAuthorityAddress: TAddress = await networkAuthorityManager
+        .resolveNetworkAuthorityAddressOrThrow(
+            networkId,
         );
 
     const text = await request.text();
@@ -64,9 +64,9 @@ export const authorizeNetworkClient = async (
                 },
             }
         );
-    } else {
-        return new Response('Unauthorized', {
-            status: 500,
-        });
     }
+    
+    return new Response('Unauthorized', {
+        status: 500,
+    });
 };

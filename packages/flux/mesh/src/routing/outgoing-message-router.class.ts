@@ -23,17 +23,15 @@ export class OutgoingMessageRouter {
     constructor(
         private readonly passToLocalClient: (
             clientId: TClientId,
-            message: string
-        ) => void
+            message: string,
+        ) => void,
     ) {
         console.log(
             `Created MessageRouter on machine address: ${this.machineAddress}, process id: ${this.processId}`
         );
 
         setInterval(() => {
-            this.redisConnection.setConnected(
-                `${this.machineAddress}/${this.processId}`
-            );
+            this.redisConnection.setConnected(`${this.machineAddress}/${this.processId}`);
         }, 3_000);
     }
 
@@ -44,7 +42,10 @@ export class OutgoingMessageRouter {
      *
      * @returns
      */
-    public message(address: TAddress, message: string): void {
+    public message(
+        address: TAddress,
+        message: string,
+    ): void {
         const [machineAddress, processId, clientId] = splitAddress(address);
 
         // * Not on the same machine

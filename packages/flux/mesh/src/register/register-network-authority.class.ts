@@ -6,16 +6,17 @@ import {
 
 export class NetworkAuthorityManager {
     private readonly redisConnection: RedisConnection = getRedisConnection();
-    private readonly cache: Map<TNetworkId_S, TAddress> = new Map(); // ! TODO MANY RESOLVERS
+    private readonly cache: Map<TNetworkId_S, Set<TAddress>> = new Map();
 
     public register(
         networkId: TNetworkId_S,
         socketId: TClientId,
     ): void {
-        this.redisConnection.networkAuthoritySet.registerNetworkAuthority(
-            networkId,
-            socketId
-        );
+        this.redisConnection.networkAuthoritySet
+            .registerNetworkAuthority(
+                networkId,
+                socketId,
+            );
     }
 
     public unregister(
@@ -26,26 +27,42 @@ export class NetworkAuthorityManager {
 
         this.redisConnection.networkAuthoritySet.unregister(
             networkId,
-            socketId
+            socketId,
         );
     }
 
+    /**
+     * Resolves a random network authority address for a given network ID.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * 
+     * @returns { Promise<TAddress> }
+     */
     public async resolveNetworkAuthorityAddressOrThrow(
         networkId: TNetworkId_S
         // retryWithDelay?: number,
     ): Promise<TAddress> {
-        const cached: TAddress | undefined = this.cache.get(networkId);
+        const cached: Set<TAddress> | undefined = this.cache.get(networkId);
 
-        if (cached) {
-            return cached;
+        if (cached && (cached.size > 0)) {
+            const randomItem = [...cached][Math.floor(Math.random() * [...cached].length)];
+
+            if (randomItem) {
+                return randomItem;
+            }
         }
 
-        const address: TAddress =
-            await this.redisConnection.networkAuthoritySet.resolveNetworkAuthorityAddressOrThrow(
-                networkId
+        const address: TAddress = await this.redisConnection
+            .networkAuthoritySet
+            .resolveNetworkAuthorityAddressOrThrow(
+                networkId,
             );
 
-        this.cache.set(networkId, address);
+        if (cached) {
+            cached.add(address);
+        } else {
+            this.cache.set(networkId, new Set([address]));
+        }
 
         return address;
     }
