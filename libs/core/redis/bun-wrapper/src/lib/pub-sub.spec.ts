@@ -33,7 +33,7 @@ describe('BunRedisPubSub', () => {
     pubsub = new BunRedisPubSub({
       url,
       socket: {
-        reconnectStrategy: () => 1_000,
+        reconnectStrategy: () => 100,
       },
     });
 
