@@ -1,3 +1,11 @@
+// * Errors
+export {
+    UnknownClientError,
+} from './lib/errors/unknown-client.error';
+export {
+    GlobalRPCTimeoutError as RPCTimeoutError,
+} from './lib/errors/global-rpc-timeout.error';
+
 export * from './lib/flux-shared';
 
 export {
