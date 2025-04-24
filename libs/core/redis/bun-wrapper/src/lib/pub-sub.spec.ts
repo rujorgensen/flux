@@ -59,6 +59,8 @@ describe('BunRedisPubSub', () => {
 
     await pubsub.publish('test-channel', 'hello world')
 
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     expect(messages).toContain('hello world')
   })
 
