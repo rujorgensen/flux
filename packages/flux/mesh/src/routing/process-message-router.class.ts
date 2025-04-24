@@ -57,7 +57,7 @@ export class ProcessMessageRouter {
             return;
         }
 
-        // This must be to local process
+        // * This must be to local process
         console.log('🛣️ Routing message to local');
         for (const localCallback of this.localCallbacks) {
             localCallback(message);

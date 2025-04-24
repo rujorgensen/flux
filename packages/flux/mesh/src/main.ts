@@ -247,7 +247,10 @@ export class FluxMeshServer {
                     //       ws.close(1001, 'Client not validated'); // ! Check correct error code
                 },
 
-                async message(ws: TConnectedClientSocket, message_: string | Buffer) {
+                async message(
+                    ws: TConnectedClientSocket,
+                    message_: string | Buffer,
+                ) {
                     if (typeof message_ !== 'string') {
                         throw new Error('Message is not a string');
                     }
@@ -301,11 +304,6 @@ export class FluxMeshServer {
                                 await networkAuthorityManager.resolveNetworkAuthorityAddressOrThrow(
                                     ws.data.networkId
                                 );
-
-                            console.log(
-                                'found networkAuthorityAddress at',
-                                networkAuthorityAddress
-                            );
 
                             const authorize: boolean = await globalRPCClient.call(
                                 networkAuthorityAddress,

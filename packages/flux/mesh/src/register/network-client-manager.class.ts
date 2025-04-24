@@ -13,12 +13,13 @@ import type {
 
 export class NetworkClientManager {
     private readonly redisConnection: RedisConnection = getRedisConnection();
-    private readonly cache: Map<`${TNetworkId_S}.${TClientOwnUId}`, TAddress> =
-        new Map(); // ! cleanup
+    private readonly cache: Map<`${TNetworkId_S}.${TClientOwnUId}`, TAddress> = new Map(); // ! cleanup
 
     public readonly networkClientHash: NetworkClientHash;
 
-    constructor() {
+    constructor(
+
+    ) {
         this.networkClientHash = this.redisConnection.networkClientHash;
     }
 

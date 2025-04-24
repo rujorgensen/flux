@@ -3,12 +3,12 @@ import {
     BunRedisPubSub,
 } from '@core/redis/bun';
 import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
-import { RedisSortedSet } from './hash/network-authority.redis.sorted-set';
+import { NetworkAuthorityRedisSortedSet } from './hash/network-authority.redis.sorted-set';
 import { NetworkClientHash } from './hash/network-client.redis.hash';
 
 let redisConnection: RedisConnection | undefined;
 
-const FLUX_MESH_REDIS_URL: string | undefined = process.env['FLUX_MESH_REDIS_URL'];
+const FLUX_MESH_REDIS_URL: string | undefined = process.env.FLUX_MESH_REDIS_URL;
 
 if (!FLUX_MESH_REDIS_URL) {
     throw new Error('Missing FLUX_MESH_REDIS_URL in .env');
@@ -42,7 +42,7 @@ export class RedisConnection {
     private readonly cache: BunRedisClientType;
     private readonly pubSub: BunRedisPubSub;
 
-    public readonly networkAuthoritySet: RedisSortedSet;
+    public readonly networkAuthoritySet: NetworkAuthorityRedisSortedSet;
     public readonly networkClientHash: NetworkClientHash;
 
     constructor(
@@ -91,7 +91,7 @@ export class RedisConnection {
                 console.warn('🚫 Redis connection closed');
             });
 
-        this.networkAuthoritySet = new RedisSortedSet(this.cache.getClient());
+        this.networkAuthoritySet = new NetworkAuthorityRedisSortedSet(this.cache.getClient());
         this.networkClientHash = new NetworkClientHash(this.cache.getClient());
 
         // *** Create Redis subscriber

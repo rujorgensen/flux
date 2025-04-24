@@ -8,7 +8,7 @@ import type {
 } from '@flux/shared/types';
 import { readMachineAddress, readProcessId } from '../../addressing.utils';
 
-export class RedisSortedSet {
+export class NetworkAuthorityRedisSortedSet {
     private readonly processId: TProcessId = readProcessId();
     private readonly machineAddress: TMachineAddress = readMachineAddress();
 

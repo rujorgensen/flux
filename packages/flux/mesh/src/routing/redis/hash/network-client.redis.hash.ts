@@ -1,3 +1,6 @@
+/**
+ * Loopkup a client address by UID
+ */
 import type { RedisClient } from 'bun';
 import type {
     TAddress,
@@ -16,15 +19,13 @@ export class NetworkClientHash {
         clientId: TAddress,
         uid: TClientOwnUId
     ): Promise<void> {
-        const key: string = `networks/${networkId}/client-uid`;
-        //  await this.client
-        //      .set([address], '1', { EX: 5 });
+        const key: string = `networks/${networkId}/client-uids`;
 
         await this.client.hmset(key, [
             uid,
-            clientId
+            clientId,
         ]);
-
+        
         await this.client.expire(key, 500);
     }
 
@@ -38,10 +39,9 @@ export class NetworkClientHash {
         networkId: TNetworkId_S,
         clientOwnUId: TClientOwnUId
     ): Promise<TAddress> {
-        const key: string = `networks/${networkId}/client-uid`;
+        const key: string = `networks/${networkId}/client-uids`;
 
         const data = await this.client.hmget(key, [clientOwnUId]);
-
 
         if (!data[0]) {
             console.error('data', data, 'key', key);
@@ -52,44 +52,6 @@ export class NetworkClientHash {
 
         return data[0] as TAddress;
     }
-
-    // public async unregister(
-    //     networkId: TNetworkId_S,
-    //     _socketId: TClientId,
-    // ): Promise<void> {
-    //     console.log('TODO unregistering', networkId, _socketId);
-
-    //     const key: string = `networks/${networkId}/client-uid`;
-    //     //  await this.client
-    //     //      .set([address], '1', { EX: 5 });
-    //     // console.log('setting', new Date().toISOString());
-
-    //     // console.log("unregisrterdd", key);
-
-    //      await this.client.del(key,);
-
-    // }
-
-    /**
-     *
-     * @param networkId
-     *
-     * @returns { Promise<TAddress> }
-     */
-    // public async resolveNetworkAuthorityAddressOrThrow(
-    //     networkId: TNetworkId_S,
-    // ): Promise<TAddress> {
-    //     const key: string = `networks/${networkId}/clients`;
-
-    //     const data = await this.client.hGetAll(key);
-
-    //     if (!data.machineAddress || !data.processId || !data.socketId) {
-    //         console.error('data', data, 'key', key);
-    //         throw new Error(`Network authority not found for networkId: "${networkId}"`);
-    //     }
-
-    //     return `${data.machineAddress}/${data.processId}/${data.socketId}` as TAddress;
-    // }
 }
 
 
