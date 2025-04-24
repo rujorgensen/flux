@@ -1,7 +1,7 @@
 <!-- ConnectedAuthorities.svelte -->
 <script lang="ts">
   import { writable } from 'svelte/store';
-  import { apiFetch } from '../../utils/fetch.util';
+  //import { apiFetch } from '../../utils/fetch.util';
 
   // import { onMount } from "svelte";
 
@@ -10,17 +10,17 @@
   // dataStore.set();
   let val = 0;
   // Fetch initial data
-  apiFetch('api/ping')
-    .then((res) => res.text())
-    .then((initialData) => {
-      console.log('[initialData]', initialData);
-      val = 23;
-      dataStore.set(val);
-    })
-    .catch((err) => {
-      console.error('Error fetching initial data:', err);
-      // dataStore.set({ error: 'Failed to fetch initial data' });
-    });
+  // apiFetch('api/ping')
+  //   .then((res) => res.text())
+  //   .then((initialData) => {
+  //     console.log('[initialData]', initialData);
+  //     val = 23;
+  //     dataStore.set(val);
+  //   })
+  //   .catch((err) => {
+  //     console.error('Error fetching initial data:', err);
+  //     // dataStore.set({ error: 'Failed to fetch initial data' });
+  //   });
 
   setInterval(() => {
     dataStore.set(val++);

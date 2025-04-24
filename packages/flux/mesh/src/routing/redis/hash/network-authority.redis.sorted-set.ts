@@ -79,7 +79,7 @@ export class NetworkAuthorityRedisSortedSet {
             }
         }
 
-        return await this.client.send('SREM', [key, address]);
+        return await this.client.srem(key, address);
     }
 
     /**
@@ -109,7 +109,7 @@ export class NetworkAuthorityRedisSortedSet {
             } catch { }
         }
 
-        return await this.client.send('SREM', [key, address]);
+        return await this.client.srem(key, address);
     }
 
     /**
@@ -119,22 +119,22 @@ export class NetworkAuthorityRedisSortedSet {
      *
      * @returns { Promise<TAddress[]> }
      */
-    public async resolveNetworkAuthorityAddressOrThrow(
+    public async resolveNetworkAuthorityAddressesOrThrow(
         networkId: TNetworkId_S,
     ): Promise<TAddress[]> {
         const key: string = `networks/${networkId}/authorities`;
-        const list = await this.client.zrandmember(
+        // const list: string | null = await this.client.srandmember(
+        //     key,
+        // );
+
+        const list: string[] = await this.client.smembers(
             key,
-        ) as unknown as string[];
+        );
 
-        const data = list;
-
-        if (!data) {
-            console.error('data', data, 'key', key);
-
+        if (list.length === 0) {
             throw new Error(`Network authority not found for networkId: '${networkId}'`);
         }
 
-        return data as TAddress[];
+        return list as TAddress[];
     }
 }
