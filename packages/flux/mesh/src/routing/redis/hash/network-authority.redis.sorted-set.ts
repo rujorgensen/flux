@@ -1,10 +1,11 @@
 import type { RedisClient } from 'bun';
-import type {
-    TAddress,
-    TClientId,
-    TMachineAddress,
-    TNetworkId_S,
-    TProcessId,
+import {
+    type TAddress,
+    type TClientId,
+    type TMachineAddress,
+    type TNetworkId_S,
+    type TProcessId,
+    splitAddressOrThrow,
 } from '@flux/shared/types';
 import { readMachineAddress, readProcessId } from '../../addressing.utils';
 
@@ -12,86 +13,128 @@ export class NetworkAuthorityRedisSortedSet {
     private readonly processId: TProcessId = readProcessId();
     private readonly machineAddress: TMachineAddress = readMachineAddress();
 
+    private readonly refreshNetworkExpiry: Map<TNetworkId_S, Set<TClientId>> = new Map();
+
     constructor(
         private readonly client: RedisClient,
-    ) { }
+    ) {
+        setInterval(async () => {
+            for (const networkId of this.refreshNetworkExpiry.keys()) {
+                const key: string = `networks/${networkId}/authorities`;
+                await this.client.expire(key, 500);
+            }
+        }, 35_000);
+    }
 
+    /**
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TClientId }     socketId
+     * 
+     * @returns { Promise<void> }
+     */
     public async registerNetworkAuthority(
         networkId: TNetworkId_S,
-        socketId: TClientId
+        socketId: TClientId,
     ): Promise<void> {
         const key: string = `networks/${networkId}/authorities`;
-        //  await this.client
-        //      .set([address], '1', { EX: 5 });
-        // console.log('setting', new Date().toISOString());
-
         const address: TAddress = `${this.machineAddress}/${this.processId}/${socketId}`;
 
-        await this.client.send("ZADD", [key, `${Date.now()}`, address]);
+        await this.client.send('SADD', [key, address]);
 
         await this.client.expire(key, 500);
+
+        // Update the refresh interval cache
+        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
+        if (refreshNetworkExpiry) {
+            refreshNetworkExpiry.add(socketId);
+        } else {
+            this.refreshNetworkExpiry.set(networkId, new Set([socketId]));
+        }
     }
 
     /**
      * Unregisters a network authority from the sorted set.
      * 
-     * @param networkId 
-     * @param _socketId 
-     * @returns 
+     * @param { TNetworkId_S }  networkId
+     * @param { TClientId }     socketId
+     * 
+     * @returns { Promise<number> } 
      */
     public async unregister(
         networkId: TNetworkId_S,
-        _socketId: TClientId
+        socketId: TClientId,
     ): Promise<number> {
-        console.log('unregistering', networkId, _socketId);
-
         const key: string = `networks/${networkId}/authorities`;
 
-        const address: TAddress = `${this.machineAddress}/${this.processId}/${_socketId}`;
+        const address: TAddress = `${this.machineAddress}/${this.processId}/${socketId}`;
 
-        return await this.client.send("ZREM", [key, address]);
+        // Update the refresh interval cache
+        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
+        if (refreshNetworkExpiry) {
+            refreshNetworkExpiry.delete(socketId);
+
+            if (refreshNetworkExpiry.size === 0) {
+                this.refreshNetworkExpiry.delete(networkId);
+            }
+        }
+
+        return await this.client.send('SREM', [key, address]);
+    }
+
+    /**
+     * Unregisters a network authority from the sorted set, even if it wasnt added by this worker.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TClientId }     socketId
+     * 
+     * @returns { Promise<number> } 
+     */
+    public async unregisterGlobal(
+        networkId: TNetworkId_S,
+        address: TAddress,
+    ): Promise<number> {
+        const key: string = `networks/${networkId}/authorities`;
+
+        // Update the refresh interval cache
+        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
+        if (refreshNetworkExpiry) {
+            try {
+                const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address);
+                refreshNetworkExpiry.delete(clientId);
+
+                if (refreshNetworkExpiry.size === 0) {
+                    this.refreshNetworkExpiry.delete(networkId);
+                }
+            } catch { }
+        }
+
+        return await this.client.send('SREM', [key, address]);
     }
 
     /**
      * Reads the network authority address from the sorted set.
      * 
-     * @param networkId
+     * @param { TNetworkId_S }  networkId
      *
-     * @returns { Promise<TAddress> }
+     * @returns { Promise<TAddress[]> }
      */
     public async resolveNetworkAuthorityAddressOrThrow(
-        networkId: TNetworkId_S
-    ): Promise<TAddress> {
+        networkId: TNetworkId_S,
+    ): Promise<TAddress[]> {
         const key: string = `networks/${networkId}/authorities`;
-
         const list = await this.client.zrandmember(
             key,
-            //         {
-            //         BY: 'SCORE',
-            //         // LIMIT: {
-            //         //     count: 5,
-            //         //     offset: 0,
-            //         // }
-            //     },
         ) as unknown as string[];
 
-        // console.log('list', list, key);
-        const data = list[0];
+        const data = list;
 
         if (!data) {
             console.error('data', data, 'key', key);
 
-            throw new Error(`Network authority not found for networkId: "${networkId}"`);
+            throw new Error(`Network authority not found for networkId: '${networkId}'`);
         }
 
-        return data as TAddress;
-        // return `${data.machineAddress}/${data.processId}/${data.socketId}` as TAddress;
-
-        // map((list: string[]) =>
-        //     list
-        //         .map((zMember: string): T => JSON.parse(zMember)),
-        // ),
-
-        // ;
+        return data as TAddress[];
     }
 }

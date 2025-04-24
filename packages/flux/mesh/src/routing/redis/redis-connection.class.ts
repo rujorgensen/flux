@@ -146,7 +146,7 @@ export class RedisConnection {
             'updatedAt', new Date().toISOString(),
         ]);
 
-        await this.cache.getClient().expire(address, 5);
+        await this.cache.getClient().expire(`machines/processes/${address}`, 5);
     }
 
     public subscribe(

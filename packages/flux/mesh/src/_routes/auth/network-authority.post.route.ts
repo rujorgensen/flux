@@ -37,7 +37,7 @@ export const authorizeNetworkAuthority = async (request: Bun.BunRequest) => {
             headers: {
                 'Content-Type': 'text/plain',
                 'Access-Control-Allow-Origin': '*',
-                'Set-Cookie': `sessionId=abc123; HttpOnly; Max-Age=3600`,
+                'Set-Cookie': 'sessionId=abc123; HttpOnly; Max-Age=3600',
             },
         }
     );

@@ -4,10 +4,10 @@
 import type { RPCRequest, RPCResponse, TCallback } from './rpc.interfaces';
 import type { TRPCResponseCallbackFunction } from '../flux-shared';
 import {
+    GlobalRPCTimeoutError,
     RPC_REQUEST,
     type TProcessAddress,
 } from '@flux/shared/types';
-
 
 export abstract class RPCClient<TMethods> {
 
@@ -82,7 +82,7 @@ export abstract class RPCClient<TMethods> {
             setTimeout(() => {
                 if (this.pendingRequests.get(id)) {
                     this.pendingRequests.delete(id);
-                    reject(new Error(`Timeout waiting for RPC method response '${method}'`));
+                    reject(new GlobalRPCTimeoutError(method as string));
                 }
             }, 5_000);
         });

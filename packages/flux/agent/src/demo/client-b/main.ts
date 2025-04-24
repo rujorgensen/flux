@@ -17,7 +17,7 @@ import { TNetworkId_S } from '@flux/shared/types';
 
 
 const flux: FluxAgent = new FluxAgent(
-    'network-id' as unknown as TNetworkId_S,
+    'rAnD0M-network-id' as unknown as TNetworkId_S,
     {
         //         domain?: string,
         //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.

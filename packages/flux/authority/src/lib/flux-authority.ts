@@ -12,12 +12,11 @@ import type {
 import { nanoid } from 'nanoid';
 import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
-import { retry } from './utils/promises.utils';
 import type {
     TChannnelAuthCallback,
 } from './channel/channel.type';
 import type { TAuthorizeCallback, TNetworkId_S } from '@flux/shared/types';
-import { StateManager } from '@flux/shared/utils';
+import { retry, StateManager } from '@flux/shared/utils';
 import {
     createWSConnection,
     type FluxNetworkConnection,

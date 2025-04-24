@@ -74,7 +74,7 @@ export class ProcessMessageRouter {
     public subscribe(
         onMessage: TCallbackFunction,
     ): void {
-        console.log('subscreibing process', this.processAddress);
+        console.log('🗒️ Subscribing process', this.processAddress);
 
         this.localCallbacks.add(onMessage);
 

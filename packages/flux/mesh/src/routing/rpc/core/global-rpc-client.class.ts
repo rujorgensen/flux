@@ -3,17 +3,18 @@
  */
 
 import {
-    RPC_REQUEST,
     type TAddress,
     type TProcessAddress,
+    GlobalRPCTimeoutError,
+    RPC_REQUEST,
 } from '@flux/shared/types';
 import type {
     TCallback,
     RPCRequest,
     RPCResponse,
 } from '@flux/shared/ws';
-import { OutgoingMessageRouter } from '../../outgoing-message-router.class';
-import { ProcessMessageRouter } from '../../process-message-router.class';
+import type { OutgoingMessageRouter } from '../../outgoing-message-router.class';
+import type { ProcessMessageRouter } from '../../process-message-router.class';
 import { readProcessAddress } from '../../addressing.utils';
 
 export class GlobalRPCClient<TMethods> {
@@ -28,7 +29,7 @@ export class GlobalRPCClient<TMethods> {
 
     constructor(
         private readonly _outgoingMessageRouter: OutgoingMessageRouter,
-        private readonly _processMessageRouter: ProcessMessageRouter
+        private readonly _processMessageRouter: ProcessMessageRouter,
     ) {
         this._processMessageRouter.subscribe((message: string): void => {
             const message_: RPCResponse = JSON.parse(
@@ -61,22 +62,25 @@ export class GlobalRPCClient<TMethods> {
             params,
         };
 
-        this._outgoingMessageRouter.message(
-            rpcServerClientAddress,
-            `${RPC_REQUEST}:${JSON.stringify(rpcRequest)}`
-        );
-
         return new Promise((resolve, reject) => {
             this.pendingRequests.set(id, [resolve, reject]);
+
+            try {
+                this._outgoingMessageRouter.message(
+                    rpcServerClientAddress,
+                    `${RPC_REQUEST}:${JSON.stringify(rpcRequest)}`
+                );
+            } catch (error) {
+                if (this.pendingRequests.get(id)) {
+                    this.pendingRequests.delete(id);
+                    reject(error instanceof Error ? error : new Error(error as string));
+                }
+            }
 
             setTimeout(() => {
                 if (this.pendingRequests.get(id)) {
                     this.pendingRequests.delete(id);
-                    reject(
-                        new Error(
-                            `Timeout waiting for RPC method response '${method}'`
-                        )
-                    );
+                    reject(new GlobalRPCTimeoutError(method as string));
                 }
             }, 5_000);
         });
@@ -89,7 +93,9 @@ export class GlobalRPCClient<TMethods> {
      *
      * @returns { boolean }
      */
-    private handleResponseMessage(response: RPCResponse): void {
+    private handleResponseMessage(
+        response: RPCResponse,
+    ): void {
         const cb: [TCallback, TCallback] | undefined = this.pendingRequests.get(
             response.id
         );
@@ -141,7 +147,10 @@ export class GlobalRPCClient2<TMethods> {
      *
      * @returns { Promise<any> }
      */
-    public call(method: TMethods, ...params: any): Promise<any> {
+    public call(
+        method: TMethods,
+        ...params: any
+    ): Promise<any> {
         const id: number = this.requestId++;
 
         const rpcRequest: RPCRequest<TMethods> = {
@@ -151,22 +160,26 @@ export class GlobalRPCClient2<TMethods> {
             params,
         };
 
-        this._outgoingMessageRouter.message(
-            this._rpcServerClientAddress,
-            `${RPC_REQUEST}:${JSON.stringify(rpcRequest)}`
-        );
-
         return new Promise((resolve, reject) => {
+
             this.pendingRequests.set(id, [resolve, reject]);
+
+            try {
+                this._outgoingMessageRouter.message(
+                    this._rpcServerClientAddress,
+                    `${RPC_REQUEST}:${JSON.stringify(rpcRequest)}`
+                );
+            } catch (error) {
+                if (this.pendingRequests.get(id)) {
+                    this.pendingRequests.delete(id);
+                    reject(error instanceof Error ? error : new Error(error as string));
+                }
+            }
 
             setTimeout(() => {
                 if (this.pendingRequests.get(id)) {
                     this.pendingRequests.delete(id);
-                    reject(
-                        new Error(
-                            `Timeout waiting for RPC method response '${method}'`
-                        )
-                    );
+                    reject(new GlobalRPCTimeoutError(method as string));
                 }
             }, 5_000);
         });
@@ -179,7 +192,9 @@ export class GlobalRPCClient2<TMethods> {
      *
      * @returns { boolean }
      */
-    private handleResponseMessage(response: RPCResponse): void {
+    private handleResponseMessage(
+        response: RPCResponse,
+    ): void {
         const cb: [TCallback, TCallback] | undefined = this.pendingRequests.get(
             response.id
         );

@@ -7,7 +7,7 @@ import {
     getRedisConnection,
 } from './redis/redis-connection.class';
 
-export class IncommingClientMessageRouter {
+export class IncommingMessageRouter {
     private readonly redisConnection: RedisConnection = getRedisConnection();
 
     constructor(

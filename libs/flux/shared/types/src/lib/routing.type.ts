@@ -8,9 +8,13 @@ export type TProcessAddress = `${TMachineAddress}/${TProcessId}`;
 export type TAddress = `${TProcessAddress}/${TClientId}`;
 
 // The direct address
-export const splitAddress = (
+export const splitAddressOrThrow = (
     address: TAddress,
 ): [TMachineAddress, TProcessId, TClientId] => {
+    if ((address.match(/\//g) || []).length !== 2) {
+        throw new Error('Invalid address format');
+    }
+
     const [machine, process, client] = address.split('/');
 
     if (machine === undefined) {
@@ -22,7 +26,7 @@ export const splitAddress = (
     }
 
     if (client === undefined) {
-        throw new Error('Client ID is not defined');
+        throw new Error('Client ID is undefined');
     }
 
     return [

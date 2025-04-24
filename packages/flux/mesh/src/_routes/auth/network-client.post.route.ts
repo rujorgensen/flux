@@ -1,12 +1,13 @@
-import * as Bun from 'bun';
+import type { BunRequest } from 'bun';
 import * as nodeURL from 'node:url';
-import type { TAddress, TNetworkId_S } from '@flux/shared/types';
+import { GlobalRPCTimeoutError, UnknownClientError, type TAddress, type TNetworkId_S } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
 import type { NetworkAuthorityManager } from '../../register/register-network-authority.class';
+import { retry } from '@flux/shared/utils';
 
 export const authorizeNetworkClient = async (
-    request: Bun.BunRequest,
+    request: BunRequest,
     networkAuthorityManager: NetworkAuthorityManager,
     globalRPCClient: GlobalRPCClient<'authorize'>
 ) => {
@@ -23,10 +24,6 @@ export const authorizeNetworkClient = async (
         });
     }
 
-    const networkAuthorityAddress: TAddress =
-        await networkAuthorityManager.resolveNetworkAuthorityAddressOrThrow(
-            networkId
-        );
 
     const text = await request.text();
 
@@ -34,39 +31,81 @@ export const authorizeNetworkClient = async (
         .get('x-flux-content-type')
         ?.toLowerCase();
 
-    const authorizedJWT: string = await globalRPCClient.call(
-        networkAuthorityAddress,
-        'authorize',
-        `${contentType === 'application/json' ? 'json' : 'text'}:${text}`
-    );
+    try {
+        let networkAuthorityAddress: TAddress;
 
-    if (authorizedJWT) {
-        const cookies = request.cookies;
+        const authorizedJWT: string = await retry<string>(
+            async () => {
 
-        // Set a cookie with various options
-        cookies.set('claim', authorizedJWT, {
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-            httpOnly: true,
-            secure: true,
-            path: '/',
-        });
+                networkAuthorityAddress = await networkAuthorityManager
+                    .resolveNetworkAuthorityAddressOrThrow(
+                        networkId,
+                    );
+                console.log('Trying networkAuthorityAddress', networkAuthorityAddress);
 
-        return new Response(
-            generateToken({
-                networkId,
-                claim: authorizedJWT,
-            }),
+                return globalRPCClient.call(
+                    networkAuthorityAddress,
+                    'authorize',
+                    `${contentType === 'application/json' ? 'json' : 'text'}:${text}`
+                );
+            },
+            (error: unknown) => {
+                if (
+                    (error instanceof UnknownClientError) ||
+                    (error instanceof GlobalRPCTimeoutError)
+                ) {
+                    networkAuthorityManager.removeUnresponsiveClient(
+                        networkId,
+                        networkAuthorityAddress,
+                    );
+
+                    return true;
+                }
+
+                return false;
+            },
             {
-                headers: {
-                    'Content-Type': 'text/plain',
-                    'Access-Control-Allow-Origin': '*',
-                    //   'Set-Cookie': `sessionId=abc123; HttpOnly; Max-Age=3600; signed=true; Path=/;`,
-                },
-            }
+                retries: 10,
+                delayMs: 50,
+            },
         );
-    } else {
-        return new Response('Unauthorized', {
-            status: 500,
-        });
+
+        // const authorizedJWT: string = await globalRPCClient.call(
+        //     networkAuthorityAddress,
+        //     'authorize',
+        //     `${contentType === 'application/json' ? 'json' : 'text'}:${text}`
+        // );
+
+        if (authorizedJWT) {
+            const cookies = request.cookies;
+
+            // Set a cookie with various options
+            cookies.set('claim', authorizedJWT, {
+                maxAge: 60 * 60 * 24 * 7, // 1 week
+                httpOnly: true,
+                secure: true,
+                path: '/',
+            });
+
+            return new Response(
+                generateToken({
+                    networkId,
+                    claim: authorizedJWT,
+                }),
+                {
+                    headers: {
+                        'Content-Type': 'text/plain',
+                        'Access-Control-Allow-Origin': '*',
+                        //   'Set-Cookie': `sessionId=abc123; HttpOnly; Max-Age=3600; signed=true; Path=/;`,
+                    },
+                }
+            );
+        }
+    } catch (error) {
+        console.error('Error authorizing:', error);
     }
+
+    return new Response('Unauthorized', {
+        status: 500,
+    });
 };
