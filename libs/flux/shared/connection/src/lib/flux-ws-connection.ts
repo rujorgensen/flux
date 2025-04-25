@@ -24,12 +24,13 @@ import {
 } from '@flux/shared/ws';
 import { FluxNetworkConnection } from './flux-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
-import type { StateManager, TRTCState } from '@flux/shared/utils';
+import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
 
 interface IOptions {
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
     retries?: number; // Number of times to retry a failed message
+    port?: number;
 }
 
 export const createWSConnection = <T, M>(
@@ -70,15 +71,14 @@ export class FluxWebSocketConnection {
     ) {
         this.options = {
             retries: 10_000,
+            port: 8080,
             ...this.options,
         };
 
         // 1. Connect to 
         this.socket = new FluxWebSocketClientConnection(
             {
-                // this.options.url ? token = ${ token }`,
-
-                url: `ws://localhost:8080?token=${this.token}`,
+                url: `ws://localhost:${this.options.port}?token=${this.token}`,
                 autoReconnect: true,
                 reconnectDelay: 2_000,
                 retries: this.options.retries,

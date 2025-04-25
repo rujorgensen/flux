@@ -59,7 +59,7 @@ export class OutgoingMessageRouter {
 
         // * On the same machine, but not on the same process
         if (processId !== this.processId) {
-            console.log(`🛣️  Routing message to from process ID '${this.processId}' to process ID: '${processId}'`);
+            console.log(`🛣️  Routing message from process ID '${this.processId}' to process ID: '${processId}'`);
 
             // ! Route through Redis for now, but change to direct process connection
             this.redisConnection.publish(address, message);

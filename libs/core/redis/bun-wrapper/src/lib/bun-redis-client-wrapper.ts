@@ -42,6 +42,14 @@ export class BunRedisClient extends EventEmitter<{
     );
   }
 
+  /**
+   * Returns the raw Redis client.
+   * 
+   * ! Please note that this may be re-instantiated on reconnections,
+   * ! so make sure to request this continuously, if used.
+   * 
+   * @returns { RedisClient}
+   */
   public getClient(
 
   ): RedisClient {
@@ -57,23 +65,26 @@ export class BunRedisClient extends EventEmitter<{
   public async connect(
 
   ) {
-    if (this.connected || this.reconnecting) return;
+    if (this.connected || this.reconnecting) {
+      return;
+    }
 
     try {
       await this.client.connect();
+
       this.connected = true;
       this.emit('ready', void 0);
       this.reconnectAttempts = 0;
 
-      this.client.onclose = err => {
-        console.error('Redis subscriber disconnected:', err);
+      this.client.onclose = (error) => {
+        console.error('⬇️ Redis client disconnected:', error);
         this.connected = false;
         this.retryReconnect();
         this.emit('end', void 0);
       };
-    } catch (err) {
-      console.error('Initial Redis connection failed:', err);
-      this.emit('error', err instanceof Error ? err : new Error('Unknown error'));
+    } catch (error) {
+      console.error('Initial Redis connection failed:', error);
+      this.emit('error', error instanceof Error ? error : new Error('Unknown error'));
       this.retryReconnect();
     }
   }
@@ -94,13 +105,19 @@ export class BunRedisClient extends EventEmitter<{
       this.reconnectAttempts++;
 
       try {
-        this.client = new RedisClient(this.options.url);
+        this.client = new RedisClient(
+          this.options.url,
+          {
+            // We're providing our own implementation
+            autoReconnect: false,
+          },
+        );
         await this.connect();
         this.connected = true;
         this.emit('ready', void 0);
         break;
-      } catch (err) {
-        this.emit('error', err instanceof Error ? err : new Error('Reconnection attempt failed: Unknown error'));
+      } catch (error) {
+        this.emit('error', error instanceof Error ? error : new Error('Reconnection attempt failed: Unknown error'));
       }
     }
 

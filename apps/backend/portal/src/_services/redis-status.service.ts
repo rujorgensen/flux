@@ -1,7 +1,10 @@
+import type {
+    BunRedisClientType,
+} from '@core/redis/bun';
 import {
     parseInfoSection,
     parseKeyspaceSection,
-} from "./redis-status/parsers/parsers.fn";
+} from './redis-status/parsers/parsers.fn';
 import type {
     RedisClient
 } from 'bun';
@@ -12,10 +15,10 @@ export class RedisStatusService {
     private readonly healthCheckIntervalMs: number = 10_000; // 10 seconds
 
     private lastAlerts: string[] = [];
-    private interval: NodeJS.Timer | undefined;
+    private interval: ReturnType<typeof setInterval> | undefined;
 
     constructor(
-        private readonly _redisClient: RedisClient,
+        private readonly _redisClient: BunRedisClientType,
     ) { }
 
     /**
@@ -87,11 +90,17 @@ export class RedisStatusService {
     public async getRedisStatus(
         threshold: number = 0.9,
     ) {
+        // Make sure to get this every time, as it may have been re-instantiated
+        const redisClient: RedisClient = this._redisClient.getClient();
+
+        if (!redisClient.connected) {
+            throw new Error('Redis client is not connected');
+        }
 
         const [infoRaw, keyspaceRaw, latencyRaw] = await Promise.all([
-            this._redisClient.send('INFO', []), // All sections in one
-            this._redisClient.send('INFO', ['keyspace']), // Still separate parsing logic
-            this._redisClient.send('LATENCY', ['LATEST']),
+            redisClient.send('INFO', []), // All sections in one
+            redisClient.send('INFO', ['keyspace']), // Still separate parsing logic
+            redisClient.send('LATENCY', ['LATEST']),
         ]);
 
         const info = parseInfoSection(infoRaw);

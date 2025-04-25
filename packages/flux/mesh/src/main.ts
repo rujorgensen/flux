@@ -423,8 +423,7 @@ export class FluxMeshServer {
                 // A socket is closed
                 close(
                     ws: TConnectedClientSocket,
-                    code: number
-                    // _message: string,
+                    code: number,
                 ) {
                     console.log('🛑 Socket disconnected', code, ws.data.id); // 1001
 
@@ -437,7 +436,6 @@ export class FluxMeshServer {
                         );
                     } else {
                         // Unsubscribe from topics
-
                         for (const topic of ws.data.channelTopics ?? []) {
                             ws.unsubscribe(
                                 `networks/${ws.data.networkId}/channels/${topic}`
