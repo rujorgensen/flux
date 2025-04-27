@@ -23,7 +23,7 @@ if (!process.env['FLUX_DOMAIN']) {
 import {
     type TNetworkId_S,
     type TAddress,
-    type TChannelTopic,
+    type TChannelName,
     type TClientId,
     type TMachineAddress,
     type TProcessAddress,
@@ -37,7 +37,7 @@ import {
     SET_OWN_UID,
     SUBSCRIBED_NETWORK_CHANNEL_TOPIC,
     NETWORK_CHANNEL_PUBLISH,
-    validateTopic,
+    validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
 
@@ -86,7 +86,7 @@ export type TConnectedClientSocket = Bun.ServerWebSocket<{
     rtcClient?: WebRTCClient;
     claim?: string;
     rpcClient: RPCClient<'channel'>;
-    channelTopics: Set<TChannelTopic>;
+    channelTopics: Set<TChannelName>;
 }>;
 
 const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
@@ -276,7 +276,7 @@ export class FluxMeshServer {
                             );
                             const data: string = message_.slice(secondColon + 1);
 
-                            if (validateTopic(channelTopic)) {
+                            if (validateChannelNameOrThrow(channelTopic)) {
                                 if (ws.data.channelTopics.has(channelTopic)) {
                                     // Don't publish to self
                                     ws.publish(
@@ -289,16 +289,16 @@ export class FluxMeshServer {
                             break;
                         }
                         case SUBSCRIBE_NETWORK_CHANNEL_TOPIC: {
-                            const channelTopic: TChannelTopic = message_.substring(
+                            const channelName: TChannelName = message_.substring(
                                 message_.indexOf(':') + 1
-                            ) as TChannelTopic;
+                            ) as TChannelName;
 
-                            if (!validateTopic(channelTopic)) {
+                            if (!validateChannelNameOrThrow(channelName)) {
                                 ws.send(`${ERROR}:Not authorized`);
                                 return;
                             }
 
-                            if (ws.data.channelTopics.has(channelTopic)) {
+                            if (ws.data.channelTopics.has(channelName)) {
                                 ws.send(
                                     `${ERROR}:Agent is already subscribed to topic`
                                 );
@@ -315,17 +315,17 @@ export class FluxMeshServer {
                                 const authorize: boolean = await globalRPCClient.call(
                                     networkAuthorityAddress,
                                     'authorizeNetworkChannel',
-                                    channelTopic,
+                                    channelName,
                                     ws.data.claim
                                 );
 
                                 if (authorize) {
-                                    ws.subscribe(`networks/${ws.data.networkId}/channels/${channelTopic}`);
-                                    ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_TOPIC}:${channelTopic}`);
-                                    ws.data.channelTopics.add(channelTopic);
-                                    console.log(`🎉 Client was authorized on channel topic '${channelTopic}'`);
+                                    ws.subscribe(`networks/${ws.data.networkId}/channels/${channelName}`);
+                                    ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_TOPIC}:${channelName}`);
+                                    ws.data.channelTopics.add(channelName);
+                                    console.log(`🎉 Client was authorized on channel topic '${channelName}'`);
                                 } else {
-                                    console.error(`Client was not authorized to connect to channel topic '${channelTopic}'`);
+                                    console.error(`Client was not authorized to connect to channel topic '${channelName}'`);
                                     ws.send(`${ERROR}:Not authorized`);
                                 }
                             } catch (error) {

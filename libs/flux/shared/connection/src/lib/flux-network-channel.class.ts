@@ -3,7 +3,7 @@
  */
 
 import type {
-    TChannelTopic,
+    TChannelName,
 } from '@flux/shared/types';
 import type {
     TMessageCallback,
@@ -16,7 +16,7 @@ export class FluxNetworkChannel {
 
     constructor(
         private readonly _fluxWebSocketConnection: FluxWebSocketConnection,
-        private readonly _channelName: TChannelTopic,
+        private readonly _channelName: TChannelName,
     ) { }
 
     /**

@@ -1,4 +1,4 @@
-export type TChannelTopic = string & { __brand: 'channel-name'; };
+export type TChannelName = string & { __brand: 'channel-name'; };
 
 /**
  * Validates a channel name and throws an error if it is invalid.
@@ -7,9 +7,9 @@ export type TChannelTopic = string & { __brand: 'channel-name'; };
  * 
  * @returns { boolean }
  */
-export const validateTopic = (
+export const validateChannelNameOrThrow = (
     channelName: string,
-): channelName is TChannelTopic => {
+): channelName is TChannelName => {
     if (channelName.includes(':')) {
         throw new Error('Channel name cannot contain :');
     }

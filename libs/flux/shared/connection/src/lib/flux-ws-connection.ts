@@ -3,7 +3,7 @@
  */
 
 import {
-    type TChannelTopic,
+    type TChannelName,
     type TClientOwnUId,
     type TAuthorizeCallback,
     CONNECT_TO_CLIENT,
@@ -13,7 +13,7 @@ import {
     SET_OWN_UID,
     SUBSCRIBED_NETWORK_CHANNEL_TOPIC,
     NETWORK_CHANNEL_PUBLISH,
-    validateTopic,
+    validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
 import {
@@ -57,7 +57,7 @@ export class FluxWebSocketConnection {
     private readonly socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TMessageCallback> = new Set();
 
-    private readonly topicCallbacks: Map<TChannelTopic, Set<TMessageCallback>> = new Map();
+    private readonly topicCallbacks: Map<TChannelName, Set<TMessageCallback>> = new Map();
 
     private webSocketClient: FluxWebSocketClientConnection | undefined;
     private first: boolean = true;
@@ -131,9 +131,9 @@ export class FluxWebSocketConnection {
 
                     switch (packageType) {
                         case SUBSCRIBED_NETWORK_CHANNEL_TOPIC: {
-                            const channelTopic: TChannelTopic = message_.substring(message_.indexOf(':') + 1) as TChannelTopic;
+                            const channelName: TChannelName = message_.substring(message_.indexOf(':') + 1) as TChannelName;
 
-                            console.log(`Connected to topic: "${channelTopic}"`);
+                            console.log(`Connected to topic: "${channelName}"`);
 
                             break;
                         }
@@ -143,12 +143,12 @@ export class FluxWebSocketConnection {
                             const firstColon = message_.indexOf(':');
                             const secondColon = message_.indexOf(':', firstColon + 1);
 
-                            const channelTopic: TChannelTopic = message_.slice(firstColon + 1, secondColon) as TChannelTopic;
+                            const channelName: TChannelName = message_.slice(firstColon + 1, secondColon) as TChannelName;
 
-                            if (validateTopic(channelTopic)) {
+                            if (validateChannelNameOrThrow(channelName)) {
                                 const data: string = message_.slice(secondColon + 1);
 
-                                const topicCallbacks: Set<TMessageCallback> | undefined = this.topicCallbacks.get(channelTopic);
+                                const topicCallbacks: Set<TMessageCallback> | undefined = this.topicCallbacks.get(channelName);
                                 if (topicCallbacks) {
                                     for (const cb of topicCallbacks) {
                                         cb(data);
@@ -269,19 +269,19 @@ export class FluxWebSocketConnection {
 
     /**
      * 
-     * @param { TChannelTopic } channelTopic
+     * @param { TChannelName } channelName
      * 
      * @returns { Promise<FluxNetworkChannel> } 
      */
     public async joinChannel(
-        channelTopic: TChannelTopic,
+        channelName: TChannelName,
     ): Promise<FluxNetworkChannel> {
 
         if (this.webSocketClient) {
-            this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_TOPIC}:${channelTopic}`);
+            this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_TOPIC}:${channelName}`);
 
             // TODO wait for acknowledgment
-            return Promise.resolve(new FluxNetworkChannel(this, channelTopic));
+            return Promise.resolve(new FluxNetworkChannel(this, channelName));
         }
 
         return Promise.reject(new Error('Not connected'));
@@ -289,40 +289,40 @@ export class FluxWebSocketConnection {
 
     /**
      * 
-     * @param { TChannelTopic } channelTopic
+     * @param { TChannelName } channelName
      * @param { string } message
      * 
      * @returns { void } 
      */
     public publish(
-        channelTopic: TChannelTopic,
+        channelName: TChannelName,
         message: string,
     ): void {
 
         if (this.webSocketClient) {
-            this.webSocketClient.send(`${NETWORK_CHANNEL_PUBLISH}:${channelTopic}:${message}`);
+            this.webSocketClient.send(`${NETWORK_CHANNEL_PUBLISH}:${channelName}:${message}`);
         }
     }
 
     /**
      * Adds a callback to the list of callbacks for a given channel topic.
      * 
-     * @param { TChannelTopic } channelTopic
+     * @param { TChannelName } channelName
      * @param { string } message
      * 
      * @returns { void } 
      */
     public onPublish(
-        channelTopic: TChannelTopic,
+        channelName: TChannelName,
         fn: TMessageCallback,
     ): void {
-        const existingSubscriber: Set<TMessageCallback> | undefined = this.topicCallbacks.get(channelTopic);
+        const existingSubscriber: Set<TMessageCallback> | undefined = this.topicCallbacks.get(channelName);
         if (existingSubscriber) {
             existingSubscriber.add(fn);
         } else {
             const newSubscriber: Set<TMessageCallback> = new Set();
             newSubscriber.add(fn);
-            this.topicCallbacks.set(channelTopic, newSubscriber);
+            this.topicCallbacks.set(channelName, newSubscriber);
         }
     }
 
