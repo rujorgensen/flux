@@ -95,7 +95,6 @@ const processId: TProcessId = readProcessId();
 const machineAddress: TMachineAddress = readMachineAddress();
 const processAddress: TProcessAddress = readProcessAddress();
 
-
 const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
     // passToLocalClient:
     (

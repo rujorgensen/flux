@@ -1,6 +1,3 @@
-// Check env
-// const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;
-
 globalThis.count ??= 0;
 globalThis.count++;
 
@@ -18,9 +15,9 @@ import type {
 import type { TAuthorizeCallback, TNetworkId_S } from '@flux/shared/types';
 import { retry, StateManager } from '@flux/shared/utils';
 import {
-    createWSConnection,
     type FluxAgentNetworkConnection,
     type FluxWebSocketConnection,
+    createWSConnection,
 } from '@flux/shared/connection';
 
 export class FluxAuthority {
@@ -99,26 +96,7 @@ export class FluxAuthority {
             );
     }
 
-
-    /**
-     *
-     * @param fn
-     *
-     * @returns { void }
-     */
-    public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
-
-    /**
-     *
-     * @param fn
-     *
-     * @returns { void }
-     */
-    public onNetworkState = this.stateManager.attachNetworkStateListener;
-
-    public onMessage(
-        cb: TMessageCallback,
-    ): void {
-        this.fluxClientData.onMessage(cb);
-    }
+    public readonly onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
+    public readonly onNetworkState = this.stateManager.attachNetworkStateListener;
+    public readonly onMessage = this.fluxClientData.onMessage;
 }

@@ -32,7 +32,7 @@ await flux1
             if (
                 ((auth as any).code !== CODE_TO_ACCESS_NETWORK)
             ) {
-                return Promise.reject('Not allowed');
+                return Promise.reject(new Error('Not allowed'));
             }
 
             // console.log('✅ Network access authorized');
@@ -54,22 +54,3 @@ await flux1
             return Promise.resolve(true);
         },
     );
-
-/*
- 
-export const verifyTokenOrThrow = (
-token: string,
-// callback?: VerifyCallback<JwtPayload | string>,
-): object => {
-try {
-    const decoded = jwt.verify(token, secret,);
-
-    return decoded as any;
-} catch (err) {
-    console.error('Invalid or expired token', (<any>err).message);
-
-    throw new Error('Invalid or expired token');
-}
-};
-
-*/

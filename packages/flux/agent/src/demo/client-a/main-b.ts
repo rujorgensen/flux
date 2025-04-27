@@ -2,7 +2,7 @@ import Alpine from 'alpinejs';
 import { FluxAgent } from '../../lib/flux-agent';
 import type { TNetworkId_S } from '@flux/shared/types';
 import type { FluxAgentNetworkConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-agent-network.class';
-import type { FluxNetworkChannel } from '../../lib/flux-network-channel.class';
+import type { FluxNetworkChannel } from '@flux/shared/connection';
 import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
 
 // Define observable component
