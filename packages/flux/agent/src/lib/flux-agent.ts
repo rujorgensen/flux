@@ -13,14 +13,12 @@ import type {
 import type {
     TMessageCallback,
 } from '@flux/shared/ws';
-import type { FluxAgentNetworkConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-agent-network.class';
+import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
 import {
-    type TNetworkConnectionState,
     type FluxWebSocketConnection,
     createWSConnection,
 } from '../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 import { nanoid } from 'nanoid';
-import type { TRTCState } from './connector/low-level-com/web-rtc/ice-connection';
 import { authenticateOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import type { TChannnelAuthCallback } from './channel/channel.type';

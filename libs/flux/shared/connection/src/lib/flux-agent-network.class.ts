@@ -1,5 +1,7 @@
+/**
+ * This is the class exposed to the user. It represents an agent connection to the network
+ */
 import type {
-    TChannelName,
     TClientOwnUId,
 } from '@flux/shared/types';
 import type {
@@ -47,9 +49,13 @@ export class FluxAgentNetworkConnection {
     ): Promise<FluxNetworkChannel> {
         console.log(`Joining channel "${channelName}"`);
 
+        if (!validateChannelNameOrThrow(channelName)) {
+            throw new Error('This will not actually be thrown');
+        }
+
         return this._fluxWebSocketConnection
             .joinChannel(
-                channelName as TChannelName,
+                channelName,
             );
     }
 

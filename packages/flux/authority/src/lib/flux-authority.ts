@@ -1,6 +1,3 @@
-// Check env
-// const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;
-
 globalThis.count ??= 0;
 globalThis.count++;
 
@@ -18,9 +15,9 @@ import type {
 import type { TAuthorizeCallback, TNetworkId_S } from '@flux/shared/types';
 import { retry, StateManager } from '@flux/shared/utils';
 import {
-    createWSConnection,
     type FluxAgentNetworkConnection,
     type FluxWebSocketConnection,
+    createWSConnection,
 } from '@flux/shared/connection';
 
 export class FluxAuthority {
@@ -32,23 +29,6 @@ export class FluxAuthority {
 
     private readonly stateManager: StateManager = new StateManager();
 
-    // Has the client preivously connected to the network or registered as an authority?
-    // ! TODO  MOVE 
-    private readonly previousNetworkActions: {
-        networkConnection: {
-            identification: unknown,
-            clientUUIDToken?: string,
-        } | null;
-        registerAuthority: {
-            authorityKey: string,
-            cb: (...args: any) => Promise<string>;
-            authorizeNetworkChannel: TChannnelAuthCallback<any>,
-        } | null;
-    } = {
-            networkConnection: null,
-            registerAuthority: null,
-        };
-
     constructor(
         private readonly networkId: string,
         private readonly options?: {
@@ -59,7 +39,8 @@ export class FluxAuthority {
     ) { }
 
     /**
-     *
+     * Registers an authority on the network.
+     * 
      * @param { string }                    authorityKey
      * @param { TAuthorizeCallback }        authorizeNetworkClient
      * @param { TChannnelAuthCallback }     authorizeNetworkChannel
@@ -76,7 +57,6 @@ export class FluxAuthority {
             cb: authorizeNetworkClient,
             authorizeNetworkChannel,
         };
-
         this.stateManager.emitNetworkState('authorizing');
 
         const ticket: string = await retry<any>(
@@ -116,26 +96,7 @@ export class FluxAuthority {
             );
     }
 
-
-    /**
-     *
-     * @param fn
-     *
-     * @returns { void }
-     */
-    public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
-
-    /**
-     *
-     * @param fn
-     *
-     * @returns { void }
-     */
-    public onNetworkState = this.stateManager.attachNetworkStateListener;
-
-    public onMessage(
-        cb: TMessageCallback,
-    ): void {
-        this.fluxClientData.onMessage(cb);
-    }
+    public readonly onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
+    public readonly onNetworkState = this.stateManager.attachNetworkStateListener;
+    public readonly onMessage = this.fluxClientData.onMessage;
 }

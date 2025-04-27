@@ -9,7 +9,7 @@ export class UnknownClientError extends Error {
         clientId: TClientId,
         address: TProcessAddress,
     ) {
-        super(`Client not found, with ID '${clientId}'. Terminated at address: '${address}'`);
+        super(`Client with ID '${clientId}' not found. Terminated at address: '${address}'.`);
         this.name = 'UnknownClientError';
     }
 }

@@ -8,3 +8,6 @@ export {
 export {
     FluxNetworkChannel,
 } from './lib/flux-network-channel.class';
+export {
+    FluxAuthorityNetworkConnection,
+} from './lib/flux-authority-network.class';
