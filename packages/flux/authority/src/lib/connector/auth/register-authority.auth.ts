@@ -1,7 +1,5 @@
-import {
-    type TNetworkId_S,
-    // TNetworkAuthorityAuthenticationTicket,
-    // checkNAATTicketShape,
+import type {
+    TNetworkId_S,
 } from '@flux/shared/types';
 
 export class RetryableError extends Error { }
@@ -9,7 +7,6 @@ export class ConnectionError extends RetryableError { }
 
 /**
  * Authenticaktes with the server and returns a ticket for connecting the websocket.
- * 
  * 
  * @param { string }    domain The domain of the authority server.
  * @param { unknown }   customPayload The payload to send to the authority server.

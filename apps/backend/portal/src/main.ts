@@ -134,9 +134,9 @@ const app = new Elysia()
   //      if (rateLimiter.check(ip)) return error(420, 'Enhance your calm')
   //  })
 
-  .onBeforeHandle(() => {
-    console.log('1')
-  })
+  // .onBeforeHandle(() => {
+  //   console.log('onBeforeHandle')
+  // })
 
   .use(cors({
     origin: 'localhost:4321',

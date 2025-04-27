@@ -211,6 +211,7 @@ export class FluxMeshServer {
 
                 return new Response('Upgrade failed', { status: 500 });
             },
+
             websocket: {
                 perMessageDeflate: true,
                 maxPayloadLength: 1024 * 1024, // 1 MB
@@ -269,10 +270,10 @@ export class FluxMeshServer {
                             const firstColon = message_.indexOf(':');
                             const secondColon = message_.indexOf(':', firstColon + 1);
 
-                            const channelTopic: TChannelTopic = message_.slice(
+                            const channelTopic: string = message_.slice(
                                 firstColon + 1,
                                 secondColon
-                            ) as TChannelTopic;
+                            );
                             const data: string = message_.slice(secondColon + 1);
 
                             if (validateTopic(channelTopic)) {
@@ -333,7 +334,7 @@ export class FluxMeshServer {
                                     break;
                                 }
 
-                                console.error('Unknown error');
+                                console.error('Unknown error', error);
                                 ws.send(`${ERROR}:Unknown error`);
                             }
 
