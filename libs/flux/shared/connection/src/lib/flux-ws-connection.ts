@@ -26,6 +26,7 @@ import { FluxAgentNetworkConnection } from './flux-agent-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
 import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
+import { FluxAuthorityNetworkConnection } from './flux-authority-network.class';
 
 interface IOptions {
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -215,12 +216,12 @@ export class FluxWebSocketConnection {
      * @param { TAuthorizeCallback }        cb
      * @param { TChannnelAuthCallback<M> }  authorizeNetworkChannel
      * 
-     * @returns { Promise<FluxAgentNetworkConnection> }
+     * @returns { Promise<FluxAuthorityNetworkConnection> }
      */
     public async registerAuthority<T, M>(
         cb: TAuthorizeCallback<T>,
         authorizeNetworkChannel: TChannnelAuthCallback<M>,
-    ): Promise<FluxAgentNetworkConnection> {
+    ): Promise<FluxAuthorityNetworkConnection> {
         const webSocketClient: FluxWebSocketClientConnection = await this.connect();
 
         // * 1 Register function for handling authorization
@@ -238,9 +239,8 @@ export class FluxWebSocketConnection {
             .registerMethod('authorizeNetworkChannel', authorizeNetworkChannel);
 
         // TODO: WAIT FOR CONNECTION TO BE ACCEPTED
-        return Promise.resolve(new FluxAgentNetworkConnection(
-            this, webSocketClient,
-            this.stateManager.emitWebRTCState.bind(this.stateManager),
+        return Promise.resolve(new FluxAuthorityNetworkConnection(
+            this,
         ));
     }
 
