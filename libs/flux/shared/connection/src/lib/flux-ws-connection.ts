@@ -22,7 +22,7 @@ import {
     type TMessageCallback,
     FluxWebSocketClientConnection,
 } from '@flux/shared/ws';
-import { FluxNetworkConnection } from './flux-network.class';
+import { FluxAgentNetworkConnection } from './flux-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
 import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
@@ -215,12 +215,12 @@ export class FluxWebSocketConnection {
      * @param { TAuthorizeCallback }        cb
      * @param { TChannnelAuthCallback<M> }  authorizeNetworkChannel
      * 
-     * @returns { Promise<FluxNetworkConnection> }
+     * @returns { Promise<FluxAgentNetworkConnection> }
      */
     public async registerAuthority<T, M>(
         cb: TAuthorizeCallback<T>,
         authorizeNetworkChannel: TChannnelAuthCallback<M>,
-    ): Promise<FluxNetworkConnection> {
+    ): Promise<FluxAgentNetworkConnection> {
         const webSocketClient: FluxWebSocketClientConnection = await this.connect();
 
         // * 1 Register function for handling authorization
@@ -238,7 +238,7 @@ export class FluxWebSocketConnection {
             .registerMethod('authorizeNetworkChannel', authorizeNetworkChannel);
 
         // TODO: WAIT FOR CONNECTION TO BE ACCEPTED
-        return Promise.resolve(new FluxNetworkConnection(
+        return Promise.resolve(new FluxAgentNetworkConnection(
             this, webSocketClient,
             this.stateManager.emitWebRTCState.bind(this.stateManager),
         ));
@@ -249,11 +249,11 @@ export class FluxWebSocketConnection {
      * 
      * @param { string }    [clientName]
      * 
-     * @returns { Promise<FluxNetworkConnection> }
+     * @returns { Promise<FluxAgentNetworkConnection> }
      */
     public async connectToNetwork(
         clientUUIDToken?: TClientOwnUId,
-    ): Promise<FluxNetworkConnection> {
+    ): Promise<FluxAgentNetworkConnection> {
         const webSocketClient: FluxWebSocketClientConnection = await this.connect();
 
         // Attmpt to set the client UUID token
@@ -261,7 +261,7 @@ export class FluxWebSocketConnection {
             await this.setClientUUIDToken(clientUUIDToken);
         }
 
-        return Promise.resolve(new FluxNetworkConnection(
+        return Promise.resolve(new FluxAgentNetworkConnection(
             this, webSocketClient,
             this.stateManager.emitWebRTCState.bind(this.stateManager),
         ));

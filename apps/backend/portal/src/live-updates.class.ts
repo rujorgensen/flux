@@ -2,9 +2,9 @@ import { FluxMeshServer } from '@flux/mesh';
 import { FluxAuthority } from '@persistica/flux-authority';
 import * as jjwt from 'jsonwebtoken';
 import { FluxAgent } from '@persistica/flux-agent';
-import type { FluxNetworkChannel, FluxNetworkConnection } from '@flux/shared/connection';
+import type { FluxNetworkChannel, FluxAgentNetworkConnection } from '@flux/shared/connection';
 import type { RedisStatusService } from './_services/redis-status.service';
-import { TNetworkId_S } from '@flux/shared/types';
+import type { TNetworkId_S } from '@flux/shared/types';
 
 const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´
 
@@ -94,7 +94,7 @@ export class LiveUpdates {
                 },
             );
 
-            const fluxNetworkConnection: FluxNetworkConnection = await fluxAgent
+            const fluxNetworkConnection: FluxAgentNetworkConnection = await fluxAgent
                 .connect(
                     CODE_TO_ACCESS_NETWORK,
                     'backend-agent',

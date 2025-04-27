@@ -15,7 +15,7 @@ import type {
 } from '@flux/shared/ws';
 import type { FluxNetworkChannel } from './flux-network-channel.class';
 
-export class FluxNetworkConnection {
+export class FluxAgentNetworkConnection {
 
     private readonly iceConnection: ICEConnection | undefined;
 
