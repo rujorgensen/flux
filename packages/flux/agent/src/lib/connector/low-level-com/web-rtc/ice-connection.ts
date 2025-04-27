@@ -21,14 +21,10 @@ const peerConnectionConfig = {
 };
 
 export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 'acceptAnswer'> {
-    //  public readonly state$$: TRTCState = 'idle';
     private readonly peerConnection = new RTCPeerConnection(peerConnectionConfig);
     private dataChannel: any; //  = this.peerConnection.createDataChannel('flux-channel');
 
-    private offerSDP: any;
-
     constructor(
-        //  private readonly _fluxWebSocketClientConnection: FluxWebSocketClientConnection,
         private readonly _fluxWebSocketClientConnection: FluxWebSocketClientConnection,
         private readonly _stateChange: (state: TRTCState) => void,
     ) {
