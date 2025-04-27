@@ -62,15 +62,15 @@
         "build"
       ],
       "options": {
-        "buildTarget": "flux-mesh:build",
+        "buildTarget": "persistica-flux-mesh:build",
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "flux-mesh:build:development"
+          "buildTarget": "persistica-flux-mesh:build:development"
         },
         "production": {
-          "buildTarget": "flux-mesh:build:production"
+          "buildTarget": "persistica-flux-mesh:build:production"
         }
       }
     },

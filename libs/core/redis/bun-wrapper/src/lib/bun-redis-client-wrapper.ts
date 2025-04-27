@@ -1,7 +1,7 @@
 import {
   RedisClient
 } from 'bun';
-import { EventEmitter } from '@flux/shared/utils';
+import { EventEmitter } from './eventemitter';
 
 type MessageHandler = (channel: string, message: string) => void;
 
