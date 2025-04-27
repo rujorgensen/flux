@@ -53,11 +53,6 @@ export class FluxAgent {
         identification: unknown,
         clientUUIDToken?: string,
     ): Promise<FluxAgentNetworkConnection> {
-        this.previousNetworkActions.networkConnection = {
-            identification,
-            clientUUIDToken: clientUUIDToken,
-        };
-
         this.stateManager.emitNetworkState('authorizing');
 
         const ticket = await authenticateOrThrow(
