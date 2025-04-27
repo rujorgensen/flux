@@ -47,9 +47,13 @@ export class FluxAgentNetworkConnection {
     ): Promise<FluxNetworkChannel> {
         console.log(`Joining channel "${channelName}"`);
 
+        if (!validateChannelNameOrThrow(channelName)) {
+            throw new Error('This will not actually be thrown');
+        }
+
         return this._fluxWebSocketConnection
             .joinChannel(
-                channelName as TChannelName,
+                channelName,
             );
     }
 

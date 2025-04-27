@@ -161,19 +161,13 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 
 // Defines possible RPC methods (should possibly be free)
 export class FluxWebSocketClientConnection extends WebSocketClient<
+    // ⬇️ For authorities only ⬇️
     'authorize' |
     'authorizeNetworkChannel' |
+
+    // ⬇️ For agents only ⬇️
     'createOffer' |
     'acceptOffer' |
-    'acceptAnswer'|
+    'acceptAnswer' |
     'answerAcceptedByInitiator'
-> {
-    constructor(
-        private readonly options_: WebSocketClientOptions,
-        //  private readonly authorize: TCallback,
-    ) {
-        super(options_);
-
-        //  this.registerMethod('authorize', authorize);
-    }
-}
+> { }

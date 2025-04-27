@@ -143,7 +143,7 @@ export class FluxWebSocketConnection {
                             const firstColon = message_.indexOf(':');
                             const secondColon = message_.indexOf(':', firstColon + 1);
 
-                            const channelName: TChannelName = message_.slice(firstColon + 1, secondColon) as TChannelName;
+                            const channelName: string = message_.slice(firstColon + 1, secondColon);
 
                             if (validateChannelNameOrThrow(channelName)) {
                                 const data: string = message_.slice(secondColon + 1);

@@ -38,18 +38,23 @@ export class RedisConnection {
         (data: string, channel: string) => unknown
     >;
 
-    // Needs two clients, one for publishing and one for subscribing
-    private readonly cache: BunRedisClientType;
+    // Dedicated client for handling hash
+    private readonly cacheClient: BunRedisClientType;
+
+    // Dedicated clients for handling pub/sub
     private readonly pubSub: BunRedisPubSub;
 
     public readonly networkAuthoritySet: NetworkAuthorityRedisSortedSet;
     public readonly networkClientHash: NetworkClientHash;
 
+    // Wrapper to not expose BunRedisClientType functions
+    public readonly hash;
+
     constructor(
         private readonly url: string,
     ) {
         this.subscribers = new Map();
-        this.cache = new BunRedisClientType({
+        this.cacheClient = new BunRedisClientType({
             url: this.url,
             socket: {
                 reconnectStrategy: (
@@ -69,12 +74,12 @@ export class RedisConnection {
         });
 
         try {
-            this.cache.connect();
+            this.cacheClient.connect();
         } catch {
             console.log('caught');
         }
 
-        this.cache
+        this.cacheClient
             .on('error', (error) => {
                 console.error('❌ Redis client error:', error.message);
 
@@ -91,8 +96,8 @@ export class RedisConnection {
                 console.warn('🚫 Redis connection closed');
             });
 
-        this.networkAuthoritySet = new NetworkAuthorityRedisSortedSet(this.cache.getClient());
-        this.networkClientHash = new NetworkClientHash(this.cache.getClient());
+        this.networkAuthoritySet = new NetworkAuthorityRedisSortedSet(this.cacheClient.getClient());
+        this.networkClientHash = new NetworkClientHash(this.cacheClient.getClient());
 
         // *** Create Redis subscriber
         this.pubSub = new BunRedisPubSub(
@@ -115,6 +120,19 @@ export class RedisConnection {
         } catch {
             console.log('caught');
         }
+
+        // Dedicated client
+        const hashClient = this.cacheClient.getClient();
+
+        this.hash = {
+            sadd: hashClient.sadd.bind(hashClient),
+            hmset: hashClient.hmset.bind(hashClient),
+            smembers: hashClient.smembers.bind(hashClient),
+            srem: hashClient.srem.bind(hashClient),
+            del: hashClient.del.bind(hashClient),
+            hincrby: hashClient.hincrby.bind(hashClient),
+            expire: hashClient.expire.bind(hashClient),
+        };
     }
 
     /**
@@ -141,12 +159,12 @@ export class RedisConnection {
         //  await this.client
         //      .set([address], '1', { EX: 5 });
         // console.log("setting", new Date().toISOString());
-        await this.cache.getClient().hmset(`machines/processes/${address}`, [
+        await this.hash.hmset(`machines/processes/${address}`, [
             'status', 'connected',
             'updatedAt', new Date().toISOString(),
         ]);
 
-        await this.cache.getClient().expire(`machines/processes/${address}`, 5);
+        await this.hash.expire(`machines/processes/${address}`, 5);
     }
 
     public subscribe(

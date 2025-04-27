@@ -190,7 +190,6 @@ const app = new Elysia()
     }
   )
 
-
   // return new Response(null, {
   //   status: 303,
   //   headers: {

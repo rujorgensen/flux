@@ -32,23 +32,6 @@ export class FluxAuthority {
 
     private readonly stateManager: StateManager = new StateManager();
 
-    // Has the client preivously connected to the network or registered as an authority?
-    // ! TODO  MOVE 
-    private readonly previousNetworkActions: {
-        networkConnection: {
-            identification: unknown,
-            clientUUIDToken?: string,
-        } | null;
-        registerAuthority: {
-            authorityKey: string,
-            cb: (...args: any) => Promise<string>;
-            authorizeNetworkChannel: TChannnelAuthCallback<any>,
-        } | null;
-    } = {
-            networkConnection: null,
-            registerAuthority: null,
-        };
-
     constructor(
         private readonly networkId: string,
         private readonly options?: {
@@ -59,7 +42,8 @@ export class FluxAuthority {
     ) { }
 
     /**
-     *
+     * Registers an authority on the network.
+     * 
      * @param { string }                    authorityKey
      * @param { TAuthorizeCallback }        authorizeNetworkClient
      * @param { TChannnelAuthCallback }     authorizeNetworkChannel
@@ -76,7 +60,6 @@ export class FluxAuthority {
             cb: authorizeNetworkClient,
             authorizeNetworkChannel,
         };
-
         this.stateManager.emitNetworkState('authorizing');
 
         const ticket: string = await retry<any>(

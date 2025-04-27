@@ -2,7 +2,10 @@ import { FluxMeshServer } from '@flux/mesh';
 import { FluxAuthority } from '@persistica/flux-authority';
 import * as jjwt from 'jsonwebtoken';
 import { FluxAgent } from '@persistica/flux-agent';
-import type { FluxNetworkChannel, FluxAgentNetworkConnection } from '@flux/shared/connection';
+import type {
+    FluxNetworkChannel,
+    FluxAgentNetworkConnection,
+} from '@flux/shared/connection';
 import type { RedisStatusService } from './_services/redis-status.service';
 import type { TNetworkId_S } from '@flux/shared/types';
 
