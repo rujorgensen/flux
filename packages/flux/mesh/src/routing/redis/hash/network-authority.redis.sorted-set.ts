@@ -40,7 +40,7 @@ export class NetworkAuthorityRedisSortedSet {
         const key: string = `networks/${networkId}/authorities`;
         const address: TAddress = `${this.machineAddress}/${this.processId}/${socketId}`;
 
-        await this.client.send('SADD', [key, address]);
+        await this.client.sadd(key, address);
 
         await this.client.expire(key, 500);
 
