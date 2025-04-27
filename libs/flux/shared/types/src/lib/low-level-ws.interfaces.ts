@@ -1,5 +1,5 @@
 /**
- * The lowest level if WebSocket interactions.
+ * The lowest level of WebSocket interactions.
  */
 export const RPC_REQUEST: string = 'rpc-request';
 export const RPC_RESPONSE: string = 'rpc-response';
