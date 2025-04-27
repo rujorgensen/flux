@@ -4,7 +4,7 @@
   import { FluxAgent } from '../../../../../../packages/flux/agent/src';
   import type {
     FluxNetworkChannel,
-    FluxNetworkConnection,
+    FluxAgentNetworkConnection,
   } from '../../../../../../libs/flux/shared/connection/src';
   import { onMount } from 'svelte';
 
@@ -25,7 +25,7 @@
       //         retries?: number; // Number of times to retry a failed message
     });
 
-    const fluxNetworkConnection: FluxNetworkConnection =
+    const fluxNetworkConnection: FluxAgentNetworkConnection =
       await fluxAgent.connect(CODE_TO_ACCESS_NETWORK, 'portal-agent');
 
     const fluxNetworkChannel: FluxNetworkChannel =

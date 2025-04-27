@@ -3,11 +3,11 @@
  * Reusable Flux connection.
  */
 import {
-    type FluxNetworkConnection,
+    type FluxAgentNetworkConnection,
     FluxAgent,
 } from '@persistica/flux-agent';
 
-let fluxNetworkConnection: FluxNetworkConnection | undefined;
+let fluxNetworkConnection: FluxAgentNetworkConnection | undefined;
 
 const fluxAgent: FluxAgent = new FluxAgent();
 

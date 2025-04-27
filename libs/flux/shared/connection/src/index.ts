@@ -1,5 +1,5 @@
 export {
-    FluxNetworkConnection,
+    FluxAgentNetworkConnection,
 } from './lib/flux-network.class';
 export {
     createWSConnection,

@@ -13,7 +13,7 @@ import type {
 import type {
     TMessageCallback,
 } from '@flux/shared/ws';
-import type { FluxNetworkConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
+import type { FluxAgentNetworkConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
 import {
     type TNetworkConnectionState,
     type FluxWebSocketConnection,
@@ -67,12 +67,12 @@ export class FluxAgent {
      * @param { unknown }   identification
      * @param { string }    [clientUUIDToken]
      *
-     * @returns { Promise<FluxNetworkConnection> }
+     * @returns { Promise<FluxAgentNetworkConnection> }
      */
     public async connect(
         identification: unknown,
         clientUUIDToken?: string,
-    ): Promise<FluxNetworkConnection> {
+    ): Promise<FluxAgentNetworkConnection> {
         this.previousNetworkActions.networkConnection = {
             identification,
             clientUUIDToken: clientUUIDToken,
@@ -108,7 +108,7 @@ export class FluxAgent {
 
         this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
 
-        const fluxNetworkConnection: FluxNetworkConnection = await this
+        const fluxNetworkConnection: FluxAgentNetworkConnection = await this
             .fluxWebSocketConnection
             .connectToNetwork(
                 clientUUIDToken as TClientOwnUId,

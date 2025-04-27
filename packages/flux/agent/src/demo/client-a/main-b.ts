@@ -3,7 +3,7 @@ import { FluxAgent } from '../../lib/flux-agent';
 import { TNetworkId_S } from '@flux/shared/types';
 import { TNetworkConnectionState } from '../../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 import { TRTCState } from '../../lib/connector/low-level-com/web-rtc/ice-connection';
-import { FluxNetworkConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
+import { FluxAgentNetworkConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
 import type { FluxNetworkChannel } from '../../lib/flux-network-channel.class';
 
 // Define observable component
@@ -17,7 +17,7 @@ Alpine.data('fluxApplicationB', () => ({
         },
     ),
     webRTCConncetionState: <undefined | TRTCState>undefined,
-    fluxNetworkConnection: <undefined | FluxNetworkConnection>undefined,
+    fluxNetworkConnection: <undefined | FluxAgentNetworkConnection>undefined,
     networkState: <string | null>null,
     clientLog: ['empty'],
     async init() {

@@ -1,10 +1,9 @@
 import Alpine from 'alpinejs';
 import { FluxAgent } from '../../lib/flux-agent';
-import { TNetworkId_S } from '@flux/shared/types';
-import { FluxNetworkConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
-import { TNetworkConnectionState } from '../../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
-import { TRTCState } from '../../lib/connector/low-level-com/web-rtc/ice-connection';
-import { FluxRemoteClient } from '../../lib/flux-remote-client.class';
+import type { TNetworkId_S } from '@flux/shared/types';
+import type { FluxAgentNetworkConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
+import type { FluxRemoteClient } from '../../lib/flux-remote-client.class';
+import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
 
 // Define observable component
 Alpine.data('fluxApplicationA', () => ({
@@ -17,7 +16,7 @@ Alpine.data('fluxApplicationA', () => ({
         },
     ),
     webRTCConncetionState: <undefined | TRTCState>undefined,
-    fluxNetworkConnection: <undefined | FluxNetworkConnection>undefined,
+    fluxNetworkConnection: <undefined | FluxAgentNetworkConnection>undefined,
     networkState: <string | null>null,
     clientLog: ['empty'],
     remoteClient: <FluxRemoteClient | undefined>undefined,
