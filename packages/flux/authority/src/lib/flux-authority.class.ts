@@ -15,7 +15,7 @@ import type {
 import type { TAuthorizeCallback, TNetworkId_S } from '@flux/shared/types';
 import { retry, StateManager } from '@flux/shared/utils';
 import {
-    type FluxAgentNetworkConnection,
+    type FluxAuthorityNetworkConnection,
     type FluxWebSocketConnection,
     createWSConnection,
 } from '@flux/shared/connection';
@@ -51,12 +51,7 @@ export class FluxAuthority {
         authorityKey: string,
         authorizeNetworkClient: TAuthorizeCallback<T>,
         authorizeNetworkChannel: TChannnelAuthCallback<M>,
-    ): Promise<FluxAgentNetworkConnection> {
-        this.previousNetworkActions.registerAuthority = {
-            authorityKey,
-            cb: authorizeNetworkClient,
-            authorizeNetworkChannel,
-        };
+    ): Promise<FluxAuthorityNetworkConnection> {
         this.stateManager.emitNetworkState('authorizing');
 
         const ticket: string = await retry<any>(

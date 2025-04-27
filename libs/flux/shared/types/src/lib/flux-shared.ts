@@ -1,4 +1,4 @@
-export type TNetworkId_S = string & { __brand: 'TNetworkId'; };
+import type { TNetworkId_S } from './network.type';
 
 // export interface ISocketPackage {
 //     type: 'MESSAGE' | 'ERROR';

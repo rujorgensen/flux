@@ -21,7 +21,6 @@ import {
 import { nanoid } from 'nanoid';
 import { authenticateOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
-import type { TChannnelAuthCallback } from './channel/channel.type';
 import { StateManager } from '@flux/shared/utils';
 
 
@@ -33,23 +32,6 @@ export class FluxAgent {
     private readonly fluxClientData: FluxClientData = new FluxClientData();
 
     private readonly stateManager: StateManager = new StateManager();
-
-    // Has the client preivously connected to the network or registered as an authority?
-    // ! TODO  MOVE 
-    private readonly previousNetworkActions: {
-        networkConnection: {
-            identification: unknown,
-            clientUUIDToken?: string,
-        } | null;
-        registerAuthority: {
-            authorityKey: string,
-            cb: (...args: any) => Promise<string>;
-            authorizeNetworkChannel: TChannnelAuthCallback<any>,
-        } | null;
-    } = {
-            networkConnection: null,
-            registerAuthority: null,
-        };
 
     constructor(
         private readonly networkId: string,
@@ -89,16 +71,10 @@ export class FluxAgent {
             ticket,
             this.stateManager,
             async () => {
-                // if (previousNetworkActions.registerAuthority || previousNetworkActions.networkConnection) {
-                //     console.log('🔗 Re-connected to WebSocket');
-                //     if (previousNetworkActions.networkConnection?.identification) {
-                //         console.log('⭕ Reconnecting to network');
                 await this.connect(
                     identification,
                     clientUUIDToken,
                 );
-
-                // }
             },
             // this.connect.bind(this),
             this.options,
