@@ -47,7 +47,14 @@
       "{workspaceRoot}/.github/workflows/e2e.yml"
     ],
     "default": [
+      "{projectRoot}/**/*",
       "sharedGlobals"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/biome.json"
     ]
   },
   "nxCloudId": "6809319308a2a647ce903863"
