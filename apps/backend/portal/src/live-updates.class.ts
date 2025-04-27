@@ -53,7 +53,7 @@ export class LiveUpdates {
                         if (
                             (auth !== CODE_TO_ACCESS_NETWORK)
                         ) {
-                            return Promise.reject('Not allowed');
+                            return Promise.reject(new Error('Not allowed'));
                         }
 
                         // console.log('✅ Network access authorized');

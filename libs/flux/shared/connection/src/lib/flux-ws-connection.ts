@@ -75,7 +75,7 @@ export class FluxWebSocketConnection {
             ...this.options,
         };
 
-        // 1. Connect to 
+        // 1. Connect to websocket
         this.socket = new FluxWebSocketClientConnection(
             {
                 url: `ws://localhost:${this.options.port}?token=${this.token}`,
@@ -112,11 +112,12 @@ export class FluxWebSocketConnection {
 
                     resolve(this.socket);
 
-                    if (!this.first) {
-                        this.onReconnectCallback();
+                    if (this.first) {
+                        this.first = false;
+                        return;
                     }
 
-                    this.first = false;
+                    this.onReconnectCallback();
                 })
 
                 .on('message', (
