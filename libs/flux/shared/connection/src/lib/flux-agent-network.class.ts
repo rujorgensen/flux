@@ -1,5 +1,5 @@
 import type {
-    TChannelTopic,
+    TChannelName,
     TClientOwnUId,
 } from '@flux/shared/types';
 import type {
@@ -13,7 +13,9 @@ import type { TRTCState } from '@flux/shared/utils';
 import type {
     FluxWebSocketClientConnection,
 } from '@flux/shared/ws';
-import type { FluxNetworkChannel } from './flux-network-channel.class';
+import type {
+    FluxNetworkChannel,
+} from './flux-network-channel.class';
 
 export class FluxAgentNetworkConnection {
 
@@ -47,7 +49,7 @@ export class FluxAgentNetworkConnection {
 
         return this._fluxWebSocketConnection
             .joinChannel(
-                channelName as TChannelTopic,
+                channelName as TChannelName,
             );
     }
 

@@ -9,8 +9,8 @@ export {
 export * from './lib/flux-shared';
 
 export {
-    type TChannelTopic,
-    validateTopic,
+    type TChannelName,
+    validateChannelNameOrThrow,
 } from './lib/channel.type';
 
 export {

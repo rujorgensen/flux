@@ -1,7 +1,6 @@
 
-import type { TChannelTopic } from '../../lib/channel/channel.type';
 import { FluxAgent } from '../../lib/flux-agent';
-import type { TNetworkId_S } from '@flux/shared/types';
+import type { TChannelName, TNetworkId_S } from '@flux/shared/types';
 import jwt from 'jsonwebtoken';
 
 const secret = 'your-very-secure-secret'; // keep this secret safe!
@@ -44,7 +43,7 @@ await flux1
         },
 
         (
-            channelTopic: TChannelTopic,
+            channelTopic: TChannelName,
             identification: string,
         ): Promise<boolean> => {
 
