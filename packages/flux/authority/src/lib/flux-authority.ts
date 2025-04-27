@@ -3,11 +3,11 @@ globalThis.count++;
 
 console.log(`Reloaded ${globalThis.count} time(s)`);
 
-import type {
-    TMessageCallback,
-} from '@flux/shared/ws';
 import { nanoid } from 'nanoid';
-import { authenticateNetworkAuthorityOrThrow, RetryableError } from './connector/auth/register-authority.auth';
+import {
+    authenticateNetworkAuthorityOrThrow,
+    RetryableError,
+} from './connector/auth/register-authority.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import type {
     TChannnelAuthCallback,

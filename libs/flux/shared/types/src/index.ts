@@ -53,3 +53,9 @@ export {
     splitAddressOrThrow,
     splitProcessAddress,
 } from './lib/routing.type';
+
+// * Types
+export {
+    type TNetworkId_S,
+    validateNetworkId,
+} from './lib/network.type';

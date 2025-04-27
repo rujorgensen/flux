@@ -288,19 +288,19 @@ export class FluxMeshServer {
                             break;
                         }
                         case SUBSCRIBE_NETWORK_CHANNEL_TOPIC: {
-                            const channelName: TChannelName = message_.substring(
-                                message_.indexOf(':') + 1
-                            ) as TChannelName;
+                            const channelNameString: string = message_.substring(message_.indexOf(':') + 1);
 
-                            if (!validateChannelNameOrThrow(channelName)) {
+                            try {
+                                validateChannelNameOrThrow(channelNameString);
+                            } catch {
                                 ws.send(`${ERROR}:Not authorized`);
                                 return;
                             }
 
+                            const channelName: TChannelName = channelNameString as TChannelName;
+
                             if (ws.data.channelTopics.has(channelName)) {
-                                ws.send(
-                                    `${ERROR}:Agent is already subscribed to topic`
-                                );
+                                ws.send(`${ERROR}:Agent is already subscribed to channnel`);
 
                                 return;
                             }
