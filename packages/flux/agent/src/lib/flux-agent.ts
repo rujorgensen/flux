@@ -13,7 +13,7 @@ import type {
 import type {
     TMessageCallback,
 } from '@flux/shared/ws';
-import type { FluxAgentNetworkConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-network.class';
+import type { FluxAgentNetworkConnection } from '../../../../../libs/flux/shared/connection/src/lib/flux-agent-network.class';
 import {
     type TNetworkConnectionState,
     type FluxWebSocketConnection,

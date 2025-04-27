@@ -22,7 +22,7 @@ import {
     type TMessageCallback,
     FluxWebSocketClientConnection,
 } from '@flux/shared/ws';
-import { FluxAgentNetworkConnection } from './flux-network.class';
+import { FluxAgentNetworkConnection } from './flux-agent-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
 import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';

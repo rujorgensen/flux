@@ -11,7 +11,7 @@
   },
   "include": [
     "src/**/*.ts"
-, "../../../libs/flux/shared/connection/src/lib/flux-ws-connection.ts", "../../../libs/flux/shared/connection/src/lib/flux-network.class.ts"  ],
+  ],
   "exclude": [
     "jest.config.ts",
     "src/**/*.spec.ts",
