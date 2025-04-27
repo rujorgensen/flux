@@ -1,5 +1,5 @@
 
-import { FluxAgent } from '../../lib/flux-agent';
+import { FluxAuthority } from '@persistica/flux-authority';
 import type { TChannelName, TNetworkId_S } from '@flux/shared/types';
 import jwt from 'jsonwebtoken';
 
@@ -14,7 +14,7 @@ console.log('🔑 Registering authority');
 const CODE_TO_ACCESS_NETWORK: any = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
-const flux1: FluxAgent = new FluxAgent(
+const flux1: FluxAuthority = new FluxAuthority(
     'rAnD0M-network-id' as unknown as TNetworkId_S,
     {
         // p2p encryption

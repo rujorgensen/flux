@@ -1,6 +1,12 @@
 import type { BunRequest } from 'bun';
 import * as nodeURL from 'node:url';
-import { GlobalRPCTimeoutError, UnknownClientError, type TAddress, type TNetworkId_S } from '@flux/shared/types';
+import {
+    type TAddress,
+    type TNetworkId_S,
+    GlobalRPCTimeoutError,
+    UnknownClientError,
+    validateNetworkId,
+} from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
 import type { NetworkAuthorityManager } from '../../register/register-network-authority.class';
@@ -12,8 +18,21 @@ export const authorizeNetworkClient = async (
     globalRPCClient: GlobalRPCClient<'authorize'>
 ) => {
     // Find the network authority to authenticate with
-    const networkId: TNetworkId_S | undefined = nodeURL.parse(request.url, true)
-        .query.networkId as TNetworkId_S;
+    const networkIdString: string | undefined = nodeURL.parse(request.url, true)
+        .query.networkId as string;
+
+    try {
+        validateNetworkId(networkIdString ?? '')
+    } catch (error) {
+        return new Response(
+            error instanceof Error ? error.message : 'Unknown error validating network ID',
+            {
+                status: 500,
+            },
+        );
+    }
+
+    const networkId: TNetworkId_S = networkIdString as TNetworkId_S;
 
     if (!networkId) {
         return new Response('Missing networkId', {
