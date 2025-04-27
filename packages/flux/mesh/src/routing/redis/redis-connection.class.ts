@@ -22,9 +22,7 @@ if (!FLUX_MESH_REDIS_URL) {
 export const getRedisConnection = (
 
 ) => {
-    if (!redisConnection) {
-        redisConnection = new RedisConnection(FLUX_MESH_REDIS_URL);
-    }
+    redisConnection ??= new RedisConnection(FLUX_MESH_REDIS_URL);
 
     return redisConnection;
 };

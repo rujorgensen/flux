@@ -14,7 +14,7 @@ type WebSocketClientOptions = {
     url: string;
     autoReconnect?: boolean;
     reconnectDelay?: number; // Does you backoff though
-    retries?: number; // Will try forever
+    retries?: number; // Undefined; will try forever
     heartbeatInterval?: number;
     connectionTimeout?: number;
 };
@@ -88,7 +88,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 
                 if (
                     this.options.autoReconnect &&
-                    (this.reconnectAttempts < this.options.retries!)
+                    ((this.options.retries === undefined) || (this.reconnectAttempts < this.options.retries))
                 ) {
                     setTimeout(() => {
                         this.reconnectAttempts++;
