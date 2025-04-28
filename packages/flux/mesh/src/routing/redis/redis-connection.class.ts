@@ -8,9 +8,7 @@ import { NetworkClientHash } from './hash/network-client.redis.hash';
 
 let redisConnection: RedisConnection | undefined;
 
-const FLUX_MESH_REDIS_URL: string | undefined = process.env.FLUX_MESH_REDIS_URL;
-
-if (!FLUX_MESH_REDIS_URL) {
+if (!process.env['FLUX_MESH_REDIS_URL']) {
     throw new Error('Missing FLUX_MESH_REDIS_URL in .env');
 }
 
@@ -22,7 +20,8 @@ if (!FLUX_MESH_REDIS_URL) {
 export const getRedisConnection = (
 
 ) => {
-    redisConnection ??= new RedisConnection(FLUX_MESH_REDIS_URL);
+    // We have to read the env variable here, because otherwise it can't be modified in tests
+    redisConnection ??= new RedisConnection(process.env['FLUX_MESH_REDIS_URL'] as string);
 
     return redisConnection;
 };

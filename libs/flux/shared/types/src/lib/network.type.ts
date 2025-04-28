@@ -11,7 +11,7 @@ export const validateNetworkId = (
         throw new Error('Network ID cannot contain /');
     }
 
-    if (/^[A-Za-z0-9-]+$/.test(networkId)) {
+    if (!/^[A-Za-z0-9-]+$/.test(networkId)) {
         throw new Error('Network ID can only contain letters, numbers and dashes (\'-\')');
     }
 
