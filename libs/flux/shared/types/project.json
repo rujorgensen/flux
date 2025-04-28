@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "@nx/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/flux/shared/types",
         "main": "libs/flux/shared/types/src/index.ts",
@@ -15,5 +17,8 @@
       }
     }
   },
-  "tags": ["type:type", "scope:shared"]
+  "tags": [
+    "type:type",
+    "scope:shared"
+  ]
 }

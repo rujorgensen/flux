@@ -1,10 +1,10 @@
 // Check env
 // const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;
 
-globalThis.count ??= 0;
-globalThis.count++;
+globalThis.agentLoadCount ??= 0;
+globalThis.agentLoadCount++;
 
-console.log(`Reloaded ${globalThis.count} time(s)`);
+console.log(`[flux-agent] Reloaded ${globalThis.agentLoadCount} time(s)`);
 
 import type {
     TClientOwnUId,

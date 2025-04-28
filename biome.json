@@ -23,6 +23,9 @@
 			"style": {
 				"useConst": "off",
 				"noInferrableTypes": "off"
+			},
+			"complexity": {
+				"useLiteralKeys": "off"
 			}
 		}
 	},
