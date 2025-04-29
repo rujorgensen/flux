@@ -1,6 +1,12 @@
 /**
  * https://bun.sh/docs/api/websockets
  */
+
+globalThis.meshLoadCount ??= 0;
+globalThis.meshLoadCount++;
+
+console.log(`[flux-mesh] Reloaded ${globalThis.meshLoadCount} time(s)`);
+
 // import { Elysia } from 'elysia';
 // import { swagger } from '@elysiajs/swagger';
 
@@ -40,10 +46,6 @@ import {
     validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
-
-(globalThis as any).count ??= 0;
-(globalThis as any).count++;
-
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
 import { OutgoingMessageRouter } from './routing/outgoing-message-router.class';
@@ -161,7 +163,7 @@ export class FluxMeshServer {
                         authorizeNetworkClient(
                             request,
                             networkAuthorityManager,
-                            globalRPCClient
+                            globalRPCClient,
                         ),
                 },
             },
@@ -221,7 +223,7 @@ export class FluxMeshServer {
                     clientMap.set(_ws.data.id, _ws);
 
                     if (_ws.data.isAuthority) {
-                        console.log('👮 Authority connected:', _ws.data.id);
+                        console.log(`👮 Authority connected at address: '${_ws.data.address}'`);
 
                         networkAuthorityManager.register(
                             _ws.data.networkId,
