@@ -53,22 +53,3 @@ export class NetworkClientHash {
         return data[0] as TAddress;
     }
 }
-
-
-// async function rateLimit(ip, limit = 100, windowSecs = 3600) {
-//     const key = `ratelimit:${ip}`;
-  
-//     // Increment counter
-//     const count = await redis.incr(key);
-  
-//     // Set expiry if this is the first request in window
-//     if (count === 1) {
-//       await redis.expire(key, windowSecs);
-//     }
-  
-//     // Check if limit exceeded
-//     return {
-//       limited: count > limit,
-//       remaining: Math.max(0, limit - count),
-//     };
-//   }

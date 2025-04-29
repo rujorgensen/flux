@@ -1,7 +1,7 @@
-globalThis.count ??= 0;
-globalThis.count++;
+globalThis.authorityLoadCount ??= 0;
+globalThis.authorityLoadCount++;
 
-console.log(`Reloaded ${globalThis.count} time(s)`);
+console.log(`[flux-authority] Reloaded ${globalThis.authorityLoadCount} time(s)`);
 
 import { nanoid } from 'nanoid';
 import {

@@ -18,7 +18,7 @@ export const validateChannelNameOrThrow = (
         throw new Error('Channel name cannot contain /');
     }
 
-    if (/^[A-Za-z0-9-]+$/.test(channelName)) {
+    if (!/^[A-Za-z0-9-]+$/.test(channelName)) {
         throw new Error('Channel name can only contain letters, numbers and dashes (\'-\')');
     }
 

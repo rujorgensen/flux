@@ -17,6 +17,7 @@ export const authorizeNetworkClient = async (
     networkAuthorityManager: NetworkAuthorityManager,
     globalRPCClient: GlobalRPCClient<'authorize'>
 ) => {
+        
     // Find the network authority to authenticate with
     const networkIdString: string | undefined = nodeURL.parse(request.url, true)
         .query.networkId as string;
@@ -42,7 +43,6 @@ export const authorizeNetworkClient = async (
             },
         });
     }
-
 
     const text = await request.text();
 
