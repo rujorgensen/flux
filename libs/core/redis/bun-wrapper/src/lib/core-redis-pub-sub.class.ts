@@ -19,6 +19,7 @@ export class BunRedisPubSub {
 
   constructor(
     private readonly _options: {
+      name?: string, // Optional name for the client to tell them apart in the logs
       url: string,
       socket: {
         reconnectStrategy: (
@@ -32,16 +33,16 @@ export class BunRedisPubSub {
 
     this.publisher
       .on('error', (error) => {
-        console.error('❌ Redis client error:', error.message);
+        console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis client error:`, error.message);
       })
       .on('reconnecting', () => {
-        console.log('🔄 Redis reconnecting...');
+        console.log(`${this._options.name ? `[${this._options.name}]` : ''}🔄 Redis reconnecting...`);
       })
       .on('ready', () => {
-        console.log('✅ Redis client ready');
+        console.log(`${this._options.name ? `[${this._options.name}]` : ''}✅ Redis client ready`);
       })
       .on('end', () => {
-        console.warn('🚫 Redis connection closed');
+        console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis connection closed`);
       });
 
     // * Create Redis subscriber
