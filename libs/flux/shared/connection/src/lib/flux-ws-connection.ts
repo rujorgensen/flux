@@ -22,11 +22,10 @@ import {
     type TMessageCallback,
     FluxWebSocketClientConnection,
 } from '@flux/shared/ws';
-import { FluxAgentNetworkConnection } from './flux-agent-network.class';
+import { FluxAgentNetworkConnection } from './agent/flux-agent-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
 import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
-import { FluxAuthorityNetworkConnection } from './flux-authority-network.class';
 
 interface IOptions {
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -216,12 +215,12 @@ export class FluxWebSocketConnection {
      * @param { TAuthorizeCallback }        cb
      * @param { TChannnelAuthCallback<M> }  authorizeNetworkChannel
      * 
-     * @returns { Promise<FluxAuthorityNetworkConnection> }
+     * @returns { Promise<void> }
      */
     public async registerAuthority<T, M>(
         cb: TAuthorizeCallback<T>,
         authorizeNetworkChannel: TChannnelAuthCallback<M>,
-    ): Promise<FluxAuthorityNetworkConnection> {
+    ): Promise<void> {
         const webSocketClient: FluxWebSocketClientConnection = await this.connect();
 
         // * 1 Register function for handling authorization
@@ -239,9 +238,7 @@ export class FluxWebSocketConnection {
             .registerMethod('authorizeNetworkChannel', authorizeNetworkChannel);
 
         // TODO: WAIT FOR CONNECTION TO BE ACCEPTED
-        return Promise.resolve(new FluxAuthorityNetworkConnection(
-            this,
-        ));
+        return Promise.resolve(void 0);
     }
 
     /**
@@ -281,7 +278,7 @@ export class FluxWebSocketConnection {
             this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_TOPIC}:${channelName}`);
 
             // TODO wait for acknowledgment
-            return Promise.resolve(new FluxNetworkChannel(this, channelName));
+            return Promise.resolve(new FluxNetworkChannel(channelName, this));
         }
 
         return Promise.reject(new Error('Not connected'));

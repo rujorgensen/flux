@@ -8,20 +8,55 @@ datasource db {
   url      = env("FLUX_DATABASE_URL")
 }
 
+// ****************************************************************************
+// *** User
+// ****************************************************************************
 model User {
-  id                   Int           @id @default(autoincrement())
-  email                String        @unique
-  magicLink            String?       @unique
-  magicLinkExpiryAt    DateTime?
-  magicLinkRequestedAt DateTime?
-  userSessions         UserSession[]
+    id                   Int           @id @default(autoincrement())
+    email                String        @unique
+    magicLink            String?       @unique
+    magicLinkExpiryAt    DateTime?
+    magicLinkRequestedAt DateTime?
+    userSessions         UserSession[]
 }
 
 model UserSession {
-  id        String   @id @default(nanoid())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  ip        String
-  userAgent String
+    id        String   @id @default(nanoid())
+    userId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+    ip        String
+    userAgent String
+}
+
+// ****************************************************************************
+// *** Stats
+// ****************************************************************************
+
+model UsageHistory {
+    id         String   @id @default(nanoid())
+    networkId  String   @unique
+    usageKb    Int
+    timeslotAt DateTime @default(now())
+}
+
+model ConnectedAuthoritiesHistory {
+    id         String   @id @default(nanoid())
+    networkId  String   @unique
+    count      Int
+    timeslotAt DateTime @default(now())
+}
+
+model ConnectedAgentsHistory {
+    id         String   @id @default(nanoid())
+    networkId  String   @unique
+    count      Int
+    timeslotAt DateTime @default(now())
+}
+
+model ChannelsHistory {
+    id         String   @id @default(nanoid())
+    networkId  String   @unique
+    count      Int
+    timeslotAt DateTime @default(now())
 }

@@ -15,10 +15,10 @@ import type {
 import type { TAuthorizeCallback, TNetworkId_S } from '@flux/shared/types';
 import { retry, StateManager } from '@flux/shared/utils';
 import {
-    type FluxAuthorityNetworkConnection,
     type FluxWebSocketConnection,
     createWSConnection,
 } from '@flux/shared/connection';
+import { FluxAuthorityNetworkConnection } from './flux-authority-network.class';
 
 export class FluxAuthority {
 
@@ -83,12 +83,14 @@ export class FluxAuthority {
 
         this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
 
-        return this
+        await this
             .fluxWebSocketConnection
             .registerAuthority(
                 authorizeNetworkClient,
                 authorizeNetworkChannel,
             );
+
+        return Promise.resolve(new FluxAuthorityNetworkConnection(this.fluxWebSocketConnection));
     }
 
     public readonly onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
