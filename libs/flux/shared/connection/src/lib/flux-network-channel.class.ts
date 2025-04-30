@@ -15,8 +15,8 @@ import type {
 export class FluxNetworkChannel {
 
     constructor(
+        public readonly channelName: TChannelName,
         private readonly _fluxWebSocketConnection: FluxWebSocketConnection,
-        private readonly _channelName: TChannelName,
     ) { }
 
     /**
@@ -31,7 +31,7 @@ export class FluxNetworkChannel {
     ): void {
         this._fluxWebSocketConnection
             .publish(
-                this._channelName,
+                this.channelName,
                 message,
             );
     }
@@ -48,7 +48,7 @@ export class FluxNetworkChannel {
     ): void {
         this._fluxWebSocketConnection
             .onPublish(
-                this._channelName,
+                this.channelName,
                 fn,
             );
     }

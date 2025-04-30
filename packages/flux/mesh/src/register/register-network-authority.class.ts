@@ -36,6 +36,14 @@ export class NetworkAuthorityManager {
         );
     }
 
+    /**
+     * Used for cleanup, in case of discovering an idle authority.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TAddress }      networkAuthorityAddress
+     * 
+     * @returns { void }
+     */
     public unregisterGlobal(
         networkId: TNetworkId_S,
         networkAuthorityAddress: TAddress,

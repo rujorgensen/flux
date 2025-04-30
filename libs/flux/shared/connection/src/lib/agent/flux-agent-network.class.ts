@@ -2,15 +2,16 @@
  * This is the class exposed to the user. It represents an agent connection to the network
  */
 import {
+    type TChannelName,
     type TClientOwnUId,
     validateChannelNameOrThrow,
 } from '@flux/shared/types';
 import type {
     FluxWebSocketConnection,
-} from './flux-ws-connection';
+} from '../flux-ws-connection';
 import {
     FluxRemoteClient,
-} from '../../../../../../packages/flux/agent/src/lib/flux-remote-client.class';
+} from '../../../../../../../packages/flux/agent/src/lib/flux-remote-client.class';
 import { ICEConnection } from 'packages/flux/agent/src/lib/connector/low-level-com/web-rtc/ice-connection';
 import type { TRTCState } from '@flux/shared/utils';
 import type {
@@ -18,11 +19,12 @@ import type {
 } from '@flux/shared/ws';
 import type {
     FluxNetworkChannel,
-} from './flux-network-channel.class';
+} from '../flux-network-channel.class';
 
 export class FluxAgentNetworkConnection {
 
     private readonly iceConnection: ICEConnection | undefined;
+    private readonly connectedChannelSet: Set<TChannelName> = new Set();
 
     constructor(
         private readonly _fluxWebSocketConnection: FluxWebSocketConnection,
@@ -45,7 +47,7 @@ export class FluxAgentNetworkConnection {
      * 
      * @param { string } channelName 
      */
-    public joinChannel(
+    public async joinChannel(
         channelName: string,
     ): Promise<FluxNetworkChannel> {
         console.log(`Joining channel "${channelName}"`);
@@ -54,10 +56,14 @@ export class FluxAgentNetworkConnection {
             throw new Error('This will not actually be thrown');
         }
 
-        return this._fluxWebSocketConnection
+        const fluxNetworkChannel: FluxNetworkChannel = await this._fluxWebSocketConnection
             .joinChannel(
                 channelName,
             );
+
+        this.connectedChannelSet.add(fluxNetworkChannel.channelName);
+
+        return fluxNetworkChannel;
     }
 
     /**
@@ -80,5 +86,11 @@ export class FluxAgentNetworkConnection {
         //     //     reject(new Error('Timeout'));
         //     // }, 600_000);
         // });
+    }
+
+    public readConnectedChannels(
+
+    ): string[] {
+        return [...this.connectedChannelSet];
     }
 }
