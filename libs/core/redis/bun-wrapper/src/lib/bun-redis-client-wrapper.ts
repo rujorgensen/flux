@@ -136,11 +136,6 @@ export class BunRedisClient extends EventEmitter<{
   ) {
     this.handlers.clear();
     this.connected = false;
-
-    try {
-      this.client.close();
-    } catch {
-      console.error('Error caught while closing Redis client. Ignoring error.');
-    }
+    this.client.close();
   }
 }
