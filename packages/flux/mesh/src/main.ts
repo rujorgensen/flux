@@ -113,6 +113,7 @@ const clientRPCResponseCallbacks: Map<
 
 export class FluxMeshServer {
     private readonly onReadyListeners: Set<() => void> = new Set();
+    private readonly bunServer: Bun.Server | undefined;
 
     constructor(
         private readonly port: number = 8080,
@@ -142,7 +143,7 @@ export class FluxMeshServer {
             'authorize' | 'authorizeNetworkChannel'
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
-        const server = Bun.serve({
+        this.bunServer = Bun.serve({
             port: this.port,
             idleTimeout: 0, // deactivate timeout
             routes: {
@@ -289,6 +290,7 @@ export class FluxMeshServer {
 
                             break;
                         }
+
                         case SUBSCRIBE_NETWORK_CHANNEL_TOPIC: {
                             const channelNameString: string = message_.substring(message_.indexOf(':') + 1);
 
@@ -478,8 +480,18 @@ export class FluxMeshServer {
         this.onReadyListeners.add(fn);
     }
 
+    /**
+     * Gracefully shuts down the server.
+     * 
+     * @returns { Promise<void> }
+     */
     public async stop(
     ): Promise<void> {
-        console.log('Stopping server...');
+        clientMap.clear();
+
+        // 'true': Force stop and close all active connections
+        await this.bunServer?.stop(true);
+        await this.redisConnection.setDisconnected(`${machineAddress}/${processId}`);
+        await this.redisConnection.disconnect();
     }
 }

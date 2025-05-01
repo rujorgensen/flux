@@ -195,4 +195,12 @@ export class RedisConnection {
             console.log('error caught #1');
         }
     }
+
+    public async disconnect(
+
+    ): Promise<void> {
+        this.cacheClient.disconnect();
+        await this.pubSub.disconnect();
+        this.subscribers.clear();
+    }
 }
