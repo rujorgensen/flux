@@ -477,4 +477,9 @@ export class FluxMeshServer {
     ): void {
         this.onReadyListeners.add(fn);
     }
+
+    public async stop(
+    ): Promise<void> {
+        console.log('Stopping server...');
+    }
 }
