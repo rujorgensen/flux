@@ -164,6 +164,12 @@ export class RedisConnection {
         await this.hash.expire(`machines/processes/${address}`, 5);
     }
 
+    public async setDisconnected(
+        _address: string,
+    ): Promise<void> {
+        // !TODO
+    }
+
     public subscribe(
         channelId: TProcessAddress | TClientId,
         callback: MessageCallback

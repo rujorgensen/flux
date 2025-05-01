@@ -73,6 +73,10 @@ import type {
     TRPCResponseCallbackFunction,
 } from '@flux/shared/ws';
 import * as nodeURL from 'node:url';
+import {
+    type RedisConnection,
+    getRedisConnection,
+} from './routing/redis/redis-connection.class';
 
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
     ip: Bun.SocketAddress | null;
@@ -112,6 +116,7 @@ const clientRPCResponseCallbacks: Map<
 
 
 export class FluxMeshServer {
+    private readonly redisConnection: RedisConnection = getRedisConnection();
     private readonly onReadyListeners: Set<() => void> = new Set();
     private readonly bunServer: Bun.Server | undefined;
 
