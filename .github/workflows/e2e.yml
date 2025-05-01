@@ -75,8 +75,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       -
-        name: 💾 Install dependencies
-        if : ${{ steps.cache-bun.outputs.cache-hit != 'true' }}
+        name: 💾 Install dependencies (FOR SOME REASON, READING THE CACHE IS NOT ENOUGH)
         run: bun install --no-cache
 
       # This enables task distribution via Nx Cloud
