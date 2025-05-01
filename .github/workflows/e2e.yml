@@ -91,7 +91,7 @@ jobs:
 
       - name: 🧪 Run unit tests
         # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true npx nx affected -t bun-test # --no-agents
+        run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected -t bun-test # --no-agents
 
   e2e-test:
     runs-on: ubuntu-latest
@@ -137,5 +137,5 @@ jobs:
 
       - name: 🧪 Run E2E tests
         # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true npx nx affected:e2e # --no-agents
+        run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected:e2e # --no-agents
  
