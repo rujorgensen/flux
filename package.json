@@ -43,7 +43,7 @@
     "jsonwebtoken": "9.0.2",
     "madge": "^8.0.0",
     "open-props": "^1.7.15",
-    "redis": "^4.7.0",
+    "redis": "^5.0.0",
     "rollup-plugin-visualizer": "^5.14.0",
     "svelte": "^5.28.2",
     "typescript": "^5.8.3",

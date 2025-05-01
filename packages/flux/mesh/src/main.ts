@@ -22,9 +22,9 @@ if (!process.env['FLUX_JWT_KEY']) {
     throw new Error('Missing FLUX_JWT_KEY in .env');
 }
 
-if (!process.env['FLUX_DOMAIN']) {
-    throw new Error('Missing FLUX_DOMAIN in .env');
-}
+// if (!process.env['FLUX_DOMAIN']) {
+//     throw new Error('Missing FLUX_DOMAIN in .env');
+// }
 
 import {
     type TNetworkId_S,
