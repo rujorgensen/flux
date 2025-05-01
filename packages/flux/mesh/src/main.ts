@@ -74,10 +74,6 @@ import type {
 } from '@flux/shared/ws';
 import * as nodeURL from 'node:url';
 
-const networkAuthorityManager: NetworkAuthorityManager =
-    new NetworkAuthorityManager();
-const networkClientManager: NetworkClientManager = new NetworkClientManager();
-
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
     ip: Bun.SocketAddress | null;
     id: TClientId;
@@ -97,22 +93,6 @@ const processId: TProcessId = readProcessId();
 const machineAddress: TMachineAddress = readMachineAddress();
 const processAddress: TProcessAddress = readProcessAddress();
 
-const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
-    // passToLocalClient:
-    (
-        clientId: TClientId,
-        message: string,
-    ) => {
-        const client: TConnectedClientSocket | undefined =
-            clientMap.get(clientId);
-
-        if (!client) {
-            throw new UnknownClientError(clientId, processAddress);
-        }
-
-        client.send(message);
-    }
-);
 
 //const clientCallbacks: Map<TClientId, TCallbackFunction[]> = new Map();
 const clientRPCResponseCallbacks: Map<
@@ -129,11 +109,7 @@ const clientRPCResponseCallbacks: Map<
 //     },
 // );
 
-const processMessageRouter: ProcessMessageRouter = new ProcessMessageRouter();
 
-const globalRPCClient: GlobalRPCClient<
-    'authorize' | 'authorizeNetworkChannel'
-> = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
 export class FluxMeshServer {
     private readonly onReadyListeners: Set<() => void> = new Set();
@@ -141,6 +117,30 @@ export class FluxMeshServer {
     constructor(
         private readonly port: number = 8080,
     ) {
+        const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
+        const networkClientManager: NetworkClientManager = new NetworkClientManager();
+
+        const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
+            // passToLocalClient:
+            (
+                clientId: TClientId,
+                message: string,
+            ) => {
+                const client: TConnectedClientSocket | undefined =
+                    clientMap.get(clientId);
+
+                if (!client) {
+                    throw new UnknownClientError(clientId, processAddress);
+                }
+
+                client.send(message);
+            }
+        );
+        const processMessageRouter: ProcessMessageRouter = new ProcessMessageRouter();
+
+        const globalRPCClient: GlobalRPCClient<
+            'authorize' | 'authorizeNetworkChannel'
+        > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
         const server = Bun.serve({
             port: this.port,
