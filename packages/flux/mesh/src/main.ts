@@ -471,7 +471,7 @@ export class FluxMeshServer {
 
             console.log(`Reloaded ${(globalThis as any).count} time(s)`);
 
-            console.log(`🚀 Server running on localhost:${server.port}`);
+            console.log(`🚀 Server running on localhost:${this.port}`);
 
             for (const cb of this.onReadyListeners) {
                 cb();
