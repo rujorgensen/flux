@@ -1,5 +1,5 @@
 # .github/workflows/bun-test.yml
-name: Run Bun Tests
+name: Run test suites
 
 on:
   workflow_dispatch: {}
