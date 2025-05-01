@@ -43,6 +43,11 @@ jobs:
         # - run: bun nx-cloud record -- echo Hello World
         # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
 
-      - name: Run tests
+      - name: 🧪 Run unit tests
         # RYUK does not work with github actions or Circle CI
         run: TESTCONTAINERS_RYUK_DISABLED=true npx nx affected -t bun-test # --no-agents
+
+      - name: 🧪 Run E2E tests
+        # RYUK does not work with github actions or Circle CI
+        run: TESTCONTAINERS_RYUK_DISABLED=true npx nx affected:e2e # --no-agents
+ 

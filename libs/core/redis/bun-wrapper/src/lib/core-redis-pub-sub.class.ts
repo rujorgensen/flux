@@ -1,120 +1,120 @@
 import {
-  type RedisClientType,
-  createClient,
+    type RedisClientType,
+    createClient,
 } from 'redis';
 
 export type MessageCallback = (message: string) => unknown;
 
 export class BunRedisPubSub {
 
-  // implements Notifier
-  private readonly subscribers: Map<
-    MessageCallback,
-    (data: string, channel: string) => unknown
-  >;
+    // implements Notifier
+    private readonly subscribers: Map<
+        MessageCallback,
+        (data: string, channel: string) => unknown
+    >;
 
-  // Needs two clients, one for publishing and one for subscribing
-  private readonly publisher: RedisClientType;
-  private readonly subscriber: RedisClientType;
+    // Needs two clients, one for publishing and one for subscribing
+    private readonly publisher: RedisClientType;
+    private readonly subscriber: RedisClientType;
 
-  constructor(
-    private readonly _options: {
-      name?: string, // Optional name for the client to tell them apart in the logs
-      url: string,
-      socket: {
-        reconnectStrategy: (
-          retries: number,
-        ) => number,
-      },
-    },
-  ) {
-    this.subscribers = new Map();
-    this.publisher = createClient(this._options);
+    constructor(
+        private readonly _options: {
+            name?: string, // Optional name for the client to tell them apart in the logs
+            url: string,
+            socket: {
+                reconnectStrategy: (
+                    retries: number,
+                ) => number,
+            },
+        },
+    ) {
+        this.subscribers = new Map();
+        this.publisher = createClient(this._options);
 
-    this.publisher
-      .on('error', (error) => {
-        console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis client error:`, error.message);
-      })
-      .on('reconnecting', () => {
-        console.log(`${this._options.name ? `[${this._options.name}]` : ''}🔄 Redis reconnecting...`);
-      })
-      .on('ready', () => {
-        console.log(`${this._options.name ? `[${this._options.name}]` : ''}✅ Redis client ready`);
-      })
-      .on('end', () => {
-        console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis connection closed`);
-      });
+        this.publisher
+            .on('error', (error) => {
+                console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis client error:`, error.message);
+            })
+            .on('reconnecting', () => {
+                console.log(`${this._options.name ? `[${this._options.name}]` : ''}🔄 Redis reconnecting...`);
+            })
+            .on('ready', () => {
+                console.log(`${this._options.name ? `[${this._options.name}]` : ''}✅ Redis client ready`);
+            })
+            .on('end', () => {
+                console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis connection closed`);
+            });
 
-    // * Create Redis subscriber
-    this.subscriber = this.publisher.duplicate();
-  }
-
-  public async connect(
-
-  ) {
-    await Promise.all([
-      this.publisher.connect(),
-      this.subscriber.connect(),
-    ]);
-  }
-
-  /**
-   * 
-   * @param address
-   * @param message
-   * 
-   * @returns { void }
-   */
-  public async publish(
-    address: string,
-    message: string,
-  ): Promise<void> {
-    try {
-      await this.publisher.publish(address, message);
-    } catch {
-      console.log('publish failed');
+        // * Create Redis subscriber
+        this.subscriber = this.publisher.duplicate();
     }
-  }
 
-  public async subscribe(
-    channelId: string,
-    callback: MessageCallback,
-  ): Promise<void> {
-    try {
-      const redisCallback = (message: string) => callback(message);
+    public async connect(
 
-      await this.subscriber.subscribe(channelId, redisCallback);
-      this.subscribers.set(callback, redisCallback);
-    } catch {
-      console.log('error caught #2');
+    ) {
+        await Promise.all([
+            this.publisher.connect(),
+            this.subscriber.connect(),
+        ]);
     }
-  }
 
-  public unsubscribe(
-    channelId: string,
-    callback: MessageCallback,
-  ): void {
-    try {
-      const redisCallback = this.subscribers.get(callback);
-
-      if (!redisCallback) {
-        return;
-      }
-
-      this.publisher.unsubscribe(channelId, redisCallback);
-      this.subscribers.delete(callback);
-    } catch {
-      console.log('error caught #1');
+    /**
+     * 
+     * @param address
+     * @param message
+     * 
+     * @returns { void }
+     */
+    public async publish(
+        address: string,
+        message: string,
+    ): Promise<void> {
+        try {
+            await this.publisher.publish(address, message);
+        } catch {
+            console.log('publish failed');
+        }
     }
-  }
 
-  public async disconnect(
+    public async subscribe(
+        channelId: string,
+        callback: MessageCallback,
+    ): Promise<void> {
+        try {
+            const redisCallback = (message: string) => callback(message);
 
-  ) {
-    this.subscribers.clear();
-    this.subscriber.disconnect();
-    this.publisher.disconnect();
-  }
+            await this.subscriber.subscribe(channelId, redisCallback);
+            this.subscribers.set(callback, redisCallback);
+        } catch {
+            console.log('error caught #2');
+        }
+    }
+
+    public unsubscribe(
+        channelId: string,
+        callback: MessageCallback,
+    ): void {
+        try {
+            const redisCallback = this.subscribers.get(callback);
+
+            if (!redisCallback) {
+                return;
+            }
+
+            this.publisher.unsubscribe(channelId, redisCallback);
+            this.subscribers.delete(callback);
+        } catch {
+            console.log('error caught #1');
+        }
+    }
+
+    public async disconnect(
+
+    ) {
+        this.subscribers.clear();
+        await this.subscriber.disconnect();
+        await this.publisher.disconnect();
+    }
 }
 
 /*
