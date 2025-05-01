@@ -37,9 +37,9 @@ jobs:
         uses: actions/cache@v4.2.2
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-${{ matrix.bun }}-bun-${{ hashFiles('**/bun.lock') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.bun }}-bun-
+            ${{ runner.os }}-bun-
 
       -
           name: 💾 Install dependencies on cache miss
@@ -68,15 +68,11 @@ jobs:
         id: cache-bun
         uses: actions/cache@v4.2.2
         with:
+          fail-on-cache-miss: true
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-${{ matrix.bun }}-bun-${{ hashFiles('**/bun.lock') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.bun }}-bun-
-
-      -
-          name: 💾 Install dependencies on cache miss
-          if : ${{ steps.cache-bun.outputs.cache-hit != 'true' }}
-          run: bun install
+            ${{ runner.os }}-bun-
 
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
@@ -121,15 +117,11 @@ jobs:
         id: cache-bun
         uses: actions/cache@v4.2.2
         with:
+          fail-on-cache-miss: true
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-${{ matrix.bun }}-bun-${{ hashFiles('**/bun.lock') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.bun }}-bun-
-
-      -
-          name: 💾 Install dependencies on cache miss
-          if : ${{ steps.cache-bun.outputs.cache-hit != 'true' }}
-          run: bun install
+            ${{ runner.os }}-bun-
 
         # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
         # - run: bun nx-cloud record -- echo Hello World
