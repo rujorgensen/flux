@@ -18,7 +18,7 @@ env:
   sha: ${{ github.sha }}
   FLUX_MESH_REDIS_URL: 'redis://localhost:6381'
   FLUX_JWT_KEY: 'flux-jwt-e2e-key-super-secret'
-  FLUX_DOMAIN: ='ws://localhost:8080'
+  FLUX_DOMAIN: 'ws://localhost:8080'
 
 jobs:
   install-deps:
