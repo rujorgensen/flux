@@ -1,4 +1,4 @@
-# .github/workflows/bun-test.yml
+# .github/workflows/e2e.yml
 name: Run test suites
 
 on:
