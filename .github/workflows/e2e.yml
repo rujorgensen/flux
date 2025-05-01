@@ -20,16 +20,21 @@ env:
 jobs:
   install-deps:
     timeout-minutes: 15
-    runs-on: self-hosted
+    runs-on: oven/bun:alpine
     steps:
       -
         name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install Bun
-        uses: oven-sh/setup-bun@v2
+        
+      -
+        name: Setup bun cache
+        id: cache-bun
+        uses: actions/cache@v4.2.2
         with:
-          bun-version-file: package.json
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-${{ matrix.bun }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.bun }}-bun-
 
       -
           name: 💾 Install dependencies on cache miss
