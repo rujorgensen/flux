@@ -37,11 +37,11 @@ import {
     type TClientOwnUId,
     UnknownClientError,
     CONNECT_TO_CLIENT,
-    SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
+    SUBSCRIBE_NETWORK_CHANNEL_NAME,
     ERROR,
     RPC_RESPONSE,
     SET_OWN_UID,
-    SUBSCRIBED_NETWORK_CHANNEL_TOPIC,
+    SUBSCRIBED_NETWORK_CHANNEL_NAME,
     NETWORK_CHANNEL_PUBLISH,
     validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
@@ -91,7 +91,7 @@ export type TConnectedClientSocket = Bun.ServerWebSocket<{
     rtcClient?: WebRTCClient;
     claim?: string;
     rpcClient: RPCClient<'channel'>;
-    channelTopics: Set<TChannelName>;
+    channelNames: Set<TChannelName>;
 }>;
 
 const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
@@ -205,7 +205,7 @@ export class FluxMeshServer {
                                 isAuthority: decodedToken.isAuthority,
                                 address: `${machineAddress}/${processId}/${socketId}`,
                                 claim: decodedToken.claim,
-                                channelTopics: new Set(),
+                                channelNames: new Set(),
                             },
                         })
                     ) {
@@ -292,18 +292,18 @@ export class FluxMeshServer {
                             const firstColon = message_.indexOf(':');
                             const secondColon = message_.indexOf(':', firstColon + 1);
 
-                            const channelTopic: string = message_.slice(
+                            const channelName: string = message_.slice(
                                 firstColon + 1,
                                 secondColon
                             );
                             const data: string = message_.slice(secondColon + 1);
 
-                            if (validateChannelNameOrThrow(channelTopic)) {
-                                if (ws.data.channelTopics.has(channelTopic)) {
+                            if (validateChannelNameOrThrow(channelName)) {
+                                if (ws.data.channelNames.has(channelName)) {
                                     // Don't publish to self
                                     this.globalChannelPubsub.publish(
-                                        `networks/${ws.data.networkId}/channels/${channelTopic}`,
-                                        `${ON_NETWORK_CHANNEL_PUBLISH}:${channelTopic}:${data}`,
+                                        `networks/${ws.data.networkId}/channels/${channelName}`,
+                                        `${ON_NETWORK_CHANNEL_PUBLISH}:${channelName}:${data}`,
                                         ws,
                                     );
                                 }
@@ -312,7 +312,7 @@ export class FluxMeshServer {
                             break;
                         }
 
-                        case SUBSCRIBE_NETWORK_CHANNEL_TOPIC: {
+                        case SUBSCRIBE_NETWORK_CHANNEL_NAME: {
                             const channelNameString: string = message_.substring(message_.indexOf(':') + 1);
 
                             try {
@@ -324,7 +324,7 @@ export class FluxMeshServer {
 
                             const channelName: TChannelName = channelNameString as TChannelName;
 
-                            if (ws.data.channelTopics.has(channelName)) {
+                            if (ws.data.channelNames.has(channelName)) {
                                 ws.send(`${ERROR}:Agent is already subscribed to channnel`);
 
                                 return;
@@ -334,6 +334,11 @@ export class FluxMeshServer {
                                 await networkAuthorityManager.resolveNetworkAuthorityAddressOrThrow(
                                     ws.data.networkId
                                 );
+
+                            const canHaveMembers = await this.channelManager.canHaveMembers(channelName);
+                            if (!canHaveMembers) {
+                                ws.send(`${ERROR}:Channel limit is reached`);
+                            }
 
                             try {
                                 const authorize: boolean = await globalRPCClient.call(
@@ -345,11 +350,18 @@ export class FluxMeshServer {
 
                                 if (authorize) {
                                     ws.subscribe(`networks/${ws.data.networkId}/channels/${channelName}`);
-                                    ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_TOPIC}:${channelName}`);
-                                    ws.data.channelTopics.add(channelName);
-                                    console.log(`🎉 Client was authorized on channel topic '${channelName}'`);
+                                    ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
+                                    ws.data.channelNames.add(channelName);
+                                    console.log(`🎉 Client was authorized on channel name '${channelName}'`);
+
+                                    this.channelManager
+                                        .joinNetworkChannel(
+                                            ws.data.networkId,
+                                            channelName,
+                                            ws.data.address,
+                                        );
                                 } else {
-                                    console.error(`Client was not authorized to connect to channel topic '${channelName}'`);
+                                    console.error(`Client was not authorized to connect to channel name '${channelName}'`);
                                     ws.send(`${ERROR}:Not authorized`);
                                 }
                             } catch (error) {
@@ -461,18 +473,21 @@ export class FluxMeshServer {
                         );
                     } else {
                         // Unsubscribe from topics
-                        for (const topic of ws.data.channelTopics ?? []) {
+                        for (const channelName of (ws.data.channelNames ?? [])) {
                             ws.unsubscribe(
-                                `networks/${ws.data.networkId}/channels/${topic}`
+                                `networks/${ws.data.networkId}/channels/${channelName}`
                             );
                         }
 
                         //  * Leave all channels
-                        this.channelManager
-                            .leaveAllNetworkChannels(
-                                ws.data.networkId,
-                                ws.data.address,
-                            );
+                        if (ws.data.channelNames.size > 0) {
+                            this.channelManager
+                                .leaveAllNetworkChannels(
+                                    ws.data.networkId,
+                                    ws.data.address,
+                                    ws.data.channelNames,
+                                );
+                        }
 
                         console.log('🤵 Agent disconnected:');
 

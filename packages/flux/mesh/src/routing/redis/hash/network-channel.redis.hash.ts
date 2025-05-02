@@ -118,4 +118,30 @@ export class NetworkChannelHash {
 
         return membersLeft;
     }
+
+    /**
+     * Leaves all network channels.
+     * 
+     * @param { TNetworkId_S }          networkId
+     * @param { TAddress }              clientAddress
+     * @param { Set<TChannelName> }     channelNames
+     * 
+     * @returns { void } 
+     */
+    public async leaveAllNetworkChannels(
+        networkId: TNetworkId_S,
+        clientAddress: TAddress,
+        channelNames: Set<TChannelName>,
+    ): Promise<void> {
+        return Promise.all(
+            Array.from(channelNames).map(async (channelName) => {
+                await this.leaveNetworkChannel(
+                    networkId,
+                    channelName,
+                    clientAddress,
+                );
+            }),
+        )
+            .then(() => void 0);
+    }
 }

@@ -21,14 +21,30 @@ export class NetworkChannelManager {
         private readonly _globalChannelPubsub: GlobalChannelPubsub,
     ) { }
 
+    /**
+     * Checks if a channel can have more members.
+     * 
+     * @param { TChannelName }  _channelName
+     * 
+     * @returns { Promise<boolean> } 
+     */
     public async canHaveMembers(
-
+        _channelName: TChannelName,
     ): Promise<boolean> {
         console.error('canHaveMembers not implemented.');
 
         return Promise.resolve(true);
     }
 
+    /**
+     * Joins a network channel.
+     * 
+     * @param { TNetworkId_S }  networkId 
+     * @param { TChannelName }  channelName 
+     * @param { TAddress }      clientAddress
+     * 
+     * @returns { void } 
+     */
     public joinNetworkChannel(
         networkId: TNetworkId_S,
         channelName: TChannelName,
@@ -46,6 +62,35 @@ export class NetworkChannelManager {
         );
     }
 
+    /**
+     * Leaves all network channels.
+     * 
+     * @param { TNetworkId_S }          networkId
+     * @param { TAddress }              clientAddress
+     * @param { Set<TChannelName> }     channelNames
+     * 
+     * @returns { void } 
+     */
+    public leaveAllNetworkChannels(
+        networkId: TNetworkId_S,
+        clientAddress: TAddress,
+        channelNames: Set<TChannelName>,
+    ): void {
+        this.networkChannelHash.leaveAllNetworkChannels(
+            networkId,
+            clientAddress,
+            channelNames,
+        );
+    }
+
+    /**
+     * Creates a network channel if it does not exist.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * 
+     * @returns { void } 
+     */
     private async createNetworkChannelIfNowExist(
         networkId: TNetworkId_S,
         channelName: TChannelName,

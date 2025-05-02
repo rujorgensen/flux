@@ -7,11 +7,11 @@ import {
     type TClientOwnUId,
     type TAuthorizeCallback,
     CONNECT_TO_CLIENT,
-    SUBSCRIBE_NETWORK_CHANNEL_TOPIC,
+    SUBSCRIBE_NETWORK_CHANNEL_NAME,
     RPC_REQUEST,
     RPC_RESPONSE,
     SET_OWN_UID,
-    SUBSCRIBED_NETWORK_CHANNEL_TOPIC,
+    SUBSCRIBED_NETWORK_CHANNEL_NAME,
     NETWORK_CHANNEL_PUBLISH,
     validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
@@ -159,7 +159,7 @@ export class FluxWebSocketConnection {
                     }
 
                     switch (packageType) {
-                        case SUBSCRIBED_NETWORK_CHANNEL_TOPIC: {
+                        case SUBSCRIBED_NETWORK_CHANNEL_NAME: {
                             const channelName: TChannelName = message_.substring(message_.indexOf(':') + 1) as TChannelName;
 
                             console.log(`Connected to topic: "${channelName}"`);
@@ -304,7 +304,7 @@ export class FluxWebSocketConnection {
     ): Promise<FluxNetworkChannel> {
 
         if (this.webSocketClient) {
-            this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_TOPIC}:${channelName}`);
+            this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
 
             // TODO wait for acknowledgment
             return Promise.resolve(new FluxNetworkChannel(channelName, this));
