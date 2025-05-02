@@ -77,6 +77,7 @@ import {
     type RedisConnection,
     getRedisConnection,
 } from './routing/redis/redis-connection.class';
+import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
 
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
     ip: Bun.SocketAddress | null;
@@ -118,11 +119,13 @@ const clientRPCResponseCallbacks: Map<
 export class FluxMeshServer {
     private readonly redisConnection: RedisConnection = getRedisConnection();
     private readonly onReadyListeners: Set<() => void> = new Set();
-    private readonly bunServer: Bun.Server | undefined;
+    private readonly bunServer: Bun.Server;
+    private readonly globalChannelPubsub: GlobalChannelPubsub;
 
     constructor(
         private readonly port: number = 8080,
     ) {
+
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
         const networkClientManager: NetworkClientManager = new NetworkClientManager();
 
@@ -174,7 +177,10 @@ export class FluxMeshServer {
                 },
             },
 
-            async fetch(request: Request, server: Bun.Server) {
+            async fetch(
+                request: Request,
+                server: Bun.Server,
+            ) {
                 // Upgrade the request to a WebSocket
 
                 //      const cookies = request.headers.get('Cookie');
@@ -260,10 +266,10 @@ export class FluxMeshServer {
                     //       ws.close(1001, 'Client not validated'); // ! Check correct error code
                 },
 
-                async message(
+                message: async (
                     ws: TConnectedClientSocket,
                     message_: string | Buffer,
-                ) {
+                ) => {
                     if (typeof message_ !== 'string') {
                         throw new Error('Message is not a string');
                     }
@@ -286,7 +292,8 @@ export class FluxMeshServer {
                             if (validateChannelNameOrThrow(channelTopic)) {
                                 if (ws.data.channelTopics.has(channelTopic)) {
                                     // Don't publish to self
-                                    ws.publish(
+                                    this.globalChannelPubsub.publish(
+                                        ws,
                                         `networks/${ws.data.networkId}/channels/${channelTopic}`,
                                         `${ON_NETWORK_CHANNEL_PUBLISH}:${channelTopic}:${data}`
                                     );
@@ -466,6 +473,12 @@ export class FluxMeshServer {
             },
         });
 
+        this.globalChannelPubsub = new GlobalChannelPubsub(
+            this.redisConnection,
+            this.bunServer,
+            processAddress,
+        );
+
         // TODO: DETECT WHEN READY
         setTimeout(() => {
 
@@ -495,7 +508,7 @@ export class FluxMeshServer {
         clientMap.clear();
 
         // 'true': Force stop and close all active connections
-        await this.bunServer?.stop(true);
+        await this.bunServer.stop(true);
         await this.redisConnection.setDisconnected(`${machineAddress}/${processId}`);
         await this.redisConnection.disconnect();
     }
