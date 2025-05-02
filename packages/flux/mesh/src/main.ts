@@ -446,10 +446,10 @@ export class FluxMeshServer {
                 },
 
                 // A socket is closed
-                close(
+                close: (
                     ws: TConnectedClientSocket,
                     code: number,
-                ) {
+                ) => {
                     console.log('🛑 Socket disconnected', code, ws.data.id); // 1001
 
                     clientMap.delete(ws.data.id);
@@ -466,6 +466,14 @@ export class FluxMeshServer {
                                 `networks/${ws.data.networkId}/channels/${topic}`
                             );
                         }
+
+                        //  * Leave all channels
+                        this.channelManager
+                            .leaveAllNetworkChannels(
+                                ws.data.networkId,
+                                ws.data.address,
+                            );
+
                         console.log('🤵 Agent disconnected:');
 
                         // TODO
