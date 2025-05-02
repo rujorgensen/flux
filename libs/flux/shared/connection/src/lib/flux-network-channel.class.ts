@@ -52,4 +52,5 @@ export class FluxNetworkChannel {
                 fn,
             );
     }
+
 }

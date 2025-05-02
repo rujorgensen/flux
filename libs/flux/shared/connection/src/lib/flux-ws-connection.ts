@@ -16,6 +16,7 @@ import {
     validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
     AUTHORITY_CHANNEL_SUBSCRIBE,
+    UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
 } from '@flux/shared/types';
 import {
     type RPCRequest,
@@ -148,10 +149,10 @@ export class FluxWebSocketConnection {
 
                     const msgInterceptors: Set<TMessageCallback> | undefined = this.packageTypeInterceptorCallbacks.get(packageType);
                     if (msgInterceptors && msgInterceptors.size > 0) {
-                        const channelTopic: string = message_.substring(message_.indexOf(':') + 1) as TChannelName;
+                        const channelName: string = message_.substring(message_.indexOf(':') + 1) as TChannelName;
 
                         for (const msgInterceptor of msgInterceptors) {
-                            msgInterceptor(channelTopic);
+                            msgInterceptor(channelName);
                         }
 
                         // There are interceptors of this package type, don't proceed
@@ -162,7 +163,7 @@ export class FluxWebSocketConnection {
                         case SUBSCRIBED_NETWORK_CHANNEL_NAME: {
                             const channelName: TChannelName = message_.substring(message_.indexOf(':') + 1) as TChannelName;
 
-                            console.log(`Connected to topic: "${channelName}"`);
+                            console.log(`Connected to channel name: "${channelName}"`);
 
                             break;
                         }
@@ -308,6 +309,26 @@ export class FluxWebSocketConnection {
 
             // TODO wait for acknowledgment
             return Promise.resolve(new FluxNetworkChannel(channelName, this));
+        }
+
+        return Promise.reject(new Error('Not connected'));
+    }
+
+    /**
+     * 
+     * @param { TChannelName } channelName
+     * 
+     * @returns { Promise<void> } 
+     */
+    public async leaveChannel(
+        channelName: TChannelName,
+    ): Promise<void> {
+
+        if (this.webSocketClient) {
+            this.webSocketClient.send(`${UNSUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
+
+            // TODO wait for acknowledgment
+            return Promise.resolve(void 0);
         }
 
         return Promise.reject(new Error('Not connected'));

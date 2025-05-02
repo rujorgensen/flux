@@ -237,7 +237,13 @@ describe('persistica-flux-mesh', () => {
             const detectedCreatedChanenl: string = await createChannelPromise;
 
             expect(detectedCreatedChanenl).toBe('channel-c');
-        });
+
+            // * Leave to channel
+            await fluxAgentNetworkConnection
+                .leaveChannel('channel-c');
+
+            expect(fluxAgentNetworkConnection.readConnectedChannels()).toEqual([]);
+
     });
 });
 

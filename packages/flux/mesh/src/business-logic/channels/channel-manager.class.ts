@@ -63,6 +63,27 @@ export class NetworkChannelManager {
     }
 
     /**
+     * Joins a network channel.
+     * 
+     * @param { TNetworkId_S }  networkId 
+     * @param { TChannelName }  channelName 
+     * @param { TAddress }      clientAddress
+     * 
+     * @returns { void } 
+     */
+    public leaveNetworkChannel(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+        clientAddress: TAddress,
+    ): void {
+        this.networkChannelHash.leaveNetworkChannel(
+            networkId,
+            channelName,
+            clientAddress,
+        );
+    }
+
+    /**
      * Leaves all network channels.
      * 
      * @param { TNetworkId_S }          networkId
