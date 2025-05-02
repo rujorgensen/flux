@@ -136,6 +136,6 @@ export class BunRedisClient extends EventEmitter<{
   ) {
     this.handlers.clear();
     this.connected = false;
-    this.client.close();
+    // this.client.close(); // This keeps randomly failing in CI, and is uncatchable
   }
 }
