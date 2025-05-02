@@ -1,98 +1,98 @@
 {
-  "name": "persistica-flux-mesh",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/flux/mesh/src",
-  "projectType": "library",
-  "tags": [
-    "type:npm-package",
-    "scope:any"
-  ],
-  "targets": {
-    "bun-serve": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "bun --watch run ./apps/flux/backend/flux-mesh/src/main.ts"
-      }
-    },
-    "bun-build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "bun build {projectRoot}/src/main.ts --outdir ./dist/apps/flux/backend/flux-mesh --external bun"
-      }
-    },
-    "build": {
-      "executor": "@nx/esbuild:esbuild",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "defaultConfiguration": "production",
-      "options": {
-        "platform": "node",
-        "outputPath": "dist/apps/flux/backend/flux-mesh",
-        "format": [
-          "cjs"
-        ],
-        "bundle": false,
-        "main": "apps/flux/backend/flux-mesh/src/main.ts",
-        "tsConfig": "apps/flux/backend/flux-mesh/tsconfig.app.json",
-        "generatePackageJson": true,
-        "esbuildOptions": {
-          "sourcemap": true,
-          "outExtension": {
-            ".js": ".js"
-          }
-        }
-      },
-      "configurations": {
-        "development": {},
-        "production": {
-          "esbuildOptions": {
-            "sourcemap": false,
-            "outExtension": {
-              ".js": ".js"
+    "name": "persistica-flux-mesh",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/flux/mesh/src",
+    "projectType": "library",
+    "tags": [
+        "type:npm-package",
+        "scope:any"
+    ],
+    "targets": {
+        "bun-serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun --watch run ./apps/flux/backend/flux-mesh/src/main.ts"
             }
-          }
-        }
-      }
-    },
-    "serve": {
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
-      "dependsOn": [
-        "build"
-      ],
-      "options": {
-        "buildTarget": "persistica-flux-mesh:build",
-        "runBuildTargetDependencies": false
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "persistica-flux-mesh:build:development"
         },
-        "production": {
-          "buildTarget": "persistica-flux-mesh:build:production"
+        "bun-build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun build {projectRoot}/src/main.ts --outdir ./dist/apps/flux/backend/flux-mesh --external bun"
+            }
+        },
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "defaultConfiguration": "production",
+            "options": {
+                "platform": "node",
+                "outputPath": "dist/apps/flux/backend/flux-mesh",
+                "format": [
+                    "cjs"
+                ],
+                "bundle": false,
+                "main": "apps/flux/backend/flux-mesh/src/main.ts",
+                "tsConfig": "apps/flux/backend/flux-mesh/tsconfig.app.json",
+                "generatePackageJson": true,
+                "esbuildOptions": {
+                    "sourcemap": true,
+                    "outExtension": {
+                        ".js": ".js"
+                    }
+                }
+            },
+            "configurations": {
+                "development": {},
+                "production": {
+                    "esbuildOptions": {
+                        "sourcemap": false,
+                        "outExtension": {
+                            ".js": ".js"
+                        }
+                    }
+                }
+            }
+        },
+        "serve": {
+            "executor": "@nx/js:node",
+            "defaultConfiguration": "development",
+            "dependsOn": [
+                "build"
+            ],
+            "options": {
+                "buildTarget": "persistica-flux-mesh:build",
+                "runBuildTargetDependencies": false
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "persistica-flux-mesh:build:development"
+                },
+                "production": {
+                    "buildTarget": "persistica-flux-mesh:build:production"
+                }
+            }
+        },
+        "docker-build": {
+            "dependsOn": [
+                "build"
+            ],
+            "command": "docker build -f apps/flux/backend/flux-mesh/Dockerfile . -t flux-backend-mesh"
+        },
+        "nx-release-publish": {
+            "options": {
+                "packageRoot": "dist/{projectRoot}"
+            }
         }
-      }
     },
-    "docker-build": {
-      "dependsOn": [
-        "build"
-      ],
-      "command": "docker build -f apps/flux/backend/flux-mesh/Dockerfile . -t flux-backend-mesh"
-    },
-    "nx-release-publish": {
-      "options": {
-        "packageRoot": "dist/{projectRoot}"
-      }
+    "release": {
+        "version": {
+            "generatorOptions": {
+                "packageRoot": "dist/{projectRoot}",
+                "currentVersionResolver": "git-tag",
+                "fallbackCurrentVersionResolver": "disk"
+            }
+        }
     }
-  },
-  "release": {
-    "version": {
-      "generatorOptions": {
-        "packageRoot": "dist/{projectRoot}",
-        "currentVersionResolver": "git-tag",
-        "fallbackCurrentVersionResolver": "disk"
-      }
-    }
-  }
 }
