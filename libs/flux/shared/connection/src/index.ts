@@ -1,6 +1,6 @@
 export {
     FluxAgentNetworkConnection,
-} from './lib/flux-agent-network.class';
+} from './lib/agent/flux-agent-network.class';
 export {
     createWSConnection,
     FluxWebSocketConnection,
@@ -9,5 +9,5 @@ export {
     FluxNetworkChannel,
 } from './lib/flux-network-channel.class';
 export {
-    FluxAuthorityNetworkConnection,
-} from './lib/flux-authority-network.class';
+    NetworkChannelEventEmitter,
+} from './lib/network-channel-manager.class';

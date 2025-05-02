@@ -124,7 +124,7 @@ export class LiveUpdates {
             const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
                 .joinChannel('protected-mesh-redis-health-alerts');
 
-            console.log(`✅ Agent connected to network channel topics: 'portal-redis-health-alerts', 'mesh-redis-health-alerts'`);
+            console.log(`✅ Agent connected to network channel topics: "${fluxNetworkConnection.readConnectedChannels().join('","')}"`);
 
             portalRedisStatusService
                 .onAlert((alerts: string[]) => {

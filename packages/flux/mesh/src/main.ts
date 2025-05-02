@@ -22,9 +22,9 @@ if (!process.env['FLUX_JWT_KEY']) {
     throw new Error('Missing FLUX_JWT_KEY in .env');
 }
 
-if (!process.env['FLUX_DOMAIN']) {
-    throw new Error('Missing FLUX_DOMAIN in .env');
-}
+// if (!process.env['FLUX_DOMAIN']) {
+//     throw new Error('Missing FLUX_DOMAIN in .env');
+// }
 
 import {
     type TNetworkId_S,
@@ -73,10 +73,10 @@ import type {
     TRPCResponseCallbackFunction,
 } from '@flux/shared/ws';
 import * as nodeURL from 'node:url';
-
-const networkAuthorityManager: NetworkAuthorityManager =
-    new NetworkAuthorityManager();
-const networkClientManager: NetworkClientManager = new NetworkClientManager();
+import {
+    type RedisConnection,
+    getRedisConnection,
+} from './routing/redis/redis-connection.class';
 
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
     ip: Bun.SocketAddress | null;
@@ -97,22 +97,6 @@ const processId: TProcessId = readProcessId();
 const machineAddress: TMachineAddress = readMachineAddress();
 const processAddress: TProcessAddress = readProcessAddress();
 
-const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
-    // passToLocalClient:
-    (
-        clientId: TClientId,
-        message: string,
-    ) => {
-        const client: TConnectedClientSocket | undefined =
-            clientMap.get(clientId);
-
-        if (!client) {
-            throw new UnknownClientError(clientId, processAddress);
-        }
-
-        client.send(message);
-    }
-);
 
 //const clientCallbacks: Map<TClientId, TCallbackFunction[]> = new Map();
 const clientRPCResponseCallbacks: Map<
@@ -129,20 +113,42 @@ const clientRPCResponseCallbacks: Map<
 //     },
 // );
 
-const processMessageRouter: ProcessMessageRouter = new ProcessMessageRouter();
 
-const globalRPCClient: GlobalRPCClient<
-    'authorize' | 'authorizeNetworkChannel'
-> = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
 export class FluxMeshServer {
+    private readonly redisConnection: RedisConnection = getRedisConnection();
     private readonly onReadyListeners: Set<() => void> = new Set();
+    private readonly bunServer: Bun.Server | undefined;
 
     constructor(
         private readonly port: number = 8080,
     ) {
+        const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
+        const networkClientManager: NetworkClientManager = new NetworkClientManager();
 
-        const server = Bun.serve({
+        const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
+            // passToLocalClient:
+            (
+                clientId: TClientId,
+                message: string,
+            ) => {
+                const client: TConnectedClientSocket | undefined =
+                    clientMap.get(clientId);
+
+                if (!client) {
+                    throw new UnknownClientError(clientId, processAddress);
+                }
+
+                client.send(message);
+            }
+        );
+        const processMessageRouter: ProcessMessageRouter = new ProcessMessageRouter();
+
+        const globalRPCClient: GlobalRPCClient<
+            'authorize' | 'authorizeNetworkChannel'
+        > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
+
+        this.bunServer = Bun.serve({
             port: this.port,
             idleTimeout: 0, // deactivate timeout
             routes: {
@@ -289,6 +295,7 @@ export class FluxMeshServer {
 
                             break;
                         }
+
                         case SUBSCRIBE_NETWORK_CHANNEL_TOPIC: {
                             const channelNameString: string = message_.substring(message_.indexOf(':') + 1);
 
@@ -464,7 +471,7 @@ export class FluxMeshServer {
 
             console.log(`Reloaded ${(globalThis as any).count} time(s)`);
 
-            console.log(`🚀 Server running on localhost:${server.port}`);
+            console.log(`🚀 Server running on localhost:${this.port}`);
 
             for (const cb of this.onReadyListeners) {
                 cb();
@@ -476,5 +483,20 @@ export class FluxMeshServer {
         fn: () => void,
     ): void {
         this.onReadyListeners.add(fn);
+    }
+
+    /**
+     * Gracefully shuts down the server.
+     * 
+     * @returns { Promise<void> }
+     */
+    public async stop(
+    ): Promise<void> {
+        clientMap.clear();
+
+        // 'true': Force stop and close all active connections
+        await this.bunServer?.stop(true);
+        await this.redisConnection.setDisconnected(`${machineAddress}/${processId}`);
+        await this.redisConnection.disconnect();
     }
 }
