@@ -244,6 +244,7 @@ describe('persistica-flux-mesh', () => {
 
             expect(fluxAgentNetworkConnection.readConnectedChannels()).toEqual([]);
 
+        });
     });
 });
 
