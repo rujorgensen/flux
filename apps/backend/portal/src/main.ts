@@ -63,13 +63,13 @@ const portalRedis: BunRedisClientType = new BunRedisClientType({
 await Promise.all([meshRedis.connect(), portalRedis.connect()]);
 
 if (!meshRedis.connected && !portalRedis.connected) {
-  console.error('❌ Both Redis connections failed, will retry');
+    console.error('❌ Both Redis connections failed, will retry');
 } else if (!meshRedis.connected) {
-  console.error('❌ Mesh Redis connection failed, will retry');
+    console.error('❌ Mesh Redis connection failed, will retry');
 } else if (!portalRedis.connected) {
-  console.error('❌ Portal Redis connection failed, will retry');
+    console.error('❌ Portal Redis connection failed, will retry');
 } else {
-  console.log('✅ Redis connected');
+    console.log('✅ Redis connected');
 }
 
 // ****************************************************************************

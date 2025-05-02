@@ -15,6 +15,12 @@
         "tsConfig": "libs/flux/shared/types/tsconfig.lib.json",
         "assets": []
       }
+    },
+    "bun-test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun test {projectRoot}"
+      }
     }
   },
   "tags": [

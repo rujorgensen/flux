@@ -233,9 +233,6 @@ export class RedisConnection {
     public async setConnected(
         address: string,
     ): Promise<void> {
-        //  await this.client
-        //      .set([address], '1', { EX: 5 });
-        // console.log("setting", new Date().toISOString());
         await this.hash.hmset(`machines/processes/${address}`, [
             'status', 'connected',
             'updatedAt', new Date().toISOString(),

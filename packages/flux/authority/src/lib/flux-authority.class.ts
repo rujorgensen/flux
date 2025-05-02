@@ -53,7 +53,7 @@ export class FluxAuthority {
         authorizeNetworkChannel: TChannnelAuthCallback<M>,
     ): Promise<FluxAuthorityNetworkConnection> {
         this.stateManager.emitNetworkState('authorizing');
-        
+
         const ticket: string = await retry<any>(
             () => authenticateNetworkAuthorityOrThrow(
                 this.networkId as TNetworkId_S,
