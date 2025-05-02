@@ -3,7 +3,6 @@ import {
     createClient,
 } from 'redis';
 
-
 export type RedisEventChannel = string & { __brand: 'redis-event-channel'; };
 export type MessageCallback = (message: string, channel: RedisEventChannel) => unknown;
 
