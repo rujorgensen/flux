@@ -5,7 +5,7 @@
 import type {
     TMessageCallback,
 } from '@flux/shared/ws';
-import { FluxWebSocketConnection } from '../../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
+import type { FluxWebSocketConnection } from '@flux/shared/connection';
 
 export class FluxClientData {
     private readonly callbacks: Set<TMessageCallback> = new Set();

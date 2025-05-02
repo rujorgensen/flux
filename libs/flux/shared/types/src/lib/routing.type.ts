@@ -31,7 +31,7 @@ export const splitAddressOrThrow = (
 
     return [
         machine as TMachineAddress,
-        Number.parseInt(process as string, 10) as TProcessId,
+        Number.parseInt(process, 10) as TProcessId,
         client as TClientId,
     ];
 };
@@ -51,6 +51,6 @@ export const splitProcessAddress = (
 
     return [
         machine as TMachineAddress,
-        Number.parseInt(process as string, 10) as TProcessId,
+        Number.parseInt(process, 10) as TProcessId,
     ];
 };

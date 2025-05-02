@@ -171,7 +171,7 @@ export class RedisConnection {
 
                 const [skipProcessAddress, message_] = index !== -1
                     ? [message.slice(0, index), message.slice(index + 1)]
-                    : [message, '']
+                    : [message, ''];
 
                 callback(
                     preFixedChannel.slice(1) as TGlobalChannel,
@@ -190,10 +190,10 @@ export class RedisConnection {
 
     /**
      * 
-     * @param address
-     * @param message
+     * @param { TAddress | TProcessAddress }    address
+     * @param { string }                        message
      * 
-     * @returns { void }
+     * @returns { Promise<void> }
      */
     public async directPublish(
         address: TAddress | TProcessAddress,
@@ -233,9 +233,6 @@ export class RedisConnection {
     public async setConnected(
         address: string,
     ): Promise<void> {
-        //  await this.client
-        //      .set([address], '1', { EX: 5 });
-        // console.log("setting", new Date().toISOString());
         await this.hash.hmset(`machines/processes/${address}`, [
             'status', 'connected',
             'updatedAt', new Date().toISOString(),

@@ -95,5 +95,4 @@ export class FluxAuthority {
 
     public readonly onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
     public readonly onNetworkState = this.stateManager.attachNetworkStateListener;
-    public readonly onMessage = this.fluxClientData.onMessage;
 }

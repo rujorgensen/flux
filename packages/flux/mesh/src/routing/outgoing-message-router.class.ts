@@ -29,10 +29,6 @@ export class OutgoingMessageRouter {
         console.log(
             `Created MessageRouter on machine address: ${this.machineAddress}, process id: ${this.processId}`
         );
-
-        setInterval(() => {
-            this.redisConnection.setConnected(`${this.machineAddress}/${this.processId}`);
-        }, 3_000);
     }
 
     /**

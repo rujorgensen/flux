@@ -1,0 +1,23 @@
+{
+    "editor.fontLigatures": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": false,
+    "editor.formatOnSave": true,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "[prisma]": {
+        "editor.defaultFormatter": "Prisma.prisma"
+    },
+    "typescript.format.semicolons": "insert",
+    "search.exclude": {
+        "**/node_modules": true
+    },
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/node_modules/**": true,
+        "**/env/**": true,
+        "**/backup/**": true,
+        "**/dist/**": true,
+        "**/.angular/**": true
+    }
+}
