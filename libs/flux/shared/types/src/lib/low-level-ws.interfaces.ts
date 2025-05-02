@@ -15,4 +15,10 @@ export const SUBSCRIBED_NETWORK_CHANNEL_TOPIC: string = 'subscribed-to-nc-topic'
 export const UNSUBSCRIBE_NETWORK_CHANNEL_TOPIC: string = 'unsubscribe-nc-topic';
 export const UNSUBSCRIBED_NETWORK_CHANNEL_TOPIC: string = 'unsubscribed-nc-topic';
 
+// * For authority-scoped events
+export const AUTHORITY_ON_CREATE_CHANNEL: string = 'acc';
+export const AUTHORITY_ON_EMPTY_CHANNEL: string = 'aec';
+export const AUTHORITY_CHANNEL_SUBSCRIBE: string = 'acs';
+
+// * Errors
 export const ERROR: string = 'e';

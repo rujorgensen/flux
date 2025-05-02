@@ -45,6 +45,7 @@ import {
     NETWORK_CHANNEL_PUBLISH,
     validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
+    AUTHORITY_CHANNEL_SUBSCRIBE,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -78,6 +79,7 @@ import {
     getRedisConnection,
 } from './routing/redis/redis-connection.class';
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
+import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
 
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
     ip: Bun.SocketAddress | null;
@@ -122,7 +124,6 @@ export class FluxMeshServer {
     constructor(
         private readonly port: number = 8080,
     ) {
-
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
         const networkClientManager: NetworkClientManager = new NetworkClientManager();
 
@@ -281,8 +282,8 @@ export class FluxMeshServer {
                             }
 
                             // Subscribe to the events 
-                            ws.subscribe(`${INTERNAL_EVENT}/networks/${ws.data.networkId}/channel-created`);
-                            ws.subscribe(`${INTERNAL_EVENT}/networks/${ws.data.networkId}/channel-empty`);
+                            ws.subscribe(`~/networks/${ws.data.networkId}/channel-created`);
+                            ws.subscribe(`~/networks/${ws.data.networkId}/channel-empty`);
 
                             break;
                         }
@@ -493,6 +494,10 @@ export class FluxMeshServer {
         setTimeout(() => {
             console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
             console.log(`🚀 Server running on localhost:${this.port}`);
+
+            setInterval(() => {
+                this.redisConnection.setConnected(`${machineAddress}/${processId}`);
+            }, 3_000);
 
             for (const cb of this.onReadyListeners) {
                 cb();
