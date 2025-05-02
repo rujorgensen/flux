@@ -4,3 +4,8 @@ export {
 export {
         BunRedisPubSub,
 } from './lib/core-redis-pub-sub.class';
+
+// Types
+export {
+        RedisEventChannel,
+} from './lib/core-redis-pub-sub.class';

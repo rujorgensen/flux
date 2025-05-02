@@ -1,5 +1,5 @@
 import {
-  RedisClient
+  RedisClient,
 } from 'bun';
 import { EventEmitter } from '@flux/shared/utils';
 

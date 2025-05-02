@@ -3,15 +3,11 @@ import {
     createClient,
 } from 'redis';
 
-export type MessageCallback = (message: string) => unknown;
+
+export type RedisEventChannel = string & { __brand: 'redis-event-channel'; };
+export type MessageCallback = (message: string, channel: RedisEventChannel) => unknown;
 
 export class BunRedisPubSub {
-
-    // implements Notifier
-    private readonly subscribers: Map<
-        MessageCallback,
-        (data: string, channel: string) => unknown
-    >;
 
     // Needs two clients, one for publishing and one for subscribing
     private readonly publisher: RedisClientType;
@@ -28,7 +24,6 @@ export class BunRedisPubSub {
             },
         },
     ) {
-        this.subscribers = new Map();
         this.publisher = createClient(this._options);
 
         this.publisher
@@ -81,10 +76,7 @@ export class BunRedisPubSub {
         callback: MessageCallback,
     ): Promise<void> {
         try {
-            const redisCallback = (message: string) => callback(message);
-
-            await this.subscriber.subscribe(channelId, redisCallback);
-            this.subscribers.set(callback, redisCallback);
+            await this.subscriber.subscribe(channelId, callback);
         } catch {
             console.log('error caught #2');
         }
@@ -95,25 +87,17 @@ export class BunRedisPubSub {
         callback: MessageCallback,
     ): void {
         try {
-            const redisCallback = this.subscribers.get(callback);
-
-            if (!redisCallback) {
-                return;
-            }
-
-            this.publisher.unsubscribe(channelId, redisCallback);
-            this.subscribers.delete(callback);
+            this.publisher.unsubscribe(channelId, callback);
         } catch {
             console.log('error caught #1');
         }
     }
 
-    public async disconnect(
+    public disconnect(
 
     ) {
-        this.subscribers.clear();
-        await this.subscriber.disconnect();
-        await this.publisher.disconnect();
+        this.subscriber.destroy();
+        this.publisher.destroy();
     }
 }
 

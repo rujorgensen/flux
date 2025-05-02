@@ -1,10 +1,12 @@
 import {
+    type RedisEventChannel,
     BunRedisClientType,
     BunRedisPubSub,
 } from '@core/redis/bun';
 import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
 import { NetworkAuthorityRedisSortedSet } from './hash/network-authority.redis.sorted-set';
 import { NetworkClientHash } from './hash/network-client.redis.hash';
+import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
 
 let redisConnection: RedisConnection | undefined;
 
@@ -26,15 +28,9 @@ export const getRedisConnection = (
     return redisConnection;
 };
 
-export type MessageCallback = (message: string) => unknown;
+export type MessageCallback = (message: string, channel?: string) => unknown;
 
 export class RedisConnection {
-    // implements Notifier
-    private readonly subscribers: Map<
-        MessageCallback,
-        (data: string, channel: string) => unknown
-    >;
-
     // Dedicated client for handling hash
     private readonly cacheClient: BunRedisClientType;
 
@@ -50,7 +46,6 @@ export class RedisConnection {
     constructor(
         private readonly url: string,
     ) {
-        this.subscribers = new Map();
         this.cacheClient = new BunRedisClientType({
             url: this.url,
             socket: {
@@ -132,6 +127,67 @@ export class RedisConnection {
         };
     }
 
+    // ****************************************************************************
+    // *** Publish To All Channels
+    // ****************************************************************************
+
+    /**
+     * 
+     * @param { TProcessAddress }   skipProcessAddress
+     * @param { TGlobalChannel  }   channel
+     * @param { string }            message
+     * 
+     * @returns { Promise<void> }
+     */
+    public async publishWebsocketChannelEvent(
+        skipProcessAddress: TProcessAddress,
+        channel: TGlobalChannel,
+        message: string,
+    ): Promise<void> {
+        try {
+            await this.pubSub.publish(`~${channel}`, `${skipProcessAddress}:${message}`);
+        } catch {
+            console.error(`Publish failed on global channel event: '${channel}'`);
+        }
+    }
+
+    /**
+     * 
+     * @returns { void }
+     */
+    public async subscribeWebsocketChannelEvent(
+        callback: (
+            channel: TGlobalChannel,
+            skipProcessAddress: TProcessAddress,
+            message: string,
+        ) => unknown,
+    ): Promise<void> {
+        try {
+            await this.pubSub.subscribe('~*', (
+                message: string,
+                preFixedChannel: RedisEventChannel,
+            ) => {
+                const index = message.indexOf(':');
+
+                const [skipProcessAddress, message_] = index !== -1
+                    ? [message.slice(0, index), message.slice(index + 1)]
+                    : [message, '']
+
+                callback(
+                    preFixedChannel.slice(1) as TGlobalChannel,
+                    skipProcessAddress as TProcessAddress,
+                    message_,
+                );
+            });
+        } catch {
+            console.log('Error caught while subscribing to websocket channel event globally');
+        }
+    }
+
+    // ****************************************************************************
+    // *** Publish Directly to Address
+    // ****************************************************************************
+
     /**
      * 
      * @param address
@@ -139,7 +195,7 @@ export class RedisConnection {
      * 
      * @returns { void }
      */
-    public async publish(
+    public async directPublish(
         address: TAddress | TProcessAddress,
         message: string,
     ): Promise<void> {
@@ -147,6 +203,30 @@ export class RedisConnection {
             await this.pubSub.publish(address, message);
         } catch {
             console.error(`Publish failed on address: ${address}`);
+        }
+    }
+
+    public subscribe(
+        channelId: TProcessAddress | TClientId,
+        callback: MessageCallback
+    ): void {
+        try {
+            const redisCallback = (message: string) => callback(message);
+
+            this.pubSub.subscribe(channelId, redisCallback);
+        } catch {
+            console.log('error caught #2');
+        }
+    }
+
+    public unsubscribe(
+        channelId: string,
+        callback: MessageCallback,
+    ): void {
+        try {
+            this.pubSub.unsubscribe(channelId, callback);
+        } catch {
+            console.log('error caught #1');
         }
     }
 
@@ -170,43 +250,10 @@ export class RedisConnection {
         // !TODO
     }
 
-    public subscribe(
-        channelId: TProcessAddress | TClientId,
-        callback: MessageCallback
-    ): void {
-        try {
-            const redisCallback = (message: string) => callback(message);
-
-            this.pubSub.subscribe(channelId, redisCallback);
-            this.subscribers.set(callback, redisCallback);
-        } catch {
-            console.log('error caught #2');
-        }
-    }
-
-    public unsubscribe(
-        channelId: string,
-        callback: MessageCallback,
-    ): void {
-        try {
-            const redisCallback = this.subscribers.get(callback);
-
-            if (!redisCallback) {
-                return;
-            }
-
-            this.pubSub.unsubscribe(channelId, redisCallback);
-            this.subscribers.delete(callback);
-        } catch {
-            console.log('error caught #1');
-        }
-    }
-
     public async disconnect(
 
     ): Promise<void> {
         this.cacheClient.disconnect();
         await this.pubSub.disconnect();
-        this.subscribers.clear();
     }
 }
