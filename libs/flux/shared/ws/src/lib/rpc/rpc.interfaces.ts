@@ -3,7 +3,7 @@ import type {
  } from '@flux/shared/types';
 
 export type TCallback = (result: any) => void;
-export type TMessageCallback = (result: string) => void;
+export type TMessageCallback = (message: string) => void;
 
 export type TRPCId = number; // Globally unique!! SHANCGE TO STRING PERHAPS
 

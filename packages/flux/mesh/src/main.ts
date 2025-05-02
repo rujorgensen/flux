@@ -93,13 +93,10 @@ export type TConnectedClientSocket = Bun.ServerWebSocket<{
 }>;
 
 const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
-
 const processId: TProcessId = readProcessId();
 const machineAddress: TMachineAddress = readMachineAddress();
 const processAddress: TProcessAddress = readProcessAddress();
 
-
-//const clientCallbacks: Map<TClientId, TCallbackFunction[]> = new Map();
 const clientRPCResponseCallbacks: Map<
     TClientId,
     Set<TRPCResponseCallbackFunction>
@@ -114,9 +111,8 @@ const clientRPCResponseCallbacks: Map<
 //     },
 // );
 
-
-
 export class FluxMeshServer {
+
     private readonly redisConnection: RedisConnection = getRedisConnection();
     private readonly onReadyListeners: Set<() => void> = new Set();
     private readonly bunServer: Bun.Server;
@@ -276,8 +272,6 @@ export class FluxMeshServer {
 
                     const packageType: string | undefined = message_.split(':')[0];
 
-                    // const fluxNetworkServer: FluxNetworkServer | undefined = this.connectedClientNetworkHandler.get(clientSocket);
-
                     switch (packageType) {
                         case NETWORK_CHANNEL_PUBLISH: {
                             const firstColon = message_.indexOf(':');
@@ -293,9 +287,9 @@ export class FluxMeshServer {
                                 if (ws.data.channelTopics.has(channelTopic)) {
                                     // Don't publish to self
                                     this.globalChannelPubsub.publish(
-                                        ws,
                                         `networks/${ws.data.networkId}/channels/${channelTopic}`,
-                                        `${ON_NETWORK_CHANNEL_PUBLISH}:${channelTopic}:${data}`
+                                        `${ON_NETWORK_CHANNEL_PUBLISH}:${channelTopic}:${data}`,
+                                        ws,
                                     );
                                 }
                             }
@@ -481,9 +475,7 @@ export class FluxMeshServer {
 
         // TODO: DETECT WHEN READY
         setTimeout(() => {
-
-            console.log(`Reloaded ${(globalThis as any).count} time(s)`);
-
+            console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
             console.log(`🚀 Server running on localhost:${this.port}`);
 
             for (const cb of this.onReadyListeners) {

@@ -45,19 +45,19 @@ export class GlobalChannelPubsub {
             });
     }
 
-    public publish(
-        ws: TConnectedClientSocket,
+    public async publish(
         channel: string,
         message: string,
-    ): void {
-        // Publish locally on the process to everyone but the client
-        ws.publish(
+        ws?: TConnectedClientSocket,
+    ): Promise<void> {
+        // Publish locally on the process to everyone but the client (if a client is provided)
+        (ws ?? this.bunServer).publish(
             channel,
             message,
         );
 
         // Publish globally to clients connected to other processes
-        this.redisConnection.publishWebsocketChannelEvent(
+        await this.redisConnection.publishWebsocketChannelEvent(
             this.processAddress, // The event is already sent to the local process
             channel as TGlobalChannel,
             message,
