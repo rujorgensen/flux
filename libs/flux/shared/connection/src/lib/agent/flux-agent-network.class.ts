@@ -67,6 +67,30 @@ export class FluxAgentNetworkConnection {
     }
 
     /**
+     * Listen to messages on this channel.
+     * 
+     * @param { string } channelName
+     * 
+     * @returns { Promise<void> }
+     */
+    public async leaveChannel(
+        channelName: string,
+    ): Promise<void> {
+        console.log(`Leaving channel "${channelName}"`);
+
+        if (!validateChannelNameOrThrow(channelName)) {
+            throw new Error('This will not actually be thrown');
+        }
+
+        await this._fluxWebSocketConnection
+            .leaveChannel(
+                channelName,
+            );
+
+        this.connectedChannelSet.delete(channelName);
+    }
+
+    /**
      * Connects to a client.
      * 
      * @param clientId
