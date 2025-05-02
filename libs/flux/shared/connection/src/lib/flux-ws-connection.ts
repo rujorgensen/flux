@@ -15,6 +15,7 @@ import {
     NETWORK_CHANNEL_PUBLISH,
     validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
+    AUTHORITY_CHANNEL_SUBSCRIBE,
 } from '@flux/shared/types';
 import {
     type RPCRequest,
@@ -59,6 +60,9 @@ export class FluxWebSocketConnection {
 
     private readonly topicCallbacks: Map<TChannelName, Set<TMessageCallback>> = new Map();
 
+    // Handles messages before the rest of the logic. Will not continue if there are interceptors
+    private readonly packageTypeInterceptorCallbacks: Map<string, Set<TMessageCallback>> = new Map();
+
     private webSocketClient: FluxWebSocketClientConnection | undefined;
     private first: boolean = true;
 
@@ -84,6 +88,19 @@ export class FluxWebSocketConnection {
                 retries: this.options.retries,
             }
         );
+    }
+
+    public interceptPackageTypeMessages(
+        packageType: string,
+        fn: TMessageCallback,
+    ): void {
+        const existingInterceptors: Set<TMessageCallback> | undefined = this.packageTypeInterceptorCallbacks.get(packageType);
+
+        if (existingInterceptors) {
+            existingInterceptors.add(fn);
+        } else {
+            this.packageTypeInterceptorCallbacks.set(packageType, new Set([fn]));
+        }
     }
 
     /**
@@ -128,6 +145,18 @@ export class FluxWebSocketConnection {
                     }
 
                     const packageType: string | undefined = message_.split(':')[0];
+
+                    const msgInterceptors: Set<TMessageCallback> | undefined = this.packageTypeInterceptorCallbacks.get(packageType);
+                    if (msgInterceptors && msgInterceptors.size > 0) {
+                        const channelTopic: string = message_.substring(message_.indexOf(':') + 1) as TChannelName;
+
+                        for (const msgInterceptor of msgInterceptors) {
+                            msgInterceptor(channelTopic);
+                        }
+
+                        // There are interceptors of this package type, don't proceed
+                        return;
+                    }
 
                     switch (packageType) {
                         case SUBSCRIBED_NETWORK_CHANNEL_TOPIC: {
@@ -362,4 +391,19 @@ export class FluxWebSocketConnection {
 
         return Promise.resolve();
     }
+
+    /**
+     * Only for authorities
+     * 
+     * @returns { void }
+     */
+    public subscribeToChannelChanges(
+    ): void {
+        if (this.webSocketClient) {
+            this.webSocketClient.send(AUTHORITY_CHANNEL_SUBSCRIBE);
+        } else {
+            console.warn('WebSocket client is not connected');
+        }
+    }
+
 }

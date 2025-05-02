@@ -273,6 +273,19 @@ export class FluxMeshServer {
                     const packageType: string | undefined = message_.split(':')[0];
 
                     switch (packageType) {
+                        case AUTHORITY_CHANNEL_SUBSCRIBE: {
+                            if (!ws.data.isAuthority) {
+                                ws.close(4000, 'Bad behavior');
+                                return;
+                            }
+
+                            // Subscribe to the events 
+                            ws.subscribe(`${INTERNAL_EVENT}/networks/${ws.data.networkId}/channel-created`);
+                            ws.subscribe(`${INTERNAL_EVENT}/networks/${ws.data.networkId}/channel-empty`);
+
+                            break;
+                        }
+
                         case NETWORK_CHANNEL_PUBLISH: {
                             const firstColon = message_.indexOf(':');
                             const secondColon = message_.indexOf(':', firstColon + 1);
@@ -472,6 +485,8 @@ export class FluxMeshServer {
             this.bunServer,
             processAddress,
         );
+
+        this.channelManager = new NetworkChannelManager(this.globalChannelPubsub);
 
         // TODO: DETECT WHEN READY
         setTimeout(() => {
