@@ -16,6 +16,12 @@
       "options": {
         "script": "bunx run ../../../dist/apps/frontend/portal/server/entry.mjs"
       }
+    },
+    "bun-test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun test {projectRoot}"
+      }
     }
   },
   "tags": []
