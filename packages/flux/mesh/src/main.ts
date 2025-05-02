@@ -117,6 +117,7 @@ export class FluxMeshServer {
     private readonly onReadyListeners: Set<() => void> = new Set();
     private readonly bunServer: Bun.Server;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
+    private readonly channelManager: NetworkChannelManager;
 
     constructor(
         private readonly port: number = 8080,
