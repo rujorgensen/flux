@@ -12,8 +12,7 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun test {projectRoot}",
-        "commandWithEnv": "bun test --env-file=.env.e2e {projectRoot}"
+        "command": "bun test {projectRoot}"
       }
     }
   }

@@ -1,5 +1,5 @@
 import {
-    type RedisEventChannel,
+    type TRedisEventChannel,
     BunRedisClientType,
     BunRedisPubSub,
 } from '@core/redis/bun';
@@ -165,7 +165,7 @@ export class RedisConnection {
         try {
             await this.pubSub.subscribe('~*', (
                 message: string,
-                preFixedChannel: RedisEventChannel,
+                preFixedChannel: TRedisEventChannel,
             ) => {
                 const index = message.indexOf(':');
 
