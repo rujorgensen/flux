@@ -61,7 +61,7 @@ export class NetworkChannelManager {
         channelName: TChannelName,
         clientAddress: TAddress,
     ): void {
-        this.createNetworkChannelIfNowExist(
+        this.createNetworkChannelIfNotExist(
             networkId,
             channelName,
         );
