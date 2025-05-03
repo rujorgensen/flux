@@ -3,6 +3,7 @@ import {
     type TChannelName,
     type TNetworkId_S,
     AUTHORITY_ON_CREATE_CHANNEL,
+    AUTHORITY_ON_EMPTY_CHANNEL,
 } from '@flux/shared/types';
 import { NetworkChannelHash } from '../../routing/redis/hash/network-channel.redis.hash';
 import {
@@ -63,24 +64,33 @@ export class NetworkChannelManager {
     }
 
     /**
-     * Joins a network channel.
+     * Leaves a network channel.
      * 
      * @param { TNetworkId_S }  networkId 
      * @param { TChannelName }  channelName 
      * @param { TAddress }      clientAddress
      * 
-     * @returns { void } 
+     * @returns { Promise<void> } 
      */
-    public leaveNetworkChannel(
+    public async leaveNetworkChannel(
         networkId: TNetworkId_S,
         channelName: TChannelName,
         clientAddress: TAddress,
-    ): void {
-        this.networkChannelHash.leaveNetworkChannel(
-            networkId,
-            channelName,
-            clientAddress,
-        );
+    ): Promise<void> {
+        const membersLeft: number = await this.networkChannelHash
+            .leaveNetworkChannel(
+                networkId,
+                channelName,
+                clientAddress,
+            );
+
+        if (membersLeft === 0) {
+            this._globalChannelPubsub
+                .publish(
+                    `~/networks/${networkId}/channel-empty`,
+                    `${AUTHORITY_ON_EMPTY_CHANNEL}:${channelName}`,
+                );
+        }
     }
 
     /**

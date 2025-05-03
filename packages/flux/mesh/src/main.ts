@@ -391,7 +391,7 @@ export class FluxMeshServer {
 
                             const channelName: TChannelName = channelNameString as TChannelName;
 
-                            if (ws.data.channelNames.has(channelName)) {
+                            if (!ws.data.channelNames.has(channelName)) {
                                 ws.send(`${ERROR}:Cannot unsubscribe. Agent is not connected to the channnel`);
 
                                 return;
@@ -535,7 +535,7 @@ export class FluxMeshServer {
                                 );
                         }
 
-                        console.log('🤵 Agent disconnected:');
+                        console.log('🤵 Agent disconnected');
 
                         // TODO
                         // localClientManager.unregister(
