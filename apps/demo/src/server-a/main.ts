@@ -1,7 +1,8 @@
 
 import { FluxAuthority } from '@persistica/flux-authority';
-import type { TChannelName, TNetworkId_S } from '@flux/shared/types';
+import type { TChannelName } from '@flux/shared/types';
 import jwt from 'jsonwebtoken';
+import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
 
 const secret = 'your-very-secure-secret'; // keep this secret safe!
 
@@ -11,32 +12,29 @@ const secret = 'your-very-secure-secret'; // keep this secret safe!
 
 console.log('🔑 Registering authority');
 
-const CODE_TO_ACCESS_NETWORK: any = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
-const flux1: FluxAuthority = new FluxAuthority(
-    'rAnD0M-network-id' as unknown as TNetworkId_S,
+const fluxAuthority: FluxAuthority = new FluxAuthority(
+    DEMO_NETWORK_ID,
     {
         // p2p encryption
         secretKey: '$Ap~yI,y^:Hsqca',
     },
 );
 
-await flux1
+await fluxAuthority
     .registerAuthority(
         NETWORK_AUTHORITY_KEY,
         (
             auth: unknown,
         ): Promise<string> => {
             // Test the agents claim to access network
-            if (
-                ((auth as any).code !== CODE_TO_ACCESS_NETWORK)
-            ) {
+            if ((<any>auth).code !== DEMO_CHANNEL_PASSWORD) {
+                console.warn(`❌ Client is not allowed to access the network, with auth: ${JSON.stringify(auth)}}`);
                 return Promise.reject(new Error('Not allowed'));
             }
 
-            // console.log('✅ Network access authorized');
-
+            console.log('✅ Client is allowed to access the network');
             return Promise.resolve(jwt.sign({
                 userId: (<any>auth).user,
             }, secret, { expiresIn: 120_000 }));
@@ -46,7 +44,6 @@ await flux1
             channelTopic: TChannelName,
             identification: string,
         ): Promise<boolean> => {
-
             console.log(`🔒 A client is trying to subscribe to topic '${channelTopic}', using identification '${identification}'`);
 
             console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
@@ -54,3 +51,5 @@ await flux1
             return Promise.resolve(true);
         },
     );
+
+console.log('✅ Demo Authority registered');

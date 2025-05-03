@@ -3,10 +3,10 @@ name: Run test suites
 
 on:
   workflow_dispatch: {}
-  push:
-    branches:
-      - '**'
-      - '!wip/**'
+  # push:
+  #   branches:
+  #     - '**'
+  #     - '!wip/**'
 
   pull_request:
 

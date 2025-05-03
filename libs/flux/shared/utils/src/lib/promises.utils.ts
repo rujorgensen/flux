@@ -4,13 +4,21 @@ export const retry = async <T>(
     options: {
         retries: number,
         delayMs: number,
+        onRetry?: (
+            attempt: number,
+            retries: number,
+        ) => void;
     },
 ): Promise<T> => {
     let attempt = 0;
     while (true) {
         try {
             if (attempt > 0) {
-                console.log(`Retrying... (attempt: ${attempt} of ${options.retries})`);
+                if (options.onRetry) {
+                    options.onRetry(attempt, options.retries);
+                } else {
+                    console.log(`Retrying... (attempt: ${attempt} of ${options.retries})`);
+                }
             }
 
             return await fn();

@@ -10,7 +10,8 @@
     },
     "typescript.format.semicolons": "insert",
     "search.exclude": {
-        "**/node_modules": true
+        "**/node_modules": true,
+        "**/dist": true
     },
     "files.watcherExclude": {
         "**/.git/**": true,

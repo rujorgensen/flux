@@ -12,7 +12,7 @@ const clearAndBuild = async (
     await build();
 };
 
-let server: any;
+let server: Bun.Server;
 
 // Create a Set to store all connected WebSocket clients
 const clients: Set<ReadableStreamDirectController> = new Set();
@@ -30,7 +30,7 @@ const watcher = watch(
 
         if (!filename?.includes('dist')) {
 
-        
+
             // 
             //    await $`persistica --configuration=./demo/schema/todo.persistica`;
 
@@ -73,28 +73,28 @@ const build = async () => {
 
     await Bun.build({
         entrypoints: [
-            './apps/flux/agent/src/demo/client-a/index.html',
+            './apps/demo/src/client-a/index.html',
         ],
         sourcemap: 'inline',
-        outdir: './apps/flux/agent/src/demo/dist/client-a',
+        outdir: './apps/demo/src/dist/client-a',
         minify: false,
     });
 
     await Bun.build({
         entrypoints: [
-            './apps/flux/agent/src/demo/client-b/index.html',
+            './apps/demo/src/client-b/index.html',
         ],
         sourcemap: 'inline',
-        outdir: './apps/flux/agent/src/demo/dist/client-b',
+        outdir: './apps/demo/src/dist/client-b',
         minify: false,
     });
 
     await Bun.build({
         entrypoints: [
-            './apps/flux/agent/src/demo/server-a/main.ts',
+            './apps/demo/src/server-a/main.ts',
         ],
         sourcemap: 'inline',
-        outdir: './apps/flux/agent/src/demo/dist/server-a',
+        outdir: './apps/demo/src/dist/server-a',
         minify: false,
     });
 
@@ -102,7 +102,7 @@ const build = async () => {
 };
 
 const serverConf = {
-    port: 3000,
+    port: 3001,
     idleTimeout: 0, // deactivate timeout
     hostname: '0.0.0.0',
     fetch: async (request: Request) => {
@@ -136,7 +136,7 @@ const serverConf = {
                 );
             }
 
-            const file = Bun.file(`./apps/flux/agent/src/demo/dist/client-a${pathname}`);
+            const file = Bun.file(`./apps/demo/src/dist/client-a${pathname}`);
 
             if (pathname === '/index.html') {
                 const text = await file.text();
@@ -163,7 +163,7 @@ await clearAndBuild();
 
 console.log('Restarting main...');
 try {
-    $`bun --watch ./apps/flux/agent/src/demo/server-a/main.ts`.then();
+    $`bun --watch ./apps/demo/src/server-a/main.ts`.then();
 } catch { }
 
 server = Bun.serve(serverConf);

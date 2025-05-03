@@ -4,75 +4,52 @@
 <head>
     <meta charset="UTF-8">
     <title>Client A</title>
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-    <link
-        rel="stylesheet"
-        href="styles.css"
-    >
-    <link
-        rel="icon"
-        type="image/x-icon"
-        href="favicon.ico"
-    >
-    <script
-        type="module"
-        src="web-rtc.ts"
-    ></script>
-    <script
-        type="module"
-        src="main-a.ts"
-    ></script>
-    <script
-        type="module"
-        src="main-b.ts"
-    ></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script type="module" src="web-rtc.ts"></script>
+    <script type="module" src="main-a.ts"></script>
+    <script type="module" src="main-b.ts"></script>
+    <script type="module" src="main-activity.ts"></script>
 </head>
 
 <body style="display:flex; flex-direction:column; gap:20px">
+
     <div x-data="webRTCApplication()">
-        <div id="panel-container">
+        <template x-if="false">
 
-            <h1>Peer A</h1>
+            <div id="panel-container">
 
-            <div class="container">
-                <button @click="createOffer">Create Offer</button>
-                <button @click="setRemoteAnswer(offerSDP)">Set Remote Answer</button>
-                <textarea
-                    x-model="offerSDP"
-                    placeholder="Offer SDP"
-                ></textarea>
-            </div>
+                <h1>Peer A</h1>
 
-            <h1>Peer B</h1>
-
-            <div class="container">
-
-                <button @click="setRemoteOffer(answerSDP)">Set Remote Offer and crete answer</button>
-                <textarea
-                    x-model="answerSDP"
-                    placeholder="Answer SDP"
-                ></textarea>
-            </div>
-
-            <h1>Messages</h1>
-
-            <div class="container">
-                <input
-                    x-model="message"
-                    placeholder="Type a message"
-                />
-                <button @click="sendMessage">Send</button>
-                <div>
-                    <strong>Received:</strong>
-                    <p x-text="receivedMessage"></p>
+                <div class="container">
+                    <button @click="createOffer">Create Offer</button>
+                    <button @click="setRemoteAnswer(offerSDP)">Set Remote Answer</button>
+                    <textarea x-model="offerSDP" placeholder="Offer SDP"></textarea>
                 </div>
-                
 
+                <h1>Peer B</h1>
+
+                <div class="container">
+
+                    <button @click="setRemoteOffer(answerSDP)">Set Remote Offer and crete answer</button>
+                    <textarea x-model="answerSDP" placeholder="Answer SDP"></textarea>
+                </div>
+
+                <h1>Messages</h1>
+
+                <div class="container">
+                    <input x-model="message" placeholder="Type a message" />
+                    <button @click="sendMessage">Send</button>
+                    <div>
+                        <strong>Received:</strong>
+                        <p x-text="receivedMessage"></p>
+                    </div>
+
+
+                </div>
             </div>
-        </div>
+        </template>
 
     </div>
     <div x-data="fluxApplicationA()">
@@ -86,14 +63,8 @@
                 <!-- 
                 <label for="nw-state">network:</label>
                 <label for="syn-state">synchronizer:</label> -->
-                <span
-                    id="network-state"
-                    x-text="networkState"
-                ></span>
-                <span
-                    id="webtrc-state"
-                    x-text="webRTCConncetionState"
-                ></span>
+                <span id="network-state" x-text="networkState"></span>
+                <span id="webtrc-state" x-text="webRTCConncetionState"></span>
                 <!-- 
                 <span id="nw-state" x-text="networkState"></span>
                 <span id="syn-state" x-text="synchronizerState"></span> -->
@@ -115,7 +86,7 @@
                 <button @click="joinChannel('channel-abc')">
                     Join Channel 'channel-abc'
                 </button>
-                
+
                 <!-- <input id="new-todo" type="text" x-model="message" @keyup.enter="enter()"
                     placeholder="Add a new todo..."> -->
                 <!-- <ul id="todo-list">
@@ -144,14 +115,8 @@
                 <!-- 
                 <label for="nw-state">network:</label>
                 <label for="syn-state">synchronizer:</label> -->
-                <span
-                    id="network-state"
-                    x-text="networkState"
-                ></span>
-                <span
-                    id="webtrc-state"
-                    x-text="webRTCConncetionState"
-                ></span>
+                <span id="network-state" x-text="networkState"></span>
+                <span id="webtrc-state" x-text="webRTCConncetionState"></span>
                 <!-- 
                 <span id="nw-state" x-text="networkState"></span>
                 <span id="syn-state" x-text="synchronizerState"></span> -->
@@ -169,8 +134,8 @@
                 <button @click="joinChannel('channel-abc')">
                     Join Channel 'channel-abc' and start broadcasting
                 </button>
-                
-                
+
+
                 <!-- <input id="new-todo" type="text" x-model="message" @keyup.enter="enter()"
                     placeholder="Add a new todo..."> -->
                 <!-- <ul id="todo-list">
@@ -183,6 +148,30 @@
                         </li>
                     </template>
                 </ul> -->
+            </div>
+        </div>
+    </div>
+
+    <div x-data="fluxActivityDemoApplication()">
+
+        <div id="panel-container">
+
+            <h1>Random Network Activity</h1>
+
+            <header class="statuses">
+                <label for="network-state">Agents:</label>
+                <label for="webtrc-state">Channels:</label>
+                <span id="network-state" x-text="agents"></span>
+                <span id="webtrc-state" x-text="channels"></span>
+
+            </header>
+            <div class="container">
+                <code>
+                    <template x-for="log in clientLog">
+                        <p x-text="log"></p>
+                    </template>
+                </code>
+
             </div>
         </div>
     </div>

@@ -17,13 +17,12 @@ export const authorizeNetworkClient = async (
     networkAuthorityManager: NetworkAuthorityManager,
     globalRPCClient: GlobalRPCClient<'authorize'>
 ) => {
-        
     // Find the network authority to authenticate with
     const networkIdString: string | undefined = nodeURL.parse(request.url, true)
         .query.networkId as string;
 
     try {
-        validateNetworkId(networkIdString ?? '')
+        validateNetworkId(networkIdString ?? '');
     } catch (error) {
         return new Response(
             error instanceof Error ? error.message : 'Unknown error validating network ID',
@@ -32,7 +31,6 @@ export const authorizeNetworkClient = async (
             },
         );
     }
-
     const networkId: TNetworkId_S = networkIdString as TNetworkId_S;
 
     if (!networkId) {

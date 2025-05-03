@@ -64,6 +64,12 @@ export class FluxAuthority {
             {
                 retries: 10_000,
                 delayMs: 500,
+                onRetry: (
+                    attempt: number,
+                    retries: number,
+                ) => {
+                    console.log(`[RegisterAuthority] Retrying... (attempt: ${attempt} of ${retries})`);
+                },
             },
         );
 
@@ -93,6 +99,5 @@ export class FluxAuthority {
         return Promise.resolve(new FluxAuthorityNetworkConnection(this.fluxWebSocketConnection));
     }
 
-    public readonly onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
-    public readonly onNetworkState = this.stateManager.attachNetworkStateListener;
+    public readonly onNetworkState = this.stateManager.attachNetworkStateListener.bind(this.stateManager);
 }

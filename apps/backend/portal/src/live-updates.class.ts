@@ -1,6 +1,6 @@
 import { FluxMeshServer } from '@flux/mesh';
 import { FluxAuthority } from '@persistica/flux-authority';
-import * as jjwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { FluxAgent } from '@persistica/flux-agent';
 import type {
     FluxNetworkChannel,
@@ -61,21 +61,31 @@ export class LiveUpdates {
 
                         // console.log('✅ Network access authorized');
 
-                        return Promise.resolve(jjwt.sign({
-                            userId: (<any>auth).user,
+                        return Promise.resolve(jwt.sign({
+                            user: {
+                                allowAllChannels: true,
+                            },
                         }, AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
                     },
 
+                    // * Authorize channel
                     (
                         channelTopic: string,
                         identification: string,
                     ): Promise<boolean> => {
 
-                        console.log(`🔒 A client is trying to subscribe to topic '${channelTopic}', using identification '${identification}'`);
+                        const agentJWT = jwt.verify(identification, AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
 
-                        console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
+                        console.log(`🔒 A client is trying to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
+
+                        // console.error(`✅ Client suscribed to channel with identification`);
 
                         if (channelTopic.startsWith('protected')) {
+                            if (agentJWT.user.allowAllChannels) {
+                                console.log('✅ Agent is allowed on all channels');
+                                return Promise.resolve(true);
+                            }
+
                             console.log('TODO: chcek if this agent is allowed to access the channel');
                             return Promise.resolve(false);
                         }
