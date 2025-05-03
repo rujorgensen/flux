@@ -30,7 +30,7 @@ const watcher = watch(
 
         if (!filename?.includes('dist')) {
 
-        
+
             // 
             //    await $`persistica --configuration=./demo/schema/todo.persistica`;
 
@@ -73,28 +73,28 @@ const build = async () => {
 
     await Bun.build({
         entrypoints: [
-            './apps/flux/agent/src/demo/client-a/index.html',
+            './apps/demo/src/client-a/index.html',
         ],
         sourcemap: 'inline',
-        outdir: './apps/flux/agent/src/demo/dist/client-a',
+        outdir: './apps/demo/src/dist/client-a',
         minify: false,
     });
 
     await Bun.build({
         entrypoints: [
-            './apps/flux/agent/src/demo/client-b/index.html',
+            './apps/demo/src/client-b/index.html',
         ],
         sourcemap: 'inline',
-        outdir: './apps/flux/agent/src/demo/dist/client-b',
+        outdir: './apps/demo/src/dist/client-b',
         minify: false,
     });
 
     await Bun.build({
         entrypoints: [
-            './apps/flux/agent/src/demo/server-a/main.ts',
+            './apps/flux/agent/src/server-a/main.ts',
         ],
         sourcemap: 'inline',
-        outdir: './apps/flux/agent/src/demo/dist/server-a',
+        outdir: './apps/flux/agent/src/dist/server-a',
         minify: false,
     });
 

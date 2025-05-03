@@ -1,60 +1,54 @@
 {
-  "name": "persistica-flux-agent",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/flux/agent/src",
-  "projectType": "library",
-  "tags": [
-    "type:npm-package",
-    "scope:any"
-  ],
-  "targets": {
-    "build": {
-      "executor": "@nx/esbuild:esbuild",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "options": {
-        "outputPath": "dist/packages/flux/agent",
-        "main": "packages/flux/agent/src/index.ts",
-        "tsConfig": "packages/flux/agent/tsconfig.lib.json",
-        "assets": [],
-        "format": [
-          "cjs"
-        ],
-        "generatePackageJson": true
-      }
+    "name": "persistica-flux-agent",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/flux/agent/src",
+    "projectType": "library",
+    "tags": [
+        "type:npm-package",
+        "scope:any"
+    ],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/packages/flux/agent",
+                "main": "packages/flux/agent/src/index.ts",
+                "tsConfig": "packages/flux/agent/tsconfig.lib.json",
+                "assets": [],
+                "format": [
+                    "cjs"
+                ],
+                "generatePackageJson": true
+            }
+        },
+        "bun-serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun --watch run ./apps/flux/agent/src/lib/flux.ts"
+            }
+        },
+        "madge-graph": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npx madge --image graph.svg --extensions ts,tsx ./apps/flux/agent/src"
+            }
+        },
+        "nx-release-publish": {
+            "options": {
+                "packageRoot": "dist/{projectRoot}"
+            }
+        }
     },
-    "bun-serve": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "bun --watch run ./apps/flux/agent/src/lib/flux.ts"
-      }
-    },
-    "madge-graph": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npx madge --image graph.svg --extensions ts,tsx ./apps/flux/agent/src"
-      }
-    },
-    "demo": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "bun --watch run ./apps/flux/agent/src/demo/http.server.ts"
-      }
-    },
-    "nx-release-publish": {
-      "options": {
-        "packageRoot": "dist/{projectRoot}"
-      }
+    "release": {
+        "version": {
+            "generatorOptions": {
+                "packageRoot": "dist/{projectRoot}",
+                "currentVersionResolver": "git-tag",
+                "fallbackCurrentVersionResolver": "disk"
+            }
+        }
     }
-  },
-  "release": {
-    "version": {
-      "generatorOptions": {
-        "packageRoot": "dist/{projectRoot}",
-        "currentVersionResolver": "git-tag",
-        "fallbackCurrentVersionResolver": "disk"
-      }
-    }
-  }
 }

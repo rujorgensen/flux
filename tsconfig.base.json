@@ -1,51 +1,51 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "rootDir": ".",
-    "sourceMap": true,
-    "declaration": false,
-    "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "target": "es2015",
-    "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@core/redis/bun": [
-        "libs/core/redis/bun-wrapper/src/index.ts"
-      ],
-      "@flux/mesh": [
-        "packages/flux/mesh/src/index.ts"
-      ],
-      "@flux/shared/connection": [
-        "libs/flux/shared/connection/src/index.ts"
-      ],
-      "@flux/shared/types": [
-        "libs/flux/shared/types/src/index.ts"
-      ],
-      "@flux/shared/utils": [
-        "libs/flux/shared/utils/src/index.ts"
-      ],
-      "@flux/shared/ws": [
-        "libs/flux/shared/ws/src/index.ts"
-      ],
-      "@persistica/flux-agent": [
-        "packages/flux/agent/src/index.ts"
-      ],
-      "@persistica/flux-authority": [
-        "packages/flux/authority/src/index.ts"
-      ]
-    }
-  },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+    "compileOnSave": false,
+    "compilerOptions": {
+        "rootDir": ".",
+        "sourceMap": true,
+        "declaration": false,
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "target": "es2015",
+        "module": "esnext",
+        "lib": [
+            "es2020",
+            "dom"
+        ],
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "baseUrl": ".",
+        "paths": {
+            "@core/redis/bun": [
+                "libs/core/redis/bun-wrapper/src/index.ts"
+            ],
+            "@flux/mesh": [
+                "packages/flux/mesh/src/index.ts"
+            ],
+            "@flux/shared/connection": [
+                "libs/flux/shared/connection/src/index.ts"
+            ],
+            "@flux/shared/types": [
+                "libs/flux/shared/types/src/index.ts"
+            ],
+            "@flux/shared/utils": [
+                "libs/flux/shared/utils/src/index.ts"
+            ],
+            "@flux/shared/ws": [
+                "libs/flux/shared/ws/src/index.ts"
+            ],
+            "@persistica/flux-agent": [
+                "packages/flux/agent/src/index.ts"
+            ],
+            "@persistica/flux-authority": [
+                "packages/flux/authority/src/index.ts"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "tmp"
+    ]
 }
