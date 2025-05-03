@@ -123,9 +123,6 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
     ): Promise<TAddress[]> {
         const key: string = `networks/${networkId}/authorities`;
-        // const list: string | null = await this.client.srandmember(
-        //     key,
-        // );
 
         const list: string[] = await this.client.smembers(
             key,

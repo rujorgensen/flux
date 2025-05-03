@@ -1,13 +1,13 @@
 import Alpine from 'alpinejs';
 import { FluxAgent } from '@persistica/flux-agent';
-import type { TNetworkId_S } from '@flux/shared/types';
 import type { FluxAgentNetworkConnection, FluxNetworkChannel } from '@flux/shared/connection';
 import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
+import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
 
 // Define observable component
 Alpine.data('fluxApplicationB', () => ({
     flux: new FluxAgent(
-        'rAnD0M-network-id' as unknown as TNetworkId_S,
+        DEMO_NETWORK_ID,
         {
             //         domain?: string,
             //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -45,7 +45,7 @@ Alpine.data('fluxApplicationB', () => ({
 
         this.fluxNetworkConnection = await this.flux.connect(
             {
-                code: 'code-to-access-network',
+                code: DEMO_CHANNEL_PASSWORD,
                 user: 'client-b',
             },
             'client-b-unique-identification-token',

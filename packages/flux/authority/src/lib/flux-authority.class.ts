@@ -99,6 +99,5 @@ export class FluxAuthority {
         return Promise.resolve(new FluxAuthorityNetworkConnection(this.fluxWebSocketConnection));
     }
 
-    public readonly onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
-    public readonly onNetworkState = this.stateManager.attachNetworkStateListener;
+    public readonly onNetworkState = this.stateManager.attachNetworkStateListener.bind(this.stateManager);
 }

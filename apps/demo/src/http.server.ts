@@ -12,7 +12,7 @@ const clearAndBuild = async (
     await build();
 };
 
-let server: any;
+let server: Bun.Server;
 
 // Create a Set to store all connected WebSocket clients
 const clients: Set<ReadableStreamDirectController> = new Set();
@@ -136,7 +136,7 @@ const serverConf = {
                 );
             }
 
-            const file = Bun.file(`./apps/flux/agent/src/demo/dist/client-a${pathname}`);
+            const file = Bun.file(`./apps/demo/src/dist/client-a${pathname}`);
 
             if (pathname === '/index.html') {
                 const text = await file.text();

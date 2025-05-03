@@ -1,14 +1,14 @@
 import Alpine from 'alpinejs';
 import { FluxAgent } from '@persistica/flux-agent';
-import type { TNetworkId_S } from '@flux/shared/types';
 import type { FluxRemoteClient } from 'packages/flux/agent/src/lib/flux-remote-client.class';
 import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
+import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
 
 // Define observable component
 Alpine.data('fluxApplicationA', () => ({
     flux: new FluxAgent(
-        'rAnD0M-network-id' as TNetworkId_S,
+        DEMO_NETWORK_ID,
         {
             //         domain?: string,
             //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -55,7 +55,7 @@ Alpine.data('fluxApplicationA', () => ({
 
         this.fluxNetworkConnection = await this.flux.connect(
             {
-                code: 'code-to-access-network',
+                code: DEMO_CHANNEL_PASSWORD,
                 user: 'client-a',
             },
             'client-a-unique-identification-token',
@@ -67,10 +67,9 @@ Alpine.data('fluxApplicationA', () => ({
     connectToNamedClient(
         clientName: string,
     ) {
-        console.log("Conneting to remo");
+        console.log('Conneting to remo');
         this.remoteClient = this.fluxNetworkConnection?.connectToClient(clientName);
 
-        console.log("this.remoteClient", this.remoteClient);
         // await new Promise((_resolve, reject) => {
 
 
@@ -88,16 +87,16 @@ Alpine.data('fluxApplicationA', () => ({
         message: string,
     ) {
         if (!this.remoteClient) {
-            alert("No remote client");
+            alert('No remote client');
         }
 
         this.remoteClient?.send(
             message,
         );
 
-        // if (this.dataChannel && this.dataChannel.readyState === "open") {
+        // if (this.dataChannel && this.dataChannel.readyState === 'open') {
         //     this.dataChannel.send(this.message);
-        // } else if (this.receiveChannel && this.receiveChannel.readyState === "open") {
+        // } else if (this.receiveChannel && this.receiveChannel.readyState === 'open') {
         //     this.receiveChannel.send(this.message);
         // } else {
         //     

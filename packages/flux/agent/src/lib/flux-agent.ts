@@ -92,7 +92,7 @@ export class FluxAgent {
      *
      * @returns { void }
      */
-    public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener;
+    public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener.bind(this.stateManager);
 
     /**
      *
@@ -100,7 +100,7 @@ export class FluxAgent {
      *
      * @returns { void }
      */
-    public onNetworkState = this.stateManager.attachNetworkStateListener;
+    public onNetworkState = this.stateManager.attachNetworkStateListener.bind(this.stateManager);
 
     public onMessage(
         cb: TMessageCallback,
