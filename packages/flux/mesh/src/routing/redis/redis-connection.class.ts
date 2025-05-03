@@ -123,6 +123,7 @@ export class RedisConnection {
             srem: hashClient.srem.bind(hashClient),
             del: hashClient.del.bind(hashClient),
             hincrby: hashClient.hincrby.bind(hashClient),
+            hmget: hashClient.hmget.bind(hashClient),
             expire: hashClient.expire.bind(hashClient),
         };
     }

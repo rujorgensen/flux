@@ -18,31 +18,35 @@ export class NetworkChannelHash {
     ) { }
 
     /**
-     * Creates a channel on a network.
+     * Creates a channel on a network if it does not already exist.
      * 
-     * @param networkId 
-     * @param channelName 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * 
+     * @returns { Promise<void> }
      */
-    public async createNetworkChannel(
+    public async createNetworkChannelIfNotExist(
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<void> {
-        await this._redisConnection.hash.sadd(`networks/${networkId}/channels`, channelName);
+        // Returns 1 if the member was added, 0 if it already existed
+        const wasAdded: number = await this._redisConnection.hash.sadd(`networks/${networkId}/channels`, channelName);
 
-        const key_: string = `networks/${networkId}/channels/${channelName}/`;
-        await this._redisConnection.hash.hmset(key_, [
-            'createdAt',
-            new Date().toISOString(),
-        ]);
+        if (wasAdded === 1) {
+            await this._redisConnection.hash.hmset(`networks/${networkId}/channels/${channelName}`, [
+                'createdAt',
+                new Date().toISOString(),
+            ]);
+        }
     }
 
     /**
      * Reads all channels on a network.
      *  
      * @param networkId
-    *
-    * @returns { Promise<TAddress> }
-    */
+     *
+     * @returns { Promise<TAddress> }
+     */
     public async readNetworkChannels(
         networkId: TNetworkId_S,
     ): Promise<TChannelName[]> {
@@ -60,9 +64,34 @@ export class NetworkChannelHash {
     }
 
     /**
+     * Reads all channels on a network.
+     *  
+     * @param { TNetworkId_S } networkId
+     * @param { TChannelName } channelName
+     *
+     * @returns { Promise<TAddress> }
+     */
+    public async readNetworkMemberCount(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<number> {
+        const hashValues: (string | null)[] = await this._redisConnection.hash.hmget(`networks/${networkId}/channels/${channelName}`, ['members']);
+        const count: string | null | undefined = hashValues.at(0);
+
+        if (!count) {
+            return 0;
+        }
+
+        return Number.parseInt(count, 10);
+    }
+
+    /**
+     * Deletes a channel on a network.
      * 
-     * @param networkId 
-     * @param channelName 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * 
+     * @returns { Promise<void> }
      */
     public async deleteNetworkChannel(
         networkId: TNetworkId_S,
@@ -94,10 +123,11 @@ export class NetworkChannelHash {
 
     /**
      * 
-     * @param networkId 
-     * @param channelName 
-     * @param clientAddress 
-     * @returns 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * @param { TAddress }      clientAddress
+     * 
+     * @returns { Promise<number> } 
      */
     public async leaveNetworkChannel(
         networkId: TNetworkId_S,
@@ -134,7 +164,7 @@ export class NetworkChannelHash {
         channelNames: Set<TChannelName>,
     ): Promise<void> {
         return Promise.all(
-            Array.from(channelNames).map(async (channelName) => {
+            [...channelNames].map(async (channelName) => {
                 await this.leaveNetworkChannel(
                     networkId,
                     channelName,

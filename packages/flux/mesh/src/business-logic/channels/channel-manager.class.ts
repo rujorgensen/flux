@@ -12,6 +12,9 @@ import {
 } from '../../routing/redis/redis-connection.class';
 import type { GlobalChannelPubsub } from '../../routing/global-channel/global-channel-pubsub.class';
 
+// ! TODO Hardcoded for now, take from network config in the future
+const MAX_CHANNEL_MEMBERS = 25;
+
 export class NetworkChannelManager {
     private readonly redisConnection: RedisConnection = getRedisConnection();
     private readonly networkChannelHash: NetworkChannelHash = new NetworkChannelHash(
@@ -24,17 +27,24 @@ export class NetworkChannelManager {
 
     /**
      * Checks if a channel can have more members.
+     *  
+     * ! TODO Don't query the database repeatedly, implement local synced cache.
      * 
-     * @param { TChannelName }  _channelName
-     * 
-     * @returns { Promise<boolean> } 
+     * @param { TNetworkId_S } networkId
+     * @param { TChannelName } channelName
+     *
+     * @returns { Promise<boolean> }
      */
     public async canHaveMembers(
-        _channelName: TChannelName,
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
     ): Promise<boolean> {
-        console.error('canHaveMembers not implemented.');
+        const count: number = await this.networkChannelHash.readNetworkMemberCount(
+            networkId,
+            channelName,
+        );
 
-        return Promise.resolve(true);
+        return Promise.resolve(count < MAX_CHANNEL_MEMBERS);
     }
 
     /**
@@ -51,7 +61,7 @@ export class NetworkChannelManager {
         channelName: TChannelName,
         clientAddress: TAddress,
     ): void {
-        this.createNetworkChannelIfNowExist(
+        this.createNetworkChannelIfNotExist(
             networkId,
             channelName,
         );
@@ -122,14 +132,12 @@ export class NetworkChannelManager {
      * 
      * @returns { void } 
      */
-    private async createNetworkChannelIfNowExist(
+    private async createNetworkChannelIfNotExist(
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<void> {
-        console.error('! TODO: Check if the channel already exists');
-
         await this.networkChannelHash
-            .createNetworkChannel(
+            .createNetworkChannelIfNotExist(
                 networkId,
                 channelName,
             );

@@ -1,3 +1,11 @@
+/**
+ * 
+ * @param fn
+ * @param shouldRetry
+ * @param options
+ * 
+ * @returns { Promise<T> }
+ */
 export const retry = async <T>(
     fn: () => Promise<T>,
     shouldRetry: (err: unknown) => boolean,
@@ -16,8 +24,6 @@ export const retry = async <T>(
             if (attempt > 0) {
                 if (options.onRetry) {
                     options.onRetry(attempt, options.retries);
-                } else {
-                    console.log(`Retrying... (attempt: ${attempt} of ${options.retries})`);
                 }
             }
 

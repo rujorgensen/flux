@@ -1,12 +1,13 @@
-import * as Bun from 'bun';
+import type * as Bun from 'bun';
 import * as nodeURL from 'node:url';
 import { TNetworkId_S } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 
-export const authorizeNetworkAuthority = async (request: Bun.BunRequest) => {
+export const authorizeNetworkAuthority = async (
+    request: Bun.BunRequest,
+) => {
     // Find the network authority to authenticate with
-    const networkId: TNetworkId_S = nodeURL.parse(request.url, true).query
-        .networkId as TNetworkId_S;
+    const networkId: string | string[] | undefined = nodeURL.parse(request.url, true).query['networkId'];
 
     if (!networkId) {
         return new Response('Missing networkId', { status: 500 });

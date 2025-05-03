@@ -126,10 +126,8 @@ export class NetworkAuthorityRedisSortedSet {
             throw new Error('Redis client is not connected');
         }
 
-        const key: string = `networks/${networkId}/authorities`;
-
         const list: string[] = await this.client.smembers(
-            key,
+            `networks/${networkId}/authorities`,
         );
 
         if (list.length === 0) {
