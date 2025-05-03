@@ -12,6 +12,7 @@ import type { RedisConnection } from '../redis/redis-connection.class';
 export type TGlobalChannel = string & { __brand: 'global-channel'; };
 
 export class GlobalChannelPubsub {
+
     constructor(
         private readonly redisConnection: RedisConnection,
         private readonly bunServer: Bun.Server,
@@ -45,6 +46,15 @@ export class GlobalChannelPubsub {
             });
     }
 
+    /**
+     * Publishes a message to the given channel.
+     * 
+     * @param { string }  channel
+     * @param { string }  message
+     * @param { TConnectedClientSocket }  [ws]
+     * 
+     * @returns { Promise<void> }
+     */
     public async publish(
         channel: string,
         message: string,

@@ -617,6 +617,6 @@ export class FluxMeshServer {
         // 'true': Force stop and close all active connections
         await this.bunServer.stop(true);
         await this.redisConnection.setDisconnected(`${machineAddress}/${processId}`);
-        await this.redisConnection.disconnect();
+        this.redisConnection.disconnect();
     }
 }
