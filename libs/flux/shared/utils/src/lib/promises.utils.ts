@@ -1,3 +1,11 @@
+/**
+ * 
+ * @param fn
+ * @param shouldRetry
+ * @param options
+ * 
+ * @returns { Promise<T> }
+ */
 export const retry = async <T>(
     fn: () => Promise<T>,
     shouldRetry: (err: unknown) => boolean,

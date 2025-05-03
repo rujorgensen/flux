@@ -18,30 +18,35 @@ export class NetworkChannelHash {
     ) { }
 
     /**
-     * Creates a channel on a network.
+     * Creates a channel on a network if it does not already exist.
      * 
-     * @param networkId 
-     * @param channelName 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * 
+     * @returns { Promise<void> }
      */
-    public async createNetworkChannel(
+    public async createNetworkChannelIfNotExist(
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<void> {
-        await this._redisConnection.hash.sadd(`networks/${networkId}/channels`, channelName);
+        // Returns 1 if the member was added, 0 if it already existed
+        const wasAdded: number = await this._redisConnection.hash.sadd(`networks/${networkId}/channels`, channelName);
 
-        await this._redisConnection.hash.hmset(`networks/${networkId}/channels/${channelName}`, [
-            'createdAt',
-            new Date().toISOString(),
-        ]);
+        if (wasAdded === 1) {
+            await this._redisConnection.hash.hmset(`networks/${networkId}/channels/${channelName}`, [
+                'createdAt',
+                new Date().toISOString(),
+            ]);
+        }
     }
 
     /**
      * Reads all channels on a network.
      *  
      * @param networkId
-    *
-    * @returns { Promise<TAddress> }
-    */
+     *
+     * @returns { Promise<TAddress> }
+     */
     public async readNetworkChannels(
         networkId: TNetworkId_S,
     ): Promise<TChannelName[]> {

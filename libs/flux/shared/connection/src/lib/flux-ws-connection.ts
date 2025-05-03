@@ -196,13 +196,6 @@ export class FluxWebSocketConnection {
                     }
 
                     switch (packageType) {
-                        case SUBSCRIBED_NETWORK_CHANNEL_NAME: {
-                            const channelName: TChannelName = message_.substring(message_.indexOf(':') + 1) as TChannelName;
-
-                            console.log(`Connected to channel name: "${channelName}"`);
-
-                            break;
-                        }
 
                         case ON_NETWORK_CHANNEL_PUBLISH: {
 

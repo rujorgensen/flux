@@ -70,7 +70,7 @@ export class NetworkClientHash {
         const data = await this.client.hmget(key, [clientOwnUId]);
 
         if (!data[0]) {
-            throw new Error(`Network authority not found for networkId: "${networkId}"`);
+            throw new Error(`Network agent not found for networkId: "${networkId}"`);
         }
 
         return data[0] as TAddress;

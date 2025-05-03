@@ -357,54 +357,58 @@ export class FluxMeshServer {
                                 return;
                             }
 
-                            const networkAuthorityAddress: TAddress =
-                                await networkAuthorityManager.resolveNetworkAuthorityAddressOrThrow(
-                                    ws.data.networkId,
-                                );
-
-                            const canHaveMembers = await this.channelManager.canHaveMembers(
-                                ws.data.networkId,
-                                channelName,
-                            );
-
-                            if (!canHaveMembers) {
-                                ws.send(`${ERROR}:Channel limit is reached`);
-                            }
-
                             try {
-                                const authorize: boolean = await globalRPCClient.call(
-                                    networkAuthorityAddress,
-                                    'authorizeNetworkChannel',
+                                const networkAuthorityAddress: TAddress = await networkAuthorityManager
+                                    .resolveNetworkAuthorityAddressOrThrow(
+                                        ws.data.networkId,
+                                    );
+
+                                const canHaveMembers = await this.channelManager.canHaveMembers(
+                                    ws.data.networkId,
                                     channelName,
-                                    ws.data.claim
                                 );
 
-                                if (authorize) {
-                                    ws.subscribe(`networks/${ws.data.networkId}/channels/${channelName}`);
-                                    ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
-                                    ws.data.channelNames.add(channelName);
-                                    console.log(`🎉 Client was authorized on channel name '${channelName}'`);
-
-                                    this.channelManager
-                                        .joinNetworkChannel(
-                                            ws.data.networkId,
-                                            channelName,
-                                            ws.data.address,
-                                        );
-                                } else {
-                                    console.error(`Client was not authorized to connect to channel name '${channelName}'`);
-                                    ws.send(`${ERROR}:Not authorized`);
-                                }
-                            } catch (error) {
-                                if (error instanceof Error) {
-                                    ws.send(`${ERROR}:${error.message}`);
-                                    break;
+                                if (!canHaveMembers) {
+                                    ws.send(`${ERROR}:Channel limit is reached`);
                                 }
 
-                                console.error('Unknown error', error);
-                                ws.send(`${ERROR}:Unknown error`);
+                                try {
+                                    const authorize: boolean = await globalRPCClient.call(
+                                        networkAuthorityAddress,
+                                        'authorizeNetworkChannel',
+                                        channelName,
+                                        ws.data.claim
+                                    );
+
+                                    if (authorize) {
+                                        ws.subscribe(`networks/${ws.data.networkId}/channels/${channelName}`);
+                                        ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
+                                        ws.data.channelNames.add(channelName);
+                                        console.log(`🎉 Client was authorized on channel name '${channelName}'`);
+
+                                        this.channelManager
+                                            .joinNetworkChannel(
+                                                ws.data.networkId,
+                                                channelName,
+                                                ws.data.address,
+                                            );
+                                    } else {
+                                        console.error(`Client was not authorized to connect to channel name '${channelName}'`);
+                                        ws.send(`${ERROR}:Not authorized`);
+                                    }
+                                } catch (error) {
+                                    if (error instanceof Error) {
+                                        ws.send(`${ERROR}:${error.message}`);
+                                        break;
+                                    }
+
+                                    console.error('Unknown error', error);
+                                    ws.send(`${ERROR}:Unknown error`);
+                                }
+                            } catch {
+                                ws.send(`${ERROR}:Not netrowk authority found`);
+                                return;
                             }
-
                             break;
                         }
 

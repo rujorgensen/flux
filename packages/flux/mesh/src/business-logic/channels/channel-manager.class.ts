@@ -132,14 +132,12 @@ export class NetworkChannelManager {
      * 
      * @returns { void } 
      */
-    private async createNetworkChannelIfNowExist(
+    private async createNetworkChannelIfNotExist(
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<void> {
-        console.error('! TODO: Check if the channel already exists');
-
         await this.networkChannelHash
-            .createNetworkChannel(
+            .createNetworkChannelIfNotExist(
                 networkId,
                 channelName,
             );

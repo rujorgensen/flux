@@ -84,6 +84,12 @@ export const authorizeNetworkClient = async (
             {
                 retries: 10,
                 delayMs: 50,
+                onRetry: (
+                    attempt: number,
+                    retries: number,
+                ) => {
+                    console.log(`[authorizeNetworkClient] Retrying... (attempt: ${attempt} of ${retries})`);
+                },
             },
         );
 
