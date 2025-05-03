@@ -238,12 +238,22 @@ describe('persistica-flux-mesh', () => {
 
             expect(detectedCreatedChanenl).toBe('channel-c');
 
+            const emptyChannelPromise = new Promise<string>((resolve, reject) => {
+                fluxAuthorityNetworkConnection
+                    .networkChannelEventEmitter
+                    .on('emptyChannel', resolve);
+
+                setTimeout(reject, 1_000);
+            });
+
             // * Leave to channel
             await fluxAgentNetworkConnection
                 .leaveChannel('channel-c');
 
             expect(fluxAgentNetworkConnection.readConnectedChannels()).toEqual([]);
 
+            const detectedEmptyChannel: string = await emptyChannelPromise;
+            expect(detectedEmptyChannel).toBe('channel-c');
         });
     });
 });

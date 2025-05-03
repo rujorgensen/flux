@@ -40,17 +40,17 @@ export class NetworkChannelEventEmitter<T extends {
             this._fluxWebSocketConnection.interceptPackageTypeMessages(
                 AUTHORITY_ON_CREATE_CHANNEL,
                 (
-                    fullMessage: string,
+                    message: string,
                 ): void => {
-                    this.emit('createChannel', fullMessage as TChannelName);
+                    this.emit('createChannel', message as TChannelName);
                 },
             );
             this._fluxWebSocketConnection.interceptPackageTypeMessages(
                 AUTHORITY_ON_EMPTY_CHANNEL,
                 (
-                    fullMessage: string,
+                    messsage: string,
                 ): void => {
-                    this.emit('emptyChannel', fullMessage as TChannelName);
+                    this.emit('emptyChannel', messsage as TChannelName);
                 },
             );
         }
