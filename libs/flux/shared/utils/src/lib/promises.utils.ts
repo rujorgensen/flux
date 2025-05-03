@@ -24,8 +24,6 @@ export const retry = async <T>(
             if (attempt > 0) {
                 if (options.onRetry) {
                     options.onRetry(attempt, options.retries);
-                } else {
-                    console.log(`Retrying... (attempt: ${attempt} of ${options.retries})`);
                 }
             }
 

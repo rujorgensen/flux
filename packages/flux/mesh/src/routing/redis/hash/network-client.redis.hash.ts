@@ -50,7 +50,7 @@ export class NetworkClientHash {
         networkId: TNetworkId_S,
         uid: TClientOwnUId
     ): Promise<void> {
-        await this.client.srem(`networks/${networkId}/client-uids`, uid);
+        await this.client.send('HDEL', [`networks/${networkId}/client-uids`, uid]);
     }
 
     /**
@@ -70,7 +70,7 @@ export class NetworkClientHash {
         const data = await this.client.hmget(key, [clientOwnUId]);
 
         if (!data[0]) {
-            throw new Error(`Network agent not found for networkId: "${networkId}"`);
+            throw new Error(`Network agent not found for networkId: '${networkId}'`);
         }
 
         return data[0] as TAddress;

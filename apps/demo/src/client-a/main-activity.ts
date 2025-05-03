@@ -29,9 +29,11 @@ Alpine.data('fluxActivityDemoApplication', () => ({
 
             this.log(`🧠 Attached and connected ${fluxAgent.id}`);
 
-            callRandomly(() => this.disconnecFromNetwork(fluxAgent));
+            callRandomly(() => this.disconnectFromNetwork(fluxAgent));
 
-        }, 2000);
+            callRandomly(() => this.connectToChannel(fluxNetworkConnection));
+
+        }, 200);
     },
 
     log(
@@ -44,25 +46,34 @@ Alpine.data('fluxActivityDemoApplication', () => ({
     async connectToChannel(
         fluxAgentNetworkConnection: FluxAgentNetworkConnection,
     ) {
-        const channelId = `channel-${Math.floor(Math.random() * 10)}`;
-        this.channels.add(channelId);
-        await fluxAgentNetworkConnection.joinChannel(channelId);
+        const channelName = `channel-${Math.floor(Math.random() * 10)}`;
+        this.channels.add(channelName);
+        await fluxAgentNetworkConnection.joinChannel(channelName);
+
+        callRandomly(() => this.disconnectFromChannel(fluxAgentNetworkConnection, channelName));
     },
 
-    disconnecFromNetwork(
+    disconnectFromNetwork(
         fluxAgent: FluxAgent,
     ) {
         fluxAgent.disconnect();
         this.agents.delete(fluxAgent);
         //  this.networkConnections.delete(fluxAgent.networkConnection);
         this.log(`🚪 Disconnected from network ${fluxAgent.id}`);
+
+        // Limit the log to max 50 entries
+        if (this.clientLog.length > 50) {
+            this.clientLog.length = 50;
+        }
     },
 
-    disconnecFromChannel(
-        fluxAgent: FluxAgent,
+    disconnectFromChannel(
+        fluxAgentNetworkConnection: FluxAgentNetworkConnection,
         channelName: string,
     ) {
-        this.log(`🚪 Disconnected from channel ${channelName}`);
+        this.log('🚪 Disconnected from channel.');
+        fluxAgentNetworkConnection.leaveChannel(channelName);
+        this.channels.delete(channelName);
     },
 }));
 
