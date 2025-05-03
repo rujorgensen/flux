@@ -1,6 +1,7 @@
+import type { TClientId } from './client-id.type';
+
 export type TProcessId = number & { __brand: 'TProcessAddress'; };
 export type TMachineAddress = string & { __brand: 'TMachineAddress'; };
-export type TClientId = string & { __brand: 'TClientId'; };
 
 export type TProcessAddress = `${TMachineAddress}/${TProcessId}`;
 

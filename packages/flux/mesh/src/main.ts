@@ -48,6 +48,7 @@ import {
     AUTHORITY_CHANNEL_SUBSCRIBE,
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
+    AUTHORITY_DISCONNECT_AGENT,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -82,6 +83,8 @@ import {
 } from './routing/redis/redis-connection.class';
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
 import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
+import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
+
 
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
     ip: Bun.SocketAddress | null;
@@ -277,6 +280,36 @@ export class FluxMeshServer {
                     const packageType: string | undefined = message_.split(':')[0];
 
                     switch (packageType) {
+                        case AUTHORITY_DISCONNECT_AGENT: {
+                            if (!ws.data.isAuthority) {
+                                ws.close(4000, 'Bad behavior');
+                                return;
+                            }
+
+                            const clientId: string = message_.substring(message_.indexOf(':') + 1);
+
+                            if (!isNanoId(clientId)) {
+                                ws.send(`${ERROR}:Invalid ID`);
+                                return;
+                            }
+
+                            // Attempt to get the client
+                            const connectedClientSocket: TConnectedClientSocket | undefined = clientMap.get(clientId);
+
+                            if (
+                                !connectedClientSocket ||
+                                (connectedClientSocket.data.networkId !== ws.data.networkId) ||
+                                (connectedClientSocket.data.isAuthority)
+                            ) {
+                                ws.send(`${ERROR}:Cannot kick agent`);
+                                return;
+                            }
+
+                            connectedClientSocket.close(1002, 'Kicked by authority');
+
+                            break;
+                        }
+
                         case AUTHORITY_CHANNEL_SUBSCRIBE: {
                             if (!ws.data.isAuthority) {
                                 ws.close(4000, 'Bad behavior');
