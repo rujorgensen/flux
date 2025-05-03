@@ -18,7 +18,7 @@ import type { ProcessMessageRouter } from '../../process-message-router.class';
 import { readProcessAddress } from '../../addressing.utils';
 
 export class GlobalRPCClient<TMethods> {
-    // TODOOD IS USED TO ROUTE THE MESSAGE; SO MAKE GLOBALLY UNIQWUE IN THE FUTURE!!!
+    // TODO OD IS USED TO ROUTE THE MESSAGE; SO MAKE GLOBALLY UNIQUE IN THE FUTURE!!!
     private requestId: number = 0; // Math.floor(Math.random() * 100_000);
 
     // Success and error callbacks for each request.

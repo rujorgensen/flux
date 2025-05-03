@@ -359,10 +359,14 @@ export class FluxMeshServer {
 
                             const networkAuthorityAddress: TAddress =
                                 await networkAuthorityManager.resolveNetworkAuthorityAddressOrThrow(
-                                    ws.data.networkId
+                                    ws.data.networkId,
                                 );
 
-                            const canHaveMembers = await this.channelManager.canHaveMembers(channelName);
+                            const canHaveMembers = await this.channelManager.canHaveMembers(
+                                ws.data.networkId,
+                                channelName,
+                            );
+
                             if (!canHaveMembers) {
                                 ws.send(`${ERROR}:Channel limit is reached`);
                             }

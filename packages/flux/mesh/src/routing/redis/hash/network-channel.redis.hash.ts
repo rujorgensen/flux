@@ -59,9 +59,34 @@ export class NetworkChannelHash {
     }
 
     /**
+     * Reads all channels on a network.
+     *  
+     * @param { TNetworkId_S } networkId
+     * @param { TChannelName } channelName
+     *
+     * @returns { Promise<TAddress> }
+     */
+    public async readNetworkMemberCount(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<number> {
+        const hashValues: (string | null)[] = await this._redisConnection.hash.hmget(`networks/${networkId}/channels/${channelName}`, ['members']);
+        const count: string | null | undefined = hashValues.at(0);
+
+        if (!count) {
+            return 0;
+        }
+
+        return Number.parseInt(count, 10);
+    }
+
+    /**
+     * Deletes a channel on a network.
      * 
-     * @param networkId 
-     * @param channelName 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * 
+     * @returns { Promise<void> }
      */
     public async deleteNetworkChannel(
         networkId: TNetworkId_S,
@@ -93,10 +118,11 @@ export class NetworkChannelHash {
 
     /**
      * 
-     * @param networkId 
-     * @param channelName 
-     * @param clientAddress 
-     * @returns 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * @param { TAddress }      clientAddress
+     * 
+     * @returns { Promise<number> } 
      */
     public async leaveNetworkChannel(
         networkId: TNetworkId_S,
@@ -133,7 +159,7 @@ export class NetworkChannelHash {
         channelNames: Set<TChannelName>,
     ): Promise<void> {
         return Promise.all(
-            Array.from(channelNames).map(async (channelName) => {
+            [...channelNames].map(async (channelName) => {
                 await this.leaveNetworkChannel(
                     networkId,
                     channelName,

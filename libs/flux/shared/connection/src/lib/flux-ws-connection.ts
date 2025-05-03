@@ -93,6 +93,14 @@ export class FluxWebSocketConnection {
         );
     }
 
+    /**
+     * Intercepts messages of a given package type.
+     * 
+     * @param { string }            packageType 
+     * @param { TMessageCallback }  fn
+     * 
+     * @returns { void } 
+     */
     public interceptPackageTypeMessages(
         packageType: string,
         fn: TMessageCallback,
@@ -103,6 +111,32 @@ export class FluxWebSocketConnection {
             existingInterceptors.add(fn);
         } else {
             this.packageTypeInterceptorCallbacks.set(packageType, new Set([fn]));
+        }
+    }
+
+    /**
+     * Removes a package type interceptor.
+     * 
+     * @param { string }            packageType 
+     * @param { TMessageCallback }  fn
+     * 
+     * @returns { void } 
+     */
+    public removePackageTypeInterceptor(
+        packageType: string,
+        fn: TMessageCallback,
+    ): void {
+
+        const existingInterceptors: Set<TMessageCallback> | undefined = this.packageTypeInterceptorCallbacks.get(packageType);
+
+        if (existingInterceptors) {
+            existingInterceptors.delete(fn);
+        } else {
+            console.warn(`No interceptors found for package type "${packageType}"`);
+        }
+
+        if (existingInterceptors && existingInterceptors.size === 0) {
+            this.packageTypeInterceptorCallbacks.delete(packageType);
         }
     }
 
@@ -151,7 +185,7 @@ export class FluxWebSocketConnection {
 
                     const msgInterceptors: Set<TMessageCallback> | undefined = this.packageTypeInterceptorCallbacks.get(packageType);
                     if (msgInterceptors && msgInterceptors.size > 0) {
-                        const channelName: string = message_.substring(message_.indexOf(':') + 1) as TChannelName;
+                        const channelName: string = message_.substring(message_.indexOf(':') + 1);
 
                         for (const msgInterceptor of msgInterceptors) {
                             msgInterceptor(channelName);
@@ -305,6 +339,7 @@ export class FluxWebSocketConnection {
     }
 
     /**
+     * Join a channel.
      * 
      * @param { TChannelName } channelName
      * 
@@ -313,12 +348,32 @@ export class FluxWebSocketConnection {
     public async joinChannel(
         channelName: TChannelName,
     ): Promise<FluxNetworkChannel> {
-
         if (this.webSocketClient) {
             this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
 
-            // TODO wait for acknowledgment
-            return Promise.resolve(new FluxNetworkChannel(channelName, this));
+            return new Promise((resolve, reject) => {
+                const cb = (
+                    message: string,
+                ) => {
+                    // ! TODO implement timeout
+                    // Remove the interceptor
+                    this.removePackageTypeInterceptor(SUBSCRIBED_NETWORK_CHANNEL_NAME, cb);
+
+                    const receivedChannelName: TChannelName = message.substring(message.indexOf(':') + 1) as TChannelName;
+
+                    if (channelName !== receivedChannelName) {
+                        reject(new Error(`Channel name mismatch: "${channelName}" !== "${receivedChannelName}"`));
+                        return;
+                    }
+
+                    resolve(new FluxNetworkChannel(channelName, this));
+                };
+
+                this.interceptPackageTypeMessages(
+                    SUBSCRIBED_NETWORK_CHANNEL_NAME,
+                    cb,
+                );
+            });
         }
 
         return Promise.reject(new Error('Not connected'));
