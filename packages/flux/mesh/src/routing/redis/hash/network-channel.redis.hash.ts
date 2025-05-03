@@ -29,8 +29,7 @@ export class NetworkChannelHash {
     ): Promise<void> {
         await this._redisConnection.hash.sadd(`networks/${networkId}/channels`, channelName);
 
-        const key_: string = `networks/${networkId}/channels/${channelName}/`;
-        await this._redisConnection.hash.hmset(key_, [
+        await this._redisConnection.hash.hmset(`networks/${networkId}/channels/${channelName}`, [
             'createdAt',
             new Date().toISOString(),
         ]);
