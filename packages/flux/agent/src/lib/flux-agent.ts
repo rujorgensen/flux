@@ -23,14 +23,13 @@ import { authenticateOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import { StateManager } from '@flux/shared/utils';
 
-
 export class FluxAgent {
 
     public readonly id: string = nanoid();
 
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
-    private readonly fluxClientData: FluxClientData = new FluxClientData();
 
+    private readonly fluxClientData: FluxClientData = new FluxClientData();
     private readonly stateManager: StateManager = new StateManager();
 
     constructor(
@@ -84,6 +83,12 @@ export class FluxAgent {
             );
 
         return fluxNetworkConnection;
+    }
+
+    public disconnect(
+
+    ): void {
+        this.fluxWebSocketConnection?.disconnect();
     }
 
     /**

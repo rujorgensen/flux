@@ -247,10 +247,15 @@ export class RedisConnection {
         // !TODO
     }
 
-    public async disconnect(
+    /**
+     * Disconnects the Redis cache and pub/sub.
+     * 
+     * @returns { void }
+     */
+    public disconnect(
 
-    ): Promise<void> {
+    ): void {
         this.cacheClient.disconnect();
-        await this.pubSub.disconnect();
+        this.pubSub.disconnect();
     }
 }

@@ -122,6 +122,10 @@ export class NetworkAuthorityRedisSortedSet {
     public async resolveNetworkAuthorityAddressesOrThrow(
         networkId: TNetworkId_S,
     ): Promise<TAddress[]> {
+        if (!this.client.connected) {
+            throw new Error('Redis client is not connected');
+        }
+
         const key: string = `networks/${networkId}/authorities`;
 
         const list: string[] = await this.client.smembers(

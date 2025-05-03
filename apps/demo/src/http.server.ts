@@ -82,15 +82,6 @@ const build = async () => {
 
     await Bun.build({
         entrypoints: [
-            './apps/demo/src/client-b/index.html',
-        ],
-        sourcemap: 'inline',
-        outdir: './apps/demo/src/dist/client-b',
-        minify: false,
-    });
-
-    await Bun.build({
-        entrypoints: [
             './apps/demo/src/server-a/main.ts',
         ],
         sourcemap: 'inline',

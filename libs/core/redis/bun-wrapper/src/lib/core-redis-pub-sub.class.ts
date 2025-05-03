@@ -92,6 +92,11 @@ export class BunRedisPubSub {
         }
     }
 
+    /**
+     * Disconnects the Redis client and the subscriber.
+     * 
+     * @returns { void }
+     */
     public disconnect(
 
     ) {

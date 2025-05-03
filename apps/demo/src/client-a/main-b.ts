@@ -76,4 +76,4 @@ Alpine.data('fluxApplicationB', () => ({
 
 console.log('⚙️ Starting alpine');
 // Start Alpine.js
-Alpine.start();
+// Alpine.start();

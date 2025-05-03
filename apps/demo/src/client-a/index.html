@@ -161,12 +161,12 @@
             <header class="statuses">
                 <label for="network-state">Agents:</label>
                 <label for="webtrc-state">Channels:</label>
-                <span id="network-state" x-text="agents"></span>
-                <span id="webtrc-state" x-text="channels"></span>
+                <span id="network-state" x-text="agents.size"></span>
+                <span id="webtrc-state" x-text="channels.size"></span>
 
             </header>
             <div class="container">
-                <code>
+                <code style="min-height: 300px;">
                     <template x-for="log in clientLog">
                         <p x-text="log"></p>
                     </template>
