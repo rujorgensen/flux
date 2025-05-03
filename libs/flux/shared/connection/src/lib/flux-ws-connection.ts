@@ -241,6 +241,14 @@ export class FluxWebSocketConnection {
         });
     }
 
+    public disconnect(
+
+    ): void {
+        this.socket.close();
+        this.webSocketClient = undefined;
+        this.stateManager.emitNetworkState('disconnected');
+    }
+
     /**
      * Registers an authority to the network.
      * 

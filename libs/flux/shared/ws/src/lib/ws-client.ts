@@ -156,6 +156,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     ) {
         this.options.autoReconnect = false;
         this.ws?.close();
+        this.clearEventSubscribers();
     }
 }
 
