@@ -14,6 +14,15 @@ export class NetworkClientHash {
         private readonly client: RedisClient,
     ) { }
 
+    /**
+     * Registers a network client UID and address in the Redis hash.
+     *
+     * @param { TNetworkId_S }      networkId
+     * @param { TAddress }          clientId
+     * @param { TClientOwnUId }     uid
+     * 
+     * @returns { void }
+     */
     public async registerNetworkClient(
         networkId: TNetworkId_S,
         clientId: TAddress,
@@ -25,13 +34,30 @@ export class NetworkClientHash {
             uid,
             clientId,
         ]);
-        
+
         await this.client.expire(key, 500);
     }
 
     /**
+     * Unregisters a network client UID and address in the Redis hash.
      *
-     * @param networkId
+     * @param { TNetworkId_S }      networkId
+     * @param { TClientOwnUId }     uid
+     * 
+     * @returns { void }
+     */
+    public async unregisterNetworkClient(
+        networkId: TNetworkId_S,
+        uid: TClientOwnUId
+    ): Promise<void> {
+        await this.client.srem(`networks/${networkId}/client-uids`, uid);
+    }
+
+    /**
+     * Resolves the network client address by an agent's UID or throws.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TClientOwnUId }  networkId
      *
      * @returns { Promise<TAddress> }
      */
@@ -44,10 +70,7 @@ export class NetworkClientHash {
         const data = await this.client.hmget(key, [clientOwnUId]);
 
         if (!data[0]) {
-            console.error('data', data, 'key', key);
-            throw new Error(
-                `Network authority not found for networkId: "${networkId}"`
-            );
+            throw new Error(`Network authority not found for networkId: "${networkId}"`);
         }
 
         return data[0] as TAddress;

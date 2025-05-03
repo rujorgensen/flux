@@ -27,15 +27,34 @@ export class NetworkClientManager {
      * Register a local client UID.
      *
      * @param { TNetworkId_S }      networkId
-     * @param { TAddress }         clientId
+     * @param { TAddress }          clientId
      * @param { TClientOwnUId }     uid
+     * 
+     * @returns { void }
      */
     public registerClientUId(
         networkId: TNetworkId_S,
         clientId: TAddress,
-        uid: TClientOwnUId
+        uid: TClientOwnUId,
     ): void {
         this.networkClientHash.registerNetworkClient(networkId, clientId, uid);
+    }
+
+    /**
+     * Unregisters a network client UID and address in the Redis hash.
+     *
+     * @param { TNetworkId_S }      networkId
+     * @param { TClientOwnUId }     clientOwnUId
+     * 
+     * @returns { void }
+     */
+    public unregisterNetworkClient(
+        networkId: TNetworkId_S,
+        clientOwnUId: TClientOwnUId,
+    ): void {
+        this.cache.delete(`${networkId}.${clientOwnUId}`);
+
+        this.networkClientHash.unregisterNetworkClient(networkId, clientOwnUId);
     }
 
     public async resolveNetworkClientAddressByUid(
@@ -51,8 +70,9 @@ export class NetworkClientManager {
             return cached;
         }
 
-        const address: TAddress =
-            await this.redisConnection.networkClientHash.resolveNetworkClientAddressOrThrow(
+        const address: TAddress = await this.redisConnection
+            .networkClientHash
+            .resolveNetworkClientAddressOrThrow(
                 networkId,
                 clientOwnUId
             );

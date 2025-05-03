@@ -560,6 +560,13 @@ export class FluxMeshServer {
                                 );
                         }
 
+                        if (ws.data.uid) {
+                            networkClientManager.unregisterNetworkClient(
+                                ws.data.networkId,
+                                ws.data.uid,
+                            );
+                        }
+
                         console.log('🤵 Agent disconnected');
 
                         // TODO
