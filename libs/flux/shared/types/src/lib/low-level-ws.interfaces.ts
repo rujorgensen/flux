@@ -19,6 +19,7 @@ export const UNSUBSCRIBED_NETWORK_CHANNEL_NAME: string = 'unsubscribed-nc-name';
 export const AUTHORITY_ON_CREATE_CHANNEL: string = 'acc';
 export const AUTHORITY_ON_EMPTY_CHANNEL: string = 'aec';
 export const AUTHORITY_CHANNEL_SUBSCRIBE: string = 'acs';
+export const AUTHORITY_DISCONNECT_AGENT: string = 'ada';
 
 // * Errors
 export const ERROR: string = 'e';

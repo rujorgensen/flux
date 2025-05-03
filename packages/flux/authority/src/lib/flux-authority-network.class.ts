@@ -23,4 +23,18 @@ export class FluxAuthorityNetworkConnection {
             this._fluxWebSocketConnection,
         );
     }
+
+    /**
+     * Removes an agent from the network.
+     * 
+     * @param { string } id
+     * 
+     * @returns { void }
+     */
+    public disconnectAgent(
+        id: string,
+    ): void {
+        this._fluxWebSocketConnection
+            .disconnectAgent(id);
+    }
 }

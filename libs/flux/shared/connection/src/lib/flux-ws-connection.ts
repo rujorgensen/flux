@@ -17,6 +17,7 @@ import {
     ON_NETWORK_CHANNEL_PUBLISH,
     AUTHORITY_CHANNEL_SUBSCRIBE,
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
+    AUTHORITY_DISCONNECT_AGENT,
 } from '@flux/shared/types';
 import {
     type RPCRequest,
@@ -28,6 +29,7 @@ import { FluxAgentNetworkConnection } from './agent/flux-agent-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
 import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
+import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
 
 interface IOptions {
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -413,8 +415,12 @@ export class FluxWebSocketConnection {
         return Promise.resolve();
     }
 
+    // ****************************************************************************
+    // *** For Authorities
+    // ****************************************************************************
+
     /**
-     * Only for authorities
+     * Subscribes to the channel changes.
      * 
      * @returns { void }
      */
@@ -422,6 +428,27 @@ export class FluxWebSocketConnection {
     ): void {
         if (this.webSocketClient) {
             this.webSocketClient.send(AUTHORITY_CHANNEL_SUBSCRIBE);
+        } else {
+            console.warn('WebSocket client is not connected');
+        }
+    }
+
+    /**
+     * Disconnects an agent from the network.
+     * 
+     * @param { string } id
+     * 
+     * @returns { void }
+     */
+    public disconnectAgent(
+        id: string,
+    ): void {
+        if (!isNanoId(id)) {
+            throw new Error(`Invalid agent id: '${id}'`);
+        }
+
+        if (this.webSocketClient) {
+            this.webSocketClient.send(`${AUTHORITY_DISCONNECT_AGENT}:${id}`);
         } else {
             console.warn('WebSocket client is not connected');
         }
