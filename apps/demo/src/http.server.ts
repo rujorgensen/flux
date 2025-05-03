@@ -91,10 +91,10 @@ const build = async () => {
 
     await Bun.build({
         entrypoints: [
-            './apps/flux/agent/src/server-a/main.ts',
+            './apps/demo/src/server-a/main.ts',
         ],
         sourcemap: 'inline',
-        outdir: './apps/flux/agent/src/dist/server-a',
+        outdir: './apps/demo/src/dist/server-a',
         minify: false,
     });
 
@@ -102,7 +102,7 @@ const build = async () => {
 };
 
 const serverConf = {
-    port: 3000,
+    port: 3001,
     idleTimeout: 0, // deactivate timeout
     hostname: '0.0.0.0',
     fetch: async (request: Request) => {
@@ -163,7 +163,7 @@ await clearAndBuild();
 
 console.log('Restarting main...');
 try {
-    $`bun --watch ./apps/flux/agent/src/demo/server-a/main.ts`.then();
+    $`bun --watch ./apps/demo/src/server-a/main.ts`.then();
 } catch { }
 
 server = Bun.serve(serverConf);

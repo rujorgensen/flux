@@ -1,6 +1,6 @@
 import Alpine from 'alpinejs';
-import { FluxAgent } from '../../lib/flux-agent';
-import { TNetworkId_S } from '@flux/shared/types';
+import { FluxAgent } from '@persistica/flux-agent';
+import type { TNetworkId_S } from '@flux/shared/types';
 // import { Todo } from '../_persistica/client/todo.class.js';
 // import {
 //     type CurrentNetworkStore,

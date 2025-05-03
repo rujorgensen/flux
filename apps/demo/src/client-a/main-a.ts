@@ -1,7 +1,7 @@
 import Alpine from 'alpinejs';
-import { FluxAgent } from '../../lib/flux-agent';
+import { FluxAgent } from '@persistica/flux-agent';
 import type { TNetworkId_S } from '@flux/shared/types';
-import type { FluxRemoteClient } from '../../lib/flux-remote-client.class';
+import type { FluxRemoteClient } from 'packages/flux/agent/src/lib/flux-remote-client.class';
 import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
 
