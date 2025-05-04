@@ -3,8 +3,8 @@ import {
     getRedisConnection,
 } from '../routing/redis/redis-connection.class';
 import type {
-    NetworkClientHash,
-} from '../routing/redis/hash/network-client.redis.hash';
+    NetworkAgentRedisCacheService,
+} from '../routing/redis/hash/network-agent-redis-cache.service';
 import type {
     TAddress,
     TClientOwnUId,
@@ -15,7 +15,7 @@ export class NetworkClientManager {
     private readonly redisConnection: RedisConnection = getRedisConnection();
     private readonly cache: Map<`${TNetworkId_S}.${TClientOwnUId}`, TAddress> = new Map(); // ! cleanup
 
-    public readonly networkClientHash: NetworkClientHash;
+    public readonly networkClientHash: NetworkAgentRedisCacheService;
 
     constructor(
 

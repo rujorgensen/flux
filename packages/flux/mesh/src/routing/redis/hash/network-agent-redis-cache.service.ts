@@ -8,10 +8,10 @@ import type {
     TNetworkId_S,
 } from '@flux/shared/types';
 
-export class NetworkClientHash {
+export class NetworkAgentRedisCacheService {
 
     constructor(
-        private readonly client: RedisClient,
+        private readonly _client: RedisClient,
     ) { }
 
     /**
@@ -30,12 +30,12 @@ export class NetworkClientHash {
     ): Promise<void> {
         const key: string = `networks/${networkId}/client-uids`;
 
-        await this.client.hmset(key, [
+        await this._client.hmset(key, [
             uid,
             clientId,
         ]);
 
-        await this.client.expire(key, 500);
+        await this._client.expire(key, 500);
     }
 
     /**
@@ -50,7 +50,7 @@ export class NetworkClientHash {
         networkId: TNetworkId_S,
         uid: TClientOwnUId
     ): Promise<void> {
-        await this.client.send('HDEL', [`networks/${networkId}/client-uids`, uid]);
+        await this._client.send('HDEL', [`networks/${networkId}/client-uids`, uid]);
     }
 
     /**
@@ -67,7 +67,7 @@ export class NetworkClientHash {
     ): Promise<TAddress> {
         const key: string = `networks/${networkId}/client-uids`;
 
-        const data = await this.client.hmget(key, [clientOwnUId]);
+        const data = await this._client.hmget(key, [clientOwnUId]);
 
         if (!data[0]) {
             throw new Error(`Network agent not found for networkId: '${networkId}'`);

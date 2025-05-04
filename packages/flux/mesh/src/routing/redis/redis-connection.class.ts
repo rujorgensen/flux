@@ -5,7 +5,7 @@ import {
 } from '@core/redis/bun';
 import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
 import { NetworkAuthorityRedisSortedSet } from './hash/network-authority.redis.sorted-set';
-import { NetworkClientHash } from './hash/network-client.redis.hash';
+import { NetworkAgentRedisCacheService } from './hash/network-agent-redis-cache.service';
 import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
 
 let redisConnection: RedisConnection | undefined;
@@ -38,7 +38,7 @@ export class RedisConnection {
     private readonly pubSub: BunRedisPubSub;
 
     public readonly networkAuthoritySet: NetworkAuthorityRedisSortedSet;
-    public readonly networkClientHash: NetworkClientHash;
+    public readonly networkClientHash: NetworkAgentRedisCacheService;
 
     // Wrapper to not expose BunRedisClientType functions
     public readonly hash;
@@ -89,7 +89,7 @@ export class RedisConnection {
             });
 
         this.networkAuthoritySet = new NetworkAuthorityRedisSortedSet(this.cacheClient.getClient());
-        this.networkClientHash = new NetworkClientHash(this.cacheClient.getClient());
+        this.networkClientHash = new NetworkAgentRedisCacheService(this.cacheClient.getClient());
 
         // *** Create Redis subscriber
         this.pubSub = new BunRedisPubSub(
