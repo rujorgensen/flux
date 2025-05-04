@@ -460,9 +460,15 @@ export class FluxWebSocketConnection {
         this.callbacks.add(cb);
     }
 
+    /**
+     * 
+     * @param { TClientOwnUId } clientUUIDToken
+     * 
+     * @returns { Promise<void> } 
+     */
     private setClientUUIDToken(
         clientUUIDToken?: TClientOwnUId,
-    ) {
+    ): Promise<void> {
 
         if (this.webSocketClient) {
             this.webSocketClient.send(`${SET_OWN_UID}:${clientUUIDToken}`);

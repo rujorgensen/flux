@@ -1,6 +1,13 @@
 export type TNetworkId_S = string & { __brand: 'NetworkId'; };
 
-export const validateNetworkId = (
+/**
+ * Validates a network ID.
+ * 
+ * @param { string }    networkId
+ *  
+ * @returns { boolean } 
+ */
+export const validateNetworkIdOrThrow = (
     networkId: string,
 ): networkId is TNetworkId_S => {
     if (networkId.includes(':')) {

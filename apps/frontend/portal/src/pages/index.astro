@@ -14,94 +14,156 @@ import Menu from "../components/Menu.svelte";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 import Pane from "../layouts/dashboard/Pane.astro";
 
+import { treaty } from "@elysiajs/eden";
+import type { App } from "../../../../backend/portal/src/main";
+const app = treaty<App>("localhost:3000");
 
-import { treaty } from '@elysiajs/eden'
-import type {
-  App
-} from '../../../../backend/portal/src/main'
-const app = treaty<App>('localhost:3000')
+const { data: initialValue } = await app.api["connected-authorities"].get();
 
-const { data: initialValue } = await app.api['connected-authorities'].get();
-
+const networkId: string = "network-id-from-astro";
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			#main-layout {
-				display: grid;
-				grid-template-columns: auto 1fr;
-				grid-template-rows: 100vh;
-				grid-template-areas: "menu main";
-				background: linear-gradient(var(--gray-gradient)) no-repeat;
-			}
+    <head>
+        <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+        <style>
+            #main-layout {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                grid-template-rows: 100vh;
+                grid-template-areas: "menu main";
+                background: linear-gradient(var(--gray-gradient)) no-repeat;
+            }
 
-			nav {
-				grid-area: menu;
-				background-color: var(--surface-1);
-			}
+            nav {
+                grid-area: menu;
+                background-color: var(--surface-1);
+            }
 
-			#main {
-				grid-area: main;
-				width: 100%;
-				overflow: scroll;
-				padding: 100px;
-			}
+            #main {
+                grid-area: main;
+                width: 100%;
+                overflow: scroll;
+                padding: 100px;
+            }
 
-			#grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-				grid-template-rows: max-content 800px;
+            #grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                grid-template-rows: max-content 400px 800px;
 
-				grid-template-areas:
-					"a b c d ctrl"
-					"chart chart chart chart ctrl";
+                grid-template-areas:
+                    "a b c d ctrl"
+                    "table table table table ctrl"
+                    "chart chart chart chart ctrl";
 
-				gap: 40px;
-			}
-		</style>
-	</head>
+                gap: 40px;
+            }
 
-	<body id="main-layout">
-		<nav>
-			<Menu client:load />
-		</nav>
+            /* Basic table styling */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                font-size: 18px;
+                text-align: left;
+            }
 
-		<main id="main">
-			<main id="grid">
-				<Pane id="connected-authorities" area="a">
-					<h2 slot="header">Connected Authotities</h2>
-					<ConnectedAuthorities initialData={initialValue} client:load />
-				</Pane>
-				
-				<Pane  area="b">
-					<h2 slot="header">Connected Agents</h2>
-					<ConnectedAgents client:load />
-				</Pane>
-				
-				<Pane  area="chart" area="c">
-					<h2 slot="header">Active Channels</h2>
-					<ActiveChanels client:load />
-				</Pane>
-				
-				<Pane  area="d">
-					<h2 slot="header">Total Data Usage</h2>
-					<TotalDataUsage client:load />
-				</Pane>
-				<Pane area="chart">
-					<h2 slot="header">Agents</h2>
-					<ChartJS client:load />
-				</Pane>
-				<Pane area="ctrl">
-					<h2 slot="header">Control Panel</h2>
-					<p>dasd</p>
-				</Pane>
-			</main>
+            /* Table header styling */
+            th {
+                background-color: #b663d4;
+                color: white;
+                padding: 12px;
+            }
 
-			<MeltUI client:load />
-			<Footer />
-		</main>
-	</body>
+            /* Table data cell styling */
+            td {
+                padding: 12px;
+                border: 1px solid #ddd;
+            }
+
+            /* Alternating row colors */
+            tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+            /* Hover effect on rows */
+            tr:hover {
+                background-color: #ddd;
+            }
+
+            /* Responsive design */
+            @media (max-width: 600px) {
+                table,
+                th,
+                td {
+                    display: block;
+                    width: 100%;
+                }
+
+                th,
+                td {
+                    text-align: right;
+                    padding-left: 50%;
+                    position: relative;
+                }
+
+                th::before,
+                td::before {
+                    content: attr(data-label);
+                    position: absolute;
+                    left: 0;
+                    width: 50%;
+                    padding-left: 15px;
+                    font-weight: bold;
+                    text-align: left;
+                }
+            }
+        </style>
+    </head>
+
+    <body id="main-layout">
+        <nav>
+            <Menu client:load />
+        </nav>
+
+        <main id="main">
+            <main id="grid">
+                <Pane id="connected-authorities" area="a">
+                    <h2 slot="header">Connected Authotities</h2>
+                    <ConnectedAuthorities
+                        initialData={initialValue}
+                        client:load
+                    />
+                </Pane>
+
+                <Pane area="b">
+                    <h2 slot="header">Connected Agents</h2>
+                    <ConnectedAgents client:load />
+                </Pane>
+
+                <Pane area="chart" area="c">
+                    <h2 slot="header">Active Channels</h2>
+                    <ActiveChanels client:load />
+                </Pane>
+
+                <Pane area="d">
+                    <h2 slot="header">Total Data Usage</h2>
+                    <TotalDataUsage client:load />
+                </Pane>
+                <Pane area="chart">
+                    <h2 slot="header">Agents</h2>
+                    <ChartJS client:load />
+                </Pane>
+                <Pane area="ctrl">
+                    <h2 slot="header">Control Panel</h2>
+                    <p>dasd</p>
+                </Pane>
+            </main>
+
+            <MeltUI client:load />
+            <Footer />
+        </main>
+    </body>
 </html>

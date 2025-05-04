@@ -24,6 +24,9 @@
             "@flux/mesh": [
                 "packages/flux/mesh/src/index.ts"
             ],
+            "@flux/mesh/store/redis/network-agent": [
+                "libs/flux/mesh/store/redis/network-agent/src/index.ts"
+            ],
             "@flux/shared/connection": [
                 "libs/flux/shared/connection/src/index.ts"
             ],

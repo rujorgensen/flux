@@ -5,7 +5,7 @@ import {
 } from '@core/redis/bun';
 import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
 import { NetworkAuthorityRedisSortedSet } from './hash/network-authority.redis.sorted-set';
-import { NetworkAgentRedisCacheService } from './hash/network-agent-redis-cache.service';
+import { NetworkAgentRedisCacheService } from '@flux/mesh/store/redis/network-agent';
 import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
 
 let redisConnection: RedisConnection | undefined;

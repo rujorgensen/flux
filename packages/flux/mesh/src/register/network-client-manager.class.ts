@@ -4,9 +4,10 @@ import {
 } from '../routing/redis/redis-connection.class';
 import type {
     NetworkAgentRedisCacheService,
-} from '../routing/redis/hash/network-agent-redis-cache.service';
+} from '../../../../../libs/flux/mesh/store/redis/network-agent/src/lib/network-agent-redis-cache.service';
 import type {
     TAddress,
+    TClientId,
     TClientOwnUId,
     TNetworkId_S,
 } from '@flux/shared/types';
@@ -24,6 +25,25 @@ export class NetworkClientManager {
     }
 
     /**
+     * Register an agent.
+     *
+     * @param { TNetworkId_S }              networkId
+     * @param { TClientId }                 id
+     * @param { Bun.SocketAddress | null }  ip
+     * @param { TAddress }                  address
+     * 
+     * @returns { void }
+     */
+    public registerAgent(
+        networkId: TNetworkId_S,
+        id: TClientId,
+        ip: Bun.SocketAddress | null,
+        address: TAddress,
+    ): Promise<void> {
+        return this.networkClientHash.registerAgent(networkId, id, ip, address);
+    }
+
+    /**
      * Register a local client UID.
      *
      * @param { TNetworkId_S }      networkId
@@ -37,7 +57,7 @@ export class NetworkClientManager {
         clientId: TAddress,
         uid: TClientOwnUId,
     ): void {
-        this.networkClientHash.registerNetworkClient(networkId, clientId, uid);
+        this.networkClientHash.registerAgentUID(networkId, clientId, uid);
     }
 
     /**
@@ -50,11 +70,28 @@ export class NetworkClientManager {
      */
     public unregisterNetworkClient(
         networkId: TNetworkId_S,
+        clientOwnUId?: TClientOwnUId,
+    ): void {
+        if (clientOwnUId) {
+            this.unregisterNetworkClientUID(networkId, clientOwnUId);
+        }
+    }
+
+    /**
+     * Unregisters a network client UID and address in the Redis hash.
+     *
+     * @param { TNetworkId_S }      networkId
+     * @param { TClientOwnUId }     clientOwnUId
+     * 
+     * @returns { void }
+     */
+    private unregisterNetworkClientUID(
+        networkId: TNetworkId_S,
         clientOwnUId: TClientOwnUId,
     ): void {
         this.cache.delete(`${networkId}.${clientOwnUId}`);
 
-        this.networkClientHash.unregisterNetworkClient(networkId, clientOwnUId);
+        this.networkClientHash.deleteNetworkClient(networkId, clientOwnUId);
     }
 
     public async resolveNetworkClientAddressByUid(
@@ -72,7 +109,7 @@ export class NetworkClientManager {
 
         const address: TAddress = await this.redisConnection
             .networkClientHash
-            .resolveNetworkClientAddressOrThrow(
+            .readNetworkClientAddressOrThrow(
                 networkId,
                 clientOwnUId
             );
