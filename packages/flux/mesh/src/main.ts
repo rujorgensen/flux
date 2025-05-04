@@ -490,7 +490,7 @@ export class FluxMeshServer {
                                 message_.indexOf(':') + 1
                             ) as TClientOwnUId;
                             const networkClientAddress: TAddress =
-                                await networkClientManager.resolveNetworkClientAddressByUid(
+                                await networkAgentManager.resolveNetworkClientAddressByUid(
                                     ws.data.networkId,
                                     clientOwnUId
                                 );
