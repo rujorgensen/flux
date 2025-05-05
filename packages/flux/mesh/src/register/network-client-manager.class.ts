@@ -64,16 +64,18 @@ export class NetworkClientManager {
      * Unregisters a network client UID and address in the Redis hash.
      *
      * @param { TNetworkId_S }      networkId
+     * @param { TClientId }         clientId
      * @param { TClientOwnUId }     clientOwnUId
      * 
      * @returns { void }
      */
     public unregisterNetworkClient(
         networkId: TNetworkId_S,
+        clientId: TClientId,
         clientOwnUId?: TClientOwnUId,
     ): void {
         if (clientOwnUId) {
-            this.unregisterNetworkClientUID(networkId, clientOwnUId);
+            this.unregisterNetworkClientUID(networkId, clientId, clientOwnUId);
         }
     }
 
@@ -81,17 +83,19 @@ export class NetworkClientManager {
      * Unregisters a network client UID and address in the Redis hash.
      *
      * @param { TNetworkId_S }      networkId
+     * @param { TClientId }         clientId
      * @param { TClientOwnUId }     clientOwnUId
      * 
      * @returns { void }
      */
     private unregisterNetworkClientUID(
         networkId: TNetworkId_S,
+        clientId: TClientId,
         clientOwnUId: TClientOwnUId,
     ): void {
         this.cache.delete(`${networkId}.${clientOwnUId}`);
 
-        this.networkClientHash.deleteNetworkClient(networkId, clientOwnUId);
+        this.networkClientHash.deleteNetworkAgent(networkId, clientId, clientOwnUId);
     }
 
     public async resolveNetworkClientAddressByUid(
