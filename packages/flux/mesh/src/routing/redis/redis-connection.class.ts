@@ -121,6 +121,7 @@ export class RedisConnection {
             hmset: hashClient.hmset.bind(hashClient),
             smembers: hashClient.smembers.bind(hashClient),
             srem: hashClient.srem.bind(hashClient),
+            scard: hashClient.scard.bind(hashClient),
             del: hashClient.del.bind(hashClient),
             hincrby: hashClient.hincrby.bind(hashClient),
             hmget: hashClient.hmget.bind(hashClient),

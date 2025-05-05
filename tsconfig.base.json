@@ -24,8 +24,17 @@
             "@flux/mesh": [
                 "packages/flux/mesh/src/index.ts"
             ],
+            "@flux/mesh/store/redis/network-channel": [
+                "libs/flux/mesh/store/redis/network-channel/src/index.ts"
+            ],
+            "@flux/mesh/store/redis/network-authority": [
+                "libs/flux/mesh/store/redis/network-authority/src/index.ts"
+            ],
             "@flux/mesh/store/redis/network-agent": [
                 "libs/flux/mesh/store/redis/network-agent/src/index.ts"
+            ],
+            "@flux/mesh/store/redis/network-usage": [
+                "libs/flux/mesh/store/redis/network-usage/src/index.ts"
             ],
             "@flux/shared/connection": [
                 "libs/flux/shared/connection/src/index.ts"
