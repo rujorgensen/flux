@@ -110,25 +110,6 @@ export class RedisStatusService {
             maxmemory: info.maxmemory,
         };
 
-        const cpu = {
-            used_cpu_sys: info.used_cpu_sys,
-            used_cpu_user: info.used_cpu_user,
-            used_cpu_sys_children: info.used_cpu_sys_children,
-            used_cpu_user_children: info.used_cpu_user_children,
-        };
-
-        const stats = {
-            evicted_keys: info.evicted_keys,
-            expired_keys: info.expired_keys,
-            keyspace_hits: info.keyspace_hits,
-            keyspace_misses: info.keyspace_misses,
-            rejected_connections: info.rejected_connections,
-        };
-
-        const clients = {
-            connected_clients: info.connected_clients,
-            blocked_clients: info.blocked_clients,
-        };
         const keyspace = parseKeyspaceSection(keyspaceRaw);
 
         const used = memory.used_memory as number;
@@ -151,21 +132,21 @@ export class RedisStatusService {
                 overThreshold: max > 0 ? used / max > threshold : false,
             },
             cpu: {
-                sys: cpu.used_cpu_sys,
-                user: cpu.used_cpu_user,
-                sysChildren: cpu.used_cpu_sys_children,
-                userChildren: cpu.used_cpu_user_children,
+                sys: info.used_cpu_sys,
+                user: info.used_cpu_user,
+                sysChildren: info.used_cpu_sys_children,
+                userChildren: info.used_cpu_user_children,
             },
             stats: {
-                evictedKeys: stats.evicted_keys,
-                expiredKeys: stats.expired_keys,
-                keyspaceHits: stats.keyspace_hits,
-                keyspaceMisses: stats.keyspace_misses,
-                rejectedConnections: stats.rejected_connections,
+                evictedKeys: info.evicted_keys,
+                expiredKeys: info.expired_keys,
+                keyspaceHits: info.keyspace_hits,
+                keyspaceMisses: info.keyspace_misses,
+                rejectedConnections: info.rejected_connections,
             },
             clients: {
-                connected: clients.connected_clients,
-                blocked: clients.blocked_clients,
+                connected: info.connected_clients,
+                blocked: info.blocked_clients,
             },
             keyspace,
             latency,
