@@ -1,6 +1,6 @@
 import type * as Bun from 'bun';
 import * as nodeURL from 'node:url';
-import { TNetworkId_S } from '@flux/shared/types';
+import { PicoLogger } from '@utils/pico-logger';
 import { generateToken } from '../../auth/auth';
 
 export const authorizeNetworkAuthority = async (
@@ -15,7 +15,7 @@ export const authorizeNetworkAuthority = async (
 
     const text = await request.text();
 
-    console.log('Received password:', text, networkId);
+    PicoLogger.log(`Received password:${text}${networkId}`, 'authorize');
 
     console.error('TODOD: CHECK PASSWORD');
 
