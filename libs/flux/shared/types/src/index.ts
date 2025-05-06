@@ -40,15 +40,15 @@ export type {
     IPackageStatus,
 } from './lib/package-status.interfaces';
 
-export type {
-    TClientOwnUId,
+export {
+    type TClientOwnUId,
+    validateClientUIDOrThrow,
 } from './lib/client.type';
 
 export {
     type TProcessId,
     type TProcessAddress,
     type TMachineAddress,
-    type TClientId,
     type TAddress,
     splitAddressOrThrow,
     splitProcessAddress,
@@ -57,5 +57,8 @@ export {
 // * Types
 export {
     type TNetworkId_S,
-    validateNetworkId,
+    validateNetworkIdOrThrow,
 } from './lib/network.type';
+export type {
+    TClientId,
+} from './lib/client-id.type';

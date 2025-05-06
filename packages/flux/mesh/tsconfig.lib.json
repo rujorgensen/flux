@@ -1,21 +1,21 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../../dist/out-tsc",
-    "declaration": true,
-    "types": [
-      "node"
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../../../dist/out-tsc",
+        "declaration": true,
+        "types": [
+            "node"
+        ],
+        "target": "ESNext",
+        "moduleResolution": "bundler",
+        "module": "EsNext"
+    },
+    "include": [
+        "src/**/*.ts"
     ],
-    "target": "ESNext",
-    "moduleResolution": "bundler",
-    "module": "EsNext"
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "jest.config.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts"
-  ]
+    "exclude": [
+        "jest.config.ts",
+        "src/**/*.spec.ts",
+        "src/**/*.test.ts"
+    ]
 }
