@@ -76,7 +76,18 @@ import {
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
 import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
 import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
+import { PicoLogger } from '@utils/pico-logger';
 
+PicoLogger.configure({
+    allowScopes: [
+        'routing',
+        'authorize',
+        'authorized',
+        'ws-connection',
+        'ws-disconnect',
+        'rpc',
+    ],
+});
 
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
     ip: Bun.SocketAddress | null;
@@ -230,14 +241,14 @@ export class FluxMeshServer {
                     clientMap.set(_ws.data.id, _ws);
 
                     if (_ws.data.isAuthority) {
-                        console.log(`👮 Authority connected at address: '${_ws.data.address}'`);
+                        PicoLogger.log(`👮 Authority connected at address: '${_ws.data.address}'`, 'ws-connection');
 
                         networkAuthorityManager.register(
                             _ws.data.networkId,
                             _ws.data.id
                         );
                     } else {
-                        console.log('🤵 Agent connected:', _ws.data.id);
+                        PicoLogger.log('🤵 Agent connected:', _ws.data.id, 'ws-connection');
 
                         _ws.data.rtcClient = new WebRTCClient(
                             processAddress,
@@ -384,7 +395,7 @@ export class FluxMeshServer {
                                         ws.subscribe(`networks/${ws.data.networkId}/channels/${channelName}`);
                                         ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
                                         ws.data.channelNames.add(channelName);
-                                        console.log(`🎉 Client was authorized on channel name '${channelName}'`);
+                                        PicoLogger.log(`🎉 Client was authorized on channel name '${channelName}'`, 'authorized');
 
                                         this.channelManager
                                             .joinNetworkChannel(
@@ -461,7 +472,7 @@ export class FluxMeshServer {
                                 message_.substring(message_.indexOf(':') + 1)
                             ) as RPCResponse;
 
-                            console.log('📡 Received RPC response.');
+                            PicoLogger.log('📡 Received RPC response.', 'rpc');
 
                             processMessageRouter.message(
                                 rpcResponseMessage.rpcProcessAddress,
@@ -541,16 +552,16 @@ export class FluxMeshServer {
                     ws: TConnectedClientSocket,
                     code: number,
                 ) => {
-                    console.log('🛑 Socket disconnected', code, ws.data.id); // 1001
-
                     clientMap.delete(ws.data.id);
 
                     if (ws.data.isAuthority) {
+                        PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
                         networkAuthorityManager.unregister(
                             ws.data.networkId,
                             ws.data.address,
                         );
                     } else {
+                        PicoLogger.log(`🛑🤵 Agent socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
                         // Unsubscribe from topics
                         for (const channelName of (ws.data.channelNames ?? [])) {
                             ws.unsubscribe(
@@ -575,14 +586,6 @@ export class FluxMeshServer {
                                 ws.data.uid,
                             );
                         }
-
-                        console.log('🤵 Agent disconnected');
-
-                        // TODO
-                        // localClientManager.unregister(
-                        //     ws.data.networkId,
-                        //     ws.data.id,
-                        // );
                     }
                 },
 

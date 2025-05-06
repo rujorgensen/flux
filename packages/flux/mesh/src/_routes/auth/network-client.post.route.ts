@@ -53,12 +53,10 @@ export const authorizeNetworkClient = async (
 
         const authorizedJWT: string = await retry<string>(
             async () => {
-
                 networkAuthorityAddress = await networkAuthorityManager
                     .resolveNetworkAuthorityAddressOrThrow(
                         networkId,
                     );
-                console.log('Trying networkAuthorityAddress', networkAuthorityAddress);
 
                 return globalRPCClient.call(
                     networkAuthorityAddress,

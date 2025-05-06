@@ -17,6 +17,7 @@ import {
     readProcessAddress,
     readProcessId,
 } from './addressing.utils';
+import { PicoLogger } from '@utils/pico-logger';
 
 export class ProcessMessageRouter {
     private readonly machineAddress: TMachineAddress = readMachineAddress();
@@ -41,7 +42,7 @@ export class ProcessMessageRouter {
 
         // * Not on the same machine
         if (machineAddress !== this.machineAddress) {
-            console.log('🛣️ Routing message to machine');
+            PicoLogger.log('🛣️ Routing message to machine', 'routing');
 
             this.redisConnection.directPublish(address, message);
 
@@ -50,7 +51,7 @@ export class ProcessMessageRouter {
 
         // * Not on the same process
         if (processId !== this.processId) {
-            console.log('🛣️ Routing message to process');
+            PicoLogger.log('🛣️ Routing message to process', 'routing');
             // ! Route through Redis for now, but change to direct process connection
             this.redisConnection.directPublish(address, message);
 
@@ -58,7 +59,7 @@ export class ProcessMessageRouter {
         }
 
         // * This must be to local process
-        console.log('🛣️ Routing message to local');
+        PicoLogger.log('🛣️ Routing message to local', 'routing');
         for (const localCallback of this.localCallbacks) {
             localCallback(message);
         }

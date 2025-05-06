@@ -13,6 +13,7 @@ import {
     type RedisConnection,
     getRedisConnection,
 } from './redis/redis-connection.class';
+import { PicoLogger } from '@utils/pico-logger';
 
 export class OutgoingMessageRouter {
     private readonly processId: TProcessId = readProcessId();
@@ -46,7 +47,7 @@ export class OutgoingMessageRouter {
 
         // * Not on the same machine
         if (machineAddress !== this.machineAddress) {
-            console.log('🛣️ Routing message to machine');
+            PicoLogger.log('🛣️ Routing message to machine', 'routing');
 
             this.redisConnection.directPublish(address, message);
 
@@ -55,7 +56,7 @@ export class OutgoingMessageRouter {
 
         // * On the same machine, but not on the same process
         if (processId !== this.processId) {
-            console.log(`🛣️  Routing message from process ID '${this.processId}' to process ID: '${processId}'`);
+            PicoLogger.log(`🛣️  Routing message from process ID '${this.processId}' to process ID: '${processId}'`, 'routing');
 
             // ! Route through Redis for now, but change to direct process connection
             this.redisConnection.directPublish(address, message);
@@ -64,7 +65,7 @@ export class OutgoingMessageRouter {
         }
 
         // * On the same machine and process
-        console.log('🛣️ Routing message to local client');
+        PicoLogger.log('🛣️ Routing message to local client', 'routing');
 
         this.passToLocalClientOrThrowUnknownClient(clientId, message);
     }
