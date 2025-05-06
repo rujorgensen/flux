@@ -5,7 +5,7 @@ import {
     type TNetworkId_S,
     GlobalRPCTimeoutError,
     UnknownClientError,
-    validateNetworkId,
+    validateNetworkIdOrThrow,
 } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
@@ -22,7 +22,7 @@ export const authorizeNetworkClient = async (
         .query.networkId as string;
 
     try {
-        validateNetworkId(networkIdString ?? '');
+        validateNetworkIdOrThrow(networkIdString ?? '');
     } catch (error) {
         return new Response(
             error instanceof Error ? error.message : 'Unknown error validating network ID',
