@@ -11,11 +11,11 @@ export const validateClientUIDOrThrow = (
     clientOwnUID: string,
 ): clientOwnUID is TClientOwnUId => {
     if (!/^[A-Za-z0-9-]+$/.test(clientOwnUID)) {
-        throw new Error('Channel name can only contain letters, numbers and dashes (\'-\')');
+        throw new Error('UID can only contain letters, numbers and dashes (\'-\')');
     }
 
     if (clientOwnUID.length > 50) {
-        throw new Error('Channel name cannot be longer than 50 characters');
+        throw new Error('UID cannot be longer than 50 characters');
     }
 
     return true;

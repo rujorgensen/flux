@@ -122,7 +122,7 @@ export class FluxMeshServer {
         private readonly port: number = 8080,
     ) {
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
-        const networkClientManager: NetworkClientManager = new NetworkClientManager();
+        const networkAgentManager: NetworkClientManager = new NetworkClientManager();
 
         const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
             // passToLocalClient:
@@ -526,7 +526,7 @@ export class FluxMeshServer {
                             ) as TClientOwnUId;
 
                             ws.data.uid = uid;
-                            networkClientManager.registerClientUId(
+                            networkAgentManager.registerClientUId(
                                 ws.data.networkId,
                                 ws.data.address,
                                 uid
@@ -569,7 +569,7 @@ export class FluxMeshServer {
                         }
 
                         if (ws.data.uid) {
-                            networkClientManager.unregisterNetworkClient(
+                            networkAgentManager.unregisterNetworkClient(
                                 ws.data.networkId,
                                 ws.data.id,
                                 ws.data.uid,
