@@ -24,14 +24,14 @@
             "@flux/mesh": [
                 "packages/flux/mesh/src/index.ts"
             ],
-            "@flux/mesh/store/redis/network-channel": [
-                "libs/flux/mesh/store/redis/network-channel/src/index.ts"
+            "@flux/mesh/store/redis/network-agent": [
+                "libs/flux/mesh/store/redis/network-agent/src/index.ts"
             ],
             "@flux/mesh/store/redis/network-authority": [
                 "libs/flux/mesh/store/redis/network-authority/src/index.ts"
             ],
-            "@flux/mesh/store/redis/network-agent": [
-                "libs/flux/mesh/store/redis/network-agent/src/index.ts"
+            "@flux/mesh/store/redis/network-channel": [
+                "libs/flux/mesh/store/redis/network-channel/src/index.ts"
             ],
             "@flux/mesh/store/redis/network-usage": [
                 "libs/flux/mesh/store/redis/network-usage/src/index.ts"
@@ -53,6 +53,9 @@
             ],
             "@persistica/flux-authority": [
                 "packages/flux/authority/src/index.ts"
+            ],
+            "@utils/pico-logger": [
+                "libs/utils/logger/src/index.ts"
             ]
         }
     },
