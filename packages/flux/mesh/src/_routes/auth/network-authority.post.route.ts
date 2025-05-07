@@ -3,9 +3,15 @@ import * as nodeURL from 'node:url';
 import { PicoLogger } from '@utils/pico-logger';
 import { generateToken } from '../../auth/auth';
 
+/**
+ * This route is used to authorize a network authority.
+ * 
+ * @returns { Promise<Response> }
+ */
 export const authorizeNetworkAuthority = async (
     request: Bun.BunRequest,
-) => {
+): Promise<Response> => {
+
     // Find the network authority to authenticate with
     const networkId: string | string[] | undefined = nodeURL.parse(request.url, true).query['networkId'];
 

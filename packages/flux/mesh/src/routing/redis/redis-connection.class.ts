@@ -1,10 +1,10 @@
 import {
     type TRedisEventChannel,
-    BunRedisClientType,
+    BunRedisClient,
     BunRedisPubSub,
 } from '@core/redis/bun';
 import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
-import { NetworkAuthorityRedisSortedSet } from './hash/network-authority.redis.sorted-set';
+import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 import { NetworkAgentRedisCacheService } from '@flux/mesh/store/redis/network-agent';
 import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
 
@@ -32,7 +32,7 @@ export type MessageCallback = (message: string, channel?: string) => unknown;
 
 export class RedisConnection {
     // Dedicated client for handling hash
-    private readonly cacheClient: BunRedisClientType;
+    private readonly cacheClient: BunRedisClient;
 
     // Dedicated clients for handling pub/sub
     private readonly pubSub: BunRedisPubSub;
@@ -40,13 +40,13 @@ export class RedisConnection {
     public readonly networkAuthoritySet: NetworkAuthorityRedisSortedSet;
     public readonly networkClientHash: NetworkAgentRedisCacheService;
 
-    // Wrapper to not expose BunRedisClientType functions
+    // Wrapper to not expose BunRedisClient functions
     public readonly hash;
 
     constructor(
         private readonly url: string,
     ) {
-        this.cacheClient = new BunRedisClientType({
+        this.cacheClient = new BunRedisClient({
             url: this.url,
             socket: {
                 reconnectStrategy: (

@@ -17,9 +17,9 @@ const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, kn
 export class LiveUpdates {
 
     constructor(
-        portalRedisStatusService: RedisStatusService,
-        meshRedisStatusService: RedisStatusService,
-        AUTHORITY_JWT_SECRET: string,
+        private readonly portalRedisStatusService: RedisStatusService,
+        private readonly meshRedisStatusService: RedisStatusService,
+        private readonly AUTHORITY_JWT_SECRET: string,
     ) {
         const fluxMeshServer: FluxMeshServer = new FluxMeshServer();
 

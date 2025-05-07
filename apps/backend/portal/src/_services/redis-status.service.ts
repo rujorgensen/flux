@@ -1,5 +1,5 @@
 import type {
-    BunRedisClientType,
+    BunRedisClient,
 } from '@core/redis/bun';
 import {
     parseInfoSection,
@@ -18,7 +18,7 @@ export class RedisStatusService {
     private interval: ReturnType<typeof setInterval> | undefined;
 
     constructor(
-        private readonly _redisClient: BunRedisClientType,
+        private readonly _redisClient: BunRedisClient,
     ) { }
 
     /**
@@ -46,7 +46,7 @@ export class RedisStatusService {
             this.interval = undefined;
         } else if (this.alertListeners.size > 0 && !this.interval) {
             this.interval = setInterval(async () => {
-                const health = await this.getRedisStatus();
+                const health = await this.getRedisStatusOrThrow();
                 const currentAlerts: string[] = this.getAlerts(health);
 
                 if (currentAlerts.join() !== this.lastAlerts.join()) {
@@ -61,8 +61,14 @@ export class RedisStatusService {
         }
     }
 
+    /**
+     * 
+     * @param health
+     * 
+     * @returns 
+     */
     private getAlerts(
-        health: Awaited<ReturnType<typeof this.getRedisStatus>>,
+        health: Awaited<ReturnType<typeof this.getRedisStatusOrThrow>>,
     ): string[] {
         const alerts: string[] = [];
 
@@ -87,7 +93,13 @@ export class RedisStatusService {
         return alerts;
     }
 
-    public async getRedisStatus(
+    /**
+     * 
+     * @param { number } threshold
+     * 
+     * @returns { Promise<TRedisStatus> }
+     */
+    public async getRedisStatusOrThrow(
         threshold: number = 0.9,
     ) {
         // Make sure to get this every time, as it may have been re-instantiated
@@ -110,25 +122,6 @@ export class RedisStatusService {
             maxmemory: info.maxmemory,
         };
 
-        const cpu = {
-            used_cpu_sys: info.used_cpu_sys,
-            used_cpu_user: info.used_cpu_user,
-            used_cpu_sys_children: info.used_cpu_sys_children,
-            used_cpu_user_children: info.used_cpu_user_children,
-        };
-
-        const stats = {
-            evicted_keys: info.evicted_keys,
-            expired_keys: info.expired_keys,
-            keyspace_hits: info.keyspace_hits,
-            keyspace_misses: info.keyspace_misses,
-            rejected_connections: info.rejected_connections,
-        };
-
-        const clients = {
-            connected_clients: info.connected_clients,
-            blocked_clients: info.blocked_clients,
-        };
         const keyspace = parseKeyspaceSection(keyspaceRaw);
 
         const used = memory.used_memory as number;
@@ -151,21 +144,21 @@ export class RedisStatusService {
                 overThreshold: max > 0 ? used / max > threshold : false,
             },
             cpu: {
-                sys: cpu.used_cpu_sys,
-                user: cpu.used_cpu_user,
-                sysChildren: cpu.used_cpu_sys_children,
-                userChildren: cpu.used_cpu_user_children,
+                sys: info.used_cpu_sys,
+                user: info.used_cpu_user,
+                sysChildren: info.used_cpu_sys_children,
+                userChildren: info.used_cpu_user_children,
             },
             stats: {
-                evictedKeys: stats.evicted_keys,
-                expiredKeys: stats.expired_keys,
-                keyspaceHits: stats.keyspace_hits,
-                keyspaceMisses: stats.keyspace_misses,
-                rejectedConnections: stats.rejected_connections,
+                evictedKeys: info.evicted_keys,
+                expiredKeys: info.expired_keys,
+                keyspaceHits: info.keyspace_hits,
+                keyspaceMisses: info.keyspace_misses,
+                rejectedConnections: info.rejected_connections,
             },
             clients: {
-                connected: clients.connected_clients,
-                blocked: clients.blocked_clients,
+                connected: info.connected_clients,
+                blocked: info.blocked_clients,
             },
             keyspace,
             latency,

@@ -4,7 +4,7 @@ import jwt from '@elysiajs/jwt';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
-import { BunRedisClientType } from '@core/redis/bun';
+import { BunRedisClient } from '@core/redis/bun';
 import { LiveUpdates } from './live-updates.class';
 
 // ****************************************************************************
@@ -32,7 +32,7 @@ if (!FLUX_PORTAL_REDIS_URL) {
 // ****************************************************************************
 
 // * Connect to Redis
-const meshRedis: BunRedisClientType = new BunRedisClientType({
+const meshRedis: BunRedisClient = new BunRedisClient({
     url: FLUX_MESH_REDIS_URL,
     socket: {
         reconnectStrategy: (
@@ -46,7 +46,7 @@ const meshRedis: BunRedisClientType = new BunRedisClientType({
     },
 });
 
-const portalRedis: BunRedisClientType = new BunRedisClientType({
+const portalRedis: BunRedisClient = new BunRedisClient({
     url: FLUX_PORTAL_REDIS_URL,
     socket: {
         reconnectStrategy: (
@@ -87,15 +87,6 @@ new LiveUpdates(
     meshRedisStatusService,
     AUTHORITY_JWT_SECRET,
 );
-
-// make TypeScript happy
-// declare global {
-//   var count: number;
-// }
-
-// globalThis.count ??= 0;
-// console.log(`Reloaded ${globalThis.count} times`);
-// globalThis.count++;
 
 const proxy = async ({ request }: {
     request: Bun.BunRequest,
@@ -158,8 +149,8 @@ const app = new Elysia()
     .get('/api/connected-authorities', () => 9999)
     .get('/api/status', () => {
         return [
-            meshRedisStatusService.getRedisStatus(),
-            portalRedisStatusService.getRedisStatus(),
+            meshRedisStatusService.getRedisStatusOrThrow(),
+            portalRedisStatusService.getRedisStatusOrThrow(),
         ];
     })
 
@@ -212,7 +203,8 @@ const app = new Elysia()
         }
     })
 
-    .listen(3_000);
+    .listen(3_000)
+    ;
 
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
 
