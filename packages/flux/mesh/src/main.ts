@@ -245,7 +245,7 @@ export class FluxMeshServer {
 
                         networkAuthorityManager.register(
                             _ws.data.networkId,
-                            _ws.data.id
+                            _ws.data.id,
                         );
                     } else {
                         PicoLogger.log('🤵 Agent connected:', _ws.data.id, 'ws-connection');
@@ -276,6 +276,7 @@ export class FluxMeshServer {
                     ws: TConnectedClientSocket,
                     message_: string | Buffer,
                 ) => {
+
                     if (typeof message_ !== 'string') {
                         throw new Error('Message is not a string');
                     }
