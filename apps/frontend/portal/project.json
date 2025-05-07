@@ -1,19 +1,19 @@
 {
-  "name": "frontend-portal",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "targets": {
-    "build": {
-      "executor": "nx:run-script",
-      "options": {
-        "script": "astro build"
-      }
-    },
-    "serve": {
-      "executor": "nx:run-script",
-      "options": {
-        "script": "astro dev",
-        "proxyConfig": "apps/frontend/portal/proxy.conf.json"
-      }
+    "name": "frontend-portal",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "targets": {
+        "build": {
+            "executor": "nx:run-script",
+            "options": {
+                "script": "astro build"
+            }
+        },
+        "serve": {
+            "executor": "nx:run-script",
+            "options": {
+                "script": "astro dev --port=3001",
+                "proxyConfig": "apps/frontend/portal/proxy.conf.json"
+            }
+        }
     }
-  }
 }

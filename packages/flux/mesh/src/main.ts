@@ -41,6 +41,7 @@ import {
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
+    validateClientUIDOrThrow,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -245,10 +246,10 @@ export class FluxMeshServer {
 
                         networkAuthorityManager.register(
                             _ws.data.networkId,
-                            _ws.data.id
+                            _ws.data.id,
                         );
                     } else {
-                        PicoLogger.log('🤵 Agent connected:', _ws.data.id, 'ws-connection');
+                        PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
 
                         _ws.data.rtcClient = new WebRTCClient(
                             processAddress,
@@ -276,6 +277,7 @@ export class FluxMeshServer {
                     ws: TConnectedClientSocket,
                     message_: string | Buffer,
                 ) => {
+
                     if (typeof message_ !== 'string') {
                         throw new Error('Message is not a string');
                     }
@@ -532,16 +534,24 @@ export class FluxMeshServer {
                         }
 
                         case SET_OWN_UID: {
-                            const uid: TClientOwnUId = message_.substring(
+                            const uid: string = message_.substring(
                                 message_.indexOf(':') + 1
-                            ) as TClientOwnUId;
-
-                            ws.data.uid = uid;
-                            networkAgentManager.registerClientUId(
-                                ws.data.networkId,
-                                ws.data.address,
-                                uid
                             );
+
+                            try {
+                                if (validateClientUIDOrThrow(uid)) {
+                                    ws.data.uid = uid;
+                                    networkAgentManager.registerClientUId(
+                                        ws.data.networkId,
+                                        ws.data.address,
+                                        uid,
+                                    );
+                                }
+                            } catch {
+                                ws.send(`${ERROR}:Invalid UID`);
+
+                                return;
+                            }
                             break;
                         }
                     }

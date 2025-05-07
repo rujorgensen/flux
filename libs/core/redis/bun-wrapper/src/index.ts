@@ -1,11 +1,11 @@
 export {
-        BunRedisClientType,
-} from './lib/core-redis-bun-wrapper';
+    BunRedisClient,
+} from './lib/bun-redis-client-wrapper';
 export {
-        BunRedisPubSub,
+    BunRedisPubSub,
 } from './lib/core-redis-pub-sub.class';
 
 // Types
 export type {
-        TRedisEventChannel,
+    TRedisEventChannel,
 } from './lib/core-redis-pub-sub.class';

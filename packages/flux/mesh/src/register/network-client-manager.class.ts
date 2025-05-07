@@ -4,7 +4,7 @@ import {
 } from '../routing/redis/redis-connection.class';
 import type {
     NetworkAgentRedisCacheService,
-} from '../../../../../libs/flux/mesh/store/redis/network-agent/src/lib/network-agent-redis-cache.service';
+} from '@flux/mesh/store/redis/network-agent';
 import type {
     TAddress,
     TClientId,
@@ -47,21 +47,21 @@ export class NetworkClientManager {
      * Register a local client UID.
      *
      * @param { TNetworkId_S }      networkId
-     * @param { TAddress }          clientId
+     * @param { TAddress }          clientAddress
      * @param { TClientOwnUId }     uid
      * 
      * @returns { void }
      */
     public registerClientUId(
         networkId: TNetworkId_S,
-        clientId: TAddress,
+        clientAddress: TAddress,
         uid: TClientOwnUId,
     ): void {
-        this.networkClientHash.registerAgentUID(networkId, clientId, uid);
+        this.networkClientHash.registerAgentUID(networkId, clientAddress, uid);
     }
 
     /**
-     * Unregisters a network client UID and address in the Redis hash.
+     * Unregisters a network client UID and associated data from the Redis hash.
      *
      * @param { TNetworkId_S }      networkId
      * @param { TClientId }         clientId

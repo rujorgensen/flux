@@ -1,28 +1,30 @@
 {
-  "name": "backend-portal",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/backend/src",
-  "projectType": "application",
-  "targets": {
-    "serve": {
-      "executor": "nx:run-script",
-      "options": {
-        "script": "bun run --watch src/main.ts --tsconfig-override=tsconfig.app.json",
-        "script-": "bun --hot src/main.ts --tsconfig-override=tsconfig.app.json"
-      }
+    "name": "backend-portal",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/backend/src",
+    "projectType": "application",
+    "targets": {
+        "serve": {
+            "executor": "nx:run-script",
+            "options": {
+                "script": "bun run --watch src/main.ts --tsconfig-override=tsconfig.app.json",
+                "script-": "bun --hot src/main.ts --tsconfig-override=tsconfig.app.json"
+            }
+        },
+        "serve-static": {
+            "executor": "nx:run-script",
+            "options": {
+                "script": "bunx run ../../../dist/apps/frontend/portal/server/entry.mjs"
+            }
+        },
+        "bun-test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun test {projectRoot}"
+            }
+        }
     },
-    "serve-static": {
-      "executor": "nx:run-script",
-      "options": {
-        "script": "bunx run ../../../dist/apps/frontend/portal/server/entry.mjs"
-      }
-    },
-    "bun-test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "bun test {projectRoot}"
-      }
-    }
-  },
-  "tags": []
+    "tags": [
+        "scope:portal"
+    ]
 }

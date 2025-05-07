@@ -23,6 +23,7 @@ env:
   FLUX_JWT_KEY: 'flux-jwt-e2e-key-super-secret'
 
 jobs:
+
   install-deps:
     timeout-minutes: 15
     runs-on: ubuntu-latest
@@ -31,25 +32,26 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
         
-      - name: 💾 Install Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: package.json
-
-      -
-        name: Setup bun cache
-        id: cache-bun
-        uses: actions/cache@v4.2.3
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-
-      -
-          name: 💾 Install dependencies on cache miss
-          if : ${{ steps.cache-bun.outputs.cache-hit != 'true' }}
-          run: bun install --no-cache
+        # Temporarily skip, as pre-caching doesnt work
+#      - name: 💾 Install Bun
+#        uses: oven-sh/setup-bun@v2
+#        with:
+#          bun-version-file: package.json
+#
+#      -
+#        name: Setup bun cache
+#        id: cache-bun
+#        uses: actions/cache@v4.2.3
+#        with:
+#          path: ~/.bun/install/cache
+#          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+#          restore-keys: |
+#            ${{ runner.os }}-bun-
+#
+#      -
+#          name: 💾 Install dependencies on cache miss
+#          if : ${{ steps.cache-bun.outputs.cache-hit != 'true' }}
+#          run: bun install --no-cache
 
   unit-test:
     runs-on: ubuntu-latest

@@ -109,14 +109,12 @@ export class NetworkAgentRedisCacheService {
         networkId: TNetworkId_S,
     ): Promise<TNetworkAgent[]> {
         // Add to network
-        const members = await this._client.smembers(`networks/${networkId}/agents`);
+        const networkAgents = await this._client.smembers(`networks/${networkId}/agents`);
 
         // Add to agent
-        const memberData: TNetworkAgent[] = [];
+        const agentData: TNetworkAgent[] = [];
 
-        console.log('members', members);
-
-        for (const id of members) {
+        for (const id of networkAgents) {
             const key: string = `networks/${networkId}/agents/${id}`;
 
             const [ip, address, bytes, packets] = await this._client.hmget(key, [
@@ -127,7 +125,7 @@ export class NetworkAgentRedisCacheService {
             ]);
 
             if (ip || address || bytes || packets) {
-                memberData.push({
+                agentData.push({
                     id: id as TClientId,
                     ip: ip || null,
                     address: address as string,
@@ -137,7 +135,7 @@ export class NetworkAgentRedisCacheService {
             }
         }
 
-        return memberData as any;
+        return agentData;
     }
 
     /**
