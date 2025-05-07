@@ -1,5 +1,5 @@
 import type {
-    BunRedisClientType,
+    BunRedisClient,
 } from '@core/redis/bun';
 import {
     parseInfoSection,
@@ -46,7 +46,7 @@ export class RedisStatusService {
             this.interval = undefined;
         } else if (this.alertListeners.size > 0 && !this.interval) {
             this.interval = setInterval(async () => {
-                const health = await this.getRedisStatus();
+                const health = await this.getRedisStatusOrThrow();
                 const currentAlerts: string[] = this.getAlerts(health);
 
                 if (currentAlerts.join() !== this.lastAlerts.join()) {
@@ -61,6 +61,11 @@ export class RedisStatusService {
         }
     }
 
+    /**
+     * 
+     * @param health
+     * 
+     * @returns 
     private getAlerts(
         health: Awaited<ReturnType<typeof this.getRedisStatus>>,
     ): string[] {
@@ -87,7 +92,13 @@ export class RedisStatusService {
         return alerts;
     }
 
-    public async getRedisStatus(
+    /**
+     * 
+     * @param { number } threshold
+     * 
+     * @returns { Promise<TRedisStatus> }
+     */
+    public async getRedisStatusOrThrow(
         threshold: number = 0.9,
     ) {
         // Make sure to get this every time, as it may have been re-instantiated

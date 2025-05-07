@@ -5,7 +5,7 @@ import {
     AUTHORITY_ON_CREATE_CHANNEL,
     AUTHORITY_ON_EMPTY_CHANNEL,
 } from '@flux/shared/types';
-import { NetworkChannelHash } from '../../routing/redis/hash/network-channel.redis.hash';
+import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import {
     type RedisConnection,
     getRedisConnection,

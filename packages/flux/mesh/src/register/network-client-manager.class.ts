@@ -4,7 +4,7 @@ import {
 } from '../routing/redis/redis-connection.class';
 import type {
     NetworkAgentRedisCacheService,
-} from '../../../../../libs/flux/mesh/store/redis/network-agent/src/lib/network-agent-redis-cache.service';
+} from '@flux/mesh/store/redis/network-agent';
 import type {
     TAddress,
     TClientId,
