@@ -5,6 +5,9 @@ import {
 import type {
     NetworkAgentRedisCacheService,
 } from '@flux/mesh/store/redis/network-agent';
+import {
+    NetworkUsageRedisCacheService,
+} from '@flux/mesh/store/redis/network-usage';
 import type {
     TAddress,
     TClientId,
@@ -13,15 +16,18 @@ import type {
 } from '@flux/shared/types';
 
 export class NetworkClientManager {
+    public readonly networkClientHash: NetworkAgentRedisCacheService;
+    public readonly networkUsageRedisCacheService: NetworkUsageRedisCacheService;
+
     private readonly redisConnection: RedisConnection = getRedisConnection();
     private readonly cache: Map<`${TNetworkId_S}.${TClientOwnUId}`, TAddress> = new Map(); // ! cleanup
-
-    public readonly networkClientHash: NetworkAgentRedisCacheService;
+    private readonly timers: Map<TClientId, ReturnType<typeof setInterval>> = new Map();
 
     constructor(
 
     ) {
         this.networkClientHash = this.redisConnection.networkClientHash;
+        this.networkUsageRedisCacheService = new NetworkUsageRedisCacheService(this.redisConnection['cacheClient'].getClient());
     }
 
     /**
@@ -39,7 +45,36 @@ export class NetworkClientManager {
         id: TClientId,
         ip: Bun.SocketAddress | null,
         address: TAddress,
+        throughput: {
+            bytes: number,
+            packets: number,
+        },
     ): Promise<void> {
+        this.timers.set(
+            id,
+            setInterval(async () => {
+                await this.networkClientHash
+                    .registerAgentThroughput(
+                        networkId,
+                        id,
+                        throughput.bytes,
+                        throughput.packets,
+                    );
+
+                if ((throughput.bytes > 0) || (throughput.packets > 0)) {
+                    await this.networkUsageRedisCacheService
+                        .increaseNetworkUsage(
+                            networkId,
+                            throughput.bytes,
+                            throughput.packets,
+                        );
+                }
+
+                throughput.bytes = 0;
+                throughput.packets = 0;
+            }, 1_000),
+        );
+
         return this.networkClientHash.registerAgent(networkId, id, ip, address);
     }
 
@@ -76,7 +111,18 @@ export class NetworkClientManager {
     ): void {
         if (clientOwnUId) {
             this.unregisterNetworkClientUID(networkId, clientId, clientOwnUId);
+            // Unregisters a network client UID and address in the Redis hash.
+            this.cache.delete(`${networkId}.${clientOwnUId}`);
+
+            this.networkClientHash.deleteNetworkAgent(
+                networkId,
+                clientId,
+                clientOwnUId,
+            );
         }
+
+        // Cancel the timer
+        clearInterval(this.timers.get(clientId));
     }
 
     /**
