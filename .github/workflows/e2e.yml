@@ -19,8 +19,6 @@ env:
   is-main-branch: ${{ github.ref == 'refs/heads/main' }}
   is-pull-request: ${{ github.event_name == 'pull_request' }}
   sha: ${{ github.sha }}
-  FLUX_MESH_REDIS_URL: 'should-be-overridden-with-correct-value-during-e2e'
-  FLUX_MESH_JWT_KEY: 'flux-jwt-e2e-key-super-secret'
 
 jobs:
 
