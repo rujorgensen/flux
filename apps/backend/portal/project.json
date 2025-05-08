@@ -5,10 +5,13 @@
     "projectType": "application",
     "targets": {
         "serve": {
-            "executor": "nx:run-script",
+            "executor": "nx:run-commands",
             "options": {
-                "script": "bun run --watch src/main.ts --tsconfig-override=tsconfig.app.json",
-                "script-": "bun --hot src/main.ts --tsconfig-override=tsconfig.app.json"
+                "commands": [
+                    "bun run --watch {projectRoot}/src/main.ts --tsconfig-override=tsconfig.app.json",
+                    "bunx open-cli http://localhost:9000/api/docs"
+                ],
+                "parallel": true
             }
         },
         "serve-static": {
@@ -20,7 +23,7 @@
         "bun-test": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "bun test {projectRoot}"
+                "command": "bun test {projectRoot} --env-file=.env.test"
             }
         }
     },

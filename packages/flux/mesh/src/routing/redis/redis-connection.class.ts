@@ -107,11 +107,9 @@ export class RedisConnection {
                 },
             });
 
-        try {
-            this.pubSub.connect();
-        } catch {
-            console.log('caught');
-        }
+        this.pubSub
+            .connect()
+            .catch(() => console.log('pubsub connection failed'));
 
         // Dedicated client
         const hashClient = this.cacheClient.getClient();

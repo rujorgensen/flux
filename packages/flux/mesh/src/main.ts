@@ -10,8 +10,8 @@ console.log(`[flux-mesh] Reloaded ${globalThis.meshLoadCount} time(s)`);
 // import { Elysia } from 'elysia';
 // import { swagger } from '@elysiajs/swagger';
 
-if (!process.env['FLUX_JWT_KEY']) {
-    throw new Error('Missing FLUX_JWT_KEY in .env');
+if (!process.env['FLUX_MESH_JWT_KEY']) {
+    throw new Error('Missing FLUX_MESH_JWT_KEY in .env');
 }
 
 // if (!process.env['FLUX_DOMAIN']) {

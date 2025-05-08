@@ -30,6 +30,7 @@ import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agen
 import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
 import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
+import { PicoLogger } from '@utils/pico-logger';
 
 interface IOptions {
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -234,8 +235,8 @@ export class FluxWebSocketConnection {
                         case RPC_RESPONSE: {
                             const payload = message_.substring(message_.indexOf(':') + 1);
 
-                            console.log(`[WS Client] 🔌 Unhandled type rpc response`);
-                            console.log('[WS Client]', { payload });
+                            PicoLogger.log("[WS Client] 🔌 Unhandled type rpc response", 'ws-client');
+                            PicoLogger.log(`[WS Client] payload: ${payload}`, 'ws-client');
 
                             break;
                         }
