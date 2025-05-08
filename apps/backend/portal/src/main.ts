@@ -10,8 +10,8 @@ import { LiveUpdates } from './live-updates.class';
 // ****************************************************************************
 // * Env
 // ****************************************************************************
-const AUTHORITY_JWT_SECRET: string | undefined = process.env.FLUX_AUTHORITY_JWT_SECRET;
-if (!AUTHORITY_JWT_SECRET) {
+const FLUX_AUTHORITY_JWT_SECRET: string | undefined = process.env.FLUX_AUTHORITY_JWT_SECRET;
+if (!FLUX_AUTHORITY_JWT_SECRET) {
     throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
 }
 
@@ -85,20 +85,8 @@ const meshRedisStatusService: RedisStatusService = new RedisStatusService(meshRe
 new LiveUpdates(
     portalRedisStatusService,
     meshRedisStatusService,
-    AUTHORITY_JWT_SECRET,
+    FLUX_AUTHORITY_JWT_SECRET,
 );
-
-const proxy = async ({ request }: {
-    request: Bun.BunRequest,
-}) => {
-    const original = new URL(request.url);
-
-    const proxyUrl = `http://localhost:3001${original.pathname}`;
-
-    return await fetch(proxyUrl, {
-        headers: request.headers,
-    });
-};
 
 // * Host the frontend and static resources 
 // try {
@@ -112,7 +100,7 @@ const proxy = async ({ request }: {
 // }
 
 // * Host the api
-const app = new Elysia()
+export const app = new Elysia()
     .use(
         jwt({
             name: 'jwt',
@@ -168,7 +156,7 @@ const app = new Elysia()
         auth?.set({
             value,
             // httpOnly: true,
-            maxAge: 7 * 86400,
+            maxAge: 7 * 86_400,
             path: '/',
         });
 
@@ -194,14 +182,6 @@ const app = new Elysia()
 
     //   return `Hello ${profile.name}`
     // })
-
-    // * Proxy all other requests to the frontend server
-    .get('/*', proxy, {
-        beforeHandle({ set, cookie: { session }, error }) {
-            console.log('validate');
-            // if (!validateSession(session.value)) return error(401)
-        }
-    })
 
     .listen(3_000)
     ;

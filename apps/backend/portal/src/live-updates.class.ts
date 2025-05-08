@@ -19,7 +19,7 @@ export class LiveUpdates {
     constructor(
         private readonly portalRedisStatusService: RedisStatusService,
         private readonly meshRedisStatusService: RedisStatusService,
-        private readonly AUTHORITY_JWT_SECRET: string,
+        private readonly FLUX_AUTHORITY_JWT_SECRET: string,
     ) {
         const fluxMeshServer: FluxMeshServer = new FluxMeshServer();
 
@@ -65,7 +65,7 @@ export class LiveUpdates {
                             user: {
                                 allowAllChannels: true,
                             },
-                        }, AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
+                        }, FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
                     },
 
                     // * Authorize channel
@@ -74,7 +74,7 @@ export class LiveUpdates {
                         identification: string,
                     ): Promise<boolean> => {
 
-                        const agentJWT = jwt.verify(identification, AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
+                        const agentJWT = jwt.verify(identification, FLUX_AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
 
                         console.log(`🔒 A client is trying to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
 
