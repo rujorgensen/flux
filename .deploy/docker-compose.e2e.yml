@@ -7,7 +7,6 @@ services:
     ports:
       - 6351:6379
 
-
   mesh-dragonfly-e2e:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
     container_name: mesh-dragonfly-e2e # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 

@@ -22,7 +22,7 @@ const { area, class: extraClass = "" } = Astro.props;
     font-weight: var(--font-weight-6);
   }
 
-  /* 
+    /* 
   .panel-footer {
     margin-top: auto;
     font-size: var(--font-size-1);
@@ -31,14 +31,14 @@ const { area, class: extraClass = "" } = Astro.props;
 </style>
 
 <div class={`panel ${extraClass}`} style={`grid-area: ${area};`}>
-  <header class="panel-header">
-    <slot name="header" />
-  </header>
+    <header class="panel-header">
+        <slot name="header" />
+    </header>
 
-  <div class="panel-content">
-    <slot />
-  </div>
-  <!-- 
+    <div class="panel-content">
+        <slot />
+    </div>
+    <!-- 
   <footer class="panel-footer">
     <slot name="footer" />
   </footer> -->

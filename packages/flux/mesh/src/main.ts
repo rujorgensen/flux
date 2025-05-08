@@ -101,6 +101,12 @@ export type TConnectedClientSocket = Bun.ServerWebSocket<{
     claim?: string;
     rpcClient: RPCClient<'channel'>;
     channelNames: Set<TChannelName>;
+
+    // The amount of data sent
+    throughput: {
+        bytes: number;
+        packets: number;
+    };
 }>;
 
 const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
@@ -215,6 +221,10 @@ export class FluxMeshServer {
                                 address: `${machineAddress}/${processId}/${socketId}`,
                                 claim: decodedToken.claim,
                                 channelNames: new Set(),
+                                throughput: {
+                                    bytes: 0,
+                                    packets: 0,
+                                },
                             },
                         })
                     ) {
@@ -251,6 +261,15 @@ export class FluxMeshServer {
                     } else {
                         PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
 
+                        await networkAgentManager
+                            .registerAgent(
+                                _ws.data.networkId,
+                                _ws.data.id,
+                                _ws.data.ip,
+                                _ws.data.address,
+                                _ws.data.throughput,
+                            );
+
                         _ws.data.rtcClient = new WebRTCClient(
                             processAddress,
                             _ws.send.bind(_ws),
@@ -281,6 +300,10 @@ export class FluxMeshServer {
                     if (typeof message_ !== 'string') {
                         throw new Error('Message is not a string');
                     }
+
+                    // Calculate the throughput
+                    ws.data.throughput.bytes = ws.data.throughput.bytes + new TextEncoder().encode(message_).length;
+                    ws.data.throughput.packets++;
 
                     const packageType: string | undefined = message_.split(':')[0];
 
@@ -589,13 +612,11 @@ export class FluxMeshServer {
                                 );
                         }
 
-                        if (ws.data.uid) {
-                            networkAgentManager.unregisterNetworkClient(
-                                ws.data.networkId,
-                                ws.data.id,
-                                ws.data.uid,
-                            );
-                        }
+                        networkAgentManager.unregisterNetworkClient(
+                            ws.data.networkId,
+                            ws.data.id,
+                            ws.data.uid,
+                        );
                     }
                 },
 
