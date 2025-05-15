@@ -2,14 +2,19 @@
  * Store data about network channels
  */
 import {
-    validateChannelNameOrThrow,
     type TAddress,
     type TChannelName,
     type TNetworkId_S,
+    validateChannelNameOrThrow,
 } from '@flux/shared/types';
 import type {
     RedisConnection,
 } from '../../../../../../../../packages/flux/mesh/src/routing/redis/redis-connection.class';
+import {
+    type TMemberDistribution,
+    checkMemberDistribution,
+} from './utils/derive-member-distribution.fn';
+import { PicoLogger } from '@utils/pico-logger';
 
 export class NetworkChannelHash {
 
@@ -19,25 +24,32 @@ export class NetworkChannelHash {
 
     /**
      * Creates a channel on a network if it does not already exist.
+     * Returns true if the channel was created, false if it already existed.
      * 
      * @param { TNetworkId_S }  networkId
      * @param { TChannelName }  channelName
      * 
-     * @returns { Promise<void> }
+     * @returns { Promise<boolean> }
      */
     public async createNetworkChannelIfNotExist(
         networkId: TNetworkId_S,
         channelName: TChannelName,
-    ): Promise<void> {
+    ): Promise<boolean> {
         // Returns 1 if the member was added, 0 if it already existed
         const wasAdded: number = await this._redisConnection.hash.sadd(`networks/${networkId}/channels`, channelName);
 
         if (wasAdded === 1) {
+            const defaultMemberDistribution: TMemberDistribution = 'same-process';
+
             await this._redisConnection.hash.hmset(`networks/${networkId}/channels/${channelName}`, [
                 'createdAt',
                 new Date().toISOString(),
+                'memberDistribution',
+                defaultMemberDistribution,
             ]);
         }
+
+        return wasAdded === 1;
     }
 
     /**
@@ -116,10 +128,11 @@ export class NetworkChannelHash {
 
     /**
      * 
-     * @param networkId 
-     * @param channelName 
-     * @param clientAddress 
-     * @returns 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * @param { TAddress }      clientAddress
+     * 
+     * @returns { Promise<number> }
      */
     public async joinNetworkChannel(
         networkId: TNetworkId_S,
@@ -128,6 +141,9 @@ export class NetworkChannelHash {
     ): Promise<number> {
         // * Add member
         await this._redisConnection.hash.sadd(`networks/${networkId}/channels/${channelName}/members`, clientAddress);
+
+        // * Check member distribution
+        await this.checkAndUpdateChannelMemberDistribution(networkId, channelName);
 
         // * Increment channel member count
         return await this._redisConnection.hash.hincrby(`networks/${networkId}/channels/${channelName}`, 'members', 1);
@@ -153,9 +169,12 @@ export class NetworkChannelHash {
         const membersLeft: number = await this._redisConnection.hash.hincrby(`networks/${networkId}/channels/${channelName}`, 'members', -1);
 
         // * If no members left, delete the channel
-        if (membersLeft < 1) {
-            console.log(`Network channel "${channelName}" has no more members. Deleting...`);
+        if (membersLeft === 0) {
+            PicoLogger.log(`Network channel "${channelName}" has no more members. Deleting...`, 'network-channel');
             await this.deleteNetworkChannel(networkId, channelName);
+        } else {
+            // * Check member distribution, but don't bother if there are no members left.
+            await this.checkAndUpdateChannelMemberDistribution(networkId, channelName);
         }
 
         return membersLeft;
@@ -185,5 +204,48 @@ export class NetworkChannelHash {
             }),
         )
             .then(() => void 0);
+    }
+
+    // ****************************************************************************
+    // * Internal Helpers
+    // ****************************************************************************
+
+    /**
+     * Reads all members of a channel on a network.
+     *  
+     * @param { TNetworkId_S } networkId
+     * @param { TChannelName } channelName
+     *
+     * @returns { Promise<TAddress[]> }
+     */
+    private async readNetworkChannelMemberAddresses(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<TAddress[]> {
+        return await this._redisConnection.hash.smembers(`networks/${networkId}/channels/${channelName}/members`) as TAddress[];
+    }
+
+    /**
+     * Checks if the connected members are all on the same process, same machine or distributed, and updates the channel's hash.
+     * 
+     * Optimal is 'same-process', then 'same-machine' and finally 'distributed'.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * 
+     * @returns { 'same-process' | 'same-machine' | 'distributed' }
+     */
+    private async checkAndUpdateChannelMemberDistribution(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<void> {
+        const memberAddresses: TAddress[] = await this.readNetworkChannelMemberAddresses(networkId, channelName);
+
+        const memberDistribution: TMemberDistribution = checkMemberDistribution(memberAddresses);
+
+        await this._redisConnection.hash.hmset(`networks/${networkId}/channels/${channelName}`, [
+            'memberDistribution',
+            memberDistribution,
+        ]);
     }
 }
