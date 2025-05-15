@@ -5,10 +5,15 @@ export type TMachineAddress = string & { __brand: 'TMachineAddress'; };
 
 export type TProcessAddress = `${TMachineAddress}/${TProcessId}`;
 
-// TIODO : FULL ADDRESS rename
+// The direct, full, address
 export type TAddress = `${TProcessAddress}/${TClientId}`;
 
-// The direct address
+/**
+ * 
+ * @param { TAddress } address
+ * 
+ * @returns { [TMachineAddress, TProcessId, TClientId] }
+ */
 export const splitAddressOrThrow = (
     address: TAddress,
 ): [TMachineAddress, TProcessId, TClientId] => {
@@ -37,8 +42,14 @@ export const splitAddressOrThrow = (
     ];
 };
 
+/**
+ * 
+ * @param { TAddress | TAddress } address
+ * 
+ * @returns { [TMachineAddress, TProcessId] }
+ */
 export const splitProcessAddress = (
-    address: TProcessAddress,
+    address: TProcessAddress | TAddress,
 ): [TMachineAddress, TProcessId] => {
     const [machine, process] = address.split('/');
 
