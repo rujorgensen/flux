@@ -12,7 +12,10 @@
                     "bunx open-cli http://localhost:9000/api/docs"
                 ],
                 "parallel": true
-            }
+            },
+            "dependsOn": [
+                "docker-dev"
+            ]
         },
         "serve-static": {
             "executor": "nx:run-script",
@@ -25,6 +28,9 @@
             "options": {
                 "command": "bun test {projectRoot} --env-file=.env.test"
             }
+        },
+        "docker-dev": {
+            "command": "docker compose -f '.deploy/docker-compose.dev.yml' up -d --build"
         }
     },
     "tags": [
