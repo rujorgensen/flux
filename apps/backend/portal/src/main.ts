@@ -4,8 +4,9 @@ import jwt from '@elysiajs/jwt';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
-import { BunRedisClient } from '@core/redis/bun';
 import { LiveUpdates } from './live-updates.class';
+import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
+import { getPortalRedisConnection } from '@flux/portal/core/redis';
 
 // ****************************************************************************
 // * Env
@@ -15,62 +16,12 @@ if (!FLUX_AUTHORITY_JWT_SECRET) {
     throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
 }
 
-const FLUX_MESH_REDIS_URL: string | undefined = process.env.FLUX_MESH_REDIS_URL;
-
-if (!FLUX_MESH_REDIS_URL) {
-    throw new Error('Missing FLUX_MESH_REDIS_URL in .env');
-}
-
-const FLUX_PORTAL_REDIS_URL: string | undefined = process.env.FLUX_PORTAL_REDIS_URL;
-
-if (!FLUX_PORTAL_REDIS_URL) {
-    throw new Error('Missing FLUX_PORTAL_REDIS_URL in .env');
-}
 
 // ****************************************************************************
 // * Connections to Stores
 // ****************************************************************************
-
-// * Connect to Redis
-const meshRedis: BunRedisClient = new BunRedisClient({
-    url: FLUX_MESH_REDIS_URL,
-    socket: {
-        reconnectStrategy: (
-            retries: number,
-        ) => {
-            console.warn(`🔄 Redis reconnection attempt #${retries}`);
-
-            // Backoff in ms
-            return Math.min(retries * 100, 3_000);
-        },
-    },
-});
-
-const portalRedis: BunRedisClient = new BunRedisClient({
-    url: FLUX_PORTAL_REDIS_URL,
-    socket: {
-        reconnectStrategy: (
-            retries: number,
-        ) => {
-            console.warn(`🔄 Redis reconnection attempt #${retries}`);
-
-            // Backoff in ms
-            return Math.min(retries * 100, 3_000);
-        },
-    },
-});
-
-await Promise.all([meshRedis.connect(), portalRedis.connect()]);
-
-if (!meshRedis.connected && !portalRedis.connected) {
-    console.error('❌ Both Redis connections failed, will retry');
-} else if (!meshRedis.connected) {
-    console.error('❌ Mesh Redis connection failed, will retry');
-} else if (!portalRedis.connected) {
-    console.error('❌ Portal Redis connection failed, will retry');
-} else {
-    console.log('✅ Redis connected');
-}
+const portalRedis = await getPortalRedisConnection();
+const meshRedis = await getMeshBunRedisConnection();
 
 // ****************************************************************************
 // * Setup Services

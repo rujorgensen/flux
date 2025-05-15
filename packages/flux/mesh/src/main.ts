@@ -72,7 +72,7 @@ import type {
 import * as nodeURL from 'node:url';
 import {
     type RedisConnection,
-    getRedisConnection,
+    getMeshRedisConnection,
 } from './routing/redis/redis-connection.class';
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
 import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
@@ -589,6 +589,7 @@ export class FluxMeshServer {
 
                     if (ws.data.isAuthority) {
                         PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
+
                         networkAuthorityManager.unregister(
                             ws.data.networkId,
                             ws.data.address,
@@ -596,6 +597,7 @@ export class FluxMeshServer {
                     } else {
                         PicoLogger.log(`🛑🤵 Agent socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
                         // Unsubscribe from topics
+
                         for (const channelName of (ws.data.channelNames ?? [])) {
                             ws.unsubscribe(
                                 `networks/${ws.data.networkId}/channels/${channelName}`

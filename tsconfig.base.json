@@ -24,6 +24,12 @@
             "@flux/mesh": [
                 "packages/flux/mesh/src/index.ts"
             ],
+            "@flux/mesh/core/redis": [
+                "libs/flux/mesh/core/redis/src/index.ts"
+            ],
+            "@flux/portal/core/redis": [
+                "libs/flux/portal/core/redis/src/index.ts"
+            ],
             "@flux/mesh/store/redis/network-agent": [
                 "libs/flux/mesh/store/redis/network-agent/src/index.ts"
             ],
