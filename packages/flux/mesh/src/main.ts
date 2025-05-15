@@ -72,7 +72,7 @@ import type {
 import * as nodeURL from 'node:url';
 import {
     type RedisConnection,
-    getMeshRedisConnection,
+    getRedisConnection,
 } from './routing/redis/redis-connection.class';
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
 import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
