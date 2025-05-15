@@ -136,17 +136,19 @@ export class NetworkChannelManager {
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<void> {
-        await this.networkChannelHash
+        const wasCreated: boolean = await this.networkChannelHash
             .createNetworkChannelIfNotExist(
                 networkId,
                 channelName,
             );
 
-        this._globalChannelPubsub
-            .publish(
-                `~/networks/${networkId}/channel-created`,
-                `${AUTHORITY_ON_CREATE_CHANNEL}:${channelName}`,
-            );
+        if (wasCreated) {
+            this._globalChannelPubsub
+                .publish(
+                    `~/networks/${networkId}/channel-created`,
+                    `${AUTHORITY_ON_CREATE_CHANNEL}:${channelName}`,
+                );
+        }
     }
 
 }
