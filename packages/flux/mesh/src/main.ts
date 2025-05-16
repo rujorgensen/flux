@@ -589,6 +589,7 @@ export class FluxMeshServer {
 
                     if (ws.data.isAuthority) {
                         PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
+
                         networkAuthorityManager.unregister(
                             ws.data.networkId,
                             ws.data.address,
@@ -596,6 +597,7 @@ export class FluxMeshServer {
                     } else {
                         PicoLogger.log(`🛑🤵 Agent socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
                         // Unsubscribe from topics
+
                         for (const channelName of (ws.data.channelNames ?? [])) {
                             ws.unsubscribe(
                                 `networks/${ws.data.networkId}/channels/${channelName}`

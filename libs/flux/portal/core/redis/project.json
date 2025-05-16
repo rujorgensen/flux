@@ -1,0 +1,12 @@
+{
+    "name": "flux-portal-core-redis",
+    "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/flux/portal/core/redis/src",
+    "projectType": "library",
+    "tags": [
+        "type:service",
+        "scope:portal"
+    ],
+    "// targets": "to see all targets run: nx show project flux-portal-core-redis --web",
+    "targets": {}
+}
