@@ -6,9 +6,10 @@ globalThis.agentLoadCount++;
 
 console.log(`[flux-agent] Reloaded ${globalThis.agentLoadCount} time(s)`);
 
-import type {
-    TAgentOwnUId,
-    TNetworkId_S,
+import {
+    type TAgentOwnUId,
+    type TNetworkId_S,
+    validateAgentUIDOrThrow,
 } from '@flux/shared/types';
 import type {
     TMessageCallback,
@@ -44,15 +45,19 @@ export class FluxAgent {
     /**
      *
      * @param { unknown }   identification
-     * @param { string }    [clientUUIDToken]
+     * @param { string }    [clientUId]
      *
      * @returns { Promise<FluxAgentNetworkConnection> }
      */
     public async connect(
         identification: unknown,
-        clientUUIDToken?: string,
+        clientUId?: string,
     ): Promise<FluxAgentNetworkConnection> {
         this.stateManager.emitNetworkState('authorizing');
+
+        if (clientUId && !validateAgentUIDOrThrow(clientUId)) {
+            throw new Error('Will never be thrown');
+        }
 
         const ticket = await authenticateOrThrow(
             this.networkId as TNetworkId_S,
@@ -67,10 +72,9 @@ export class FluxAgent {
             async () => {
                 await this.connect(
                     identification,
-                    clientUUIDToken,
+                    clientUId,
                 );
             },
-            // this.connect.bind(this),
             this.options,
         );
 
@@ -79,7 +83,7 @@ export class FluxAgent {
         const fluxNetworkConnection: FluxAgentNetworkConnection = await this
             .fluxWebSocketConnection
             .connectToNetwork(
-                clientUUIDToken as TAgentOwnUId,
+                clientUId as TAgentOwnUId,
             );
 
         return fluxNetworkConnection;

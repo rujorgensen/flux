@@ -3,7 +3,7 @@ import {
     getMeshRedisConnection,
 } from '../routing/redis/redis-connection.class';
 import type {
-    NetworkAgentRedisCacheService,
+    NetworkAgentRedisService,
 } from '@flux/mesh/store/redis/network-agent';
 import {
     NetworkUsageRedisCacheService,
@@ -15,8 +15,8 @@ import type {
     TNetworkId_S,
 } from '@flux/shared/types';
 
-export class NetworkClientManager {
-    public readonly networkClientHash: NetworkAgentRedisCacheService;
+export class NetworkAgentManager {
+    public readonly networkAgentRedisService: NetworkAgentRedisService;
     public readonly networkUsageRedisCacheService: NetworkUsageRedisCacheService;
 
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
@@ -26,7 +26,7 @@ export class NetworkClientManager {
     constructor(
 
     ) {
-        this.networkClientHash = this.redisConnection.networkClientHash;
+        this.networkAgentRedisService = this.redisConnection.networkAgentRedisService;
         this.networkUsageRedisCacheService = new NetworkUsageRedisCacheService(this.redisConnection['cacheClient'].getClient());
     }
 
@@ -53,7 +53,7 @@ export class NetworkClientManager {
         this.timers.set(
             id,
             setInterval(async () => {
-                await this.networkClientHash
+                await this.networkAgentRedisService
                     .registerAgentThroughput(
                         networkId,
                         id,
@@ -75,7 +75,7 @@ export class NetworkClientManager {
             }, 1_000),
         );
 
-        return this.networkClientHash.registerAgent(networkId, id, ip, address);
+        return this.networkAgentRedisService.registerAgent(networkId, id, ip, address);
     }
 
     /**
@@ -92,7 +92,7 @@ export class NetworkClientManager {
         clientAddress: TAddress,
         uid: TAgentOwnUId,
     ): void {
-        this.networkClientHash.registerAgentUID(networkId, clientAddress, uid);
+        this.networkAgentRedisService.registerAgentUID(networkId, clientAddress, uid);
     }
 
     /**
@@ -114,7 +114,7 @@ export class NetworkClientManager {
             // Unregisters a network client UID and address in the Redis hash.
             this.cache.delete(`${networkId}.${clientOwnUId}`);
 
-            this.networkClientHash.deleteNetworkAgent(
+            this.networkAgentRedisService.deleteNetworkAgent(
                 networkId,
                 clientId,
                 clientOwnUId,
@@ -141,7 +141,7 @@ export class NetworkClientManager {
     ): void {
         this.cache.delete(`${networkId}.${clientOwnUId}`);
 
-        this.networkClientHash.deleteNetworkAgent(networkId, clientId, clientOwnUId);
+        this.networkAgentRedisService.deleteNetworkAgent(networkId, clientId, clientOwnUId);
     }
 
     public async resolveNetworkClientAddressByUid(
@@ -158,7 +158,7 @@ export class NetworkClientManager {
         }
 
         const address: TAddress = await this.redisConnection
-            .networkClientHash
+            .networkAgentRedisService
             .readNetworkClientAddressOrThrow(
                 networkId,
                 clientOwnUId
