@@ -5,6 +5,7 @@ import {
     type TNetworkId_S,
     GlobalRPCTimeoutError,
     UnknownClientError,
+    validateAgentUIDOrThrow,
     validateNetworkIdOrThrow,
 } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
@@ -25,9 +26,10 @@ export const authorizeNetworkAgent = async (
     networkAuthorityManager: NetworkAuthorityManager,
     globalRPCClient: GlobalRPCClient<'authorize'>,
 ) => {
+    const urlWithParsedQuery: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);
+
     // Find the network authority to authenticate with
-    const networkIdString: string | undefined = nodeURL.parse(request.url, true)
-        .query['networkId'] as string;
+    const networkIdString: string | string[] | undefined = urlWithParsedQuery.query['networkId'];
 
     try {
         validateNetworkIdOrThrow(networkIdString ?? '');
@@ -106,6 +108,21 @@ export const authorizeNetworkAgent = async (
         // );
 
         if (authorizedJWT) {
+            const requestedAgentUidString: string | string[] | undefined = urlWithParsedQuery.query['requestedAgentUid'];
+
+            if (requestedAgentUidString) {
+                try {
+                    validateAgentUIDOrThrow(requestedAgentUidString);
+                } catch (error) {
+                    return new Response(
+                        error instanceof Error ? error.message : 'The requested agent ID is not valid',
+                        {
+                            status: 500,
+                        },
+                    );
+                }
+            }
+
             const cookies = request.cookies;
 
             // Set a cookie with various options
@@ -120,6 +137,7 @@ export const authorizeNetworkAgent = async (
                 generateToken({
                     networkId,
                     claim: authorizedJWT,
+                    agentUID: requestedAgentUidString,
                 }),
                 {
                     headers: {

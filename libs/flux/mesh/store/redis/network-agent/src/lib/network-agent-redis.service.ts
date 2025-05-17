@@ -35,7 +35,19 @@ export class NetworkAgentRedisService {
         clientId: TClientId,
         ip: Bun.SocketAddress | null,
         address: TAddress,
+        uid?: TAgentOwnUId,
     ): Promise<void> {
+        if (uid) {
+            const key_: string = `networks/${networkId}/agent-uids`;
+
+            await this._client.hmset(key_, [
+                uid,
+                clientId,
+            ]);
+
+            await this._client.expire(key_, 500);
+        }
+
         // Add to network
         await this._client.sadd(`networks/${networkId}/agents`, clientId);
 
@@ -47,11 +59,24 @@ export class NetworkAgentRedisService {
                 'ip',
                 typeof ip === 'string' ? ip : '',
             ] : []),
+
+            ...(uid ? [
+                'name',
+                typeof uid === 'string' ? uid : '',
+            ] : []),
+
             'address',
             address,
         ]);
     }
 
+    /**
+     * 
+     * @param networkId 
+     * @param clientId 
+     * @param bytes 
+     * @param packets 
+     */
     public async registerAgentThroughput(
         networkId: TNetworkId_S,
         clientId: TClientId,
@@ -68,30 +93,7 @@ export class NetworkAgentRedisService {
             'packets',
             `${packets}`,
         ]);
-    }
 
-    /**
-     * Registers a network client UID and address in the Redis hash.
-     *
-     * @param { TNetworkId_S }      networkId
-     * @param { TAddress }          clientId
-     * @param { TAgentOwnUId }     uid
-     * 
-     * @returns { void }
-     */
-    public async registerAgentUID(
-        networkId: TNetworkId_S,
-        clientId: TAddress,
-        uid: TAgentOwnUId
-    ): Promise<void> {
-        const key: string = `networks/${networkId}/client-uids`;
-
-        await this._client.hmset(key, [
-            uid,
-            clientId,
-        ]);
-
-        await this._client.expire(key, 500);
     }
 
     // ****************************************************************************
@@ -160,11 +162,11 @@ export class NetworkAgentRedisService {
      *
      * @returns { Promise<TAddress> }
      */
-    public async readNetworkClientAddressOrThrow(
+    public async readNetworkClientAddressByUIDOrThrow(
         networkId: TNetworkId_S,
         clientOwnUId: TAgentOwnUId,
     ): Promise<TAddress> {
-        const [clientAddress] = await this._client.hmget(`networks/${networkId}/client-uids`, [clientOwnUId]);
+        const [clientAddress] = await this._client.hmget(`networks/${networkId}/agent-uids`, [clientOwnUId]);
 
         if (!clientAddress) {
             throw new Error(`Network agent not found for networkId: '${networkId}'`);
@@ -186,12 +188,12 @@ export class NetworkAgentRedisService {
      * 
      * @returns { void }
      */
-    public async deleteNetworkAgent(
+    public async unregisterNetworkAgent(
         networkId: TNetworkId_S,
         clientId: TClientId,
         uid: TAgentOwnUId,
     ): Promise<void> {
-        await this._client.send('HDEL', [`networks/${networkId}/client-uids`, uid]);
+        await this._client.send('HDEL', [`networks/${networkId}/agent-uids`, uid]);
         await this._client.srem(`networks/${networkId}/agents`, clientId);
     }
 

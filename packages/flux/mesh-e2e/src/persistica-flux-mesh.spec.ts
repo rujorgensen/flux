@@ -124,7 +124,7 @@ describe('persistica-flux-mesh', () => {
                         if (
                             (auth !== CODE_TO_ACCESS_NETWORK)
                         ) {
-                            return Promise.reject(new Error('Not allowed, wrong agent claim'));
+                            return Promise.reject(new Error('Not allowed, bad agent claim'));
                         }
 
                         return Promise.resolve('allowed');
@@ -197,7 +197,7 @@ describe('persistica-flux-mesh', () => {
                         if (
                             (auth !== CODE_TO_ACCESS_NETWORK)
                         ) {
-                            return Promise.reject(new Error('Not allowed, wrong agent claim'));
+                            return Promise.reject(new Error('Not allowed, bad agent claim'));
                         }
 
                         return Promise.resolve('allowed');

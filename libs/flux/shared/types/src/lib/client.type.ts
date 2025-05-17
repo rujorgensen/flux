@@ -3,13 +3,17 @@ export type TAgentOwnUId = string & { __brand: 'AgentOwnUId'; };
 /**
  * Validates a clientUID or throws an error if it is invalid.
  * 
- * @param { string } clientOwnUID
+ * @param { unknown } clientOwnUID
  * 
  * @returns { boolean }
  */
 export const validateAgentUIDOrThrow = (
-    clientOwnUID: string,
+    clientOwnUID: unknown,
 ): clientOwnUID is TAgentOwnUId => {
+    if (typeof clientOwnUID !== 'string') {
+        throw new Error('UID must be a string');
+    }
+
     if (!/^[A-Za-z0-9-]+$/.test(clientOwnUID)) {
         throw new Error('UID can only contain letters, numbers and dashes (\'-\')');
     }

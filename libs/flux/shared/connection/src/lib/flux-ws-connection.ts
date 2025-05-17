@@ -10,7 +10,6 @@ import {
     SUBSCRIBE_NETWORK_CHANNEL_NAME,
     RPC_REQUEST,
     RPC_RESPONSE,
-    SET_OWN_UID,
     SUBSCRIBED_NETWORK_CHANNEL_NAME,
     NETWORK_CHANNEL_PUBLISH,
     validateChannelNameOrThrow,
@@ -320,19 +319,11 @@ export class FluxWebSocketConnection {
     /**
      * Connects to a network.
      * 
-     * @param { string }    [clientName]
-     * 
      * @returns { Promise<FluxAgentNetworkConnection> }
      */
     public async connectToNetwork(
-        clientUUIDToken?: TAgentOwnUId,
     ): Promise<FluxAgentNetworkConnection> {
         const webSocketClient: FluxWebSocketClientConnection = await this.connect();
-
-        // Attmpt to set the client UUID token
-        if (clientUUIDToken) {
-            await this.setClientUUIDToken(clientUUIDToken);
-        }
 
         return Promise.resolve(new FluxAgentNetworkConnection(
             this, webSocketClient,
@@ -467,23 +458,6 @@ export class FluxWebSocketConnection {
         cb: TMessageCallback,
     ): void {
         this.callbacks.add(cb);
-    }
-
-    /**
-     * 
-     * @param { TAgentOwnUId } clientUUIDToken
-     * 
-     * @returns { Promise<void> } 
-     */
-    private setClientUUIDToken(
-        clientUUIDToken?: TAgentOwnUId,
-    ): Promise<void> {
-
-        if (this.webSocketClient) {
-            this.webSocketClient.send(`${SET_OWN_UID}:${clientUUIDToken}`);
-        }
-
-        return Promise.resolve();
     }
 
     // ****************************************************************************

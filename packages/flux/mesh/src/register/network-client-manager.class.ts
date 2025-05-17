@@ -37,6 +37,7 @@ export class NetworkAgentManager {
      * @param { TClientId }                 id
      * @param { Bun.SocketAddress | null }  ip
      * @param { TAddress }                  address
+     * @param { TAgentOwnUId }              [uid]
      * 
      * @returns { void }
      */
@@ -49,6 +50,7 @@ export class NetworkAgentManager {
             bytes: number,
             packets: number,
         },
+        uid?: TAgentOwnUId,
     ): Promise<void> {
         this.timers.set(
             id,
@@ -75,28 +77,17 @@ export class NetworkAgentManager {
             }, 1_000),
         );
 
-        return this.networkAgentRedisService.registerAgent(networkId, id, ip, address);
+        return this.networkAgentRedisService.registerAgent(
+            networkId,
+            id,
+            ip,
+            address,
+            uid,
+        );
     }
 
     /**
-     * Register a local client UID.
-     *
-     * @param { TNetworkId_S }      networkId
-     * @param { TAddress }          clientAddress
-     * @param { TAgentOwnUId }     uid
-     * 
-     * @returns { void }
-     */
-    public registerClientUId(
-        networkId: TNetworkId_S,
-        clientAddress: TAddress,
-        uid: TAgentOwnUId,
-    ): void {
-        this.networkAgentRedisService.registerAgentUID(networkId, clientAddress, uid);
-    }
-
-    /**
-     * Unregisters a network client UID and associated data from the Redis hash.
+     * Unregisters a network agent UID and associated data from the Redis hash.
      *
      * @param { TNetworkId_S }      networkId
      * @param { TClientId }         clientId
@@ -110,11 +101,10 @@ export class NetworkAgentManager {
         clientOwnUId?: TAgentOwnUId,
     ): void {
         if (clientOwnUId) {
-            this.unregisterNetworkAgentUID(networkId, clientId, clientOwnUId);
             // Unregisters a network client UID and address in the Redis hash.
             this.cache.delete(`${networkId}.${clientOwnUId}`);
 
-            this.networkAgentRedisService.deleteNetworkAgent(
+            this.networkAgentRedisService.unregisterNetworkAgent(
                 networkId,
                 clientId,
                 clientOwnUId,
@@ -123,25 +113,6 @@ export class NetworkAgentManager {
 
         // Cancel the timer
         clearInterval(this.timers.get(clientId));
-    }
-
-    /**
-     * Unregisters a network client UID and address in the Redis hash.
-     *
-     * @param { TNetworkId_S }      networkId
-     * @param { TClientId }         clientId
-     * @param { TAgentOwnUId }     clientOwnUId
-     * 
-     * @returns { void }
-     */
-    private unregisterNetworkAgentUID(
-        networkId: TNetworkId_S,
-        clientId: TClientId,
-        clientOwnUId: TAgentOwnUId,
-    ): void {
-        this.cache.delete(`${networkId}.${clientOwnUId}`);
-
-        this.networkAgentRedisService.deleteNetworkAgent(networkId, clientId, clientOwnUId);
     }
 
     public async resolveNetworkClientAddressByUid(
@@ -159,7 +130,7 @@ export class NetworkAgentManager {
 
         const address: TAddress = await this.redisConnection
             .networkAgentRedisService
-            .readNetworkClientAddressOrThrow(
+            .readNetworkClientAddressByUIDOrThrow(
                 networkId,
                 clientOwnUId
             );

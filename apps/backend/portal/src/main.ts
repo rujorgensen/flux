@@ -16,7 +16,6 @@ if (!FLUX_AUTHORITY_JWT_SECRET) {
     throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
 }
 
-
 // ****************************************************************************
 // * Connections to Stores
 // ****************************************************************************

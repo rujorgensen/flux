@@ -31,7 +31,6 @@ export class LiveUpdates {
 
             console.log('🔑 Registering authority');
 
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
             const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
@@ -56,7 +55,7 @@ export class LiveUpdates {
                         if (
                             (auth !== CODE_TO_ACCESS_NETWORK)
                         ) {
-                            return Promise.reject(new Error('Not allowed'));
+                            return Promise.reject(new Error('Not allowed, bad agent claim'));
                         }
 
                         // console.log('✅ Network access authorized');
