@@ -1,4 +1,4 @@
-import {
+import type {
     TAuthenticationTicket,
     TNetworkAuthorityAuthenticationTicket,
 } from './auth.types';

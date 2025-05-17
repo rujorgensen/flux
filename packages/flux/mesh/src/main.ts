@@ -32,7 +32,6 @@ import {
     SUBSCRIBE_NETWORK_CHANNEL_NAME,
     ERROR,
     RPC_RESPONSE,
-    SET_OWN_UID,
     SUBSCRIBED_NETWORK_CHANNEL_NAME,
     NETWORK_CHANNEL_PUBLISH,
     validateChannelNameOrThrow,
@@ -41,7 +40,6 @@ import {
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
-    validateAgentUIDOrThrow,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -200,13 +198,15 @@ export class FluxMeshServer {
                 // const token = cookies['X-Token'];
                 //         console.log('CVookies: ', cookies);
 
-                const token: string | undefined = nodeURL.parse(request.url, true).query['token'] as string;
+                const token: string | string[] | undefined = nodeURL.parse(request.url, true)
+                    .query['token'];
 
                 try {
                     const decodedToken: {
                         networkId: TNetworkId_S;
                         claim?: string;
                         isAuthority?: boolean;
+                        agentUID?: string,
                     } = verifyTokenOrThrow(token) as any;
 
                     const socketId: TClientId = nanoid() as TClientId;
@@ -220,6 +220,7 @@ export class FluxMeshServer {
                                 isAuthority: decodedToken.isAuthority,
                                 address: `${machineAddress}/${processId}/${socketId}`,
                                 claim: decodedToken.claim,
+                                uid: decodedToken.agentUID,
                                 channelNames: new Set(),
                                 throughput: {
                                     bytes: 0,
@@ -268,6 +269,7 @@ export class FluxMeshServer {
                                 _ws.data.ip,
                                 _ws.data.address,
                                 _ws.data.throughput,
+                                _ws.data.uid,
                             );
 
                         _ws.data.rtcClient = new WebRTCClient(
@@ -545,7 +547,7 @@ export class FluxMeshServer {
                             if (initiatingClient && remoteClient) {
                                 facilitateWebRTCConnection(
                                     initiatingClient,
-                                    remoteClient
+                                    remoteClient,
                                 );
                             } else {
                                 ws.send(`${ERROR}:RPC clients could not be resolved`);
@@ -553,28 +555,6 @@ export class FluxMeshServer {
                                 return;
                             }
 
-                            break;
-                        }
-
-                        case SET_OWN_UID: {
-                            const uid: string = message_.substring(
-                                message_.indexOf(':') + 1
-                            );
-
-                            try {
-                                if (validateAgentUIDOrThrow(uid)) {
-                                    ws.data.uid = uid;
-                                    networkAgentManager.registerClientUId(
-                                        ws.data.networkId,
-                                        ws.data.address,
-                                        uid,
-                                    );
-                                }
-                            } catch {
-                                ws.send(`${ERROR}:Invalid UID`);
-
-                                return;
-                            }
                             break;
                         }
                     }

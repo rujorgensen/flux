@@ -7,7 +7,7 @@ globalThis.agentLoadCount++;
 console.log(`[flux-agent] Reloaded ${globalThis.agentLoadCount} time(s)`);
 
 import {
-    type TAgentOwnUId,
+    TAgentOwnUId,
     type TNetworkId_S,
     validateAgentUIDOrThrow,
 } from '@flux/shared/types';
@@ -63,6 +63,8 @@ export class FluxAgent {
             this.networkId as TNetworkId_S,
             this.options?.domain ?? 'http://localhost:8080',
             identification,
+            undefined, // Password
+            clientUId as TAgentOwnUId,
         );
 
         this.fluxWebSocketConnection = createWSConnection(
@@ -82,9 +84,7 @@ export class FluxAgent {
 
         const fluxNetworkConnection: FluxAgentNetworkConnection = await this
             .fluxWebSocketConnection
-            .connectToNetwork(
-                clientUId as TAgentOwnUId,
-            );
+            .connectToNetwork();
 
         return fluxNetworkConnection;
     }

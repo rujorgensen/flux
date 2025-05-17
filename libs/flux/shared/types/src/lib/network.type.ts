@@ -3,13 +3,17 @@ export type TNetworkId_S = string & { __brand: 'NetworkId'; };
 /**
  * Validates a network ID.
  * 
- * @param { string }    networkId
+ * @param { unknown } networkId
  *  
  * @returns { boolean } 
  */
 export const validateNetworkIdOrThrow = (
-    networkId: string,
+    networkId: unknown,
 ): networkId is TNetworkId_S => {
+    if (typeof networkId !== 'string') {
+        throw new Error('Network ID must be a string');
+    }
+
     if (networkId.includes(':')) {
         throw new Error('Network ID cannot contain :');
     }
