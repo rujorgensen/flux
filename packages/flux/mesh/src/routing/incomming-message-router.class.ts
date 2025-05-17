@@ -4,11 +4,11 @@
 import type { TClientId } from '@flux/shared/types';
 import {
     type RedisConnection,
-    getRedisConnection,
+    getMeshRedisConnection,
 } from './redis/redis-connection.class';
 
 export class IncommingMessageRouter {
-    private readonly redisConnection: RedisConnection = getRedisConnection();
+    private readonly redisConnection: RedisConnection = getMeshRedisConnection();
 
     constructor(
         private readonly onLocal: (

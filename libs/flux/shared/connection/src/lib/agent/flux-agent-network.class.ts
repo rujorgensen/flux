@@ -3,7 +3,7 @@
  */
 import {
     type TChannelName,
-    type TClientOwnUId,
+    type TAgentOwnUId,
     validateChannelNameOrThrow,
 } from '@flux/shared/types';
 import type {
@@ -97,10 +97,10 @@ export class FluxAgentNetworkConnection {
      * 
      * @returns 
      */
-    public connectToClient(
+    public connectToAgent(
         clientId: string,
     ): FluxRemoteClient {
-        this._fluxWebSocketConnection.connectToClient(clientId as TClientOwnUId);
+        this._fluxWebSocketConnection.connectToAgent(clientId as TAgentOwnUId);
 
         return new FluxRemoteClient(this.iceConnection as ICEConnection);
 

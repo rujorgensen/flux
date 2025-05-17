@@ -8,7 +8,7 @@ import {
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import {
     type RedisConnection,
-    getRedisConnection,
+    getMeshRedisConnection,
 } from '../../routing/redis/redis-connection.class';
 import type { GlobalChannelPubsub } from '../../routing/global-channel/global-channel-pubsub.class';
 
@@ -16,7 +16,7 @@ import type { GlobalChannelPubsub } from '../../routing/global-channel/global-ch
 const MAX_CHANNEL_MEMBERS = 25;
 
 export class NetworkChannelManager {
-    private readonly redisConnection: RedisConnection = getRedisConnection();
+    private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly networkChannelHash: NetworkChannelHash = new NetworkChannelHash(
         this.redisConnection,
     );

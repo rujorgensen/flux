@@ -1,11 +1,11 @@
 import { splitAddressOrThrow, type TAddress, type TClientId, type TNetworkId_S } from '@flux/shared/types';
 import {
     type RedisConnection,
-    getRedisConnection,
+    getMeshRedisConnection,
 } from '../routing/redis/redis-connection.class';
 
 export class NetworkAuthorityManager {
-    private readonly redisConnection: RedisConnection = getRedisConnection();
+    private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly cache: Map<TNetworkId_S, Set<TAddress>> = new Map();
 
     public register(

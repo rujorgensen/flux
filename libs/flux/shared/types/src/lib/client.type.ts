@@ -1,4 +1,4 @@
-export type TClientOwnUId = string & { __brand: 'ClientOwnUId'; };
+export type TAgentOwnUId = string & { __brand: 'AgentOwnUId'; };
 
 /**
  * Validates a clientUID or throws an error if it is invalid.
@@ -9,7 +9,7 @@ export type TClientOwnUId = string & { __brand: 'ClientOwnUId'; };
  */
 export const validateClientUIDOrThrow = (
     clientOwnUID: string,
-): clientOwnUID is TClientOwnUId => {
+): clientOwnUID is TAgentOwnUId => {
     if (!/^[A-Za-z0-9-]+$/.test(clientOwnUID)) {
         throw new Error('UID can only contain letters, numbers and dashes (\'-\')');
     }

@@ -124,8 +124,7 @@
 body {
     font-family: 'Atkinson', sans-serif;
     text-align: left;
-    background-color: var(--surface-0);
-    background: linear-gradient(var(--gray-gradient)) no-repeat;
+    background-color: linear-gradient(var(--gray-gradient)) no-repeat;
     background-size: 100% 600px;
     word-wrap: break-word;
     overflow-wrap: break-word;

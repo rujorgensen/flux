@@ -12,14 +12,22 @@ import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.c
 import type { NetworkAuthorityManager } from '../../register/register-network-authority.class';
 import { retry } from '@flux/shared/utils';
 
-export const authorizeNetworkClient = async (
+/**
+ * 
+ * @param { BunRequest }                    request
+ * @param { NetworkAuthorityManager }       networkAuthorityManager
+ * @param { GlobalRPCClient<'authorize'> }  globalRPCClient
+ * 
+ * @returns { void }
+ */
+export const authorizeNetworkAgent = async (
     request: BunRequest,
     networkAuthorityManager: NetworkAuthorityManager,
-    globalRPCClient: GlobalRPCClient<'authorize'>
+    globalRPCClient: GlobalRPCClient<'authorize'>,
 ) => {
     // Find the network authority to authenticate with
     const networkIdString: string | undefined = nodeURL.parse(request.url, true)
-        .query.networkId as string;
+        .query['networkId'] as string;
 
     try {
         validateNetworkIdOrThrow(networkIdString ?? '');
@@ -86,7 +94,7 @@ export const authorizeNetworkClient = async (
                     attempt: number,
                     retries: number,
                 ) => {
-                    console.log(`[authorizeNetworkClient] Retrying... (attempt: ${attempt} of ${retries})`);
+                    console.log(`[authorizeNetworkAgent] Retrying... (attempt: ${attempt} of ${retries})`);
                 },
             },
         );

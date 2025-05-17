@@ -82,7 +82,7 @@ Alpine.data('webRTCApplication', () => ({
         ) => {
             this.receiveChannel = event.channel;
             this.receiveChannel.onopen = () => console.log('ReceiveChannel opened');
-            this.receiveChannel.onmessage = (e: any) => this.receivedMessage = e.data;
+            this.receiveChannel.onmessage = (e: any) => { this.receivedMessage = e.data; };
         };
     },
 
@@ -90,7 +90,7 @@ Alpine.data('webRTCApplication', () => ({
     async createOffer() {
         this.dataChannel = this.peer1.createDataChannel("chat");
         this.dataChannel.onopen = () => console.log("DataChannel opened");
-        this.dataChannel.onmessage = (e: any) => this.receivedMessage = e.data;
+        this.dataChannel.onmessage = (e: any) => { this.receivedMessage = e.data; };
 
         const offer = await this.peer1.createOffer();
         await this.peer1.setLocalDescription(offer);
