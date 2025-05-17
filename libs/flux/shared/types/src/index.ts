@@ -41,7 +41,7 @@ export type {
 } from './lib/package-status.interfaces';
 
 export {
-    type TClientOwnUId,
+    type TAgentOwnUId,
     validateClientUIDOrThrow,
 } from './lib/client.type';
 

@@ -26,7 +26,7 @@ import {
     type TMachineAddress,
     type TProcessAddress,
     type TProcessId,
-    type TClientOwnUId,
+    type TAgentOwnUId,
     UnknownClientError,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_NAME,
@@ -63,7 +63,7 @@ import {
 import { NetworkClientManager } from './register/network-client-manager.class';
 import { OPTIONS_RESPONSE } from './_routes/options.route';
 import { authorizeNetworkAuthority } from './_routes/auth/network-authority.post.route';
-import { authorizeNetworkClient } from './_routes/auth/network-client.post.route';
+import { authorizeNetworkAgent } from './_routes/auth/network-client.post.route';
 import type {
     RPCClient,
     RPCResponse,
@@ -72,7 +72,7 @@ import type {
 import * as nodeURL from 'node:url';
 import {
     type RedisConnection,
-    getRedisConnection,
+    getMeshRedisConnection,
 } from './routing/redis/redis-connection.class';
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
 import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
@@ -93,7 +93,7 @@ PicoLogger.configure({
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
     ip: Bun.SocketAddress | null;
     id: TClientId;
-    uid?: TClientOwnUId;
+    uid?: TAgentOwnUId;
     address: TAddress;
     networkId: TNetworkId_S;
     isAuthority?: boolean;
@@ -130,7 +130,7 @@ const clientRPCResponseCallbacks: Map<
 
 export class FluxMeshServer {
 
-    private readonly redisConnection: RedisConnection = getRedisConnection();
+    private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly onReadyListeners: Set<() => void> = new Set();
     private readonly bunServer: Bun.Server;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
@@ -182,7 +182,7 @@ export class FluxMeshServer {
                 '/auth/network-client': {
                     OPTIONS: OPTIONS_RESPONSE,
                     POST: (request: Bun.BunRequest) =>
-                        authorizeNetworkClient(
+                        authorizeNetworkAgent(
                             request,
                             networkAuthorityManager,
                             globalRPCClient,
@@ -200,8 +200,7 @@ export class FluxMeshServer {
                 // const token = cookies['X-Token'];
                 //         console.log('CVookies: ', cookies);
 
-                const token: string | undefined = nodeURL.parse(request.url, true).query
-                    .token as string;
+                const token: string | undefined = nodeURL.parse(request.url, true).query['token'] as string;
 
                 try {
                     const decodedToken: {
@@ -211,6 +210,7 @@ export class FluxMeshServer {
                     } = verifyTokenOrThrow(token) as any;
 
                     const socketId: TClientId = nanoid() as TClientId;
+
                     if (
                         server.upgrade(request, {
                             data: {
@@ -522,9 +522,9 @@ export class FluxMeshServer {
                                 console.warn('Initiating client could not be resolved');
                             }
 
-                            const clientOwnUId: TClientOwnUId = message_.substring(
+                            const clientOwnUId: TAgentOwnUId = message_.substring(
                                 message_.indexOf(':') + 1
-                            ) as TClientOwnUId;
+                            ) as TAgentOwnUId;
                             const networkClientAddress: TAddress =
                                 await networkAgentManager.resolveNetworkClientAddressByUid(
                                     ws.data.networkId,
@@ -614,7 +614,7 @@ export class FluxMeshServer {
                                 );
                         }
 
-                        networkAgentManager.unregisterNetworkClient(
+                        networkAgentManager.unregisterNetworkAgent(
                             ws.data.networkId,
                             ws.data.id,
                             ws.data.uid,

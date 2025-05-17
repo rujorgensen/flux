@@ -5,7 +5,7 @@ import type { RedisClient } from 'bun';
 import type {
     TAddress,
     TClientId,
-    TClientOwnUId,
+    TAgentOwnUId,
     TNetworkId_S,
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
@@ -75,14 +75,14 @@ export class NetworkAgentRedisCacheService {
      *
      * @param { TNetworkId_S }      networkId
      * @param { TAddress }          clientId
-     * @param { TClientOwnUId }     uid
+     * @param { TAgentOwnUId }     uid
      * 
      * @returns { void }
      */
     public async registerAgentUID(
         networkId: TNetworkId_S,
         clientId: TAddress,
-        uid: TClientOwnUId
+        uid: TAgentOwnUId
     ): Promise<void> {
         const key: string = `networks/${networkId}/client-uids`;
 
@@ -156,13 +156,13 @@ export class NetworkAgentRedisCacheService {
      * Resolves the network client address by an agent's UID or throws.
      * 
      * @param { TNetworkId_S }  networkId
-     * @param { TClientOwnUId }  networkId
+     * @param { TAgentOwnUId }  networkId
      *
      * @returns { Promise<TAddress> }
      */
     public async readNetworkClientAddressOrThrow(
         networkId: TNetworkId_S,
-        clientOwnUId: TClientOwnUId
+        clientOwnUId: TAgentOwnUId,
     ): Promise<TAddress> {
         const [clientAddress] = await this._client.hmget(`networks/${networkId}/client-uids`, [clientOwnUId]);
 
@@ -182,14 +182,14 @@ export class NetworkAgentRedisCacheService {
      *
      * @param { TNetworkId_S }      networkId
      * @param { TClientId }         clientId
-     * @param { TClientOwnUId }     uid
+     * @param { TAgentOwnUId }     uid
      * 
      * @returns { void }
      */
     public async deleteNetworkAgent(
         networkId: TNetworkId_S,
         clientId: TClientId,
-        uid: TClientOwnUId,
+        uid: TAgentOwnUId,
     ): Promise<void> {
         await this._client.send('HDEL', [`networks/${networkId}/client-uids`, uid]);
         await this._client.srem(`networks/${networkId}/agents`, clientId);

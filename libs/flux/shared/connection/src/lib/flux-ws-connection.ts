@@ -4,7 +4,7 @@
 
 import {
     type TChannelName,
-    type TClientOwnUId,
+    type TAgentOwnUId,
     type TAuthorizeCallback,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_NAME,
@@ -317,7 +317,7 @@ export class FluxWebSocketConnection {
      * @returns { Promise<FluxAgentNetworkConnection> }
      */
     public async connectToNetwork(
-        clientUUIDToken?: TClientOwnUId,
+        clientUUIDToken?: TAgentOwnUId,
     ): Promise<FluxAgentNetworkConnection> {
         const webSocketClient: FluxWebSocketClientConnection = await this.connect();
 
@@ -438,8 +438,8 @@ export class FluxWebSocketConnection {
      * 
      * @returns { Promise<FluxNetworkChannel> } 
      */
-    public async connectToClient(
-        destinationClientId: TClientOwnUId,
+    public async connectToAgent(
+        destinationClientId: TAgentOwnUId,
     ): Promise<void> {
 
         if (this.webSocketClient) {
@@ -463,12 +463,12 @@ export class FluxWebSocketConnection {
 
     /**
      * 
-     * @param { TClientOwnUId } clientUUIDToken
+     * @param { TAgentOwnUId } clientUUIDToken
      * 
      * @returns { Promise<void> } 
      */
     private setClientUUIDToken(
-        clientUUIDToken?: TClientOwnUId,
+        clientUUIDToken?: TAgentOwnUId,
     ): Promise<void> {
 
         if (this.webSocketClient) {

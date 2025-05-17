@@ -5,7 +5,7 @@ import type { RedisClient } from 'bun';
 import type {
     TAddress,
     TClientId,
-    TClientOwnUId,
+    TAgentOwnUId,
     TNetworkId_S,
 } from '@flux/shared/types';
 import { NetworkAgentRedisSortedSet } from './hash/network-agent.redis.sorted-set';
@@ -35,7 +35,7 @@ export class NetworkAgentRedis {
         networkId: TNetworkId_S,
         clientId: TAddress,
         socketId: TClientId,
-        uid: TClientOwnUId,
+        uid: TAgentOwnUId,
     ): Promise<void> {
         const key: string = `networks/${networkId}/agents/${socketId}`;
 

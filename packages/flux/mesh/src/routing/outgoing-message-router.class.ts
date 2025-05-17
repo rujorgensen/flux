@@ -11,7 +11,7 @@ import {
 import { readMachineAddress, readProcessId } from './addressing.utils';
 import {
     type RedisConnection,
-    getRedisConnection,
+    getMeshRedisConnection,
 } from './redis/redis-connection.class';
 import { PicoLogger } from '@utils/pico-logger';
 
@@ -19,7 +19,7 @@ export class OutgoingMessageRouter {
     private readonly processId: TProcessId = readProcessId();
     private readonly machineAddress: TMachineAddress = readMachineAddress();
 
-    private readonly redisConnection: RedisConnection = getRedisConnection();
+    private readonly redisConnection: RedisConnection = getMeshRedisConnection();
 
     constructor(
         private readonly passToLocalClientOrThrowUnknownClient: (

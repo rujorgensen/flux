@@ -30,7 +30,7 @@
             }
         },
         "docker-dev": {
-            "command": "docker compose -f '.deploy/docker-compose.dev.yml' up -d --build"
+            "command": "docker compose -p flux-dev -f '.deploy/docker-compose.dev.yml' up -d --build"
         }
     },
     "tags": [

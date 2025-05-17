@@ -19,7 +19,7 @@ if (!process.env['FLUX_MESH_REDIS_URL']) {
  *
  * @returns
  */
-export const getRedisConnection = (
+export const getMeshRedisConnection = (
 
 ) => {
     // We have to read the env variable here, because otherwise it can't be modified in tests

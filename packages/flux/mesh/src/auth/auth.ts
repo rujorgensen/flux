@@ -10,9 +10,13 @@ export const generateToken = (
 };
 
 export const verifyTokenOrThrow = (
-    token: string
+    token: unknown,
     // callback?: VerifyCallback<JwtPayload | string>,
 ): object => {
+    if (typeof token !== 'string') {
+        throw new Error('Token must be a string');
+    }
+
     try {
         const decoded = jwt.verify(token, secret);
 

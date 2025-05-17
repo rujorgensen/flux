@@ -10,7 +10,7 @@ import {
 } from '@flux/shared/types';
 import {
     type RedisConnection,
-    getRedisConnection,
+    getMeshRedisConnection,
 } from './redis/redis-connection.class';
 import {
     readMachineAddress,
@@ -23,7 +23,7 @@ export class ProcessMessageRouter {
     private readonly machineAddress: TMachineAddress = readMachineAddress();
     private readonly processAddress: TProcessAddress = readProcessAddress();
     private readonly processId: TProcessId = readProcessId();
-    private readonly redisConnection: RedisConnection = getRedisConnection();
+    private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly localCallbacks: Set<TCallbackFunction> = new Set();
 
     /**

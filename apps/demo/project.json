@@ -11,7 +11,10 @@
         "demo": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "bun --watch run ./apps/demo/src/http.server.ts"
+                "commands": [
+                    "bun --watch run ./apps/demo/src/http.server.ts",
+                    "bunx open-cli http://localhost:3001"
+                ]
             }
         }
     }

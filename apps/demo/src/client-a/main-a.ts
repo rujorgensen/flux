@@ -64,11 +64,11 @@ Alpine.data('fluxApplicationA', () => ({
         console.log('✅ Client A connected to network', this.flux.id);
     },
 
-    connectToNamedClient(
+    connectToNamedAgent(
         clientName: string,
     ) {
         console.log('Conneting to remo');
-        this.remoteClient = this.fluxNetworkConnection?.connectToClient(clientName);
+        this.remoteClient = this.fluxNetworkConnection?.connectToAgent(clientName);
 
         // await new Promise((_resolve, reject) => {
 
