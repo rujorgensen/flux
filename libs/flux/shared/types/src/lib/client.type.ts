@@ -7,7 +7,7 @@ export type TAgentOwnUId = string & { __brand: 'AgentOwnUId'; };
  * 
  * @returns { boolean }
  */
-export const validateClientUIDOrThrow = (
+export const validateAgentUIDOrThrow = (
     clientOwnUID: string,
 ): clientOwnUID is TAgentOwnUId => {
     if (!/^[A-Za-z0-9-]+$/.test(clientOwnUID)) {

@@ -38,6 +38,14 @@ interface IOptions {
     port?: number;
 }
 
+/**
+ * @param id 
+ * @param ticket 
+ * @param stateManager 
+ * @param cb 
+ * @param options 
+ * @returns 
+ */
 export const createWSConnection = <T, M>(
     id: string,
     ticket: string,

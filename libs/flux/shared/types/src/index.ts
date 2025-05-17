@@ -42,7 +42,7 @@ export type {
 
 export {
     type TAgentOwnUId,
-    validateClientUIDOrThrow,
+    validateAgentUIDOrThrow,
 } from './lib/client.type';
 
 export {

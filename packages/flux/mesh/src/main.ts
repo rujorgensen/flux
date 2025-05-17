@@ -41,7 +41,7 @@ import {
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
-    validateClientUIDOrThrow,
+    validateAgentUIDOrThrow,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -60,7 +60,7 @@ import {
     readProcessAddress,
     readProcessId,
 } from './routing/addressing.utils';
-import { NetworkClientManager } from './register/network-client-manager.class';
+import { NetworkAgentManager } from './register/network-client-manager.class';
 import { OPTIONS_RESPONSE } from './_routes/options.route';
 import { authorizeNetworkAuthority } from './_routes/auth/network-authority.post.route';
 import { authorizeNetworkAgent } from './_routes/auth/network-client.post.route';
@@ -140,7 +140,7 @@ export class FluxMeshServer {
         private readonly port: number = 8080,
     ) {
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
-        const networkAgentManager: NetworkClientManager = new NetworkClientManager();
+        const networkAgentManager: NetworkAgentManager = new NetworkAgentManager();
 
         const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
             // passToLocalClient:
@@ -562,7 +562,7 @@ export class FluxMeshServer {
                             );
 
                             try {
-                                if (validateClientUIDOrThrow(uid)) {
+                                if (validateAgentUIDOrThrow(uid)) {
                                     ws.data.uid = uid;
                                     networkAgentManager.registerClientUId(
                                         ws.data.networkId,

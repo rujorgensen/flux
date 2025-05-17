@@ -1,5 +1,5 @@
 /**
- * This is the class exposed to the user. It represents an agent connection to the network
+ * This is the class exposed to the user. It represents an agent connection to the network.
  */
 import {
     type TChannelName,

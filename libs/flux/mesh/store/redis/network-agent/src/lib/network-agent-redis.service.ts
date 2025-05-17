@@ -10,7 +10,7 @@ import type {
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
 
-export class NetworkAgentRedisCacheService {
+export class NetworkAgentRedisService {
 
     constructor(
         private readonly _client: RedisClient,

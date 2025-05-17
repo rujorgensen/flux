@@ -1,6 +1,6 @@
 export {
-    NetworkAgentRedisCacheService,
-} from './lib/network-agent-redis-cache.service';
+    NetworkAgentRedisService,
+} from './lib/network-agent-redis.service';
 export type {
     TNetworkAgent,
 } from './lib/network-agent-cache.type';
