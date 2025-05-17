@@ -7,7 +7,7 @@ globalThis.agentLoadCount++;
 console.log(`[flux-agent] Reloaded ${globalThis.agentLoadCount} time(s)`);
 
 import {
-    TAgentOwnUId,
+    type TAgentOwnUId,
     type TNetworkId_S,
     validateAgentUIDOrThrow,
 } from '@flux/shared/types';
