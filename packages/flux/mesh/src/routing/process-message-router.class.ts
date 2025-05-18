@@ -51,7 +51,7 @@ export class ProcessMessageRouter {
 
         // * Not on the same process
         if (processId !== this.processId) {
-            PicoLogger.log('🛣️ Routing message to process', 'routing');
+            PicoLogger.log('🛣️ Routing message to process (todo; direct process)', 'routing');
             // ! Route through Redis for now, but change to direct process connection
             this.redisConnection.directPublish(address, message);
 

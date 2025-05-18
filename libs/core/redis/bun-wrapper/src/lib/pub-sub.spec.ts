@@ -2,27 +2,14 @@ import {
     type RedisClientType,
     createClient,
 } from 'redis';
-import {
-    type StartedRedisContainer,
-    RedisContainer,
-} from '@testcontainers/redis';
 import { BunRedisPubSub } from './core-redis-pub-sub.class';
-import {
-    Wait,
-} from 'testcontainers';
 
 describe('BunRedisPubSub', () => {
-    let redisContainer: StartedRedisContainer;
     let redisClient: RedisClientType;
     let pubsub: BunRedisPubSub;
 
     beforeAll(async () => {
-        redisContainer = await new RedisContainer('redis:6.2.7')
-            .withExposedPorts(6379)
-            .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
-            .start();
-
-        const url: string = redisContainer.getConnectionUrl();
+        const url: string = globalThis['infrastructureRedisURL'];
 
         console.log(`Redis is ready at ${url}`);
 
@@ -44,7 +31,6 @@ describe('BunRedisPubSub', () => {
     afterAll(async () => {
         await redisClient?.disconnect();
         await pubsub?.disconnect();
-        await redisContainer?.stop();
     });
 
     it('works', async () => {
