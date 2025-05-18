@@ -69,7 +69,7 @@ export class FluxWebSocketConnection {
     private readonly socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TMessageCallback> = new Set();
 
-    private readonly topicCallbacks: Map<TChannelName, Set<TMessageCallback>> = new Map();
+    private readonly channelCallbacks: Map<TChannelName, Set<TMessageCallback>> = new Map();
 
     // Handles messages before the rest of the logic. Will not continue if there are interceptors
     private readonly packageTypeInterceptorCallbacks: Map<string, Set<TMessageCallback>> = new Map();
@@ -213,10 +213,19 @@ export class FluxWebSocketConnection {
                             const channelName: string = message_.slice(firstColon + 1, secondColon);
 
                             if (validateChannelNameOrThrow(channelName)) {
-                                const data: string = message_.slice(secondColon + 1);
 
-                                const topicCallbacks: Set<TMessageCallback> | undefined = this.topicCallbacks.get(channelName);
+                                const topicCallbacks: Set<TMessageCallback> | undefined = this.channelCallbacks.get(channelName);
                                 if (topicCallbacks) {
+                                    let data: string = message_.slice(secondColon + 1);
+
+                                    if (data.startsWith('o:')) {
+                                        try {
+                                            data = JSON.parse(data.substring(2));
+                                        } catch {
+                                            data = data.substring(2);
+                                        }
+                                    }
+
                                     for (const cb of topicCallbacks) {
                                         cb(data);
                                     }
@@ -399,13 +408,16 @@ export class FluxWebSocketConnection {
      * 
      * @returns { void } 
      */
-    public publish(
+    public publish<T>(
         channelName: TChannelName,
-        message: string,
+        message: string | T,
     ): void {
 
         if (this.webSocketClient) {
-            this.webSocketClient.send(`${NETWORK_CHANNEL_PUBLISH}:${channelName}:${message}`);
+            // TODO NB! There is a risk of the string message already starting with 'o:'
+            const messageString: string = typeof message === 'string' ? message : `o:${JSON.stringify(message)}`;
+
+            this.webSocketClient.send(`${NETWORK_CHANNEL_PUBLISH}:${channelName}:${messageString}`);
         }
     }
 
@@ -421,13 +433,13 @@ export class FluxWebSocketConnection {
         channelName: TChannelName,
         fn: TMessageCallback,
     ): void {
-        const existingSubscriber: Set<TMessageCallback> | undefined = this.topicCallbacks.get(channelName);
+        const existingSubscriber: Set<TMessageCallback> | undefined = this.channelCallbacks.get(channelName);
         if (existingSubscriber) {
             existingSubscriber.add(fn);
         } else {
             const newSubscriber: Set<TMessageCallback> = new Set();
             newSubscriber.add(fn);
-            this.topicCallbacks.set(channelName, newSubscriber);
+            this.channelCallbacks.set(channelName, newSubscriber);
         }
     }
 

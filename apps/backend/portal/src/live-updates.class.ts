@@ -126,8 +126,7 @@ export class LiveUpdates {
                     date: new Date(),
                 };
 
-                // ! @TODO Automatically convert detect object / string
-                fluxConnectedAgentNetworkChannel.publish(JSON.stringify(networkAgentCountAt));
+                fluxConnectedAgentNetworkChannel.publish(networkAgentCountAt);
             }, 3_000);
 
             // * Emit connected authorities
