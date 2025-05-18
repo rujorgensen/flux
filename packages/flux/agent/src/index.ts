@@ -1,3 +1,3 @@
 export {
     FluxAgent,
-} from './lib/flux-agent';
+} from './lib/flux-agent.class';

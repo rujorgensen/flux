@@ -1,11 +1,12 @@
 {
-  "name": "@flux/shared/utils",
-  "version": "0.0.1",
-  "private": true,
-  "type": "commonjs",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
-  "dependencies": {
-    "@swc/helpers": "~0.5.11"
-  }
+    "name": "@flux/shared/utils",
+    "version": "0.0.1",
+    "private": true,
+    "type": "commonjs",
+    "main": "./src/index.js",
+    "types": "./src/index.d.ts",
+    "dependencies": {
+        "@swc/helpers": "~0.5.11",
+        "node-machine-id": "1.1.12"
+    }
 }

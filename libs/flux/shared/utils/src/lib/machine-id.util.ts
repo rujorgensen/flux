@@ -1,0 +1,54 @@
+import * as machineIdSync from 'node-machine-id';
+
+export type TFluxClientUID = string & { __brand: 'flux-client-uid'; };
+
+// Make TypeScript happy
+declare global {
+    var __flux_client_id: TFluxClientUID | null;
+}
+
+export const validateMachineUID = (
+    machineUID: unknown,
+): machineUID is TFluxClientUID => {
+    if (typeof machineUID !== 'string') {
+        console.warn('Machine UID must be a string');
+        return false;
+    }
+
+    if (machineUID.length < 5) {
+        console.warn('Machine UID too short');
+        return false;
+    }
+
+    if (machineUID.length > 50) {
+        console.warn('Machine UID too long');
+        return false;
+    }
+
+    return true;
+};
+
+/**
+ * Returns the machine UID or NULL.
+ * 
+ * @returns { TFluxClientUID | null }
+ */
+export const getMachineUID = async (
+): Promise<TFluxClientUID | null> => {
+    if (typeof globalThis !== 'object') {
+        throw new Error('Flux can only be used in an environment with globalThis');
+    }
+
+    if (globalThis.__flux_client_id !== null) {
+        console.log('[flux-client] Reusing existing id');
+        return globalThis.__flux_client_id as unknown as TFluxClientUID;
+    }
+
+    try {
+        globalThis.__flux_client_id = machineIdSync() as TFluxClientUID;
+    } catch {
+        globalThis.__flux_client_id = null;
+    }
+
+    return globalThis.__flux_client_id as unknown as TFluxClientUID;
+};

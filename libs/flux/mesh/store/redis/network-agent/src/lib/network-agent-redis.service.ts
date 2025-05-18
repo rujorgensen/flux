@@ -10,6 +10,9 @@ import type {
     TNetworkAgentCountAt,
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
+import type {
+    TFluxClientUID,
+} from '@flux/shared/utils';
 
 export class NetworkAgentRedisService {
 
@@ -37,6 +40,7 @@ export class NetworkAgentRedisService {
         ip: Bun.SocketAddress | null,
         address: TAddress,
         uid?: TAgentOwnUId,
+        machineUID?: TFluxClientUID,
     ): Promise<void> {
         if (uid) {
             const key_: string = `networks/${networkId}/agent-uids`;
@@ -53,22 +57,28 @@ export class NetworkAgentRedisService {
         await this._client.sadd(`networks/${networkId}/agents`, clientId);
 
         // Add to agent
-        const key: string = `networks/${networkId}/agents/${clientId}`;
+        await this._client.hmset(
+            `networks/${networkId}/agents/${clientId}`,
+            [
+                ...(ip ? [
+                    'ip',
+                    typeof ip === 'string' ? ip : '',
+                ] : []),
 
-        await this._client.hmset(key, [
-            ...(ip ? [
-                'ip',
-                typeof ip === 'string' ? ip : '',
-            ] : []),
+                ...(uid ? [
+                    'name',
+                    typeof uid === 'string' ? uid : '',
+                ] : []),
 
-            ...(uid ? [
-                'name',
-                typeof uid === 'string' ? uid : '',
-            ] : []),
+                ...(machineUID ? [
+                    'machineUID',
+                    typeof machineUID === 'string' ? machineUID : '',
+                ] : []),
 
-            'address',
-            address,
-        ]);
+                'address',
+                address,
+            ],
+        );
     }
 
     /**
