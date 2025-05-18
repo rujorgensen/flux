@@ -20,7 +20,7 @@ import {
     createWSConnection,
 } from '../../../../../libs/flux/shared/connection/src/lib/flux-ws-connection';
 import { nanoid } from 'nanoid';
-import { authenticateOrThrow } from './connector/auth/register-client.auth';
+import { authenticateAgentOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
 import { StateManager } from '@flux/shared/utils';
 
@@ -59,7 +59,7 @@ export class FluxAgent {
             throw new Error('Will never be thrown');
         }
 
-        const ticket = await authenticateOrThrow(
+        const ticket = await authenticateAgentOrThrow(
             this.networkId as TNetworkId_S,
             this.options?.domain ?? 'http://localhost:8080',
             identification,

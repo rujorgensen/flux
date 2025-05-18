@@ -5,6 +5,7 @@ import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
 import { LiveUpdates } from './live-updates.class';
+import { networkAgentRoutes } from './api/networks/networks.route';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
 
@@ -84,6 +85,7 @@ export const app = new Elysia()
     })
 
     .get('/api/ping', () => 'pong')
+    .use(networkAgentRoutes)
     .get('/api/connected-authorities', () => 9999)
     .get('/api/status', () => {
         return [

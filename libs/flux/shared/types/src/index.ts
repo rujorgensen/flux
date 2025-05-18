@@ -62,3 +62,7 @@ export {
 export type {
     TClientId,
 } from './lib/client-id.type';
+
+export type {
+    TNetworkAgentCountAt,
+} from './lib/agents/network-agent.type';

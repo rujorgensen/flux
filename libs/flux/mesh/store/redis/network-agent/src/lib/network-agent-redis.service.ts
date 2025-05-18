@@ -7,6 +7,7 @@ import type {
     TClientId,
     TAgentOwnUId,
     TNetworkId_S,
+    TNetworkAgentCountAt,
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
 
@@ -145,13 +146,15 @@ export class NetworkAgentRedisService {
      * 
      * @param { TNetworkId_S }  networkId
      *
-     * @returns { Promise<number> }
+     * @returns { Promise<TNetworkAgentCountAt> }
      */
     public async readNetworkAgentCount(
         networkId: TNetworkId_S,
-    ): Promise<number> {
-        // Add to network
-        return (await this._client.scard(`networks/${networkId}/agents`));
+    ): Promise<TNetworkAgentCountAt> {
+        return {
+            count: await this._client.scard(`networks/${networkId}/agents`),
+            date: new Date(),
+        };
     }
 
     /**
@@ -184,16 +187,18 @@ export class NetworkAgentRedisService {
      *
      * @param { TNetworkId_S }      networkId
      * @param { TClientId }         clientId
-     * @param { TAgentOwnUId }     uid
+     * @param { TAgentOwnUId }      [uid]
      * 
      * @returns { void }
      */
     public async unregisterNetworkAgent(
         networkId: TNetworkId_S,
         clientId: TClientId,
-        uid: TAgentOwnUId,
+        uid?: TAgentOwnUId,
     ): Promise<void> {
-        await this._client.send('HDEL', [`networks/${networkId}/agent-uids`, uid]);
+        if (uid) {
+            await this._client.send('HDEL', [`networks/${networkId}/agent-uids`, uid]);
+        }
         await this._client.srem(`networks/${networkId}/agents`, clientId);
     }
 
