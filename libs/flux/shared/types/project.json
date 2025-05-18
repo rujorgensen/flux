@@ -19,7 +19,7 @@
         "bun-test": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "bun test {projectRoot} --env-file=.env.e2e"
+                "command": "bun test {projectRoot}/ --env-file=.env.e2e"
             }
         }
     },

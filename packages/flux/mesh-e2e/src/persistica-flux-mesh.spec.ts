@@ -2,13 +2,6 @@ import {
     createClient,
 } from 'redis';
 import {
-    type StartedRedisContainer,
-    RedisContainer,
-} from '@testcontainers/redis';
-import {
-    Wait,
-} from 'testcontainers';
-import {
     FluxMeshServer
 } from '@flux/mesh';
 import {
@@ -34,7 +27,6 @@ const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to registe
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 
 describe('persistica-flux-mesh', () => {
-    let redisContainer: StartedRedisContainer;
     let fluxMeshServer: FluxMeshServer;
     let fluxServerPort: number = 8080;
     let fluxDomain: string = `localhost:${fluxServerPort}`;
@@ -44,13 +36,7 @@ describe('persistica-flux-mesh', () => {
 
         if (process.env.FLUX_TEST_INFRASTRUCTURE !== 'local') {
             // * Start Redis container
-            redisContainer = await new RedisContainer('redis:7.4.3')
-                .withExposedPorts(6379)
-                .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
-                .start()
-                ;
-
-            redisURL = redisContainer.getConnectionUrl();
+            redisURL = globalThis['infrastructureRedisURL'];
         }
 
         // Modify env so the Flux Mesh connects to the test Redis container
@@ -96,7 +82,6 @@ describe('persistica-flux-mesh', () => {
 
     afterAll(async () => {
         await fluxMeshServer?.stop();
-        await redisContainer?.stop();
     });
 
     describe('network-connection', () => {
