@@ -1,6 +1,7 @@
 /**
- * Store data about network channels
+ * Store data related to network channels
  */
+
 import {
     type TAddress,
     type TChannelName,
@@ -46,6 +47,8 @@ export class NetworkChannelHash {
                 new Date().toISOString(),
                 'memberDistribution',
                 defaultMemberDistribution,
+                'usage',
+                '0',
             ]);
         }
 
@@ -204,6 +207,18 @@ export class NetworkChannelHash {
             }),
         )
             .then(() => void 0);
+    }
+
+    // ****************************************************************************
+    // * Update
+    // ****************************************************************************
+    public async incrementUsage(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+        usage: number,
+    ): Promise<number> {
+        // * Increment channel usage
+        return await this._redisConnection.hash.hincrby(`networks/${networkId}/channels/${channelName}`, 'usage', usage);
     }
 
     // ****************************************************************************

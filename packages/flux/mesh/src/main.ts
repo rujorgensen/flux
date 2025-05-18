@@ -322,7 +322,8 @@ export class FluxMeshServer {
                     }
 
                     // Calculate the throughput
-                    ws.data.throughput.bytes = ws.data.throughput.bytes + new TextEncoder().encode(message_).length;
+                    const packageSize: number = new TextEncoder().encode(message_).length;
+                    ws.data.throughput.bytes = ws.data.throughput.bytes + packageSize;
                     ws.data.throughput.packets++;
 
                     const packageType: string | undefined = message_.split(':')[0];
@@ -334,15 +335,15 @@ export class FluxMeshServer {
                                 return;
                             }
 
-                            const clientId: string = message_.substring(message_.indexOf(':') + 1);
+                            const agentClientId: string = message_.substring(message_.indexOf(':') + 1);
 
-                            if (!isNanoId(clientId)) {
-                                ws.send(`${ERROR}:Invalid ID`);
+                            if (!isNanoId(agentClientId)) {
+                                ws.send(`${ERROR}:Invalid agent ID`);
                                 return;
                             }
 
                             // Attempt to get the client
-                            const connectedClientSocket: TConnectedClientSocket | undefined = clientMap.get(clientId);
+                            const connectedClientSocket: TConnectedClientSocket | undefined = clientMap.get(agentClientId);
 
                             if (
                                 !connectedClientSocket ||
@@ -401,6 +402,14 @@ export class FluxMeshServer {
                                         `${ON_NETWORK_CHANNEL_PUBLISH}:${channelName}:${data}`,
                                         ws,
                                     );
+
+                                    // Add the usage to the channel
+                                    this.channelManager
+                                        .increaseUsageCount(
+                                            ws.data.networkId,
+                                            channelName,
+                                            packageSize,
+                                        );
                                 }
                             }
 
