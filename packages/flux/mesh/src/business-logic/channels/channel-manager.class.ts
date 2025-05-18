@@ -15,7 +15,12 @@ import type { GlobalChannelPubsub } from '../../routing/global-channel/global-ch
 // ! TODO Hardcoded for now, take from network config in the future
 const MAX_CHANNEL_MEMBERS = 25;
 
+interface IUsageCache {
+    networkId: TNetworkId_S;
+    usage: number;
+};
 export class NetworkChannelManager {
+    private readonly channelUsageCount: Map<TChannelName, IUsageCache> = new Map();
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly networkChannelHash: NetworkChannelHash = new NetworkChannelHash(
         this.redisConnection,
@@ -23,7 +28,23 @@ export class NetworkChannelManager {
 
     constructor(
         private readonly _globalChannelPubsub: GlobalChannelPubsub,
-    ) { }
+    ) {
+        setInterval(() => {
+            for (const [channelName, usage] of this.channelUsageCount) {
+
+                if (usage.usage > 0) {
+                    this.networkChannelHash
+                        .incrementUsage(
+                            usage.networkId,
+                            channelName,
+                            usage.usage,
+                        );
+                }
+
+                this.channelUsageCount.delete(channelName);
+            }
+        }, 5_000);
+    }
 
     /**
      * Checks if a channel can have more members.
@@ -151,4 +172,38 @@ export class NetworkChannelManager {
         }
     }
 
+    // ****************************************************************************
+    // *** Update
+    // ****************************************************************************
+
+    /**
+     * Increases the usage count of a channel.
+     * 
+     * @param { TNetworkId_S } networkId
+     * @param { TChannelName } channelName
+     * @param { number } usage
+     * 
+     * @returns { void }
+     */
+    public increaseUsageCount(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+        usage: number,
+    ): void {
+        const channelUsageCache: {
+            networkId: TNetworkId_S;
+            usage: number;
+        } | undefined = this.channelUsageCount.get(channelName);
+
+        this.channelUsageCount.set(
+            channelName,
+            channelUsageCache ? {
+                ...channelUsageCache,
+                usage: channelUsageCache.usage + usage,
+            } : {
+                networkId,
+                usage: usage,
+            },
+        );
+    }
 }
