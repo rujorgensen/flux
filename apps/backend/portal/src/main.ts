@@ -9,6 +9,16 @@ import { networkAgentRoutes } from './api/networks/networks.route';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
 
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    // Optionally exit: process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // Optionally exit: process.exit(1);
+});
+
 // ****************************************************************************
 // * Env
 // ****************************************************************************

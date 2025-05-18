@@ -7,6 +7,25 @@ services:
     ports:
       - 6351:6379
 
+  portal-pg-e2e:
+    image: postgres:17.0
+    restart: always
+    container_name: portal-pg-e2e # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ports:
+      - 5401:5432
+    environment:
+      # Make sure these matches your env file
+      POSTGRES_USER: portal-db-user
+      POSTGRES_PASSWORD: non-important-password
+      POSTGRES_DB: portal
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ../../pgdata/portal:/var/lib/postgresql/data
+
   mesh-dragonfly-e2e:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
     container_name: mesh-dragonfly-e2e # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 

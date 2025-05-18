@@ -29,6 +29,8 @@ export class FluxAuthority {
 
     private readonly stateManager: StateManager = new StateManager();
 
+    //     public readonly networkChannelManager: NetworkChannelManager = new NetworkChannelManager();
+
     constructor(
         private readonly networkId: string,
         private readonly options?: {

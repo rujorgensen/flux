@@ -9,6 +9,40 @@ import type {
     RedisClient
 } from 'bun';
 
+type TRedisStatus = {
+    memory: {
+        used: number,
+        max: number,
+        usageRatio: number | null,
+        overThreshold: boolean,
+    },
+    cpu: {
+        sys?: string | number,
+        user?: string | number,
+        sysChildren?: string | number,
+        userChildren?: string | number,
+    },
+    stats: {
+        evictedKeys?: string | number,
+        expiredKeys?: string | number,
+        keyspaceHits?: string | number,
+        keyspaceMisses?: string | number,
+        rejectedConnections?: string | number,
+    },
+    clients: {
+        connected?: string | number,
+        blocked?: string | number,
+    },
+    keyspace: unknown, // Replace with actual parsed type if available
+    latency: {
+        event: string,
+        lastTimestamp: number,
+        latencyMs: number,
+        samples: number,
+    }[];
+};
+
+
 export class RedisStatusService {
 
     private readonly alertListeners: Set<(alerts: string[]) => void> = new Set();
@@ -68,7 +102,7 @@ export class RedisStatusService {
      * @returns 
      */
     private getAlerts(
-        health: Awaited<ReturnType<typeof this.getRedisStatusOrThrow>>,
+        health: Awaited<TRedisStatus>,
     ): string[] {
         const alerts: string[] = [];
 
@@ -101,7 +135,7 @@ export class RedisStatusService {
      */
     public async getRedisStatusOrThrow(
         threshold: number = 0.9,
-    ) {
+    ): Promise<TRedisStatus> {
         // Make sure to get this every time, as it may have been re-instantiated
         const redisClient: RedisClient = this._redisClient.getClient();
 

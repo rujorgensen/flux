@@ -10,12 +10,20 @@ import type {
     TNetworkAgentCountAt,
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
+import { NetworkAgentRedisSortedSet } from './network-agent.redis.sorted-set';
 
 export class NetworkAgentRedisService {
+    private readonly cashedDataUsage: Map<string, number> = new Map();
+    private readonly networkAgentRedisSortedSet: NetworkAgentRedisSortedSet;
 
     constructor(
         private readonly _client: RedisClient,
-    ) { }
+    ) {
+        this.networkAgentRedisSortedSet = new NetworkAgentRedisSortedSet(this._client);
+
+        // Update the network agent data usage regularly
+        // setInterval(this.pushDataUsage.bind(this), 3_000);
+    }
 
     // ****************************************************************************
     // * Create
@@ -61,14 +69,31 @@ export class NetworkAgentRedisService {
                 typeof ip === 'string' ? ip : '',
             ] : []),
 
+            'data-usage',
+            '0',
+
             ...(uid ? [
                 'name',
                 typeof uid === 'string' ? uid : '',
             ] : []),
 
+            'clientId',
+            clientId,
+
             'address',
             address,
+
+            'registerAt',
+            new Date().toISOString(),
         ]);
+
+        await this._client.expire(key, 500);
+
+        await this.networkAgentRedisSortedSet
+            .registerAgent(
+                networkId,
+                address,
+            );
     }
 
     /**
@@ -94,6 +119,14 @@ export class NetworkAgentRedisService {
             'packets',
             `${packets}`,
         ]);
+
+        const cashedDataUsage: number | undefined = this.cashedDataUsage.get(key);
+
+        if (cashedDataUsage === undefined) {
+            this.cashedDataUsage.set(key, bytes);
+        } else {
+            this.cashedDataUsage.set(key, bytes + cashedDataUsage);
+        }
 
     }
 
@@ -194,12 +227,51 @@ export class NetworkAgentRedisService {
     public async unregisterNetworkAgent(
         networkId: TNetworkId_S,
         clientId: TClientId,
+        address: TAddress,
         uid?: TAgentOwnUId,
     ): Promise<void> {
         if (uid) {
             await this._client.send('HDEL', [`networks/${networkId}/agent-uids`, uid]);
         }
         await this._client.srem(`networks/${networkId}/agents`, clientId);
+
+        await this._client.hmset(
+            `networks/${networkId}/agents/${clientId}`,
+            [
+                'unregisteredAt',
+                new Date().toISOString(),
+            ],
+        );
+
+        await this.networkAgentRedisSortedSet
+            .unregisterAgent(
+                networkId,
+                address,
+            );
     }
 
+    // ****************************************************************************
+    // * Internal Helpers
+    // ****************************************************************************
+
+    /**
+     * Pushes the data usage to the Redis server.
+     * 
+     * @returns { Promise<void> }
+     */
+    private async pushDataUsage(
+
+    ): Promise<void> {
+
+        for (const [redisKey, usage] of this.cashedDataUsage) {
+            await this._client
+                .hincrby(
+                    redisKey,
+                    'data-usage',
+                    usage,
+                );
+
+            this.cashedDataUsage.delete(redisKey);
+        }
+    }
 }

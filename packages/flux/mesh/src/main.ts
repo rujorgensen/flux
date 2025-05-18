@@ -40,6 +40,7 @@ import {
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
+    AUTHORITY_CHANNEL_UNSUBSCRIBE,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -85,6 +86,7 @@ PicoLogger.configure({
         'ws-connection',
         'ws-disconnect',
         'rpc',
+        'network-channel',
     ],
 });
 
@@ -136,6 +138,9 @@ export class FluxMeshServer {
 
     constructor(
         private readonly port: number = 8080,
+        // private readonly options?: {
+        //     redisUrl?: string; // Override the global env Redis URL
+        // },
     ) {
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
         const networkAgentManager: NetworkAgentManager = new NetworkAgentManager();
@@ -161,6 +166,10 @@ export class FluxMeshServer {
         const globalRPCClient: GlobalRPCClient<
             'authorize' | 'authorizeNetworkChannel'
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
+
+        setInterval(() => {
+            this.redisConnection.setConnected(`${machineAddress}/${processId}`);
+        }, 3_000);
 
         this.bunServer = Bun.serve({
             port: this.port,
@@ -349,6 +358,18 @@ export class FluxMeshServer {
                             // Subscribe to the events 
                             ws.subscribe(`~/networks/${ws.data.networkId}/channel-created`);
                             ws.subscribe(`~/networks/${ws.data.networkId}/channel-empty`);
+
+                            break;
+                        }
+                        case AUTHORITY_CHANNEL_UNSUBSCRIBE: {
+                            if (!ws.data.isAuthority) {
+                                ws.close(4000, 'Bad behavior');
+                                return;
+                            }
+
+                            // Subscribe to the events 
+                            ws.unsubscribe(`~/networks/${ws.data.networkId}/channel-created`);
+                            ws.unsubscribe(`~/networks/${ws.data.networkId}/channel-empty`);
 
                             break;
                         }
@@ -597,6 +618,7 @@ export class FluxMeshServer {
                         networkAgentManager.unregisterNetworkAgent(
                             ws.data.networkId,
                             ws.data.id,
+                            ws.data.address,
                             ws.data.uid,
                         );
                     }
@@ -644,6 +666,16 @@ export class FluxMeshServer {
      */
     public async stop(
     ): Promise<void> {
+        // Disconnect clients
+        // for (const client of clientMap.values()) {
+        //     // DO WE REALLY CARE ABOUT CLIENT'S FEELINGS?   client.close(1000, 'Server is shutting down');
+        //     if (client.data.isAuthority) {
+        //         this.redisConnection.networkAuthoritySet.unregister(
+        //             client.data.networkId,
+        //             client.data.id
+        //         );
+        //     }
+        // }
         clientMap.clear();
 
         // 'true': Force stop and close all active connections

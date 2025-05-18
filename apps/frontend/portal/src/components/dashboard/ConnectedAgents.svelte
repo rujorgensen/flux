@@ -1,13 +1,10 @@
 <!-- ConnectedAuthorities.svelte -->
 <script lang="ts">
-    import { writable } from "svelte/store";
-    import type {
-        TNetworkAgentCountAt,
-        TNetworkId_S,
-    } from "@flux/shared/types";
-    import { onMount } from "svelte";
-    import { onConnectedAgentCount } from "../../data/flux/connected-agents.service.fn";
-    import type { FluxAgentNetworkConnection } from "@flux/shared/connection";
+    import { writable } from 'svelte/store';
+    import type { TNetworkAgentCountAt, TNetworkId_S } from '@flux/shared/types';
+    import { onMount } from 'svelte';
+    import { onConnectedAgentCount } from '../../data/flux/connected-agents.service.fn';
+    import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
 
     // Passed by Astro
     export let fluxAgentNetworkConnection: FluxAgentNetworkConnection;
@@ -18,11 +15,11 @@
 
     onMount(async () => {
         // Update on new data
-        (await onConnectedAgentCount(fluxAgentNetworkConnection))(
-            connectedAgents.set,
-        );
+        (await onConnectedAgentCount(fluxAgentNetworkConnection))(connectedAgents.set);
     });
 </script>
+
+<!-- <button on:click={create}>Create</button> -->
 
 {#if $connectedAgents}
     <strong title={$connectedAgents.date.toDateString()}>

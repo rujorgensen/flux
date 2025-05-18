@@ -5,9 +5,25 @@
     "editor.formatOnSave": true,
     "editor.detectIndentation": false,
     "editor.tabSize": 4,
+    "editor.bracketPairColorization.enabled": true,
+    "[html]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.defaultFormatter": "nesterenok.js-beautify-extentions"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
     "[prisma]": {
         "editor.defaultFormatter": "Prisma.prisma"
     },
+    "html.format.wrapAttributes": "force-expand-multiline",
+    "html.format.preserveNewLines": true,
+    "html.format.endWithNewline": true,
+    "html.format.wrapLineLength": 0,
     "typescript.format.semicolons": "insert",
     "search.exclude": {
         "**/node_modules": true,
@@ -20,5 +36,9 @@
         "**/backup/**": true,
         "**/dist/**": true,
         "**/.angular/**": true
-    }
+    },
+    "[typescript]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4
+    },
 }

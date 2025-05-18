@@ -1,11 +1,11 @@
 services:
-  mesh-dragonfly-dev:
+  mesh-dragonfly-dev-NOT_USED:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
     container_name: mesh-dragonfly-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
     ulimits:
       memlock: -1
     ports:
-      - "6381:6379"
+      - "6399:6379"
     # For better performance, consider `host` mode instead `port` to avoid docker NAT.
     # `host` mode is NOT currently supported in Swarm Mode.
     # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
@@ -13,19 +13,54 @@ services:
     volumes:
       - dragonflymeshdata:/mesh-dev-data
 
-  portal-dragonfly-dev:
-    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
-    container_name: portal-dragonfly-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
-    ulimits:
-      memlock: -1
+  # Dragonfly does not work with "await this._client.send('HEXPIRE', [key, '60', 'FIELDS', '1', 'locked',]);"
+  mesh-redis-dev:
+    image: redis:7.4.3
+    # command: redis-server --requirepass e2e-redis-password
+    restart: always
+    container_name: mesh-redis-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
     ports:
-      - "6350:6379"
-    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
-    # `host` mode is NOT currently supported in Swarm Mode.
-    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
-    # network_mode: "host"
-    volumes:
-      - dragonflyportaldata:/portal-dev-data
+      - 6381:6379
+
+  #portal-dragonfly-dev:
+  #  image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+  #  container_name: portal-dragonfly-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+  #  ulimits:
+  #    memlock: -1
+  #  ports:
+  #    - "6350:6379"
+  #  # For better performance, consider `host` mode instead `port` to avoid docker NAT.
+  #  # `host` mode is NOT currently supported in Swarm Mode.
+  #  # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+  #  # network_mode: "host"
+  #  volumes:
+  #    - dragonflyportaldata:/portal-dev-data
+  portal-redis-dev:
+    image: redis:7.4.3
+    command: redis-server --requirepass e2e-redis-password
+    restart: always
+    container_name: portal-redis-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ports:
+      - 6350:6379
+
+ # portal-pg-dev:
+ #   image: postgres:17.0
+ #   restart: always
+ #   container_name: portal-pg-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+ #   ports:
+ #     - 5400:5432
+ #   environment:
+ #     # Make sure these matches your env file
+ #     POSTGRES_USER: portal-db-user
+ #     POSTGRES_PASSWORD: non-important-password
+ #     POSTGRES_DB: portal
+ #   healthcheck:
+ #     test: [ "CMD-SHELL", "pg_isready" ]
+ #     interval: 5s
+ #     timeout: 5s
+ #     retries: 5
+ #   volumes:
+ #     - ../../pgdata/portal:/var/lib/postgresql/data
 
 volumes:
   dragonflymeshdata:

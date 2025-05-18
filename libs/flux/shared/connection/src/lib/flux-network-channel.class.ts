@@ -53,4 +53,14 @@ export class FluxNetworkChannel {
             );
     }
 
+    /**
+     * Listen to own disconnect events on this channel.
+     * 
+     * @returns { void }
+     */
+    // public onDisconnect(
+    //     fn: () => void,
+    // ): void {
+    //     console.error('To implement: "onDisconnect"');
+    // }
 }

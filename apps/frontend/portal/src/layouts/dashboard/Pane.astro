@@ -1,6 +1,6 @@
 ---
 // src/components/Panel.astro
-const { area, class: extraClass = "" } = Astro.props;
+const { area, class: extraClass = '' } = Astro.props;
 ---
 
 <style>
@@ -22,6 +22,15 @@ const { area, class: extraClass = "" } = Astro.props;
         font-weight: var(--font-weight-6);
     }
 
+    .panel-header {
+        font-size: var(--font-size-3);
+        font-weight: var(--font-weight-6);
+    }
+
+    .flair {
+        border: 3px solid #ab00e9;
+        background-color: #f8e8fe;
+    }
     /* 
   .panel-footer {
     margin-top: auto;

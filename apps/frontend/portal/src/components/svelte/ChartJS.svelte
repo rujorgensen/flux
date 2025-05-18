@@ -25,36 +25,39 @@ Chart.register(
 );
 */
 
-    import { onMount } from "svelte";
-    import Chart from "chart.js/auto";
+    import { onMount } from 'svelte';
+    import Chart from 'chart.js/auto';
 
     const data = [20, 100, 50, 12, 20, 130, 45];
-    const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     let ctx;
     let canvas;
 
     onMount(() => {
-
         let lineColor = '#111';
 
-        setInterval(() => {
+        const rootStyles = getComputedStyle(document.documentElement);
+        lineColor = rootStyles.getPropertyValue('--pop-color-1').trim();
 
-            const rootStyles = getComputedStyle(document.documentElement);
-            lineColor = rootStyles.getPropertyValue("--pop-color-1").trim();
-            const fillColor = rootStyles.getPropertyValue("--pop-color-2").trim();
-            
-            console.log(lineColor,fillColor);
-        });
-      
-        ctx = canvas.getContext("2d");
+        // setInterval(() => {
+        //     const rootStyles = getComputedStyle(document.documentElement);
+        //     lineColor = rootStyles.getPropertyValue("--pop-color-1").trim();
+        //     const fillColor = rootStyles
+        //         .getPropertyValue("--pop-color-2")
+        //         .trim();
+
+        //     console.log(lineColor, fillColor);
+        // }, 1000);
+
+        ctx = canvas.getContext('2d');
         const chart = new Chart(ctx, {
             options: {
                 responseive: true,
                 maintainAspectRatio: false,
                 interaction: {
-                    mode: "index",
+                    mode: 'index',
                     intersect: false, // show tooltip even if not directly over the line
-                    axis: "x",
+                    axis: 'x',
                 },
                 animation: {
                     duration: 0,
@@ -72,10 +75,10 @@ Chart.register(
                         display: true,
                         ticks: {
                             font: {
-                                family: "Atkinson",
+                                family: 'Atkinson',
                                 size: 14,
                             },
-                            color: "gray",
+                            color: 'gray',
                         },
                         grid: {
                             display: true,
@@ -85,10 +88,10 @@ Chart.register(
                         display: true,
                         ticks: {
                             font: {
-                                family: "Atkinson",
+                                family: 'Atkinson',
                                 size: 14,
                             },
-                            color: "gray",
+                            color: 'gray',
                         },
                         grid: {
                             display: true,
@@ -102,15 +105,14 @@ Chart.register(
                     },
                 },
             },
-            type: "line",
+            type: 'line',
             data: {
                 labels: labels,
                 datasets: [
                     {
-                        label: "Unit Sales",
+                        label: 'Unit Sales',
                         data: data,
                         tension: 0.4, // smoothness (0 = straight lines, 1 = max curve)
-
 
                         borderColor: lineColor,
                         //backgroundColor: fillColor, // "", // Fill under line (if `fill: true`)
@@ -121,15 +123,15 @@ Chart.register(
             annotation: {
                 annotations: [
                     {
-                        type: "line",
-                        mode: "horizontal",
-                        scaleID: "y-axis-0",
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'y-axis-0',
                         value: 5,
-                        borderColor: "--pop-color-1",
+                        borderColor: '--pop-color-1',
                         borderWidth: 4,
                         label: {
                             enabled: false,
-                            content: "Test label",
+                            content: 'Test label',
                         },
                     },
                 ],

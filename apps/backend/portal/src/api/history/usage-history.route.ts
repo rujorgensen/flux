@@ -10,6 +10,7 @@ import type {
 } from '@prisma-types/flux';
 
 export const readUsageHistory = (
+    meshRedisRepository: any,
     portalPgRepository: PrismaClient,
 ) => {
     return (
@@ -20,15 +21,15 @@ export const readUsageHistory = (
         },
     ) => {
         // Read from cache
-        // // return portalPgRepository
-        // //     .usageHistory
-        // //     .findMany({
-        // //         where: {
-        // //             networkId,
-        // //             at: {
-        // //                 lte: dateInterval.to,
-        // //             },
-        // //         },
-        // //     });
+        return portalPgRepository
+            .usageHistory
+            .findMany({
+                where: {
+                    networkId,
+                    at: {
+                        lte: dateInterval.to,
+                    },
+                },
+            });
     };
 };

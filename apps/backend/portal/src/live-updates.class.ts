@@ -7,7 +7,7 @@ import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
 import type { RedisStatusService } from './_services/redis-status.service';
-import type { TNetworkAgentCountAt, TNetworkId_S } from '@flux/shared/types';
+import type { TChannelName, TNetworkAgentCountAt, TNetworkId_S } from '@flux/shared/types';
 
 const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´
 
@@ -43,7 +43,7 @@ export class LiveUpdates {
                 },
             );
 
-            await fluxAuthority
+            const authorityNetworkConnection = await fluxAuthority
                 .registerAuthority(
                     NETWORK_AUTHORITY_KEY,
                     (
@@ -86,12 +86,29 @@ export class LiveUpdates {
                             }
 
                             console.log('TODO: chcek if this agent is allowed to access the channel');
+                            // return Promise.reject(new Error('Not allowed'));
+
+                            if (agentJWT.superUser) {
+                                return Promise.resolve(true);
+                            }
+
+                            console.log("TODO: chcek if this agent is allowed to access the channel", agentJWT);
+
                             return Promise.resolve(false);
                         }
 
                         return Promise.resolve(true);
                     },
                 );
+
+            authorityNetworkConnection
+                .networkChannelEventEmitter
+                .on('emptyChannel', (topic: TChannelName) => {
+                    console.log(`❗ Channel '${topic}' is empty, run cleanup`);
+                })
+                .on('createChannel', (topic: TChannelName) => {
+                    console.log(`❗ New channel created '${topic}'. Is there anything you need to subscribe to?`);
+                });
 
             // ****************************************************************************
             // * Setup Agent

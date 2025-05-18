@@ -29,8 +29,17 @@
                 "command": "bun test {projectRoot} --env-file=.env.test"
             }
         },
+        "type-test": {
+            "executor": "nx:run-script",
+            "options": {
+                "script": "tsc --noEmit {projectRoot}/**/*.spec.ts"
+            }
+        },
         "docker-dev": {
             "command": "docker compose -p flux-dev -f '.deploy/docker-compose.dev.yml' up -d --build"
+        },
+        "-docker-dev": {
+            "command": "bun run {projectRoot}/start-docker-services-if-not-running.sh"
         }
     },
     "tags": [

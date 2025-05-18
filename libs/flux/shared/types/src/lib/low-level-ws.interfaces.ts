@@ -18,6 +18,7 @@ export const AUTHORITY_ON_CREATE_CHANNEL: string = 'acc';
 export const AUTHORITY_ON_EMPTY_CHANNEL: string = 'aec';
 export const AUTHORITY_CHANNEL_SUBSCRIBE: string = 'acs';
 export const AUTHORITY_DISCONNECT_AGENT: string = 'ada';
+export const AUTHORITY_CHANNEL_UNSUBSCRIBE: string = 'acu';
 
 // * Errors
 export const ERROR: string = 'e';

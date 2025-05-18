@@ -1,49 +1,60 @@
 <!-- ConnectedAuthorities.svelte -->
 <script lang="ts">
-  import { writable } from 'svelte/store';
-  //import { apiFetch } from '../../utils/fetch.util';
-  const dataStore = writable<number | undefined>();
+    import { writable } from "svelte/store";
 
-  // import { onMount } from "svelte";
+    // Passed by Astro
+    export let networkId: string;
+    export let initial: number;
 
-  // dataStore.set();
-  let val = 0;
-  // Fetch initial data
-  // apiFetch('api/ping')
-  //   .then((res) => res.text())
-  //   .then((initialData) => {
-  //     console.log('[initialData]', initialData);
-  //     val = 23;
-  //     dataStore.set(val);
-  //   })
-  //   .catch((err) => {
-  //     console.error('Error fetching initial data:', err);
-  //     // dataStore.set({ error: 'Failed to fetch initial data' });
-  //   });
+    // import { onMount } from "svelte";
 
-  setInterval(() => {
-    dataStore.set(val++);
-  }, 1_000);
-  // onMount(async () => {
-  //   // const socket = new WebSocket('wss://example.com');
+    // dataStore.set();
+    let val = initial;
 
-  //   // socket.addEventListener('message', (event) => {
-  //   //   const newData = JSON.parse(event.data);
+    //import { apiFetch } from '../../utils/fetch.util';
+    const dataStore = writable<number | undefined>(initial);
+    // Fetch initial data
+    // apiFetch('api/ping')
+    //   .then((res) => res.text())
+    //   .then((initialData) => {
+    //     console.log('[initialData]', initialData);
+    //     val = 23;
+    //     dataStore.set(val);
+    //   })
+    //   .catch((err) => {
+    //     console.error('Error fetching initial data:', err);
+    //     // dataStore.set({ error: 'Failed to fetch initial data' });
+    //   });
 
-  //   //   dataStore.update(current => ({
-  //   //     ...current,
-  //   //     ...newData
-  //   //   }));
-  //   // });
+    setInterval(() => {
+        dataStore.set(val++);
+    }, 1_000);
+    // onMount(async () => {
+    //   // const socket = new WebSocket('wss://example.com');
 
-  //   //    return () => socket.close();
-  // });
+    //   // socket.addEventListener('message', (event) => {
+    //   //   const newData = JSON.parse(event.data);
 
-  // Export the store directly
+    //   //   dataStore.update(current => ({
+    //   //     ...current,
+    //   //     ...newData
+    //   //   }));
+    //   // });
 
-  export const dataUsage = dataStore;
+    //   //    return () => socket.close();
+    // });
+
+    // Export the store directly
+
+    export const dataUsage = dataStore;
 </script>
 
 {#if $dataUsage}
-  <strong>{JSON.stringify($dataUsage)}</strong>
+    <strong>{JSON.stringify($dataUsage)}</strong>
 {/if}
+
+<style>
+    strong {
+        text-align: right;
+    }
+</style>

@@ -242,9 +242,14 @@ export class RedisConnection {
     }
 
     public async setDisconnected(
-        _address: string,
+        address: string,
     ): Promise<void> {
-        // !TODO
+        await this.hash.hmset(`machines/processes/${address}`, [
+            'status', 'disconnected',
+            'updatedAt', new Date().toISOString(),
+        ]);
+
+        await this.hash.expire(`machines/processes/${address}`, 60);
     }
 
     /**

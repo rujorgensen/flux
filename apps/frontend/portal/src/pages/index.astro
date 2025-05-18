@@ -1,42 +1,50 @@
 ---
-import MeltUI from "../components/svelte/melt-ui/MeltUI.svelte";
+import MeltUI from '../components/svelte/melt-ui/MeltUI.svelte';
+
+// Utilities
+import { formatDate } from '../utils/pipes/data-format.pipe';
 
 // Dahsboard tiles
-import ConnectedAuthorities from "../components/dashboard/ConnectedAuthorities.svelte";
-import ConnectedAgents from "../components/dashboard/ConnectedAgents.svelte";
-import ActiveChanels from "../components/dashboard/ActiveChannels.svelte";
-import TotalDataUsage from "../components/dashboard/TotalDataUsage.svelte";
+import ConnectedAuthorities from '../components/dashboard/ConnectedAuthorities.svelte';
+import ConnectedAgents from '../components/dashboard/ConnectedAgents.svelte';
+import ActiveChanels from '../components/dashboard/ActiveChannels.svelte';
+import TotalDataUsage from '../components/dashboard/TotalDataUsage.svelte';
 
-import ChartJS from "../components/svelte/ChartJS.svelte";
-import BaseHead from "../components/BaseHead.astro";
-import Footer from "../components/Footer.astro";
-import Menu from "../components/Menu.svelte";
-import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
-import Pane from "../layouts/dashboard/Pane.astro";
-import { app } from "../data/api";
+import ChartJS from '../components/svelte/ChartJS.svelte';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Menu from '../components/Menu.svelte';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import Pane from '../layouts/dashboard/Pane.astro';
+import { app } from '../data/api';
 
-import { readConnectedAgentCount } from "../data/api/connected-agents.service.fn";
-import { getFluxNetworkConnection } from "../data/flux-connection.fn";
-import type { FluxAgentNetworkConnection } from "@flux/shared/connection";
-import type { TNetworkId_S } from "@flux/shared/types";
+import { readConnectedAuthorityCount } from '../data/api/connected-authorities.service.fn';
+import { readChannelCount } from '../data/api/channels.service.fn';
+import { readConnectedAgentCount } from '../data/api/connected-agents.service.fn';
+import { readTotalNetworkDataUsage } from '../data/api/data-usage.service';
+import { readNetworkConfiguration } from '../data/api/read-network-configuration.service';
+import { getFluxNetworkConnection } from '../data/flux-connection.fn';
+import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
+import type { TNetworkId_S } from '@flux/shared/types';
 
-const { data: initialValue } = await app.api["connected-authorities"].get();
+const networkId: string = 'rAnD0M-network-id-from-astro';
 
-const networkId: string = "rAnD0M-network-id-from-astro";
+const initialConnectedAuthoritiesCount = await readConnectedAuthorityCount(networkId);
+const initialChannelCount = await readChannelCount(networkId);
+const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
+const initialTotalDataUsage = await readTotalNetworkDataUsage(networkId);
+const initialNetworkConofiguration = await readNetworkConfiguration(networkId);
+
+const { data: initialValue } = await app.api['connected-authorities'].get();
+
 let fluxAgentNetworkConnection: FluxAgentNetworkConnection | undefined;
-const CODE_TO_ACCESS_NETWORK: string = "code-to-access-network"; // Key to connect to a network, unknown and irelevant to flux
+const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 
 try {
-    fluxAgentNetworkConnection = await getFluxNetworkConnection(
-        networkId as TNetworkId_S,
-        CODE_TO_ACCESS_NETWORK,
-        "portal-agent",
-    );
+    fluxAgentNetworkConnection = await getFluxNetworkConnection(networkId as TNetworkId_S, CODE_TO_ACCESS_NETWORK, 'portal-agent');
 } catch (error) {
-    console.error("Error connecting agent to network:", error);
+    console.error('Error connecting agent to network:', error);
 }
-
-const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
 ---
 
 <!doctype html>
@@ -48,9 +56,8 @@ const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
                 display: grid;
                 grid-template-columns: auto 1fr;
                 grid-template-rows: 100vh;
-                grid-template-areas: "menu main";
-                background-color: linear-gradient(var(--gray-gradient))
-                    no-repeat;
+                grid-template-areas: 'menu main';
+                background-color: linear-gradient(var(--gray-gradient)) no-repeat;
             }
 
             nav {
@@ -71,76 +78,18 @@ const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
                 grid-template-rows: max-content 400px 800px;
 
                 grid-template-areas:
-                    "a b c d ctrl"
-                    "table table table table ctrl"
-                    "chart chart chart chart ctrl";
+                    'a b c d ctrl'
+                    'table table table table ctrl'
+                    'chart chart chart chart ctrl';
 
                 gap: 40px;
-            }
-
-            /* Basic table styling */
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 20px 0;
-                font-size: 18px;
-                text-align: left;
-            }
-
-            /* Table header styling */
-            th {
-                background-color: #b663d4;
-                color: white;
-                padding: 12px;
-            }
-
-            /* Table data cell styling */
-            td {
-                padding: 12px;
-                border: 1px solid #ddd;
-            }
-
-            /* Alternating row colors */
-            tr:nth-child(even) {
-                background-color: #f2f2f2;
-            }
-
-            /* Hover effect on rows */
-            tr:hover {
-                background-color: #ddd;
-            }
-
-            /* Responsive design */
-            @media (max-width: 600px) {
-                table,
-                th,
-                td {
-                    display: block;
-                    width: 100%;
-                }
-
-                th,
-                td {
-                    text-align: right;
-                    padding-left: 50%;
-                    position: relative;
-                }
-
-                th::before,
-                td::before {
-                    content: attr(data-label);
-                    position: absolute;
-                    left: 0;
-                    width: 50%;
-                    padding-left: 15px;
-                    font-weight: bold;
-                    text-align: left;
-                }
             }
         </style>
     </head>
 
     <body id="main-layout">
+        <Toast client:load />
+
         <nav>
             <Menu client:load />
         </nav>
@@ -149,30 +98,26 @@ const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
             <main id="grid">
                 <Pane id="connected-authorities" area="a">
                     <h2 slot="header">Connected Authorities</h2>
-                    <ConnectedAuthorities
-                        initialData={initialValue}
-                        client:load
-                    />
+                    <ConnectedAuthorities client:load initial={initialConnectedAuthoritiesCount} />
                 </Pane>
 
                 <Pane area="b">
                     <h2 slot="header">Connected Agents</h2>
-                    <ConnectedAgents
-                        client:load
-                        networkId={networkId}
-                        fluxAgentNetworkConnection={fluxAgentNetworkConnection}
-                        initial={initialConnectedAgentsCount}
-                    />
+                    <ConnectedAgents client:load networkId={networkId} fluxAgentNetworkConnection={fluxAgentNetworkConnection} initial={initialConnectedAgentsCount} />
                 </Pane>
 
                 <Pane area="chart" area="c">
                     <h2 slot="header">Active Channels</h2>
-                    <ActiveChanels client:load />
+                    <ActiveChanels client:load networkId={networkId} initial={initialChannelCount} />
                 </Pane>
 
                 <Pane area="d">
-                    <h2 slot="header">Total Data Usage</h2>
-                    <TotalDataUsage client:load />
+                    <h2 slot="header">Total Data Usage This Period</h2>
+                    <TotalDataUsage client:load networkId={networkId} initial={initialTotalDataUsage} />
+                </Pane>
+                <Pane class="flair" area="table" style="border: 3px solid #ab00e9; background-color: #f8e8fe;">
+                    <h2 slot="header">Table</h2>
+                    <ConnectedAgentsHistory client:load networkId={networkId} />
                 </Pane>
                 <Pane area="chart">
                     <h2 slot="header">Agents</h2>
@@ -180,7 +125,40 @@ const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
                 </Pane>
                 <Pane area="ctrl">
                     <h2 slot="header">Control Panel</h2>
-                    <p>dasd</p>
+
+                    <div class="grid _2xn_auto">
+                        <label for="alias">Alias</label>
+                        <p id="alias">{initialNetworkConofiguration.alias}</p>
+                    </div>
+                    <div class="grid _2xn_auto">
+                        <label for="network-id">Network ID</label>
+                        <p id="network-id">
+                            {initialNetworkConofiguration.networkId}
+                        </p>
+                    </div>
+                    <div class="grid _2xn_auto">
+                        <label for="total-capacity">Monthly Capacity</label>
+                        <p id="total-capacity">
+                            {initialNetworkConofiguration.totalCapacity} mb
+                        </p>
+                        <label for="total-capacity"></label>
+                        <p id="total-capacity">
+                            Channel Cache: {initialNetworkConofiguration.totalCapacity} mb
+                        </p>
+                    </div>
+                    <div class="grid _2xn_auto">
+                        <label for="member-since">Member Since</label>
+                        <p id="member-since">
+                            {formatDate(initialNetworkConofiguration.memberSince)}
+                        </p>
+                    </div>
+                    <div class="grid _2xn_auto">
+                        <label for="access-key">Access Key</label>
+                        <button>
+                            <p id="access-key">Click to reveal</p>
+                        </button>
+                        <!-- <p id="access-key">Click to generate new</p> -->
+                    </div>
                 </Pane>
             </main>
 

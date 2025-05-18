@@ -74,7 +74,7 @@ export class NetworkAgentManager {
 
                 throughput.bytes = 0;
                 throughput.packets = 0;
-            }, 1_000),
+            }, 2_000),
         );
 
         return this.networkAgentRedisService.registerAgent(
@@ -98,6 +98,7 @@ export class NetworkAgentManager {
     public unregisterNetworkAgent(
         networkId: TNetworkId_S,
         clientId: TClientId,
+        address: TAddress,
         clientOwnUId?: TAgentOwnUId,
     ): void {
         if (clientOwnUId) {
@@ -108,6 +109,7 @@ export class NetworkAgentManager {
                 networkId,
                 clientId,
                 clientOwnUId,
+                address,
             );
         }
 
@@ -117,7 +119,7 @@ export class NetworkAgentManager {
 
     public async resolveNetworkClientAddressByUid(
         networkId: TNetworkId_S,
-        clientOwnUId: TAgentOwnUId,
+        clientOwnUId: TAgentOwnUId
         // retryWithDelay?: number,
     ): Promise<TAddress> {
         const cached: TAddress | undefined = this.cache.get(

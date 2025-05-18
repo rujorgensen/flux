@@ -56,6 +56,9 @@ export class NetworkChannelManager {
      * 
      * @returns { void } 
      */
+
+    public readNetworkChannels = this.networkChannelHash.readNetworkChannels;
+
     public joinNetworkChannel(
         networkId: TNetworkId_S,
         channelName: TChannelName,

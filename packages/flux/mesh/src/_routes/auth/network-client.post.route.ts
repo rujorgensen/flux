@@ -61,6 +61,7 @@ export const authorizeNetworkAgent = async (
     try {
         let networkAuthorityAddress: TAddress;
 
+
         const authorizedJWT: string = await retry<string>(
             async () => {
                 networkAuthorityAddress = await networkAuthorityManager
@@ -110,6 +111,14 @@ export const authorizeNetworkAgent = async (
         if (authorizedJWT) {
             const requestedAgentUidString: string | string[] | undefined = urlWithParsedQuery.query['requestedAgentUid'];
 
+            // if (requestUIDString) {
+            //     //           ws.data.uid = uid;
+            //     networkAgentManager.registerClientUId(
+            //         ws.data.networkId,
+            //         ws.data.address,
+            //         uid,
+            //     );
+            // }
             if (requestedAgentUidString) {
                 try {
                     validateAgentUIDOrThrow(requestedAgentUidString);

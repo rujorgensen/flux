@@ -26,8 +26,8 @@ export const validateNetworkIdOrThrow = (
         throw new Error('Network ID can only contain letters, numbers and dashes (\'-\')');
     }
 
-    if (networkId.length > 100) {
-        throw new Error('Network ID cannot be longer than 100 characters');
+    if (networkId.length > 50) {
+        throw new Error('Network ID cannot be longer than 50 characters');
     }
 
     return true;
