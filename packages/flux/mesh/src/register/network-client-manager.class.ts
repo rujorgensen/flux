@@ -14,6 +14,9 @@ import type {
     TAgentOwnUId,
     TNetworkId_S,
 } from '@flux/shared/types';
+import type {
+    TFluxClientUID,
+} from '@flux/shared/utils';
 
 export class NetworkAgentManager {
     public readonly networkAgentRedisService: NetworkAgentRedisService;
@@ -51,6 +54,7 @@ export class NetworkAgentManager {
             packets: number,
         },
         uid?: TAgentOwnUId,
+        machineUID?: TFluxClientUID,
     ): Promise<void> {
         this.timers.set(
             id,
@@ -77,13 +81,15 @@ export class NetworkAgentManager {
             }, 1_000),
         );
 
-        return this.networkAgentRedisService.registerAgent(
-            networkId,
-            id,
-            ip,
-            address,
-            uid,
-        );
+        return this.networkAgentRedisService
+            .registerAgent(
+                networkId,
+                id,
+                ip,
+                address,
+                uid,
+                machineUID,
+            );
     }
 
     /**

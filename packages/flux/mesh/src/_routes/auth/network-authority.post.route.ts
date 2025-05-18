@@ -2,6 +2,14 @@ import type * as Bun from 'bun';
 import * as nodeURL from 'node:url';
 import { PicoLogger } from '@utils/pico-logger';
 import { generateToken } from '../../auth/auth';
+import {
+    type TNetworkId_S,
+    validateNetworkIdOrThrow,
+} from '@flux/shared/types';
+import {
+    type TFluxClientUID,
+    validateMachineUID,
+} from '@flux/shared/utils';
 
 /**
  * This route is used to authorize a network authority.
@@ -11,14 +19,22 @@ import { generateToken } from '../../auth/auth';
 export const authorizeNetworkAuthority = async (
     request: Bun.BunRequest,
 ): Promise<Response> => {
+    const urlWithParsedQuery: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);
 
     // Find the network authority to authenticate with
-    const networkId: string | string[] | undefined = nodeURL.parse(request.url, true).query['networkId'];
+    const networkIdString: string | string[] | undefined = urlWithParsedQuery.query['networkId'];
 
-    if (!networkId) {
-        return new Response('Missing networkId', { status: 500 });
+    try {
+        validateNetworkIdOrThrow(networkIdString ?? '');
+    } catch (error) {
+        return new Response(
+            error instanceof Error ? error.message : 'Unknown error validating network ID',
+            {
+                status: 500,
+            },
+        );
     }
-
+    const networkId: TNetworkId_S = networkIdString as TNetworkId_S;
     const text = await request.text();
 
     PicoLogger.log(`Received password:${text}${networkId}`, 'authorize');
@@ -35,10 +51,17 @@ export const authorizeNetworkAuthority = async (
         path: '/',
     });
 
+    const machineUIDString: string | string[] | undefined = urlWithParsedQuery.query['machineUID'];
+    let machineUID: TFluxClientUID | undefined;
+    if (machineUIDString && validateMachineUID(machineUIDString)) {
+        machineUID = machineUIDString;
+    }
+
     return new Response(
         generateToken({
             networkId,
             isAuthority: true,
+            machineUID: machineUID,
         }),
         {
             headers: {

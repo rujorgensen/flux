@@ -12,6 +12,10 @@ import { generateToken } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
 import type { NetworkAuthorityManager } from '../../register/register-network-authority.class';
 import { retry } from '@flux/shared/utils';
+import {
+    type TFluxClientUID,
+    validateMachineUID,
+} from '@flux/shared/utils';
 
 /**
  * 
@@ -133,11 +137,18 @@ export const authorizeNetworkAgent = async (
                 path: '/',
             });
 
+            const machineUIDString: string | string[] | undefined = urlWithParsedQuery.query['machineUID'];
+            let machineUID: TFluxClientUID | undefined;
+            if (machineUIDString && validateMachineUID(machineUIDString)) {
+                machineUID = machineUIDString;
+            }
+
             return new Response(
                 generateToken({
                     networkId,
                     claim: authorizedJWT,
                     agentUID: requestedAgentUidString,
+                    machineUID: machineUID,
                 }),
                 {
                     headers: {

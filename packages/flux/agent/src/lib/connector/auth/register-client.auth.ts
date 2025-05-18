@@ -5,6 +5,8 @@ import {
     checkAuthTicketShape,
 } from '@flux/shared/types';
 import { encrypt } from '../../utils/obscuring/encyprt.utils';
+import type { TFluxClientUID } from '@flux/shared/utils';
+import { validateMachineUID } from 'libs/flux/shared/utils/src/lib/machine-id.util';
 
 /**
  * Authenticates with the server and returns a ticket for connecting the websocket.
@@ -22,8 +24,11 @@ export const authenticateAgentOrThrow = async (
     networkId: TNetworkId_S,
     domain: string,
     unknownIdentificationPayload: unknown,
+    clientInfo: {
+        clientUId?: TAgentOwnUId,
+        machineUID?: TFluxClientUID,
+    },
     password?: string,
-    agentOwnUId?: TAgentOwnUId,
 ): Promise<TAuthenticationTicket> => {
 
     // * 1. Encrypt the payload, if a password is defined
@@ -55,7 +60,16 @@ export const authenticateAgentOrThrow = async (
     }
 
     // * 3. Send the payload to the authority server and wait for the response
-    const response = await fetch(`${domain}/auth/network-client?networkId=${networkId}${agentOwnUId ? `&requestedAgentUid=${agentOwnUId}` : ''}`, {
+    const url = new URL(`${domain}/auth/network-client`);
+    url.searchParams.set('networkId', networkId);
+    if (clientInfo.clientUId) {
+        url.searchParams.set('requestedAgentUid', clientInfo.clientUId);
+    }
+    if (clientInfo.machineUID && validateMachineUID(clientInfo.machineUID)) {
+        url.searchParams.set('machineUID', clientInfo.machineUID);
+    }
+
+    const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'text/plain',

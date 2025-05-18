@@ -76,6 +76,7 @@ import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pub
 import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
 import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
 import { PicoLogger } from '@utils/pico-logger';
+import type { TFluxClientUID } from '@flux/shared/utils';
 
 PicoLogger.configure({
     allowScopes: [
@@ -99,6 +100,7 @@ export type TConnectedClientSocket = Bun.ServerWebSocket<{
     claim?: string;
     rpcClient: RPCClient<'channel'>;
     channelNames: Set<TChannelName>;
+    machineUID?: TFluxClientUID,
 
     // The amount of data sent
     throughput: {
@@ -207,6 +209,7 @@ export class FluxMeshServer {
                         claim?: string;
                         isAuthority?: boolean;
                         agentUID?: string,
+                        machineUID?: TFluxClientUID,
                     } = verifyTokenOrThrow(token) as any;
 
                     const socketId: TClientId = nanoid() as TClientId;
@@ -221,6 +224,7 @@ export class FluxMeshServer {
                                 address: `${machineAddress}/${processId}/${socketId}`,
                                 claim: decodedToken.claim,
                                 uid: decodedToken.agentUID,
+                                machineUID: decodedToken.machineUID,
                                 channelNames: new Set(),
                                 throughput: {
                                     bytes: 0,
@@ -255,40 +259,45 @@ export class FluxMeshServer {
                     if (_ws.data.isAuthority) {
                         PicoLogger.log(`👮 Authority connected at address: '${_ws.data.address}'`, 'ws-connection');
 
-                        networkAuthorityManager.register(
-                            _ws.data.networkId,
-                            _ws.data.id,
-                        );
-                    } else {
-                        PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
-
-                        await networkAgentManager
-                            .registerAgent(
+                        networkAuthorityManager
+                            .register(
                                 _ws.data.networkId,
                                 _ws.data.id,
-                                _ws.data.ip,
-                                _ws.data.address,
-                                _ws.data.throughput,
-                                _ws.data.uid,
+                                _ws.data.machineUID,
                             );
 
-                        _ws.data.rtcClient = new WebRTCClient(
-                            processAddress,
-                            _ws.send.bind(_ws),
-                            (cb: TRPCResponseCallbackFunction) => {
-                                const cbs:
-                                    | Set<TRPCResponseCallbackFunction>
-                                    | undefined = clientRPCResponseCallbacks.get(
-                                        _ws.data.id
-                                    );
-
-                                clientRPCResponseCallbacks.set(
-                                    _ws.data.id,
-                                    cbs === undefined ? new Set([cb]) : cbs.add(cb)
-                                );
-                            }
-                        );
+                        return;
                     }
+
+                    PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
+
+                    await networkAgentManager
+                        .registerAgent(
+                            _ws.data.networkId,
+                            _ws.data.id,
+                            _ws.data.ip,
+                            _ws.data.address,
+                            _ws.data.throughput,
+                            _ws.data.uid,
+                            _ws.data.machineUID,
+                        );
+
+                    _ws.data.rtcClient = new WebRTCClient(
+                        processAddress,
+                        _ws.send.bind(_ws),
+                        (cb: TRPCResponseCallbackFunction) => {
+                            const cbs:
+                                | Set<TRPCResponseCallbackFunction>
+                                | undefined = clientRPCResponseCallbacks.get(
+                                    _ws.data.id
+                                );
+
+                            clientRPCResponseCallbacks.set(
+                                _ws.data.id,
+                                cbs === undefined ? new Set([cb]) : cbs.add(cb)
+                            );
+                        }
+                    );
 
                     // This will make the client retry: _ws.terminate();
                     //       ws.close(1001, 'Client not validated'); // ! Check correct error code

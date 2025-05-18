@@ -3,6 +3,9 @@ import {
     type RedisConnection,
     getMeshRedisConnection,
 } from '../routing/redis/redis-connection.class';
+import type {
+    TFluxClientUID,
+} from '@flux/shared/utils';
 
 export class NetworkAuthorityManager {
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
@@ -11,11 +14,13 @@ export class NetworkAuthorityManager {
     public register(
         networkId: TNetworkId_S,
         socketId: TClientId,
+        machineUID?: TFluxClientUID,
     ): void {
         this.redisConnection.networkAuthoritySet
             .registerNetworkAuthority(
                 networkId,
                 socketId,
+                machineUID,
             );
     }
 

@@ -5,3 +5,8 @@ export {
 export {
     EventEmitter,
 } from './lib/eventemitter';
+export {
+    type TFluxClientUID,
+    getMachineUID,
+    validateMachineUID,
+} from './lib/machine-id.util';
