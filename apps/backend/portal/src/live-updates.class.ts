@@ -7,7 +7,7 @@ import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
 import type { RedisStatusService } from './_services/redis-status.service';
-import type { TNetworkId_S } from '@flux/shared/types';
+import type { TNetworkAgentCountAt, TNetworkId_S } from '@flux/shared/types';
 
 const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´
 
@@ -114,6 +114,23 @@ export class LiveUpdates {
 
             console.log(`✅ Agent connected to network ID: '${fluxNetworkConnection.id}'`);
 
+            // * Emit connected agents
+            const fluxConnectedAgentNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
+                .joinChannel('connected-agents');
+
+            let num2: number = 0;
+            setInterval(() => {
+                num2++;
+                const networkAgentCountAt: TNetworkAgentCountAt = {
+                    count: num2,
+                    date: new Date(),
+                };
+
+                // ! @TODO Automatically convert detect object / string
+                fluxConnectedAgentNetworkChannel.publish(JSON.stringify(networkAgentCountAt));
+            }, 3_000);
+
+            // * Emit connected authorities
             const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
                 .joinChannel('connected-authorities');
 

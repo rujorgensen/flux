@@ -7,7 +7,7 @@ import {
 import { encrypt } from '../../utils/obscuring/encyprt.utils';
 
 /**
- * Authenticaktes with the server and returns a ticket for connecting the websocket.
+ * Authenticates with the server and returns a ticket for connecting the websocket.
  * 
  * This client -> flux server -> authority client -> flux server -> this client.
  * 
@@ -18,7 +18,7 @@ import { encrypt } from '../../utils/obscuring/encyprt.utils';
  * 
  * @returns { Promise<TAuthenticationTicket> }
  */
-export const authenticateOrThrow = async (
+export const authenticateAgentOrThrow = async (
     networkId: TNetworkId_S,
     domain: string,
     unknownIdentificationPayload: unknown,

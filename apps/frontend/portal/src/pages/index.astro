@@ -13,14 +13,30 @@ import Footer from "../components/Footer.astro";
 import Menu from "../components/Menu.svelte";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 import Pane from "../layouts/dashboard/Pane.astro";
+import { app } from "../data/api";
 
-import { treaty } from "@elysiajs/eden";
-import type { App } from "../../../../backend/portal/src/main";
-const app = treaty<App>("localhost:3000");
+import { readConnectedAgentCount } from "../data/api/connected-agents.service.fn";
+import { getFluxNetworkConnection } from "../data/flux-connection.fn";
+import type { FluxAgentNetworkConnection } from "@flux/shared/connection";
+import type { TNetworkId_S } from "@flux/shared/types";
 
 const { data: initialValue } = await app.api["connected-authorities"].get();
 
-const networkId: string = "network-id-from-astro";
+const networkId: string = "rAnD0M-network-id-from-astro";
+let fluxAgentNetworkConnection: FluxAgentNetworkConnection | undefined;
+const CODE_TO_ACCESS_NETWORK: string = "code-to-access-network"; // Key to connect to a network, unknown and irelevant to flux
+
+try {
+    fluxAgentNetworkConnection = await getFluxNetworkConnection(
+        networkId as TNetworkId_S,
+        CODE_TO_ACCESS_NETWORK,
+        "portal-agent",
+    );
+} catch (error) {
+    console.error("Error connecting agent to network:", error);
+}
+
+const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
 ---
 
 <!doctype html>
@@ -33,7 +49,8 @@ const networkId: string = "network-id-from-astro";
                 grid-template-columns: auto 1fr;
                 grid-template-rows: 100vh;
                 grid-template-areas: "menu main";
-                background-color: linear-gradient(var(--gray-gradient)) no-repeat;
+                background-color: linear-gradient(var(--gray-gradient))
+                    no-repeat;
             }
 
             nav {
@@ -140,7 +157,12 @@ const networkId: string = "network-id-from-astro";
 
                 <Pane area="b">
                     <h2 slot="header">Connected Agents</h2>
-                    <ConnectedAgents client:load />
+                    <ConnectedAgents
+                        client:load
+                        networkId={networkId}
+                        fluxAgentNetworkConnection={fluxAgentNetworkConnection}
+                        initial={initialConnectedAgentsCount}
+                    />
                 </Pane>
 
                 <Pane area="chart" area="c">
