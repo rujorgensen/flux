@@ -7,7 +7,13 @@ import {
     type TProcessId,
     splitAddressOrThrow,
 } from '@flux/shared/types';
-import { readMachineAddress, readProcessId } from '../../../../../../../../packages/flux/mesh/src/routing/addressing.utils';
+import {
+    readMachineAddress,
+    readProcessId,
+} from '../../../../../../../../packages/flux/mesh/src/routing/addressing.utils';
+import type {
+    TFluxClientUID,
+} from '@flux/shared/utils';
 
 export class NetworkAuthorityRedisSortedSet {
     private readonly processId: TProcessId = readProcessId();
@@ -33,27 +39,42 @@ export class NetworkAuthorityRedisSortedSet {
     /**
      * 
      * @param { TNetworkId_S }  networkId
-     * @param { TClientId }     socketId
+     * @param { TClientId }     clientId
      * 
      * @returns { Promise<void> }
      */
     public async registerNetworkAuthority(
         networkId: TNetworkId_S,
-        socketId: TClientId,
+        clientId: TClientId,
+        machineUID?: TFluxClientUID,
     ): Promise<void> {
         const key: string = `networks/${networkId}/authorities`;
-        const address: TAddress = `${this.machineAddress}/${this.processId}/${socketId}`;
+        const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
 
         await this._client.sadd(key, address);
 
         await this._client.expire(key, 500);
 
+        // Add to authority
+        await this._client.hmset(
+            `networks/${networkId}/authorities/${clientId}`,
+            [
+                ...(machineUID ? [
+                    'machineUID',
+                    typeof machineUID === 'string' ? machineUID : '',
+                ] : []),
+
+                'address',
+                address,
+            ],
+        );
+
         // Update the refresh interval cache
         const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
         if (refreshNetworkExpiry) {
-            refreshNetworkExpiry.add(socketId);
+            refreshNetworkExpiry.add(clientId);
         } else {
-            this.refreshNetworkExpiry.set(networkId, new Set([socketId]));
+            this.refreshNetworkExpiry.set(networkId, new Set([clientId]));
         }
     }
 
@@ -61,22 +82,24 @@ export class NetworkAuthorityRedisSortedSet {
      * Unregisters a network authority from the sorted set.
      * 
      * @param { TNetworkId_S }  networkId
-     * @param { TClientId }     socketId
+     * @param { TClientId }     clientId
      * 
      * @returns { Promise<number> } 
      */
     public async unregister(
         networkId: TNetworkId_S,
-        socketId: TClientId,
+        clientId: TClientId,
     ): Promise<number> {
         const key: string = `networks/${networkId}/authorities`;
 
-        const address: TAddress = `${this.machineAddress}/${this.processId}/${socketId}`;
+        const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
+
+        await this._client.srem(`networks/${networkId}/authorities`, clientId);
 
         // Update the refresh interval cache
         const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
         if (refreshNetworkExpiry) {
-            refreshNetworkExpiry.delete(socketId);
+            refreshNetworkExpiry.delete(clientId);
 
             if (refreshNetworkExpiry.size === 0) {
                 this.refreshNetworkExpiry.delete(networkId);

@@ -11,6 +11,9 @@ import type {
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
 import { NetworkAgentRedisSortedSet } from './network-agent.redis.sorted-set';
+import type {
+    TFluxClientUID,
+} from '@flux/shared/utils';
 
 export class NetworkAgentRedisService {
     private readonly cashedDataUsage: Map<string, number> = new Map();
@@ -45,6 +48,7 @@ export class NetworkAgentRedisService {
         ip: Bun.SocketAddress | null,
         address: TAddress,
         uid?: TAgentOwnUId,
+        machineUID?: TFluxClientUID,
     ): Promise<void> {
         if (uid) {
             const key_: string = `networks/${networkId}/agent-uids`;
@@ -63,29 +67,37 @@ export class NetworkAgentRedisService {
         // Add to agent
         const key: string = `networks/${networkId}/agents/${clientId}`;
 
-        await this._client.hmset(key, [
-            ...(ip ? [
-                'ip',
-                typeof ip === 'string' ? ip : '',
-            ] : []),
+        await this._client.hmset(
+            `networks/${networkId}/agents/${clientId}`,
+            [
+                ...(ip ? [
+                    'ip',
+                    typeof ip === 'string' ? ip : '',
+                ] : []),
 
-            'data-usage',
-            '0',
+                'data-usage',
+                '0',
 
-            ...(uid ? [
-                'name',
-                typeof uid === 'string' ? uid : '',
-            ] : []),
+                ...(uid ? [
+                    'name',
+                    typeof uid === 'string' ? uid : '',
+                ] : []),
 
-            'clientId',
-            clientId,
+                ...(machineUID ? [
+                    'machineUID',
+                    typeof machineUID === 'string' ? machineUID : '',
+                ] : []),
 
-            'address',
-            address,
+                'clientId',
+                clientId,
 
-            'registerAt',
-            new Date().toISOString(),
-        ]);
+                'address',
+                address,
+
+                'registerAt',
+                new Date().toISOString(),
+            ],
+        );
 
         await this._client.expire(key, 500);
 

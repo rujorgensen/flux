@@ -1,6 +1,8 @@
 import type {
     TNetworkId_S,
 } from '@flux/shared/types';
+import type { TFluxClientUID } from '@flux/shared/utils';
+import { validateMachineUID } from 'libs/flux/shared/utils/src/lib/machine-id.util';
 
 export class RetryableError extends Error { }
 export class ConnectionError extends RetryableError { }
@@ -17,11 +19,20 @@ export const authenticateNetworkAuthorityOrThrow = async (
     networkId: TNetworkId_S,
     domain: string,
     authorityKey: string,
+    clientInfo: {
+        machineUID?: TFluxClientUID,
+    },
 ): Promise<unknown> => {
 
     // * 1. Send the payload to the authority server and wait for the response
     try {
-        const response = await fetch(`${domain}/auth/network-authority?networkId=${networkId}`, {
+        const url = new URL(`${domain}/auth/network-authority`);
+        url.searchParams.set('networkId', networkId);
+        if (clientInfo.machineUID && validateMachineUID(clientInfo.machineUID)) {
+            url.searchParams.set('machineUID', clientInfo.machineUID);
+        }
+
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/plain', //  'application/json', // text/plain

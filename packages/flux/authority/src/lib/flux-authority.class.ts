@@ -13,7 +13,12 @@ import type {
     TChannnelAuthCallback,
 } from './channel/channel.type';
 import type { TAuthorizeCallback, TNetworkId_S } from '@flux/shared/types';
-import { retry, StateManager } from '@flux/shared/utils';
+import {
+    type TFluxClientUID,
+    getMachineUID,
+    retry,
+    StateManager,
+} from '@flux/shared/utils';
 import {
     type FluxWebSocketConnection,
     createWSConnection,
@@ -56,11 +61,16 @@ export class FluxAuthority {
     ): Promise<FluxAuthorityNetworkConnection> {
         this.stateManager.emitNetworkState('authorizing');
 
+        const machineUID: TFluxClientUID | undefined = await getMachineUID() ?? undefined;
+
         const ticket: string = await retry<any>(
             () => authenticateNetworkAuthorityOrThrow(
                 this.networkId as TNetworkId_S,
                 this.options?.domain ?? 'http://localhost:8080',
                 authorityKey,
+                {
+                    machineUID,
+                },
             ),
             (err: unknown) => err instanceof RetryableError,
             {

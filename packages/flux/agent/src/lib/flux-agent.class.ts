@@ -22,7 +22,7 @@ import {
 import { nanoid } from 'nanoid';
 import { authenticateAgentOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
-import { StateManager } from '@flux/shared/utils';
+import { getMachineUID, StateManager } from '@flux/shared/utils';
 
 export class FluxAgent {
 
@@ -59,12 +59,15 @@ export class FluxAgent {
             throw new Error('Will never be thrown');
         }
 
+        // getMachineUID
         const ticket = await authenticateAgentOrThrow(
             this.networkId as TNetworkId_S,
             this.options?.domain ?? 'http://localhost:8080',
             identification,
-            undefined, // Password
-            clientUId as TAgentOwnUId,
+            {
+                clientUId: clientUId as TAgentOwnUId,
+                machineUID: await getMachineUID() ?? undefined,
+            },
         );
 
         this.fluxWebSocketConnection = createWSConnection(

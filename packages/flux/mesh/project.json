@@ -11,13 +11,13 @@
         "bun-serve": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "bun --watch run ./apps/flux/backend/flux-mesh/src/main.ts"
+                "command": "bun --watch run ./packages/flux/mesh/src/main.ts"
             }
         },
         "bun-build": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "bun build {projectRoot}/src/main.ts --outdir ./dist/apps/flux/backend/flux-mesh --external bun"
+                "command": "bun build {projectRoot}/src/main.ts --outdir ./dist/packages/flux/mesh --external bun"
             }
         },
         "build": {
@@ -28,13 +28,13 @@
             "defaultConfiguration": "production",
             "options": {
                 "platform": "node",
-                "outputPath": "dist/apps/flux/backend/flux-mesh",
+                "outputPath": "dist/packages/flux/mesh",
                 "format": [
                     "cjs"
                 ],
                 "bundle": false,
-                "main": "apps/flux/backend/flux-mesh/src/main.ts",
-                "tsConfig": "apps/flux/backend/flux-mesh/tsconfig.app.json",
+                "main": "packages/flux/mesh/src/main.ts",
+                "tsConfig": "packages/flux/mesh/tsconfig.app.json",
                 "generatePackageJson": true,
                 "esbuildOptions": {
                     "sourcemap": true,
@@ -78,7 +78,7 @@
             "dependsOn": [
                 "build"
             ],
-            "command": "docker build -f apps/flux/backend/flux-mesh/Dockerfile . -t flux-backend-mesh"
+            "command": "docker build -f packages/flux/mesh/Dockerfile . -t flux-backend-mesh"
         },
         "nx-release-publish": {
             "options": {
@@ -88,7 +88,7 @@
         "bun-test": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "bun test {projectRoot} --env-file=.env.e2e"
+                "command": "bun test {projectRoot}/ --env-file=.env.e2e"
             }
         }
     },

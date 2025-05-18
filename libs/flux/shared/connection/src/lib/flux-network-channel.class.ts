@@ -26,8 +26,8 @@ export class FluxNetworkChannel {
      * 
      * @returns { void }
      */
-    public publish(
-        message: string,
+    public publish<T>(
+        message: string | T,
     ): void {
         this._fluxWebSocketConnection
             .publish(
@@ -43,8 +43,8 @@ export class FluxNetworkChannel {
      * 
      * @returns { void }
      */
-    public onPublish(
-        fn: TMessageCallback,
+    public onPublish<T>(
+        fn: (message: string | T) => void,
     ): void {
         this._fluxWebSocketConnection
             .onPublish(
