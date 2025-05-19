@@ -1,11 +1,14 @@
 ---
 import MeltUI from "../components/svelte/melt-ui/MeltUI.svelte";
 
-// Dahsboard tiles
+// * Dahsboard tiles
 import ConnectedAuthorities from "../components/dashboard/ConnectedAuthorities.svelte";
 import ConnectedAgents from "../components/dashboard/ConnectedAgents.svelte";
 import ActiveChanels from "../components/dashboard/ActiveChannels.svelte";
 import TotalDataUsage from "../components/dashboard/TotalDataUsage.svelte";
+
+// * Dashboard Tables
+import ActiveChannels from "./home/dashboard/tables/ActiveChannels.svelte";
 
 import ChartJS from "../components/svelte/ChartJS.svelte";
 import BaseHead from "../components/BaseHead.astro";
@@ -17,25 +20,12 @@ import { app } from "../data/api";
 
 import { readConnectedAgentCount } from "../data/api/connected-agents.service.fn";
 import { readChannelCount } from "../data/api/channels.service.fn";
-import { getFluxNetworkConnection } from "../data/flux-connection.fn";
-import type { FluxAgentNetworkConnection } from "@flux/shared/connection";
-import type { TNetworkId_S } from "@flux/shared/types";
 
 const { data: initialValue } = await app.api["connected-authorities"].get();
 
 const networkId: string = "rAnD0M-network-id-from-astro";
-let fluxAgentNetworkConnection: FluxAgentNetworkConnection | undefined;
 const CODE_TO_ACCESS_NETWORK: string = "code-to-access-network"; // Key to connect to a network, unknown and irelevant to flux
 
-try {
-    fluxAgentNetworkConnection = await getFluxNetworkConnection(
-        networkId as TNetworkId_S,
-        CODE_TO_ACCESS_NETWORK,
-        "portal-agent",
-    );
-} catch (error) {
-    console.error("Error connecting agent to network:", error);
-}
 const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
 const initialChannelCount = await readChannelCount(networkId);
 ---
@@ -161,7 +151,7 @@ const initialChannelCount = await readChannelCount(networkId);
                     <ConnectedAgents
                         client:load
                         networkId={networkId}
-                        fluxAgentNetworkConnection={fluxAgentNetworkConnection}
+                        networkCode={CODE_TO_ACCESS_NETWORK}
                         initial={initialConnectedAgentsCount}
                     />
                 </Pane>
@@ -171,7 +161,7 @@ const initialChannelCount = await readChannelCount(networkId);
                     <ActiveChanels
                         client:load
                         networkId={networkId}
-                        fluxAgentNetworkConnection={fluxAgentNetworkConnection}
+                        networkCode={CODE_TO_ACCESS_NETWORK}
                         initial={initialChannelCount}
                     />
                 </Pane>
@@ -179,6 +169,10 @@ const initialChannelCount = await readChannelCount(networkId);
                 <Pane area="d">
                     <h2 slot="header">Total Data Usage</h2>
                     <TotalDataUsage client:load />
+                </Pane>
+                <Pane class="flair" area="table">
+                    <h2 slot="header">Active Channels</h2>
+                    <ActiveChannels client:load networkId={networkId} />
                 </Pane>
                 <Pane area="chart">
                     <h2 slot="header">Agents</h2>
