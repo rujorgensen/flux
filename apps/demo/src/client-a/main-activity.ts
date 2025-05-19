@@ -21,7 +21,7 @@ Alpine.data('fluxActivityDemoApplication', () => ({
                     code: DEMO_CHANNEL_PASSWORD,
                     user: 'client-a',
                 },
-                `client-${fluxAgent.id}}-unique-identification-token`,
+                `client-${fluxAgent.id}-uid-token`,
             );
 
             this.networkConnections.add(fluxNetworkConnection);
