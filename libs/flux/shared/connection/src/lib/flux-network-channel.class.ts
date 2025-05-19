@@ -6,9 +6,6 @@ import type {
     TChannelName,
 } from '@flux/shared/types';
 import type {
-    TMessageCallback,
-} from '@flux/shared/ws';
-import type {
     FluxWebSocketConnection,
 } from './flux-ws-connection';
 

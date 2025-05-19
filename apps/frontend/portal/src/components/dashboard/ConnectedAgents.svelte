@@ -1,10 +1,7 @@
 <!-- ConnectedAuthorities.svelte -->
 <script lang="ts">
     import { writable } from "svelte/store";
-    import type {
-        TNetworkAgentCountAt,
-        TNetworkId_S,
-    } from "@flux/shared/types";
+    import type { TNetworkAgentCountAt } from "@flux/shared/types";
     import { onMount } from "svelte";
     import { onConnectedAgentCount } from "../../data/flux/connected-agents.service.fn";
     import type { FluxAgentNetworkConnection } from "@flux/shared/connection";

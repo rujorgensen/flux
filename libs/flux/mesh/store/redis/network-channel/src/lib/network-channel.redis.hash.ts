@@ -5,6 +5,7 @@
 import {
     type TAddress,
     type TChannelName,
+    type TNetworkChannelCountAt,
     type TNetworkId_S,
     validateChannelNameOrThrow,
 } from '@flux/shared/types';
@@ -83,12 +84,15 @@ export class NetworkChannelHash {
      *  
      * @param networkId
      *
-     * @returns { Promise<number> }
+     * @returns { Promise<TNetworkChannelCountAt> }
      */
     public async readNetworkChannelCount(
         networkId: TNetworkId_S,
-    ): Promise<number> {
-        return await this._redisConnection.hash.scard(`networks/${networkId}/channels`);
+    ): Promise<TNetworkChannelCountAt> {
+        return {
+            count: await this._redisConnection.hash.scard(`networks/${networkId}/channels`) ?? 0,
+            date: new Date(),
+        };
     }
 
     /**

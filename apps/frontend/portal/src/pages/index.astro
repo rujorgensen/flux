@@ -16,6 +16,7 @@ import Pane from "../layouts/dashboard/Pane.astro";
 import { app } from "../data/api";
 
 import { readConnectedAgentCount } from "../data/api/connected-agents.service.fn";
+import { readChannelCount } from "../data/api/channels.service.fn";
 import { getFluxNetworkConnection } from "../data/flux-connection.fn";
 import type { FluxAgentNetworkConnection } from "@flux/shared/connection";
 import type { TNetworkId_S } from "@flux/shared/types";
@@ -35,8 +36,8 @@ try {
 } catch (error) {
     console.error("Error connecting agent to network:", error);
 }
-
 const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
+const initialChannelCount = await readChannelCount(networkId);
 ---
 
 <!doctype html>
@@ -167,7 +168,12 @@ const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
 
                 <Pane area="chart" area="c">
                     <h2 slot="header">Active Channels</h2>
-                    <ActiveChanels client:load />
+                    <ActiveChanels
+                        client:load
+                        networkId={networkId}
+                        fluxAgentNetworkConnection={fluxAgentNetworkConnection}
+                        initial={initialChannelCount}
+                    />
                 </Pane>
 
                 <Pane area="d">
