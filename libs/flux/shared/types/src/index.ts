@@ -68,5 +68,6 @@ export type {
 } from './lib/agents/network-agent.type';
 
 export type {
+    INetworkChannel,
     TNetworkChannelCountAt,
 } from './lib/channels/network-channel.type';

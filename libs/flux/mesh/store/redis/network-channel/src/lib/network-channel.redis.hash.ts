@@ -3,6 +3,7 @@
  */
 
 import {
+    type INetworkChannel,
     type TAddress,
     type TChannelName,
     type TNetworkChannelCountAt,
@@ -23,6 +24,10 @@ export class NetworkChannelHash {
     constructor(
         private readonly _redisConnection: RedisConnection,
     ) { }
+
+    // ****************************************************************************
+    // * Create
+    // ****************************************************************************
 
     /**
      * Creates a channel on a network if it does not already exist.
@@ -56,6 +61,10 @@ export class NetworkChannelHash {
         return wasAdded === 1;
     }
 
+    // ****************************************************************************
+    // * Read
+    // ***************************************************************************
+
     /**
      * Reads all channels on a network.
      *  
@@ -64,6 +73,44 @@ export class NetworkChannelHash {
      * @returns { Promise<TAddress> }
      */
     public async readNetworkChannels(
+        networkId: TNetworkId_S,
+    ): Promise<INetworkChannel[]> {
+        const channelNames: TChannelName[] = await this.readNetworkChannelNames(networkId);
+
+        // Add to channel list
+        const channels: INetworkChannel[] = [];
+
+        for (const channelName of channelNames) {
+            const key: string = `networks/${networkId}/agents/${channelName}`;
+
+            const [createdAt, memberDistribution, usage] = await this._redisConnection.hash.hmget(key, [
+                'createdAt',
+                'memberDistribution',
+                'usage',
+            ]);
+
+            if (createdAt && memberDistribution && usage) {
+                channels.push({
+                    channelName,
+                    memberDistribution: memberDistribution as string,
+                    members: await this.readNetworkMemberCount(networkId, channelName),
+                    bytes: Number.parseInt(usage || '0', 10),
+                    createdAt: new Date(createdAt as string),
+                });
+            }
+        }
+
+        return channels;
+    }
+
+    /**
+     * Reads all channel names on a network.
+     *  
+     * @param { TNetworkId_S }  networkId
+     *
+     * @returns { Promise<TChannelName[]> }
+     */
+    public async readNetworkChannelNames(
         networkId: TNetworkId_S,
     ): Promise<TChannelName[]> {
         const data = await this._redisConnection.hash.smembers(`networks/${networkId}/channels`);
