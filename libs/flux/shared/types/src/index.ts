@@ -66,3 +66,7 @@ export type {
 export type {
     TNetworkAgentCountAt,
 } from './lib/agents/network-agent.type';
+
+export type {
+    TNetworkChannelCountAt,
+} from './lib/channels/network-channel.type';
