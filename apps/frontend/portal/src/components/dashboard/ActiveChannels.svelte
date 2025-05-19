@@ -1,49 +1,51 @@
 <!-- ConnectedAuthorities.svelte -->
 <script lang="ts">
-  import { writable } from 'svelte/store';
-  //import { apiFetch } from '../../utils/fetch.util';
+    import { writable } from "svelte/store";
+    import type {
+        TNetworkChannelCountAt,
+        TNetworkId_S,
+    } from "@flux/shared/types";
+    import { onMount } from "svelte";
+    import type { FluxAgentNetworkConnection } from "@flux/shared/connection";
+    import { onActiveChannelCount } from "../../data/flux/channels.service.fn";
+    import { getFluxNetworkConnection } from "../../data/flux-connection.fn";
 
-  // import { onMount } from "svelte";
+    // Passed by Astro
+    export let initial: TNetworkChannelCountAt;
+    export let networkId: TNetworkId_S;
+    export let networkCode: string;
 
-  const dataStore = writable<number | undefined>();
+    // Export the store directly
+    export const activeChannels = writable<TNetworkChannelCountAt>(initial);
 
-  // dataStore.set();
-  let val = 0;
-  // Fetch initial data
-  // apiFetch('api/ping')
-  //   .then((res) => res.text())
-  //   .then((initialData) => {
-  //     console.log('[initialData]', initialData);
-  //     val = 23;
-  //     dataStore.set(val);
-  //   })
-  //   .catch((err) => {
-  //     console.error('Error fetching initial data:', err);
-  //     // dataStore.set({ error: 'Failed to fetch initial data' });
-  //   });
+    onMount(async () => {
+        try {
+            const fluxAgentNetworkConnection: FluxAgentNetworkConnection =
+                await getFluxNetworkConnection(
+                    networkId as TNetworkId_S,
+                    networkCode,
+                    "portal-agent",
+                );
 
-  setInterval(() => {
-    dataStore.set(val++);
-  }, 1_000);
-  // onMount(async () => {
-  //   // const socket = new WebSocket('wss://example.com');
-
-  //   // socket.addEventListener('message', (event) => {
-  //   //   const newData = JSON.parse(event.data);
-
-  //   //   dataStore.update(current => ({
-  //   //     ...current,
-  //   //     ...newData
-  //   //   }));
-  //   // });
-
-  //   //    return () => socket.close();
-  // });
-
-  // Export the store directly
-  export const activeChannels = dataStore;
+            // Update on new data
+            (await onActiveChannelCount(fluxAgentNetworkConnection))(
+                activeChannels.set,
+            );
+        } catch (error) {
+            console.error("Error connecting agent to network:", error);
+        }
+    });
 </script>
 
 {#if $activeChannels}
-  <strong>{JSON.stringify($activeChannels)}</strong>
+    <strong title={$activeChannels.date.toDateString()}>
+        {$activeChannels.count}
+    </strong>
 {/if}
+
+<style>
+    strong {
+        text-align: right;
+        display: block;
+    }
+</style>

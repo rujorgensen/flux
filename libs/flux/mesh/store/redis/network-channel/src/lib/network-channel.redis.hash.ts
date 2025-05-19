@@ -3,8 +3,10 @@
  */
 
 import {
+    type INetworkChannel,
     type TAddress,
     type TChannelName,
+    type TNetworkChannelCountAt,
     type TNetworkId_S,
     validateChannelNameOrThrow,
 } from '@flux/shared/types';
@@ -22,6 +24,10 @@ export class NetworkChannelHash {
     constructor(
         private readonly _redisConnection: RedisConnection,
     ) { }
+
+    // ****************************************************************************
+    // * Create
+    // ****************************************************************************
 
     /**
      * Creates a channel on a network if it does not already exist.
@@ -55,6 +61,10 @@ export class NetworkChannelHash {
         return wasAdded === 1;
     }
 
+    // ****************************************************************************
+    // * Read
+    // ***************************************************************************
+
     /**
      * Reads all channels on a network.
      *  
@@ -63,6 +73,45 @@ export class NetworkChannelHash {
      * @returns { Promise<TAddress> }
      */
     public async readNetworkChannels(
+        networkId: TNetworkId_S,
+    ): Promise<INetworkChannel[]> {
+        const channelNames: TChannelName[] = await this.readNetworkChannelNames(networkId);
+
+        // Add to channel list
+        const channels: INetworkChannel[] = [];
+
+        for (const channelName of channelNames) {
+            const [createdAt, memberDistribution, usage] = await this._redisConnection.hash.hmget(
+                `networks/${networkId}/channels/${channelName}`,
+                [
+                    'createdAt',
+                    'memberDistribution',
+                    'usage',
+                ],
+            );
+
+            if (createdAt && memberDistribution && usage) {
+                channels.push({
+                    channelName,
+                    memberDistribution: memberDistribution as string,
+                    members: await this.readNetworkMemberCount(networkId, channelName),
+                    bytes: Number.parseInt(usage || '0', 10),
+                    createdAt: new Date(createdAt as string),
+                });
+            }
+        }
+
+        return channels;
+    }
+
+    /**
+     * Reads all channel names on a network.
+     *  
+     * @param { TNetworkId_S }  networkId
+     *
+     * @returns { Promise<TChannelName[]> }
+     */
+    public async readNetworkChannelNames(
         networkId: TNetworkId_S,
     ): Promise<TChannelName[]> {
         const data = await this._redisConnection.hash.smembers(`networks/${networkId}/channels`);
@@ -83,12 +132,15 @@ export class NetworkChannelHash {
      *  
      * @param networkId
      *
-     * @returns { Promise<number> }
+     * @returns { Promise<TNetworkChannelCountAt> }
      */
     public async readNetworkChannelCount(
         networkId: TNetworkId_S,
-    ): Promise<number> {
-        return await this._redisConnection.hash.scard(`networks/${networkId}/channels`);
+    ): Promise<TNetworkChannelCountAt> {
+        return {
+            count: await this._redisConnection.hash.scard(`networks/${networkId}/channels`) ?? 0,
+            date: new Date(),
+        };
     }
 
     /**

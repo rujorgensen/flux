@@ -1,11 +1,14 @@
-import { Elysia, error, t } from 'elysia';
+import { Elysia, status, t } from 'elysia';
 // import { $ } from 'bun';
 import jwt from '@elysiajs/jwt';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
 import { LiveUpdates } from './live-updates.class';
-import { networkAgentRoutes } from './api/networks/networks.route';
+import {
+    networkAgentRoutes,
+    networkChannelRoutes,
+} from './api/networks/networks.route';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
 
@@ -86,6 +89,7 @@ export const app = new Elysia()
 
     .get('/api/ping', () => 'pong')
     .use(networkAgentRoutes)
+    .use(networkChannelRoutes)
     .get('/api/connected-authorities', () => 9999)
     .get('/api/status', () => {
         return [
@@ -102,7 +106,7 @@ export const app = new Elysia()
         const value = await jwt.sign({ token: query.token as string });
 
         if (!body.password) {
-            return error(401, 'Unauthorized');
+            return status(401);
         }
 
         auth?.set({

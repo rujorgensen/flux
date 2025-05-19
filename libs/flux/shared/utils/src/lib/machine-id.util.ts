@@ -1,5 +1,3 @@
-import * as machineIdSync from 'node-machine-id';
-
 export type TFluxClientUID = string & { __brand: 'flux-client-uid'; };
 
 // Make TypeScript happy
@@ -31,6 +29,8 @@ export const validateMachineUID = (
 /**
  * Returns the machine UID or NULL.
  * 
+ * NB! node-machine-id' turned out to fail catastrophically on non-bun/node environments.
+ * 
  * @returns { TFluxClientUID | null }
  */
 export const getMachineUID = async (
@@ -44,11 +44,6 @@ export const getMachineUID = async (
         return globalThis.__flux_client_id as unknown as TFluxClientUID;
     }
 
-    try {
-        globalThis.__flux_client_id = machineIdSync() as TFluxClientUID;
-    } catch {
-        globalThis.__flux_client_id = null;
-    }
-
+    globalThis.__flux_client_id = null;
     return globalThis.__flux_client_id as unknown as TFluxClientUID;
 };

@@ -6,7 +6,6 @@
     "main": "./src/index.js",
     "types": "./src/index.d.ts",
     "dependencies": {
-        "@swc/helpers": "~0.5.11",
-        "node-machine-id": "1.1.12"
+        "@swc/helpers": "~0.5.11"
     }
 }
