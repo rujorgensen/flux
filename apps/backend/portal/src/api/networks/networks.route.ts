@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia';
 import {
     type TNetworkChannelCountAt,
+    type INetworkChannel,
     validateNetworkIdOrThrow,
 } from '@flux/shared/types';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
@@ -63,9 +64,9 @@ export const networkChannelRoutes = new Elysia({ prefix: '/api/networks/:network
     /**
      * '/api/networks/:networkId/channels
      */
-    .get('', ({ networkId }) => {
+    .get('', ({ networkId }): Promise<INetworkChannel[]> => {
         return networkChannelRedisCacheService
-            .readNetworkChannelCount(
+            .readNetworkChannels(
                 networkId,
             );
     })

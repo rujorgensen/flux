@@ -81,13 +81,14 @@ export class NetworkChannelHash {
         const channels: INetworkChannel[] = [];
 
         for (const channelName of channelNames) {
-            const key: string = `networks/${networkId}/agents/${channelName}`;
-
-            const [createdAt, memberDistribution, usage] = await this._redisConnection.hash.hmget(key, [
-                'createdAt',
-                'memberDistribution',
-                'usage',
-            ]);
+            const [createdAt, memberDistribution, usage] = await this._redisConnection.hash.hmget(
+                `networks/${networkId}/channels/${channelName}`,
+                [
+                    'createdAt',
+                    'memberDistribution',
+                    'usage',
+                ],
+            );
 
             if (createdAt && memberDistribution && usage) {
                 channels.push({
