@@ -130,7 +130,8 @@ export class NetworkAgentRedisService {
         for (const id of networkAgents) {
             const key: string = `networks/${networkId}/agents/${id}`;
 
-            const [ip, address, bytes, packets] = await this._client.hmget(key, [
+            const [name, ip, address, bytes, packets] = await this._client.hmget(key, [
+                'name',
                 'ip',
                 'address',
                 'bytes',
@@ -140,6 +141,7 @@ export class NetworkAgentRedisService {
             if (ip || address || bytes || packets) {
                 agentData.push({
                     id: id as TClientId,
+                    uid: name ? (name as TAgentOwnUId) : undefined,
                     ip: ip || null,
                     address: address as string,
                     bytes: Number.parseInt(bytes || '0', 10),
