@@ -15,7 +15,8 @@
             },
             "dependsOn": [
                 "docker-dev"
-            ]
+            ],
+            "continuous": true
         },
         "serve-static": {
             "executor": "nx:run-script",
