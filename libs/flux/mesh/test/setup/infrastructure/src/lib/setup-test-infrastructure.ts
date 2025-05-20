@@ -6,6 +6,14 @@ import {
 import {
     Wait,
 } from 'testcontainers';
+import {
+    createClient,
+} from 'redis';
+
+declare global {
+    var infrastructureRedisURL: string | null;
+    var infrastructureRedisContainer: StartedRedisContainer | null;
+}
 
 beforeAll(async () => {
     // global setup
@@ -25,10 +33,45 @@ beforeAll(async () => {
         globalThis['infrastructureRedisURL'] = 'redis://localhost:6381';
     }
 
-    console.log(`✅\tRedis is ready at ${globalThis['infrastructureRedisURL']} for testing`);
+    if (await testRedisConnection(globalThis['infrastructureRedisURL'])) {
+        console.log(`✅\tRedis is ready at ${globalThis['infrastructureRedisURL']} for testing`);
+    } else {
+        throw new Error(`💀\tRedis is NOT running ${globalThis['infrastructureRedisURL']}`);
+    }
 });
 
 afterAll(async () => {
     console.log('Tearing down test infrastructure...');
     await globalThis['infrastructureRedisContainer']?.stop();
-}); 
+});
+
+/**
+ * Test if Redis is running at url.
+ * 
+ * @param { string } url
+ * 
+ * @returns { Promise<void> }
+ */
+async function testRedisConnection(
+    url: string,
+): Promise<boolean> {
+    try {
+        const client = createClient({
+            url,
+        });
+
+        await client.connect();
+
+        if (client.isOpen) {
+            client.destroy();
+
+            return true;
+        }
+
+        return false;
+    } catch (e) {
+        console.error(e instanceof Error ? e.message : e);
+
+        return false;
+    }
+}
