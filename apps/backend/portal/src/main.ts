@@ -73,7 +73,7 @@ export const app = new Elysia()
     // })
 
     .use(cors({
-        origin: 'localhost:4321',
+        origin: 'http://localhost:3001',
         methods: ['GET'],
     }))
 
