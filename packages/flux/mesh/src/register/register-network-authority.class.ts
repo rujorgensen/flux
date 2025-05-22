@@ -11,12 +11,12 @@ export class NetworkAuthorityManager {
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly cache: Map<TNetworkId_S, Set<TAddress>> = new Map();
 
-    public register(
+    public async register(
         networkId: TNetworkId_S,
         socketId: TClientId,
         machineUID?: TFluxClientUID,
-    ): void {
-        this.redisConnection.networkAuthoritySet
+    ): Promise<void> {
+        await this.redisConnection.networkAuthoritySet
             .registerNetworkAuthority(
                 networkId,
                 socketId,
