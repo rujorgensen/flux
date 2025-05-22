@@ -1,45 +1,52 @@
 <!-- ConnectedAuthorities.svelte -->
 <script lang="ts">
     import { writable } from "svelte/store";
-    import { FluxAgent } from "../../../../../../packages/flux/agent/src";
-    import type {
-        FluxNetworkChannel,
-        FluxAgentNetworkConnection,
-    } from "../../../../../../libs/flux/shared/connection/src";
+    import type { FluxAgentNetworkConnection } from "../../../../../../libs/flux/shared/connection/src";
     import { onMount } from "svelte";
+    import type {
+        TNetworkAuthorityCountAt,
+        TNetworkId_S,
+    } from "@flux/shared/types";
+    import { getFluxNetworkConnection } from "../../data/flux-connection.fn";
+    import { onConnectedAuthoritiesCount } from "../../data/flux/connected-authorities.service.fn";
 
     // Passed by Astro
-    export let initialData: number;
+    export let initial: TNetworkAuthorityCountAt;
+    export let networkId: TNetworkId_S;
+    export let networkCode: string;
 
-    const CODE_TO_ACCESS_NETWORK: string = "code-to-access-network"; // Key to connect to a network, unknown and irelevant to flux
-
-    const dataStore = writable<number | undefined>();
-
-    dataStore.set(initialData ?? 0);
+    // Export the store directly
+    export const connectedAuthorities =
+        writable<TNetworkAuthorityCountAt>(initial);
 
     onMount(async () => {
-        // if (isBrowser()) {
-        const fluxAgent = new FluxAgent("rAnD0M-network-id-from-astro", {
-            //         domain?: string,
-            //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
-            //         retries?: number; // Number of times to retry a failed message
-        });
+        try {
+            const fluxAgentNetworkConnection: FluxAgentNetworkConnection =
+                await getFluxNetworkConnection(
+                    networkId,
+                    networkCode,
+                    "portal-agent",
+                );
 
-        const fluxNetworkConnection: FluxAgentNetworkConnection =
-            await fluxAgent.connect(CODE_TO_ACCESS_NETWORK, "portal-agent");
-
-        const fluxNetworkChannel: FluxNetworkChannel =
-            await fluxNetworkConnection.joinChannel("connected-authorities");
-
-        fluxNetworkChannel.onPublish((message: string) => {
-            dataStore.set(Number.parseInt(message, 10));
-        });
-        //  }
+            // Update on new data
+            (await onConnectedAuthoritiesCount(fluxAgentNetworkConnection))(
+                connectedAuthorities.set,
+            );
+        } catch (error) {
+            console.error("Error connecting agent to network:", error);
+        }
     });
-    // Export the store directly
-    export const connectedAuthorities = dataStore;
 </script>
 
 {#if $connectedAuthorities}
-    <strong>{JSON.stringify($connectedAuthorities)}</strong>
+    <strong title={$connectedAuthorities.date.toDateString()}>
+        {$connectedAuthorities.count}
+    </strong>
 {/if}
+
+<style>
+    strong {
+        text-align: right;
+        display: block;
+    }
+</style>

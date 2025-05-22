@@ -22,7 +22,7 @@
         try {
             const fluxAgentNetworkConnection: FluxAgentNetworkConnection =
                 await getFluxNetworkConnection(
-                    networkId as TNetworkId_S,
+                    networkId,
                     networkCode,
                     "portal-agent",
                 );

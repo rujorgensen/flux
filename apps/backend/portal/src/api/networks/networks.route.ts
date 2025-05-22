@@ -1,8 +1,7 @@
 import { Elysia, t } from 'elysia';
-import {
-    type TNetworkChannelCountAt,
-    type INetworkChannel,
-    validateNetworkIdOrThrow,
+import type {
+    TNetworkChannelCountAt,
+    INetworkChannel,
 } from '@flux/shared/types';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
@@ -12,29 +11,12 @@ import {
     getMeshRedisConnection,
 } from 'packages/flux/mesh/src/routing/redis/redis-connection.class';
 import type { TNetworkAgentCountAt } from 'libs/flux/shared/types/src/lib/agents/network-agent.type';
+import { networkIdValidatorPlugin } from './plugins';
 
 const meshRedisConnection = await getMeshBunRedisConnection();
-
 const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
-
 const redisConnection_: RedisConnection = getMeshRedisConnection();
-
 const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
-
-const networkIdValidatorPlugin = new Elysia()
-    .derive({
-        as: 'scoped'
-    }, ({ params: { networkId } }) => {
-
-        if (!validateNetworkIdOrThrow(networkId)) {
-            throw new Error('Will not actually be thrown');
-        }
-
-        return {
-            networkId,
-        };
-    })
-    ;
 
 export const networkChannelRoutes = new Elysia({ prefix: '/api/networks/:networkId/channels' })
     .use(networkIdValidatorPlugin)

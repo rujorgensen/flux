@@ -16,16 +16,16 @@ import Footer from "../components/Footer.astro";
 import Menu from "../components/Menu.svelte";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 import Pane from "../layouts/dashboard/Pane.astro";
-import { app } from "../data/api";
 
 import { readConnectedAgentCount } from "../data/api/connected-agents.service.fn";
 import { readChannelCount } from "../data/api/channels.service.fn";
-
-const { data: initialValue } = await app.api["connected-authorities"].get();
+import { readConnectedAuthoritiesCount } from "../data/api/connected-authorities.service.fn";
 
 const networkId: string = "rAnD0M-network-id-from-astro";
 const CODE_TO_ACCESS_NETWORK: string = "code-to-access-network"; // Key to connect to a network, unknown and irelevant to flux
 
+const initialConnectedAuthoritiesCount =
+    await readConnectedAuthoritiesCount(networkId);
 const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
 const initialChannelCount = await readChannelCount(networkId);
 ---
@@ -63,6 +63,7 @@ const initialChannelCount = await readChannelCount(networkId);
 
                 grid-template-areas:
                     "a b c d ctrl"
+                    "table-1 table-1 table-1 table-1 ctrl"
                     "table table table table ctrl"
                     "chart chart chart chart ctrl";
 
@@ -141,8 +142,10 @@ const initialChannelCount = await readChannelCount(networkId);
                 <Pane id="connected-authorities" area="a">
                     <h2 slot="header">Connected Authorities</h2>
                     <ConnectedAuthorities
-                        initialData={initialValue}
                         client:load
+                        networkId={networkId}
+                        networkCode={CODE_TO_ACCESS_NETWORK}
+                        initial={initialConnectedAuthoritiesCount}
                     />
                 </Pane>
 
@@ -169,6 +172,10 @@ const initialChannelCount = await readChannelCount(networkId);
                 <Pane area="d">
                     <h2 slot="header">Total Data Usage</h2>
                     <TotalDataUsage client:load />
+                </Pane>
+                <Pane class="flair" area="table-1">
+                    <h2 slot="header">Connected Authorities</h2>
+                    <ConnectedAuthorities client:load networkId={networkId} />
                 </Pane>
                 <Pane class="flair" area="table">
                     <h2 slot="header">Active Channels</h2>

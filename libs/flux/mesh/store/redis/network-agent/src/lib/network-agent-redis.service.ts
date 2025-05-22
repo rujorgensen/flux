@@ -77,6 +77,9 @@ export class NetworkAgentRedisService {
 
                 'address',
                 address,
+
+                'connectedAt',
+                new Date().toISOString(),
             ],
         );
     }
@@ -130,12 +133,13 @@ export class NetworkAgentRedisService {
         for (const id of networkAgents) {
             const key: string = `networks/${networkId}/agents/${id}`;
 
-            const [name, ip, address, bytes, packets] = await this._client.hmget(key, [
+            const [name, ip, address, bytes, packets, connectedAt] = await this._client.hmget(key, [
                 'name',
                 'ip',
                 'address',
                 'bytes',
                 'packets',
+                'connectedAt',
             ]);
 
             if (ip || address || bytes || packets) {
@@ -146,6 +150,7 @@ export class NetworkAgentRedisService {
                     address: address as string,
                     bytes: Number.parseInt(bytes || '0', 10),
                     packets: Number.parseInt(packets || '0', 10),
+                    connectedAt: new Date(connectedAt as unknown as Date),
                 });
             }
         }

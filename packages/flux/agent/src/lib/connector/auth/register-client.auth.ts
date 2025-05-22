@@ -5,8 +5,10 @@ import {
     checkAuthTicketShape,
 } from '@flux/shared/types';
 import { encrypt } from '../../utils/obscuring/encyprt.utils';
-import type { TFluxClientUID } from '@flux/shared/utils';
-import { validateMachineUID } from 'libs/flux/shared/utils/src/lib/machine-id.util';
+import {
+    type TFluxClientUID,
+    validateMachineUID,
+} from '@flux/shared/utils';
 
 /**
  * Authenticates with the server and returns a ticket for connecting the websocket.
