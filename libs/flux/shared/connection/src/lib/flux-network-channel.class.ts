@@ -10,6 +10,7 @@ import type {
 } from './flux-ws-connection';
 
 export class FluxNetworkChannel {
+    private _latestValue: unknown;
 
     constructor(
         public readonly channelName: TChannelName,
@@ -26,6 +27,7 @@ export class FluxNetworkChannel {
     public publish<T>(
         message: string | T,
     ): void {
+        this._latestValue = message;
         this._fluxWebSocketConnection
             .publish(
                 this.channelName,
@@ -46,8 +48,19 @@ export class FluxNetworkChannel {
         this._fluxWebSocketConnection
             .onPublish(
                 this.channelName,
-                fn,
+                (message: string | T) => {
+                    this._latestValue = message;
+                    fn(message);
+                }
             );
     }
 
+    /**
+     * Get the latest value published on this channel.
+     * 
+     * @returns { unknown } The latest value published on this channel or undefined if no message has been published
+     */
+    public getLatestValue<T>(): T | undefined {
+        return this._latestValue as T | undefined;
+    }
 }
