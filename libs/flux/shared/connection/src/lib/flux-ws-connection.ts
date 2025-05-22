@@ -165,7 +165,7 @@ export class FluxWebSocketConnection {
             this.socket.clearEventSubscribers();
 
             this.socket
-                .on('open', () => {
+                .on('initialPing', () => {
                     console.log('🔌✅ Socket connected');
 
                     this.stateManager.emitNetworkState('connected');
@@ -335,7 +335,8 @@ export class FluxWebSocketConnection {
         const webSocketClient: FluxWebSocketClientConnection = await this.connect();
 
         return Promise.resolve(new FluxAgentNetworkConnection(
-            this, webSocketClient,
+            this,
+            webSocketClient,
             this.stateManager.emitWebRTCState.bind(this.stateManager),
         ));
     }

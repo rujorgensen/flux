@@ -268,5 +268,5 @@ async function connectToRedisAndFlush(
     await client.flushAll();
 
     console.warn(`Flushed all data from Redis at '${url}', disconnecting.`);
-    client.destory();
+    client.destroy();
 }

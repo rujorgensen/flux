@@ -19,7 +19,7 @@ export const PicoLogger = (() => {
             return;
         }
 
-        console.log(message);
+        console.log(`[${scopes}]\t${message}`);
     };
 
     const warn = (
@@ -30,7 +30,7 @@ export const PicoLogger = (() => {
             return;
         }
 
-        console.warn(message);
+        console.warn(`[${scopes}]\t${message}`);
     };
 
     const error = (
@@ -41,7 +41,7 @@ export const PicoLogger = (() => {
             return;
         }
 
-        console.error(message);
+        console.error(`[${scopes}]\t${message}`);
     };
 
     return {

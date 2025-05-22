@@ -43,7 +43,8 @@ export class FluxAgent {
     ) { }
 
     /**
-     *
+     * Connect to the network using provided identification.
+     * 
      * @param { unknown }   identification
      * @param { string }    [clientUId]
      *
