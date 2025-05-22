@@ -344,14 +344,20 @@ export class FluxWebSocketConnection {
      * Join a channel.
      * 
      * @param { TChannelName } channelName
+     * @param { boolean } requestLatestValue - Whether to request the latest value immediately
      * 
      * @returns { Promise<FluxNetworkChannel> } 
      */
     public async joinChannel(
         channelName: TChannelName,
+        requestLatestValue: boolean = false,
     ): Promise<FluxNetworkChannel> {
         if (this.webSocketClient) {
-            this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
+            const subscribeMessage = requestLatestValue 
+                ? `${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}:latest` 
+                : `${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`;
+                
+            this.webSocketClient.send(subscribeMessage);
 
             return new Promise((resolve, reject) => {
                 const cb = (
@@ -425,13 +431,15 @@ export class FluxWebSocketConnection {
      * Adds a callback to the list of callbacks for a given channel topic.
      * 
      * @param { TChannelName } channelName
-     * @param { string } message
+     * @param { TMessageCallback } fn
+     * @param { boolean } emitLatestValue - Whether to emit the latest value immediately
      * 
      * @returns { void } 
      */
     public onPublish(
         channelName: TChannelName,
         fn: TMessageCallback,
+        emitLatestValue: boolean = false,
     ): void {
         const existingSubscriber: Set<TMessageCallback> | undefined = this.channelCallbacks.get(channelName);
         if (existingSubscriber) {
@@ -440,6 +448,11 @@ export class FluxWebSocketConnection {
             const newSubscriber: Set<TMessageCallback> = new Set();
             newSubscriber.add(fn);
             this.channelCallbacks.set(channelName, newSubscriber);
+        }
+
+        // Request the latest value if needed
+        if (emitLatestValue && this.webSocketClient) {
+            this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}:latest`);
         }
     }
 

@@ -37,16 +37,19 @@ export class FluxNetworkChannel {
      * Listen to messages on this channel.
      * 
      * @param { TMessageCallback } fn
+     * @param { boolean } emitLatestValue - Whether to emit the latest value immediately
      * 
      * @returns { void }
      */
     public onPublish<T>(
         fn: (message: string | T) => void,
+        emitLatestValue: boolean = false,
     ): void {
         this._fluxWebSocketConnection
             .onPublish(
                 this.channelName,
                 fn,
+                emitLatestValue,
             );
     }
 
