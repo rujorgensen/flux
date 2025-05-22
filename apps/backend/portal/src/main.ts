@@ -74,7 +74,7 @@ export const app = new Elysia()
 
     .use(cors({
         origin: 'http://localhost:3001',
-        methods: ['GET'],
+        methods: ['GET', 'POST'],
     }))
 
     .use(swagger({
