@@ -30,7 +30,9 @@
             }
         };
 
-        fetchData().then().catch();
+        fetchData().then().catch((error) => {
+            console.error("Error occurred while fetching connected agents:", error);
+        });
     });
 
     export const connectedAgents = dataStore;
