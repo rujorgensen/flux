@@ -16,7 +16,8 @@ async function exampleUsage(fluxNetworkChannel: FluxNetworkChannel) {
   fluxNetworkChannel.publish('Hello channel!');
 
   // 3. At any time, you can get the latest value that was published on the channel
-  const latestValue = fluxNetworkChannel.getLatestValue<string>();
+  // Note: getLatestValue is now an async method that retrieves the value from Redis
+  const latestValue = await fluxNetworkChannel.getLatestValue<string>();
   console.log('Latest value:', latestValue); // Will output: Latest value: Hello channel!
 
   // 4. When working with typed channels, you can specify the type in getLatestValue
@@ -24,7 +25,7 @@ async function exampleUsage(fluxNetworkChannel: FluxNetworkChannel) {
   const networkChannel = fluxNetworkChannel; // Just reusing for example
   
   // After receiving messages
-  const latestCountAt = networkChannel.getLatestValue<TNetworkAgentCountAt>();
+  const latestCountAt = await networkChannel.getLatestValue<TNetworkAgentCountAt>();
   if (latestCountAt) {
     console.log(`Latest active channel count: ${latestCountAt.count} at ${latestCountAt.date}`);
   }
