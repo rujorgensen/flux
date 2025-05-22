@@ -106,8 +106,8 @@ export class RedisStatusService {
     /**
      * Retrieves Redis status information
      * 
-     * @param threshold Memory threshold ratio for triggering alerts (0-1)
-     * @returns Promise with detailed Redis status information
+     * @param { number } threshold Memory threshold ratio for triggering alerts (0-1)
+     * @returns { Promise<ReturnType<RedisStatusService["getRedisStatusOrThrow"]>> } Detailed Redis status information
      */
     public async getRedisStatusOrThrow(
         threshold: number = 0.9,
@@ -177,10 +177,11 @@ export class RedisStatusService {
 
     /**
      * Calculates the Redis instance health score based on various metrics
+     * The threshold parameter is used for memory usage evaluation (0-1 range)
      *
-     * @param metrics Redis metrics from parseInfoSection
-     * @param threshold Memory threshold ratio for calculating health score (0-1)
-     * @returns Health score from 0-100, with 100 being perfectly healthy
+     * @param { ReturnType<typeof parseInfoSection> } metrics
+     * @param { number } threshold
+     * @returns { number } Health score from 0-100, with 100 being perfectly healthy
      */
     private computeHealthScore(
         metrics: ReturnType<typeof parseInfoSection>,
