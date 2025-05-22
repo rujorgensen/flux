@@ -2,6 +2,11 @@ import { PrismaClient } from '@prisma-types/flux';
 
 let prisma: PrismaClient | undefined;
 
+/**
+ * Gets or creates a singleton Prisma client instance
+ * 
+ * @returns PrismaClient instance for database operations
+ */
 export const getPortalPgRepository = (
 
 ): PrismaClient => {

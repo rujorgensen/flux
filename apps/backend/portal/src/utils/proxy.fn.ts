@@ -1,8 +1,9 @@
 
 /**
+ * Creates a proxy function that forwards requests to another server
  * 
- * @param param
- * @returns 
+ * @param proxyTo URL to proxy requests to, defaults to http://localhost:3001
+ * @returns Async function that handles proxying the request
  */
 const proxy = (
     proxyTo: string = 'http://localhost:3001',

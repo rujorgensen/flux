@@ -1,4 +1,10 @@
 
+/**
+ * Parses Redis INFO command output into a structured object
+ * 
+ * @param info Raw string output from Redis INFO command
+ * @returns Object with key-value pairs from the INFO command
+ */
 export const parseInfoSection = (
     info: string,
 ): Record<string, number | string> => {
@@ -16,6 +22,12 @@ export const parseInfoSection = (
     return result;
 }
 
+/**
+ * Parses Redis keyspace section into a structured object
+ * 
+ * @param info Raw string output from Redis INFO keyspace command
+ * @returns Object with database statistics including keys, expires, and average TTL
+ */
 export const parseKeyspaceSection = (
     info: string,
 ) => {

@@ -22,7 +22,9 @@ export class RedisStatusService {
     ) { }
 
     /**
-     * Subscribe to 
+     * Subscribe to alert notifications
+     * 
+     * @param cb Callback function to be called when alerts occur
      */
     public onAlert(
         cb: (alerts: string[]) => void,
@@ -31,6 +33,11 @@ export class RedisStatusService {
         this.observerChanged();
     }
 
+    /**
+     * Unsubscribe from alert notifications
+     * 
+     * @param cb Callback function to remove from alert notifications
+     */
     public offAlert(
         cb: (alerts: string[]) => void,
     ): void {
@@ -38,6 +45,9 @@ export class RedisStatusService {
         this.observerChanged();
     }
 
+    /**
+     * Handles observer changes by starting or stopping the health check interval
+     */
     private observerChanged(
 
     ): void {
@@ -62,10 +72,10 @@ export class RedisStatusService {
     }
 
     /**
+     * Processes health data to generate alert messages
      * 
-     * @param health
-     * 
-     * @returns 
+     * @param health Redis health data from getRedisStatusOrThrow
+     * @returns Array of alert messages
      */
     private getAlerts(
         health: Awaited<ReturnType<typeof this.getRedisStatusOrThrow>>,
@@ -94,10 +104,10 @@ export class RedisStatusService {
     }
 
     /**
+     * Retrieves Redis status information
      * 
-     * @param { number } threshold
-     * 
-     * @returns { Promise<TRedisStatus> }
+     * @param threshold Memory threshold ratio for triggering alerts (0-1)
+     * @returns Promise with detailed Redis status information
      */
     public async getRedisStatusOrThrow(
         threshold: number = 0.9,
@@ -165,6 +175,13 @@ export class RedisStatusService {
         };
     }
 
+    /**
+     * Calculates the Redis instance health score based on various metrics
+     *
+     * @param metrics Redis metrics from parseInfoSection
+     * @param threshold Memory threshold ratio for calculating health score (0-1)
+     * @returns Health score from 0-100, with 100 being perfectly healthy
+     */
     private computeHealthScore(
         metrics: ReturnType<typeof parseInfoSection>,
         threshold: number = 0.9,
