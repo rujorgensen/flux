@@ -8,7 +8,7 @@
         "scope:all"
     ],
     "targets": {
-        "demo": {
+        "serve": {
             "executor": "nx:run-commands",
             "options": {
                 "commands": [

@@ -41,12 +41,12 @@ export class FluxNetworkChannel {
      * @returns { void }
      */
     public onPublish<T>(
-        fn: (message: string | T) => void,
+        fn: (message: T) => void,
     ): void {
         this._fluxWebSocketConnection
             .onPublish(
                 this.channelName,
-                fn,
+                (fn as any), // TODO
             );
     }
 

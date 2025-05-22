@@ -149,12 +149,16 @@ export class LiveUpdates {
                 .joinChannel('connected-authorities');
 
             console.log(`✅ Agent connected to network channel topic: 'connected-authorities'`);
-            let num: number = 0;
 
+            let num4: number = 0;
             setInterval(() => {
-                num++;
-                fluxNetworkChannel
-                    .publish(`${num++}`);
+                num4++;
+                const fluxActiveChannelsAt: TNetworkChannelCountAt = {
+                    count: num4,
+                    date: new Date(),
+                };
+
+                fluxNetworkChannel.publish(fluxActiveChannelsAt);
             }, 3_000);
 
             // * Listen to Redis health

@@ -14,10 +14,9 @@ export const onConnectedAgentCount = async (
         ) => void,
     ): void => {
         fluxNetworkChannel
-            .onPublish((
-                message: string,
+            .onPublish<TNetworkAgentCountAt>((
+                networkAgentCountAt: TNetworkAgentCountAt,
             ) => {
-                const networkAgentCountAt: TNetworkAgentCountAt = JSON.parse(message);
                 fn({
                     ...networkAgentCountAt,
                     date: new Date(networkAgentCountAt.date),
