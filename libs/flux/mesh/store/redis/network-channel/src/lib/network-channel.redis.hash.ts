@@ -166,6 +166,7 @@ export class NetworkChannelHash {
 
     /**
      * Gets the latest value for a channel if available.
+     * This is used when a client requests the latest value when subscribing to a channel.
      * 
      * @param { TNetworkId_S }  networkId
      * @param { TChannelName }  channelName
@@ -295,6 +296,7 @@ export class NetworkChannelHash {
 
     /**
      * Stores the latest value for a channel.
+     * This value will be sent to any new subscribers that request the latest value.
      * 
      * @param { TNetworkId_S }  networkId
      * @param { TChannelName }  channelName

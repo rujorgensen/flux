@@ -36,8 +36,10 @@ export class FluxNetworkChannel {
     /**
      * Listen to messages on this channel.
      * 
-     * @param { TMessageCallback } fn
-     * @param { boolean } emitLatestValue - Whether to emit the latest value immediately
+     * @param { TMessageCallback } fn - Callback function to handle messages
+     * @param { boolean } emitLatestValue - Whether to emit the latest value immediately when subscribing
+     *                                      If true, the server will send the latest message that was
+     *                                      published to the channel immediately after subscription
      * 
      * @returns { void }
      */

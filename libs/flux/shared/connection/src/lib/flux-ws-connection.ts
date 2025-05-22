@@ -343,8 +343,10 @@ export class FluxWebSocketConnection {
     /**
      * Join a channel.
      * 
-     * @param { TChannelName } channelName
+     * @param { TChannelName } channelName - Name of the channel to join
      * @param { boolean } requestLatestValue - Whether to request the latest value immediately
+     *                                       If true, the server will send the latest message that was
+     *                                       published to the channel immediately after subscription
      * 
      * @returns { Promise<FluxNetworkChannel> } 
      */
@@ -430,9 +432,11 @@ export class FluxWebSocketConnection {
     /**
      * Adds a callback to the list of callbacks for a given channel topic.
      * 
-     * @param { TChannelName } channelName
-     * @param { TMessageCallback } fn
-     * @param { boolean } emitLatestValue - Whether to emit the latest value immediately
+     * @param { TChannelName } channelName - Name of the channel to subscribe to
+     * @param { TMessageCallback } fn - Callback function to handle messages
+     * @param { boolean } emitLatestValue - Whether to emit the latest value immediately when subscribing
+     *                                      If true, the server will send the latest message that was
+     *                                      published to the channel immediately after subscription
      * 
      * @returns { void } 
      */

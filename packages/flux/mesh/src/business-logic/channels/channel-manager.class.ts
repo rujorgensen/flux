@@ -76,6 +76,8 @@ export class NetworkChannelManager {
      * @param { TChannelName }  channelName 
      * @param { TAddress }      clientAddress
      * @param { TConnectedClientSocket | undefined } clientSocket - Optional client socket to emit latest value
+     *                                              If provided, the server will attempt to send the latest
+     *                                              message that was published to the channel immediately
      * 
      * @returns { void } 
      */
@@ -195,6 +197,7 @@ export class NetworkChannelManager {
 
     /**
      * Stores the latest value for a channel.
+     * This value will be sent to any new subscribers that request the latest value.
      * 
      * @param { TNetworkId_S } networkId
      * @param { TChannelName } channelName
