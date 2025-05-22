@@ -382,6 +382,13 @@ export class FluxMeshServer {
                                         ws,
                                     );
 
+                                    // Store the latest value for future subscribers
+                                    this.channelManager.storeLatestChannelValue(
+                                        ws.data.networkId,
+                                        channelName,
+                                        data,
+                                    );
+
                                     // Add the usage to the channel
                                     this.channelManager
                                         .increaseUsageCount(
@@ -396,16 +403,24 @@ export class FluxMeshServer {
                         }
 
                         case SUBSCRIBE_NETWORK_CHANNEL_NAME: {
-                            const channelNameString: string = message_.substring(message_.indexOf(':') + 1);
+                            const channelNameWithOptions: string = message_.substring(message_.indexOf(':') + 1);
+                            let channelName: TChannelName;
+                            let requestLatestValue: boolean = false;
+                            
+                            // Check if the client is requesting the latest value
+                            if (channelNameWithOptions.includes(':latest')) {
+                                channelName = channelNameWithOptions.substring(0, channelNameWithOptions.indexOf(':')) as TChannelName;
+                                requestLatestValue = true;
+                            } else {
+                                channelName = channelNameWithOptions as TChannelName;
+                            }
 
                             try {
-                                validateChannelNameOrThrow(channelNameString);
+                                validateChannelNameOrThrow(channelName);
                             } catch {
                                 ws.send(`${ERROR}:Not authorized`);
                                 return;
                             }
-
-                            const channelName: TChannelName = channelNameString as TChannelName;
 
                             if (ws.data.channelNames.has(channelName)) {
                                 ws.send(`${ERROR}:Agent is already subscribed to channnel`);
@@ -447,6 +462,7 @@ export class FluxMeshServer {
                                                 ws.data.networkId,
                                                 channelName,
                                                 ws.data.address,
+                                                requestLatestValue ? ws : undefined
                                             );
                                     } else {
                                         console.error(`Client was not authorized to connect to channel name '${channelName}'`);

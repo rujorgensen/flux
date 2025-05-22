@@ -4,6 +4,7 @@ import {
     type TNetworkId_S,
     AUTHORITY_ON_CREATE_CHANNEL,
     AUTHORITY_ON_EMPTY_CHANNEL,
+    ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import {
@@ -74,6 +75,7 @@ export class NetworkChannelManager {
      * @param { TNetworkId_S }  networkId 
      * @param { TChannelName }  channelName 
      * @param { TAddress }      clientAddress
+     * @param { TConnectedClientSocket | undefined } clientSocket - Optional client socket to emit latest value
      * 
      * @returns { void } 
      */
@@ -81,6 +83,7 @@ export class NetworkChannelManager {
         networkId: TNetworkId_S,
         channelName: TChannelName,
         clientAddress: TAddress,
+        clientSocket?: any, // Using any to avoid cyclic dependency
     ): void {
         this.createNetworkChannelIfNotExist(
             networkId,
@@ -92,6 +95,20 @@ export class NetworkChannelManager {
             channelName,
             clientAddress,
         );
+
+        // If client wants the latest value, try to get it
+        if (clientSocket) {
+            this.networkChannelHash.getLatestChannelValue(networkId, channelName)
+                .then(latestValue => {
+                    if (latestValue && clientSocket.send) {
+                        const messageString: string = latestValue;
+                        clientSocket.send(`${ON_NETWORK_CHANNEL_PUBLISH}:${channelName}:${messageString}`);
+                    }
+                })
+                .catch(error => {
+                    console.warn(`Failed to get latest value for channel ${channelName}:`, error);
+                });
+        }
     }
 
     /**
@@ -175,6 +192,27 @@ export class NetworkChannelManager {
     // ****************************************************************************
     // *** Update
     // ****************************************************************************
+
+    /**
+     * Stores the latest value for a channel.
+     * 
+     * @param { TNetworkId_S } networkId
+     * @param { TChannelName } channelName
+     * @param { string } value
+     * 
+     * @returns { Promise<void> }
+     */
+    public storeLatestChannelValue(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+        value: string,
+    ): void {
+        this.networkChannelHash.setLatestChannelValue(
+            networkId,
+            channelName,
+            value,
+        );
+    }
 
     /**
      * Increases the usage count of a channel.

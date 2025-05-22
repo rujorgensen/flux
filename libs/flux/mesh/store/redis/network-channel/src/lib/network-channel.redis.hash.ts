@@ -165,6 +165,26 @@ export class NetworkChannelHash {
     }
 
     /**
+     * Gets the latest value for a channel if available.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * 
+     * @returns { Promise<string | null> }
+     */
+    public async getLatestChannelValue(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<string | null> {
+        const [latestValue] = await this._redisConnection.hash.hmget(
+            `networks/${networkId}/channels/${channelName}`,
+            ['latestValue']
+        );
+        
+        return latestValue;
+    }
+
+    /**
      * Deletes a channel on a network.
      * 
      * @param { TNetworkId_S }  networkId
@@ -271,6 +291,26 @@ export class NetworkChannelHash {
     ): Promise<number> {
         // * Increment channel usage
         return await this._redisConnection.hash.hincrby(`networks/${networkId}/channels/${channelName}`, 'usage', usage);
+    }
+
+    /**
+     * Stores the latest value for a channel.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { TChannelName }  channelName
+     * @param { string }        value
+     * 
+     * @returns { Promise<void> }
+     */
+    public async setLatestChannelValue(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+        value: string,
+    ): Promise<void> {
+        await this._redisConnection.hash.hmset(
+            `networks/${networkId}/channels/${channelName}`,
+            ['latestValue', value]
+        );
     }
 
     // ****************************************************************************
