@@ -2,13 +2,15 @@
 import MeltUI from "../components/svelte/melt-ui/MeltUI.svelte";
 
 // * Dahsboard tiles
-import ConnectedAuthorities from "../components/dashboard/ConnectedAuthorities.svelte";
-import ConnectedAgents from "../components/dashboard/ConnectedAgents.svelte";
-import ActiveChanels from "../components/dashboard/ActiveChannels.svelte";
+import ConnectedAuthoritityCount from "../components/dashboard/ConnectedAuthoritityCount.svelte";
+import ConnectedAgentCount from "../components/dashboard/ConnectedAgentCount.svelte";
+import ActiveChannelCount from "../components/dashboard/ActiveChannelCount.svelte";
 import TotalDataUsage from "../components/dashboard/TotalDataUsage.svelte";
 
 // * Dashboard Tables
 import ActiveChannels from "./home/dashboard/tables/ActiveChannels.svelte";
+import ConnectedAgents from "./home/dashboard/tables/ConnectedAgents.svelte";
+import ConnectedAuthorities from "./home/dashboard/tables/ConnectedAuthorities.svelte";
 
 import ChartJS from "../components/svelte/ChartJS.svelte";
 import BaseHead from "../components/BaseHead.astro";
@@ -64,6 +66,7 @@ const initialChannelCount = await readChannelCount(networkId);
                 grid-template-areas:
                     "a b c d ctrl"
                     "table-1 table-1 table-1 table-1 ctrl"
+                    "table-2 table-2 table-2 table-2 ctrl"
                     "table table table table ctrl"
                     "chart chart chart chart ctrl";
 
@@ -141,7 +144,7 @@ const initialChannelCount = await readChannelCount(networkId);
             <main id="grid">
                 <Pane id="connected-authorities" area="a">
                     <h2 slot="header">Connected Authorities</h2>
-                    <ConnectedAuthorities
+                    <ConnectedAuthoritityCount
                         client:load
                         networkId={networkId}
                         networkCode={CODE_TO_ACCESS_NETWORK}
@@ -151,7 +154,7 @@ const initialChannelCount = await readChannelCount(networkId);
 
                 <Pane area="b">
                     <h2 slot="header">Connected Agents</h2>
-                    <ConnectedAgents
+                    <ConnectedAgentCount
                         client:load
                         networkId={networkId}
                         networkCode={CODE_TO_ACCESS_NETWORK}
@@ -161,7 +164,7 @@ const initialChannelCount = await readChannelCount(networkId);
 
                 <Pane area="chart" area="c">
                     <h2 slot="header">Active Channels</h2>
-                    <ActiveChanels
+                    <ActiveChannelCount
                         client:load
                         networkId={networkId}
                         networkCode={CODE_TO_ACCESS_NETWORK}
@@ -174,6 +177,10 @@ const initialChannelCount = await readChannelCount(networkId);
                     <TotalDataUsage client:load />
                 </Pane>
                 <Pane class="flair" area="table-1">
+                    <h2 slot="header">Connected Agents</h2>
+                    <ConnectedAgents client:load networkId={networkId} />
+                </Pane>
+                <Pane class="flair" area="table-2">
                     <h2 slot="header">Connected Authorities</h2>
                     <ConnectedAuthorities client:load networkId={networkId} />
                 </Pane>

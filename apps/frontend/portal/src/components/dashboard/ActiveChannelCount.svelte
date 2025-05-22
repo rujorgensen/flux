@@ -1,4 +1,4 @@
-<!-- ConnectedAuthorities.svelte -->
+<!-- ActiveChannelsCount.svelte -->
 <script lang="ts">
     import { writable } from "svelte/store";
     import type {
