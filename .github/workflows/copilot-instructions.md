@@ -2,9 +2,19 @@ This is a TypeScript based repository using Bun and Elysia.
 
 ## Code Standards
 
+## Naming Conventions
+- Follow CRUD convention for function names:
+    -   `create*` for create operations (don't use `set*`)
+    -   `read*` for read operations (don't use `get*`)
+    -   `update*` for update operations (don't use `set*`)
+    -   `delete*` for delete operations (don't use `remove*`)
+
 ## Formatting
-- Function arguments must be on their own line
-- Add hanging comma (comma on the last argument or property, if on it's own line)
+- Each function argument must be on their own line
+- Add hanging comma. Comma on the last
+    -   Function argument
+    -   Array member
+    -   Object property
 
 ## Repository Structure
 - `apps/`: Backend and frontend applications

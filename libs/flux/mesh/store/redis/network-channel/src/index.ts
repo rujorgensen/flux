@@ -1,3 +1,3 @@
 export {
-    NetworkChannelHash,
+    NetworkChannelService,
 } from './lib/network-channel.redis.hash';

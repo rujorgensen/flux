@@ -401,6 +401,14 @@ export class FluxMeshServer {
                                             channelName,
                                             packageSize,
                                         );
+
+                                    // Add the package to the channel
+                                    this.channelManager
+                                        .updateCache(
+                                            ws.data.networkId,
+                                            channelName,
+                                            data,
+                                        );
                                 }
                             }
 
@@ -653,7 +661,10 @@ export class FluxMeshServer {
             processAddress,
         );
 
-        this.channelManager = new NetworkChannelManager(this.globalChannelPubsub);
+        this.channelManager = new NetworkChannelManager(
+            this.redisConnection,
+            this.globalChannelPubsub,
+        );
 
         // TODO: DETECT WHEN READY
         setTimeout(() => {

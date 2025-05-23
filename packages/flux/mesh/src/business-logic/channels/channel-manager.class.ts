@@ -6,11 +6,8 @@ import {
     AUTHORITY_ON_EMPTY_CHANNEL,
     ON_NETWORK_CHANNEL_PUBLISH,
 } from '@flux/shared/types';
-import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
-import {
-    type RedisConnection,
-    getMeshRedisConnection,
-} from '../../routing/redis/redis-connection.class';
+import { NetworkChannelService } from '@flux/mesh/store/redis/network-channel';
+import type { RedisConnection } from '../../routing/redis/redis-connection.class';
 import type { GlobalChannelPubsub } from '../../routing/global-channel/global-channel-pubsub.class';
 
 // ! TODO Hardcoded for now, take from network config in the future
@@ -22,19 +19,21 @@ interface IUsageCache {
 };
 export class NetworkChannelManager {
     private readonly channelUsageCount: Map<TChannelName, IUsageCache> = new Map();
-    private readonly redisConnection: RedisConnection = getMeshRedisConnection();
-    private readonly networkChannelHash: NetworkChannelHash = new NetworkChannelHash(
-        this.redisConnection,
-    );
+    private readonly networkChannelService: NetworkChannelService;
 
     constructor(
+        private readonly _redisConnection: RedisConnection,
         private readonly _globalChannelPubsub: GlobalChannelPubsub,
     ) {
+        this.networkChannelService = new NetworkChannelService(
+            this._redisConnection,
+        );
+
         setInterval(() => {
             for (const [channelName, usage] of this.channelUsageCount) {
 
                 if (usage.usage > 0) {
-                    this.networkChannelHash
+                    this.networkChannelService
                         .incrementUsage(
                             usage.networkId,
                             channelName,
@@ -61,7 +60,7 @@ export class NetworkChannelManager {
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<boolean> {
-        const count: number = await this.networkChannelHash.readNetworkMemberCount(
+        const count: number = await this.networkChannelService.readNetworkMemberCount(
             networkId,
             channelName,
         );
@@ -92,7 +91,7 @@ export class NetworkChannelManager {
             channelName,
         );
 
-        this.networkChannelHash.joinNetworkChannel(
+        this.networkChannelService.joinNetworkChannel(
             networkId,
             channelName,
             clientAddress,
@@ -127,7 +126,7 @@ export class NetworkChannelManager {
         channelName: TChannelName,
         clientAddress: TAddress,
     ): Promise<void> {
-        const membersLeft: number = await this.networkChannelHash
+        const membersLeft: number = await this.networkChannelService
             .leaveNetworkChannel(
                 networkId,
                 channelName,
@@ -157,7 +156,7 @@ export class NetworkChannelManager {
         clientAddress: TAddress,
         channelNames: Set<TChannelName>,
     ): void {
-        this.networkChannelHash.leaveAllNetworkChannels(
+        this.networkChannelService.leaveAllNetworkChannels(
             networkId,
             clientAddress,
             channelNames,
@@ -176,7 +175,7 @@ export class NetworkChannelManager {
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<void> {
-        const wasCreated: boolean = await this.networkChannelHash
+        const wasCreated: boolean = await this.networkChannelService
             .createNetworkChannelIfNotExist(
                 networkId,
                 channelName,
@@ -230,6 +229,37 @@ export class NetworkChannelManager {
         networkId: TNetworkId_S,
         channelName: TChannelName,
         usage: number,
+    ): void {
+        const channelUsageCache: {
+            networkId: TNetworkId_S;
+            usage: number;
+        } | undefined = this.channelUsageCount.get(channelName);
+
+        this.channelUsageCount.set(
+            channelName,
+            channelUsageCache ? {
+                ...channelUsageCache,
+                usage: channelUsageCache.usage + usage,
+            } : {
+                networkId,
+                usage: usage,
+            },
+        );
+    }
+
+    /**
+     * Updates the channel cache.
+     * 
+     * @param { TNetworkId_S } networkId
+     * @param { TChannelName } channelName
+     * @param { number } usage
+     * 
+     * @returns { void }
+     */
+    public updateCache(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+        data: string,
     ): void {
         const channelUsageCache: {
             networkId: TNetworkId_S;
