@@ -50,7 +50,7 @@ export class FluxNetworkChannel {
         this._fluxWebSocketConnection
             .onPublish(
                 this.channelName,
-                fn,
+                (fn as any), // TODO
                 emitLatestValue,
             );
     }

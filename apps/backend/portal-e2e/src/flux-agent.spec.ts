@@ -78,11 +78,6 @@ describe('persistica-flux-api-agents', () => {
                 'backend-agent-1',
             );
 
-        // TODO: remove, when connect is actually waiting for connection
-        await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-        });
-
         const res_ = await fetch(`http://localhost:3000/api/networks/${NETWORK_ID}/agents/count?when=now`);
         const data_ = await res_.json();
 
@@ -107,11 +102,6 @@ describe('persistica-flux-api-agents', () => {
             .connect(
                 CODE_TO_ACCESS_NETWORK,
             );
-
-        // TODO: remove, when connect is actually waiting for connection
-        await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-        });
 
         const res = await fetch(`http://localhost:3000/api/networks/${NETWORK_ID}/agents/connected`);
 

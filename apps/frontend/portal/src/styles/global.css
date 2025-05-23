@@ -193,6 +193,8 @@ input {
 
 table {
     width: 100%;
+    border-collapse: separate;
+    border-spacing: 20px 0;
 }
 
 img {

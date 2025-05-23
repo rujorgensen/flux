@@ -1,4 +1,4 @@
-<!-- ConnectedAuthorities.svelte -->
+<!-- ConnectedAgentCount.svelte -->
 <script lang="ts">
     import { writable } from "svelte/store";
     import type {
@@ -22,7 +22,7 @@
         try {
             const fluxAgentNetworkConnection: FluxAgentNetworkConnection =
                 await getFluxNetworkConnection(
-                    networkId as TNetworkId_S,
+                    networkId,
                     networkCode,
                     "portal-agent",
                 );

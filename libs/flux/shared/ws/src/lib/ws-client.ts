@@ -8,7 +8,7 @@ import {
 // import { decrypt } from '../../utils/obscuring/decrypt.utils';
 // import { encrypt } from '../../utils/obscuring/encyprt.utils';
 
-type WebSocketEvent = 'open' | 'message' | 'close' | 'connecting' | 'error';
+type WebSocketEvent = 'open' | 'initialPing' | 'message' | 'close' | 'connecting' | 'error';
 
 type WebSocketClientOptions = {
     url: string;
@@ -24,6 +24,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     private readonly options: WebSocketClientOptions;
     private readonly eventListeners: Record<WebSocketEvent, ((data?: any) => void)[]> = {
         open: [],
+        initialPing: [], // Can be used to detect server readyness
         message: [],
         close: [],
         error: [],
@@ -47,6 +48,10 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         };
     }
 
+    /**
+     * 
+     * @returns { Promise<void> }
+     */
     public connect(
     ): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -63,13 +68,20 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
                 }
             }, this.options.connectionTimeout);
 
+            this.ws.addEventListener(
+                'ping',
+                () => this.emit('initialPing'),
+                {
+                    once: true,
+                });
+
             this.ws.onopen = () => {
                 clearTimeout(timeout);
                 this.reconnectAttempts = 0;
                 this.isOpen = true;
                 this.emit('open');
 
-                resolve(void 0);
+                resolve();
             };
 
             this.ws.onmessage = (event) => {
@@ -131,9 +143,15 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         return this;
     }
 
+    /**
+     * Clears all subscribers.
+     * 
+     * @returns { void }
+     */
     public clearEventSubscribers(
 
     ): void {
+        this.eventListeners.initialPing = [];
         this.eventListeners.open = [];
         this.eventListeners.message = [];
         this.eventListeners.close = [];
