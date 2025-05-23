@@ -1,6 +1,6 @@
 import type { FluxAgentNetworkConnection, FluxNetworkChannel } from '@flux/shared/connection';
 import type {
-    TNetworkAgentCountAt,
+    TNetworkChannelCountAt,
 } from '@flux/shared/types';
 
 export const onActiveChannelCount = async (
@@ -10,14 +10,13 @@ export const onActiveChannelCount = async (
 
     return (
         fn: (
-            networkChannelCountAt: TNetworkAgentCountAt,
+            networkChannelCountAt: TNetworkChannelCountAt,
         ) => void,
     ): void => {
         fluxNetworkChannel
-            .onPublish((
-                message: string,
+            .onPublish<TNetworkChannelCountAt>((
+                networkAgentCountAt: TNetworkChannelCountAt,
             ) => {
-                const networkAgentCountAt: TNetworkAgentCountAt = JSON.parse(message);
                 fn({
                     ...networkAgentCountAt,
                     date: new Date(networkAgentCountAt.date),

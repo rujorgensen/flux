@@ -8,7 +8,7 @@ import type {
 import type {
     FluxWebSocketConnection,
 } from './flux-ws-connection';
-import { BunRedisClient } from '@core/redis/bun';
+import type { BunRedisClient } from '@core/redis/bun';
 
 /**
  * Key prefix used for storing the latest channel values in Redis
@@ -35,7 +35,7 @@ export class FluxNetworkChannel {
     ): void {
         // Store the latest message in Redis
         this.storeLatestValue(message);
-        
+
         this._fluxWebSocketConnection
             .publish(
                 this.channelName,
@@ -51,7 +51,7 @@ export class FluxNetworkChannel {
      * @returns { void }
      */
     public onPublish<T>(
-        fn: (message: string | T) => void,
+        fn: (message: T) => void,
     ): void {
         this._fluxWebSocketConnection
             .onPublish(
@@ -61,6 +61,7 @@ export class FluxNetworkChannel {
                     this.storeLatestValue(message);
                     fn(message);
                 }
+                (fn as any), // TODO
             );
     }
 
@@ -69,7 +70,9 @@ export class FluxNetworkChannel {
      * 
      * @returns { unknown } The latest value published on this channel or undefined if no message has been published
      */
-    public async getLatestValue<T>(): Promise<T | undefined> {
+    public async readLatestValue<T>(
+
+    ): Promise<T | undefined> {
         const redisClient = await this.getRedisClient();
         if (!redisClient) {
             console.warn('Redis client is not available, unable to retrieve latest channel value');
@@ -78,11 +81,11 @@ export class FluxNetworkChannel {
 
         const key = this.getRedisKey();
         const client = redisClient.getClient();
-        
+
         try {
             const value = await client.get(key);
             if (!value) return undefined;
-            
+
             // Parse the value based on the stored format
             if (value.startsWith('o:')) {
                 // This is a JSON object
@@ -103,21 +106,14 @@ export class FluxNetworkChannel {
     }
 
     /**
-     * @deprecated Please use the async getLatestValue method instead.
-     * This synchronous version is kept for backward compatibility but will always return undefined.
-     */
-    public getLatestValue<T>(): T | undefined {
-        console.warn('Synchronous getLatestValue() is deprecated. Please use the async version: await getLatestValue()');
-        return undefined;
-    }
-
-    /**
      * Stores the latest value published on this channel in Redis
      * 
      * @private
      * @param message The message to store
      */
-    private async storeLatestValue<T>(message: string | T): Promise<void> {
+    private async storeLatestValue<T>(
+        message: string | T,
+    ): Promise<void> {
         const redisClient = await this.getRedisClient();
         if (!redisClient) {
             console.warn('Redis client is not available, unable to store latest channel value');
@@ -129,10 +125,10 @@ export class FluxNetworkChannel {
 
         try {
             // Store the value based on its type
-            const valueToStore = typeof message === 'string' ? 
-                message : 
+            const valueToStore = typeof message === 'string' ?
+                message :
                 `o:${JSON.stringify(message)}`;
-            
+
             await client.set(key, valueToStore);
         } catch (err) {
             console.error(`Error storing latest value for channel ${this.channelName}:`, err);

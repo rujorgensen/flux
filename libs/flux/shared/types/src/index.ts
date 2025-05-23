@@ -71,3 +71,8 @@ export type {
     INetworkChannel,
     TNetworkChannelCountAt,
 } from './lib/channels/network-channel.type';
+
+export type {
+    TNetworkAuthority,
+    TNetworkAuthorityCountAt,
+} from './lib/authorities/network-authority.type';

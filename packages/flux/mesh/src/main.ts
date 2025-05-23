@@ -259,12 +259,14 @@ export class FluxMeshServer {
                     if (_ws.data.isAuthority) {
                         PicoLogger.log(`👮 Authority connected at address: '${_ws.data.address}'`, 'ws-connection');
 
-                        networkAuthorityManager
+                        await networkAuthorityManager
                             .register(
                                 _ws.data.networkId,
                                 _ws.data.id,
                                 _ws.data.machineUID,
                             );
+
+                        _ws.ping();
 
                         return;
                     }
@@ -298,6 +300,9 @@ export class FluxMeshServer {
                             );
                         }
                     );
+
+                    // Ping to let the client detect readyState
+                    _ws.ping();
 
                     // This will make the client retry: _ws.terminate();
                     //       ws.close(1001, 'Client not validated'); // ! Check correct error code
@@ -388,6 +393,14 @@ export class FluxMeshServer {
                                             ws.data.networkId,
                                             channelName,
                                             packageSize,
+                                        );
+
+                                    // Add the package to the channel
+                                    this.channelManager
+                                        .updateCache(
+                                            ws.data.networkId,
+                                            channelName,
+                                            data,
                                         );
                                 }
                             }
@@ -632,7 +645,10 @@ export class FluxMeshServer {
             processAddress,
         );
 
-        this.channelManager = new NetworkChannelManager(this.globalChannelPubsub);
+        this.channelManager = new NetworkChannelManager(
+            this.redisConnection,
+            this.globalChannelPubsub,
+        );
 
         // TODO: DETECT WHEN READY
         setTimeout(() => {

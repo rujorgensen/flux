@@ -19,7 +19,7 @@ import {
 } from './utils/derive-member-distribution.fn';
 import { PicoLogger } from '@utils/pico-logger';
 
-export class NetworkChannelHash {
+export class NetworkChannelService {
 
     constructor(
         private readonly _redisConnection: RedisConnection,

@@ -3,6 +3,8 @@ import {
     type TAddress,
     type TClientId,
     type TMachineAddress,
+    type TNetworkAuthority,
+    type TNetworkAuthorityCountAt,
     type TNetworkId_S,
     type TProcessId,
     splitAddressOrThrow,
@@ -37,6 +39,7 @@ export class NetworkAuthorityRedisSortedSet {
     // ****************************************************************************
 
     /**
+     * Register a network authority.
      * 
      * @param { TNetworkId_S }  networkId
      * @param { TClientId }     clientId
@@ -66,6 +69,9 @@ export class NetworkAuthorityRedisSortedSet {
 
                 'address',
                 address,
+
+                'connectedAt',
+                new Date().toISOString(),
             ],
         );
 
@@ -144,6 +150,41 @@ export class NetworkAuthorityRedisSortedSet {
     // ****************************************************************************
 
     /**
+     * Returns all network authorities.
+     * 
+     * @param { TNetworkId_S }  networkId
+     *
+     * @returns { Promise<TNetworkAuthority> }
+     */
+    public async readNetworkAuthorities(
+        networkId: TNetworkId_S,
+    ): Promise<TNetworkAuthority[]> {
+        // Add to network
+        const networkAgents = await this._client.smembers(`networks/${networkId}/agents`);
+
+        // Add to agent
+        const authorityData: TNetworkAuthority[] = [];
+
+        for (const id of networkAgents) {
+            const key: string = `networks/${networkId}/agents/${id}`;
+
+            const [address, connectedAt] = await this._client.hmget(key, [
+                'address',
+                'connectedAt',
+            ]);
+
+            if (address) {
+                authorityData.push({
+                    id: id as TClientId,
+                    connectedAt: new Date(connectedAt as unknown as Date),
+                });
+            }
+        }
+
+        return authorityData;
+    }
+
+    /**
      * Reads the network authority address from the sorted set.
      * 
      * @param { TNetworkId_S }  networkId
@@ -173,12 +214,15 @@ export class NetworkAuthorityRedisSortedSet {
      * 
      * @param { TNetworkId_S }  networkId
      *
-     * @returns { Promise<number> }
+     * @returns { Promise<TNetworkAuthorityCountAt> }
      */
     public async readNetworkAuthorityCount(
         networkId: TNetworkId_S,
-    ): Promise<number> {
-        return await this._client.scard(`networks/${networkId}/authorities`);
+    ): Promise<TNetworkAuthorityCountAt> {
+        return {
+            count: await this._client.scard(`networks/${networkId}/authorities`) ?? 0,
+            date: new Date(),
+        };
     }
 
     // ****************************************************************************

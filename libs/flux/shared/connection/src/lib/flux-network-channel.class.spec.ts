@@ -44,21 +44,21 @@ describe('FluxNetworkChannel', () => {
 
         // Wait a bit for async Redis operations to complete
         await new Promise(resolve => setTimeout(resolve, 10));
-        
+
         // Check the value was stored and can be retrieved
-        const latestString = await channel.getLatestValue<string>();
+        const latestString = await channel.readLatestValue<string>();
         expect(latestString).toBe('test-message');
 
         // Test with object message
         const testObject = { key: 'value' };
         channel.publish(testObject);
         expect(mockConnection.publish).toHaveBeenCalledWith('test-channel', testObject);
-        
+
         // Wait a bit for async Redis operations to complete
         await new Promise(resolve => setTimeout(resolve, 10));
-        
+
         // Check the value was stored and can be retrieved
-        const latestObject = await channel.getLatestValue<typeof testObject>();
+        const latestObject = await channel.readLatestValue<typeof testObject>();
         expect(latestObject).toEqual(testObject);
     });
 
@@ -82,23 +82,23 @@ describe('FluxNetworkChannel', () => {
         if (publishCallback) {
             publishCallback('received-message');
             expect(mockHandler).toHaveBeenCalledWith('received-message');
-            
+
             // Wait a bit for async Redis operations to complete
             await new Promise(resolve => setTimeout(resolve, 10));
-            
+
             // Check the value was stored and can be retrieved
-            const latestString = await channel.getLatestValue<string>();
+            const latestString = await channel.readLatestValue<string>();
             expect(latestString).toBe('received-message');
 
             const receivedObject = { data: 'test' };
             publishCallback(receivedObject);
             expect(mockHandler).toHaveBeenCalledWith(receivedObject);
-            
+
             // Wait a bit for async Redis operations to complete
             await new Promise(resolve => setTimeout(resolve, 10));
-            
+
             // Check the value was stored and can be retrieved
-            const latestObject = await channel.getLatestValue<typeof receivedObject>();
+            const latestObject = await channel.readLatestValue<typeof receivedObject>();
             expect(latestObject).toEqual(receivedObject);
         }
     });
@@ -113,9 +113,9 @@ describe('FluxNetworkChannel', () => {
         };
 
         const channel = new FluxNetworkChannel('test-channel', mockConnection as FluxWebSocketConnection);
-        
+
         // Use the deprecated synchronous method
-        const value = (channel.getLatestValue as any)();
+        const value = (channel.readLatestValue as any)();
         expect(value).toBeUndefined();
         expect(console.warn).toHaveBeenCalled();
 

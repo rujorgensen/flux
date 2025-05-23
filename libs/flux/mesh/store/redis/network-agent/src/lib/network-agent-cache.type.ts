@@ -7,4 +7,5 @@ export type TNetworkAgent = {
     address: string;
     bytes: number;
     packets: number;
+    connectedAt: Date;
 };

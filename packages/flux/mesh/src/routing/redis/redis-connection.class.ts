@@ -17,11 +17,11 @@ if (!process.env['FLUX_MESH_REDIS_URL']) {
 /**
  * Singleton function to get the Redis connection
  *
- * @returns
+ * @returns { RedisConnection }
  */
 export const getMeshRedisConnection = (
 
-) => {
+): RedisConnection => {
     // We have to read the env variable here, because otherwise it can't be modified in tests
     redisConnection ??= new RedisConnection(process.env['FLUX_MESH_REDIS_URL'] as string);
 
