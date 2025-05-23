@@ -38,18 +38,19 @@ interface IOptions {
 }
 
 /**
- * @param id 
- * @param ticket 
- * @param stateManager 
- * @param cb 
+ * @param { string }        id
+ * @param { string }        ticket
+ * @param { StateManager }  stateManager
+ * @param { () => void }    onReconnectCallback
  * @param options 
- * @returns 
+ * 
+ * @returns { FluxWebSocketConnection }
  */
 export const createWSConnection = <T, M>(
     id: string,
     ticket: string,
     stateManager: StateManager,
-    cb: () => void,
+    onReconnectCallback: () => void,
     options?: {
         domain?: string,
         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -58,7 +59,7 @@ export const createWSConnection = <T, M>(
 ): FluxWebSocketConnection => {
     return new FluxWebSocketConnection(
         id,
-        cb,
+        onReconnectCallback,
         stateManager,
         ticket,
         options,
@@ -166,7 +167,7 @@ export class FluxWebSocketConnection {
 
             this.socket
                 .on('initialPing', () => {
-                    console.log('🔌✅ Socket connected');
+                    PicoLogger.log('🔌✅ Socket connected');
 
                     this.stateManager.emitNetworkState('connected');
 
@@ -182,91 +183,12 @@ export class FluxWebSocketConnection {
                     this.onReconnectCallback();
                 })
 
-                .on('message', (
-                    message_: string,
-                ) => {
-                    for (const cb of this.callbacks) {
-                        cb(message_);
-                    }
-
-                    const packageType: string | undefined = message_.split(':')[0];
-
-                    const msgInterceptors: Set<TMessageCallback> | undefined = this.packageTypeInterceptorCallbacks.get(packageType);
-                    if (msgInterceptors && msgInterceptors.size > 0) {
-                        const channelName: string = message_.substring(message_.indexOf(':') + 1);
-
-                        for (const msgInterceptor of msgInterceptors) {
-                            msgInterceptor(channelName);
-                        }
-
-                        // There are interceptors of this package type, don't proceed
-                        return;
-                    }
-
-                    switch (packageType) {
-
-                        case ON_NETWORK_CHANNEL_PUBLISH: {
-
-                            const firstColon = message_.indexOf(':');
-                            const secondColon = message_.indexOf(':', firstColon + 1);
-
-                            const channelName: string = message_.slice(firstColon + 1, secondColon);
-
-                            if (validateChannelNameOrThrow(channelName)) {
-
-                                const topicCallbacks: Set<TMessageCallback> | undefined = this.channelCallbacks.get(channelName);
-                                if (topicCallbacks) {
-                                    let data: string = message_.slice(secondColon + 1);
-
-                                    if (data.startsWith('o:')) {
-                                        try {
-                                            data = JSON.parse(data.substring(2));
-                                        } catch {
-                                            data = data.substring(2);
-                                        }
-                                    }
-
-                                    for (const cb of topicCallbacks) {
-                                        cb(data);
-                                    }
-                                }
-                            }
-
-                            break;
-                        }
-                        case RPC_REQUEST: {
-
-                            const payload: RPCRequest<any> = JSON.parse(message_.substring(message_.indexOf(':') + 1));
-
-                            this.socket
-                                .handleMessage(payload, (
-                                    data: RPCResponse,
-                                ) => {
-                                    this.socket.send(`${RPC_RESPONSE}:${JSON.stringify(data)}`);
-                                });
-
-                            break;
-                        }
-
-                        case RPC_RESPONSE: {
-                            const payload = message_.substring(message_.indexOf(':') + 1);
-
-                            PicoLogger.log("[WS Client] 🔌 Unhandled type rpc response", 'ws-client');
-                            PicoLogger.log(`[WS Client] payload: ${payload}`, 'ws-client');
-
-                            break;
-                        }
-
-                        default:
-                            console.log(`[WS Client] 🔌 Unhandled type: "${message_}"`);
-                            break;
-                    }
-                })
+                .on('message', this.handleMessage.bind(this))
 
                 .on('close', () => {
                     this.webSocketClient = undefined;
                     this.stateManager.emitNetworkState('disconnected');
-                    console.log('🔌🔴 Disconnected', this.fluxInstanceId);
+                    PicoLogger.log('🔌🔴 Disconnected', this.fluxInstanceId);
                 })
 
                 .on('connecting', (retryAttempt: number) => {
@@ -275,7 +197,7 @@ export class FluxWebSocketConnection {
                     console.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options?.retries ?? 'none'}`, this.fluxInstanceId);
                 })
                 .on('error', (error: Error) => {
-                    console.log(`❌ Error: "${error.message}".`, this.fluxInstanceId);
+                    PicoLogger.log(`❌ Error: "${error.message}".`, this.fluxInstanceId);
                 })
                 ;
 
@@ -512,4 +434,88 @@ export class FluxWebSocketConnection {
         }
     }
 
+    // ****************************************************************************
+    // *** Internal Helpers
+    // ****************************************************************************
+
+    private handleMessage(
+        message_: string,
+    ): void {
+        for (const cb of this.callbacks) {
+            cb(message_);
+        }
+
+        const packageType: string | undefined = message_.split(':')[0];
+
+        const msgInterceptors: Set<TMessageCallback> | undefined = this.packageTypeInterceptorCallbacks.get(packageType);
+        if (msgInterceptors && msgInterceptors.size > 0) {
+            const channelName: string = message_.substring(message_.indexOf(':') + 1);
+
+            for (const msgInterceptor of msgInterceptors) {
+                msgInterceptor(channelName);
+            }
+
+            // There are interceptors of this package type, don't proceed
+            return;
+        }
+
+        switch (packageType) {
+
+            case ON_NETWORK_CHANNEL_PUBLISH: {
+
+                const firstColon = message_.indexOf(':');
+                const secondColon = message_.indexOf(':', firstColon + 1);
+
+                const channelName: string = message_.slice(firstColon + 1, secondColon);
+
+                if (validateChannelNameOrThrow(channelName)) {
+
+                    const topicCallbacks: Set<TMessageCallback> | undefined = this.channelCallbacks.get(channelName);
+                    if (topicCallbacks) {
+                        let data: string = message_.slice(secondColon + 1);
+
+                        if (data.startsWith('o:')) {
+                            try {
+                                data = JSON.parse(data.substring(2));
+                            } catch {
+                                data = data.substring(2);
+                            }
+                        }
+
+                        for (const cb of topicCallbacks) {
+                            cb(data);
+                        }
+                    }
+                }
+
+                break;
+            }
+            case RPC_REQUEST: {
+
+                const payload: RPCRequest<any> = JSON.parse(message_.substring(message_.indexOf(':') + 1));
+
+                this.socket
+                    .handleMessage(payload, (
+                        data: RPCResponse,
+                    ) => {
+                        this.socket.send(`${RPC_RESPONSE}:${JSON.stringify(data)}`);
+                    });
+
+                break;
+            }
+
+            case RPC_RESPONSE: {
+                const payload = message_.substring(message_.indexOf(':') + 1);
+
+                PicoLogger.log("[WS Client] 🔌 Unhandled type rpc response", 'ws-client');
+                PicoLogger.log(`[WS Client] payload: ${payload}`, 'ws-client');
+
+                break;
+            }
+
+            default:
+                PicoLogger.log(`[WS Client] 🔌 Unhandled type: "${message_}"`);
+                break;
+        }
+    }
 }

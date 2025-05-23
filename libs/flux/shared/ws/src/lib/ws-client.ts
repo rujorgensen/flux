@@ -114,7 +114,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
             this.ws.onerror = (event) => {
 
                 // Don't log, this is to be expected if the server is unavailable
-                if ((<any>event).message.includes('Failed to connect')) {
+                if ((<any>event)?.message?.includes('Failed to connect')) {
                     // console.log('❌ Error: Failed to connect');
                 } else {
                     console.log('❌ Error', (<any>event).message);

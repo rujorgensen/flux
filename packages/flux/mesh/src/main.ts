@@ -1,6 +1,7 @@
-/**
- * https://bun.sh/docs/api/websockets
- */
+// Make TypeScript happy
+declare global {
+    var meshLoadCount: number | null;
+}
 
 globalThis.meshLoadCount ??= 0;
 globalThis.meshLoadCount++;
@@ -10,12 +11,8 @@ console.log(`[flux-mesh] Reloaded ${globalThis.meshLoadCount} time(s)`);
 // import { Elysia } from 'elysia';
 // import { swagger } from '@elysiajs/swagger';
 
-if (!process.env['FLUX_MESH_JWT_KEY']) {
-    throw new Error('Missing FLUX_MESH_JWT_KEY in .env');
-}
-
-// if (!process.env['FLUX_DOMAIN']) {
-//     throw new Error('Missing FLUX_DOMAIN in .env');
+// if (!process.env['FLUX_MESH_JWT_KEY']) {
+//     throw new Error('Missing FLUX_MESH_JWT_KEY in .env');
 // }
 
 import {
@@ -642,7 +639,7 @@ export class FluxMeshServer {
         // TODO: DETECT WHEN READY
         setTimeout(() => {
             console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
-            console.log(`🚀 Server running on localhost:${this.port}`);
+            console.log(`🚀 Flux mesh server running on localhost:${this.port}`);
 
             setInterval(() => {
                 this.redisConnection.setConnected(`${machineAddress}/${processId}`);

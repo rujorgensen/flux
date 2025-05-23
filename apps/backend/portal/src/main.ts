@@ -5,9 +5,7 @@ import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
 import { LiveUpdates } from './live-updates.class';
-import {
-    networkChannelRoutes,
-} from './api/networks/networks.route';
+import { networkChannelRoutes } from './api/networks/networks.route';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
 import { networkAuthorityRoutes } from './api/networks/authorities/authorities.route';
@@ -73,8 +71,11 @@ export const app = new Elysia()
     // })
 
     .use(cors({
-        origin: 'http://localhost:3001',
-        methods: ['GET'],
+        origin: 'localhost:3001',
+        methods: [
+            'GET',
+            'POST',
+        ],
     }))
 
     .use(swagger({
@@ -92,7 +93,6 @@ export const app = new Elysia()
     .use(networkAuthorityRoutes)
     .use(networkAgentRoutes)
     .use(networkChannelRoutes)
-    .get('/api/connected-authorities', () => 9999)
     .get('/api/status', () => {
         return [
             meshRedisStatusService.getRedisStatusOrThrow(),

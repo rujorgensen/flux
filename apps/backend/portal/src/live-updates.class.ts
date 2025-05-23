@@ -64,7 +64,7 @@ export class LiveUpdates {
                             user: {
                                 allowAllChannels: true,
                             },
-                        }, FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
+                        }, this.FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
                     },
 
                     // * Authorize channel
@@ -73,7 +73,7 @@ export class LiveUpdates {
                         identification: string,
                     ): Promise<boolean> => {
 
-                        const agentJWT = jwt.verify(identification, FLUX_AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
+                        const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
 
                         console.log(`🔒 A client is trying to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
 
@@ -112,7 +112,7 @@ export class LiveUpdates {
                     'backend-agent',
                 );
 
-            console.log(`✅ Agent connected to network ID: '${fluxNetworkConnection.id}'`);
+            console.log(`✅ Agent connected to network ID: '${NETWORK_ID}'`);
 
             // * Emit connected agents
             const fluxConnectedAgentNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
@@ -148,8 +148,6 @@ export class LiveUpdates {
             const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
                 .joinChannel('connected-authorities');
 
-            console.log(`✅ Agent connected to network channel topic: 'connected-authorities'`);
-
             let num4: number = 0;
             setInterval(() => {
                 num4++;
@@ -170,12 +168,12 @@ export class LiveUpdates {
 
             console.log(`✅ Agent connected to network channel topics: "${fluxNetworkConnection.readConnectedChannels().join('","')}"`);
 
-            portalRedisStatusService
+            this.portalRedisStatusService
                 .onAlert((alerts: string[]) => {
                     portalRedisHealthChannel.publish(JSON.stringify(alerts));
                 });
 
-            meshRedisStatusService
+            this.meshRedisStatusService
                 .onAlert((alerts: string[]) => {
                     meshRedisHealthAlertChannel.publish(JSON.stringify(alerts));
                 });
