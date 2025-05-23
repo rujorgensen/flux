@@ -12,28 +12,36 @@ Alpine.data('fluxActivityDemoApplication', () => ({
     init() {
         console.log('🚀 Flux Demo Activity Application is live');
 
-        // Simulate agent attachment every 2 seconds
-        setInterval(async () => {
-            const fluxAgent: FluxAgent = new FluxAgent(DEMO_NETWORK_ID);
+        // Simulate agent connection every 200 ms
+        for (let i = 0; i < 20; i++) {
+            setTimeout(async () => {
+                this.log('⭕ Connecting flux agent...');
 
-            const fluxNetworkConnection: FluxAgentNetworkConnection = await fluxAgent.connect(
-                {
-                    code: DEMO_CHANNEL_PASSWORD,
-                    user: 'client-a',
-                },
-                `client-${fluxAgent.id.replaceAll('_', '-')}-uid-token`,
-            );
+                const fluxAgent: FluxAgent = new FluxAgent(DEMO_NETWORK_ID);
 
-            this.networkConnections.add(fluxNetworkConnection);
-            this.agents.add(fluxAgent);
+                const fluxNetworkConnection: FluxAgentNetworkConnection = await fluxAgent.connect(
+                    {
+                        code: DEMO_CHANNEL_PASSWORD,
+                        user: 'client-a',
+                    },
+                    `client-${fluxAgent.id.replaceAll('_', '-')}-uid-token`,
+                );
+                this.log(`🧠 Flux agent connected ${fluxAgent.id}`);
 
-            this.log(`🧠 Attached and connected ${fluxAgent.id}`);
+                this.networkConnections.add(fluxNetworkConnection);
+                this.agents.add(fluxAgent);
 
-            callRandomly(() => this.disconnectFromNetwork(fluxAgent));
 
-            callRandomly(() => this.connectToChannel(fluxNetworkConnection));
+                mayBeMaybeNot(() => {
+                    callRandomly(() => this.disconnectFromNetwork(fluxAgent));
+                });
 
-        }, 200);
+                mayBeMaybeNot(() => {
+                    callRandomly(() => this.connectToChannel(fluxNetworkConnection));
+                });
+
+            }, 200 * i);
+        }
     },
 
     log(
@@ -50,7 +58,9 @@ Alpine.data('fluxActivityDemoApplication', () => ({
         this.channels.add(channelName);
         await fluxAgentNetworkConnection.joinChannel(channelName);
 
-        callRandomly(() => this.disconnectFromChannel(fluxAgentNetworkConnection, channelName));
+        mayBeMaybeNot(() => {
+            callRandomly(() => this.disconnectFromChannel(fluxAgentNetworkConnection, channelName));
+        });
     },
 
     disconnectFromNetwork(
@@ -80,6 +90,14 @@ Alpine.data('fluxActivityDemoApplication', () => ({
 const callRandomly = (
     fn: () => void,
 ) => setTimeout(() => fn(), Math.random() * 4000 + 1000);
+
+const mayBeMaybeNot = (
+    fn: () => void,
+): void => {
+    if (Math.random() > 0.5) {
+        fn();
+    }
+};
 
 console.log('⚙️ Starting alpine');
 Alpine.start();

@@ -60,7 +60,6 @@ export class FluxAgent {
             throw new Error('Will never be thrown');
         }
 
-        // getMachineUID
         const ticket = await authenticateAgentOrThrow(
             this.networkId as TNetworkId_S,
             this.options?.domain ?? 'http://localhost:8080',
