@@ -2,6 +2,7 @@ import Alpine from 'alpinejs';
 import { FluxAgent } from '@persistica/flux-agent';
 import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
+import { PicoLogger } from '@utils/pico-logger';
 
 Alpine.data('fluxActivityDemoApplication', () => ({
     agents: new Set<FluxAgent>(),
@@ -10,6 +11,10 @@ Alpine.data('fluxActivityDemoApplication', () => ({
     clientLog: new Array<string>(0),
 
     init() {
+        PicoLogger.configure({
+            allowScopes: '*',
+        });
+
         console.log('🚀 Flux Demo Activity Application is live');
 
         // Simulate agent connection every 200 ms

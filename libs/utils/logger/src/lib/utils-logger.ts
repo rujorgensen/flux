@@ -1,21 +1,21 @@
 const hasOverlap = <T>(a: Set<T> | undefined, b?: T[] | T) => a && b ? [...a].some((item: T) => (Array.isArray(b) ? b : [b]).includes(item)) : false;
 
 export const PicoLogger = (() => {
-    let allowScopes: Set<string> | undefined;
+    let allowScopes: Set<string> | '*' | undefined;
 
     const configure = (
         configuration: {
-            allowScopes: string[];
+            allowScopes: string[] | '*';
         },
     ) => {
-        allowScopes = new Set(configuration.allowScopes);
+        allowScopes = ((typeof configuration.allowScopes === 'string') && (configuration.allowScopes === '*')) ? '*' : new Set(configuration.allowScopes);
     };
 
     const log = (
         message: string,
         scopes?: string | string[],
     ): void => {
-        if (!hasOverlap(allowScopes, scopes)) {
+        if ((allowScopes !== '*') && !hasOverlap(allowScopes, scopes)) {
             return;
         }
 
@@ -26,7 +26,7 @@ export const PicoLogger = (() => {
         message: string,
         scopes?: string | string[],
     ): void => {
-        if (!hasOverlap(allowScopes, scopes)) {
+        if ((allowScopes !== '*') && !hasOverlap(allowScopes, scopes)) {
             return;
         }
 
@@ -37,7 +37,7 @@ export const PicoLogger = (() => {
         message: string,
         scopes?: string | string[],
     ): void => {
-        if (!hasOverlap(allowScopes, scopes)) {
+        if ((allowScopes !== '*') && !hasOverlap(allowScopes, scopes)) {
             return;
         }
 
