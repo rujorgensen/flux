@@ -86,8 +86,10 @@ export class FluxWebSocketConnection {
         private readonly options?: IOptions,
     ) {
         this.options = {
+            // Defaults
             retries: 10_000,
             port: 8080,
+            // Override with provided options
             ...this.options,
         };
 
@@ -157,18 +159,14 @@ export class FluxWebSocketConnection {
     public async connect(
 
     ): Promise<FluxWebSocketClientConnection> {
-
         if (this.webSocketClient) {
             return Promise.resolve(this.webSocketClient);
         }
 
         return new Promise((resolve) => {
-            this.socket.clearEventSubscribers();
-
-            this.socket
-                .on('initialPing', () => {
-                    PicoLogger.log('🔌✅ Socket connected');
-
+            this.interceptPackageTypeMessages(
+                'isReady',
+                () => {
                     this.stateManager.emitNetworkState('connected');
 
                     this.webSocketClient = this.socket;
@@ -181,8 +179,12 @@ export class FluxWebSocketConnection {
                     }
 
                     this.onReconnectCallback();
-                })
+                },
+            );
 
+            this.socket.clearEventSubscribers();
+
+            this.socket
                 .on('message', this.handleMessage.bind(this))
 
                 .on('close', () => {
@@ -196,6 +198,7 @@ export class FluxWebSocketConnection {
 
                     console.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options?.retries ?? 'none'}`, this.fluxInstanceId);
                 })
+
                 .on('error', (error: Error) => {
                     PicoLogger.log(`❌ Error: "${error.message}".`, this.fluxInstanceId);
                 })
@@ -490,6 +493,7 @@ export class FluxWebSocketConnection {
 
                 break;
             }
+
             case RPC_REQUEST: {
 
                 const payload: RPCRequest<any> = JSON.parse(message_.substring(message_.indexOf(':') + 1));

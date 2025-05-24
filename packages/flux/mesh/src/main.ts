@@ -76,14 +76,7 @@ import { PicoLogger } from '@utils/pico-logger';
 import type { TFluxClientUID } from '@flux/shared/utils';
 
 PicoLogger.configure({
-    allowScopes: [
-        'routing',
-        'authorize',
-        'authorized',
-        'ws-connection',
-        'ws-disconnect',
-        'rpc',
-    ],
+    allowScopes: '*',
 });
 
 export type TConnectedClientSocket = Bun.ServerWebSocket<{
@@ -250,7 +243,9 @@ export class FluxMeshServer {
                 // publishToSelf: true,
 
                 // A socket is opened, validate it
-                async open(_ws: TConnectedClientSocket): Promise<void> {
+                async open(
+                    _ws: TConnectedClientSocket,
+                ): Promise<void> {
                     clientMap.set(_ws.data.id, _ws);
 
                     if (_ws.data.isAuthority) {
@@ -263,7 +258,8 @@ export class FluxMeshServer {
                                 _ws.data.machineUID,
                             );
 
-                        _ws.ping();
+                        // Let the client detect readyState. Regular ping cannot be detected by the WebSocket client in the browser 
+                        _ws.send('isReady');
 
                         return;
                     }
@@ -298,9 +294,8 @@ export class FluxMeshServer {
                         }
                     );
 
-                    // Ping to let the client detect readyState
-                    _ws.ping();
-
+                    // Let the client detect readyState. Regular ping cannot be detected by the WebSocket client in the browser 
+                    _ws.send('isReady');
                     // This will make the client retry: _ws.terminate();
                     //       ws.close(1001, 'Client not validated'); // ! Check correct error code
                 },

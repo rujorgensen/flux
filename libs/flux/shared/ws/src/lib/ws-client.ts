@@ -8,7 +8,7 @@ import {
 // import { decrypt } from '../../utils/obscuring/decrypt.utils';
 // import { encrypt } from '../../utils/obscuring/encyprt.utils';
 
-type WebSocketEvent = 'open' | 'initialPing' | 'message' | 'close' | 'connecting' | 'error';
+type WebSocketEvent = 'open' | 'message' | 'close' | 'connecting' | 'error';
 
 type WebSocketClientOptions = {
     url: string;
@@ -24,7 +24,6 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     private readonly options: WebSocketClientOptions;
     private readonly eventListeners: Record<WebSocketEvent, ((data?: any) => void)[]> = {
         open: [],
-        initialPing: [], // Can be used to detect server readyness
         message: [],
         close: [],
         error: [],
@@ -67,13 +66,6 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
                     reject(new Error('Connection timeout'));
                 }
             }, this.options.connectionTimeout);
-
-            this.ws.addEventListener(
-                'ping',
-                () => this.emit('initialPing'),
-                {
-                    once: true,
-                });
 
             this.ws.onopen = () => {
                 clearTimeout(timeout);
@@ -151,7 +143,6 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     public clearEventSubscribers(
 
     ): void {
-        this.eventListeners.initialPing = [];
         this.eventListeners.open = [];
         this.eventListeners.message = [];
         this.eventListeners.close = [];
