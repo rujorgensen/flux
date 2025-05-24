@@ -1,5 +1,20 @@
 This is a TypeScript based repository using Bun and Elysia.
 
+## Stack
+- **Language**: TypeScript
+- **Runtime**: Bun
+- **Backend Frameworks**: Elysia / Bun
+- **Frontend Frameworks**: Astro and Svelte for frontend-portal, alpinejs for the demo application 
+- **Package Manager and Dependency Management**: Bun / Bun.lockb
+- **Testing**: Bun
+- **Linting**: Biome
+- **Documentation**: Markdown files in `docs/`
+- **Version Control**: Git
+- **Package Structure**: Monorepo with `apps/`, `libs/`, and `packages/`
+- **Database**: PostgreSQL with Prisma ORM
+- **Deployment**: Docker
+- **Authentication**: JWT (JSON Web Tokens)
+
 ## Code Standards
 
 ## Formatting

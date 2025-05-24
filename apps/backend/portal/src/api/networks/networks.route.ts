@@ -39,7 +39,7 @@ export const networkChannelRoutes = new Elysia({ prefix: '/api/networks/:network
         })
 
     /**
-     * '/api/networks/:networkId/channels
+     * '/api/networks/:networkId/channels'
      */
     .get('', ({ networkId }): Promise<INetworkChannel[]> => {
         return networkChannelRedisCacheService

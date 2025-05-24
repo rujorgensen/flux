@@ -34,6 +34,9 @@ export const networkAuthorityRoutes = new Elysia({ prefix: '/api/networks/:netwo
             })
         })
 
+    /**
+     * '/api/networks/:networkId/authorities/connected'
+     */
     .get('/connected', ({ networkId }) => {
         return networkAuthorityService
             .readNetworkAuthorities(
