@@ -196,7 +196,11 @@ export class FluxWebSocketConnection {
                 .on('connecting', (retryAttempt: number) => {
                     this.stateManager.emitNetworkState('disconnected');
 
-                    console.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options?.retries ?? 'none'}`, this.fluxInstanceId);
+                    if (retryAttempt > 0) {
+                        PicoLogger.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options?.retries ?? 'none'}`, this.fluxInstanceId);
+                    } else {
+                        PicoLogger.log(`🔄 Connecting: ${this.fluxInstanceId}`);
+                    }
                 })
 
                 .on('error', (error: Error) => {

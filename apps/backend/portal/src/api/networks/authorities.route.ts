@@ -3,7 +3,7 @@ import type {
     TNetworkAuthorityCountAt,
 } from '@flux/shared/types';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
-import { networkIdValidatorPlugin } from '../plugins';
+import { networkIdValidatorPlugin } from './plugins';
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 
 const meshRedisConnection = await getMeshBunRedisConnection();
