@@ -32,6 +32,9 @@ export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId
             })
         })
 
+    /**
+     * '/api/networks/:networkId/agents/connected'
+     */
     .get('/connected', ({ networkId }) => {
         return networkAgentRedisCacheService
             .readNetworkAgents(

@@ -8,7 +8,7 @@ import { LiveUpdates } from './live-updates.class';
 import { networkChannelRoutes } from './api/networks/networks.route';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
-import { networkAuthorityRoutes } from './api/networks/authorities/authorities.route';
+import { networkAuthorityRoutes } from './api/networks/authorities.route';
 import { networkAgentRoutes } from './api/networks/agents.route';
 
 // ****************************************************************************
