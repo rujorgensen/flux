@@ -9,6 +9,9 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "noPropertyAccessFromIndexSignature": true,
+        "lib": [
+            "es2021"
+        ]
     },
     "files": [],
     "include": [],
