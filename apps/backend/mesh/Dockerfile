@@ -24,11 +24,8 @@ FROM base AS build
 COPY --from=install ./src/node_modules node_modules
 COPY . .
 
-# Disable Nx daemon to avoid project graph failures in Docker
-ENV NX_DAEMON=false
-
 # ENV NODE_ENV=production
-RUN bunx nx run backend-mesh:build
+RUN bun run apps/backend/mesh/build.js --projectRoot=apps/backend/mesh
 
 # ******************************************************************************
 # *** DEPLOY STAGE
