@@ -127,8 +127,19 @@ export class FluxMeshServer {
     private readonly channelManager: NetworkChannelManager;
 
     constructor(
-        private readonly port: number = 8080,
+        private readonly options?: {
+            port?: number,
+            redisConnectionString?: string;
+        },
     ) {
+        this.options = {
+            // Defaults
+            port: 8080,
+            redisConnectionString: '',
+            // Override with provided options
+            ...this.options,
+        };
+
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
         const networkAgentManager: NetworkAgentManager = new NetworkAgentManager();
 
@@ -155,7 +166,7 @@ export class FluxMeshServer {
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
         this.bunServer = Bun.serve({
-            port: this.port,
+            port: this.options.port,
             idleTimeout: 0, // deactivate timeout
             routes: {
                 // ****************************************************************************

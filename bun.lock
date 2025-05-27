@@ -29,7 +29,7 @@
         "open-props": "^1.7.15",
         "redis": "^5.1.0",
         "rollup-plugin-visualizer": "^5.14.0",
-        "svelte": "^5.33.1",
+        "svelte": "^5.33.2",
         "typescript": "^5.8.3",
         "webpack-bundle-analyzer": "^4.10.2",
       },
@@ -49,7 +49,6 @@
         "@types/node": "22.15.21",
         "@vitest/coverage-v8": "^3.1.4",
         "@vitest/ui": "^3.1.4",
-        "jiti": "2.4.2",
         "jsdom": "~26.1.0",
         "nx": "21.1.2",
         "open-cli": "^8.0.0",
@@ -2632,7 +2631,7 @@
 
     "supports-preserve-symlinks-flag": ["supports-preserve-symlinks-flag@1.0.0", "", {}, "sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w=="],
 
-    "svelte": ["svelte@5.33.1", "", { "dependencies": { "@ampproject/remapping": "^2.3.0", "@jridgewell/sourcemap-codec": "^1.5.0", "@sveltejs/acorn-typescript": "^1.0.5", "@types/estree": "^1.0.5", "acorn": "^8.12.1", "aria-query": "^5.3.1", "axobject-query": "^4.1.0", "clsx": "^2.1.1", "esm-env": "^1.2.1", "esrap": "^1.4.6", "is-reference": "^3.0.3", "locate-character": "^3.0.0", "magic-string": "^0.30.11", "zimmerframe": "^1.1.2" } }, "sha512-7znzaaQALL62NBzkdKV04tmYIVla8qjrW+k6GdgFZcKcj8XOb8iEjmfRPo40iaWZlKv3+uiuc0h4iaGgwoORtA=="],
+    "svelte": ["svelte@5.33.2", "", { "dependencies": { "@ampproject/remapping": "^2.3.0", "@jridgewell/sourcemap-codec": "^1.5.0", "@sveltejs/acorn-typescript": "^1.0.5", "@types/estree": "^1.0.5", "acorn": "^8.12.1", "aria-query": "^5.3.1", "axobject-query": "^4.1.0", "clsx": "^2.1.1", "esm-env": "^1.2.1", "esrap": "^1.4.6", "is-reference": "^3.0.3", "locate-character": "^3.0.0", "magic-string": "^0.30.11", "zimmerframe": "^1.1.2" } }, "sha512-uiyusx2rUa9NmVMaIcShnZyDhOfFXxgkn5eXOcgjDBL3RYQGR1+7TctPcI6AWNbu4gHWF5xZ/TlFM7nnw5H+JQ=="],
 
     "svelte2tsx": ["svelte2tsx@0.7.39", "", { "dependencies": { "dedent-js": "^1.0.1", "pascal-case": "^3.1.1" }, "peerDependencies": { "svelte": "^3.55 || ^4.0.0-next.0 || ^4.0 || ^5.0.0-next.0", "typescript": "^4.9.4 || ^5.0.0" } }, "sha512-NX8a7eSqF1hr6WKArvXr7TV7DeE+y0kDFD7L5JP7TWqlwFidzGKaG415p992MHREiiEWOv2xIWXJ+mlONofs0A=="],
 

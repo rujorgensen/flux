@@ -63,6 +63,9 @@
             "@persistica/flux-authority": [
                 "packages/flux/authority/src/index.ts"
             ],
+            "@persistica/mesh": [
+                "packages/flux/mesh/src/index.ts"
+            ],
             "@utils/pico-logger": [
                 "libs/utils/logger/src/index.ts"
             ]

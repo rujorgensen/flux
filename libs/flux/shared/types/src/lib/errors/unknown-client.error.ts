@@ -2,7 +2,8 @@
  * An unknown client (either agent or authority) error.
  */
 
-import type { TClientId, TProcessAddress } from '../routing.type';
+import type { TProcessAddress } from '../routing.type';
+import type { TClientId } from '@flux/shared/types';
 
 export class UnknownClientError extends Error {
     constructor(
