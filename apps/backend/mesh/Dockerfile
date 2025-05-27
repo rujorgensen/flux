@@ -33,7 +33,6 @@ RUN bun run apps/backend/mesh/build.js --projectRoot=apps/backend/mesh
 # Copy production dependencies and source code into final image
 FROM base AS deploy
 
-COPY --from=install ./src/node_modules node_modules
 COPY --from=build ./src/dist ./dist
 
 # Run the app as bun_user
