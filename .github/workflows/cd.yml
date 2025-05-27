@@ -45,7 +45,7 @@ jobs:
           push: true
           context: .
           file: ./apps/backend/mesh/Dockerfile
-          target: run-stage
+          target: deploy
           tags: |
               ${{ secrets.DOCKER_HUB_USERNAME }}/persistica-mesh:staging-${{ steps.package-version.outputs.current-version }}
               ${{ secrets.DOCKER_HUB_USERNAME }}/persistica-mesh:latest
