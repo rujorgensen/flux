@@ -62,9 +62,13 @@ export class BunRedisClient extends EventEmitter<{
         return new BunRedisClient(this.options);
     }
 
+    /**
+     * 
+     * @returns { Promise<void> }
+     */
     public async connect(
 
-    ) {
+    ): Promise<void> {
         if (this.connected || this.reconnecting) {
             return;
         }

@@ -27,16 +27,16 @@ export class BunRedisPubSub {
 
         this.publisher
             .on('error', (error) => {
-                console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis client error:`, error.message);
+                console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub client error:`, error.message);
             })
             .on('reconnecting', () => {
-                console.log(`${this._options.name ? `[${this._options.name}]` : ''}🔄 Redis reconnecting...`);
+                console.log(`${this._options.name ? `[${this._options.name}]` : ''}🔄 Redis pub/sub reconnecting...`);
             })
             .on('ready', () => {
-                console.log(`${this._options.name ? `[${this._options.name}]` : ''}✅ Redis client ready`);
+                console.log(`${this._options.name ? `[${this._options.name}]` : ''}✅ Redis pub/sub client ready`);
             })
             .on('end', () => {
-                console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis connection closed`);
+                console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub connection closed`);
             });
 
         // * Create Redis subscriber

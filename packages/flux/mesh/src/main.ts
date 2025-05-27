@@ -645,7 +645,7 @@ export class FluxMeshServer {
         // TODO: DETECT WHEN READY
         setTimeout(() => {
             console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
-            console.log(`🚀 Flux mesh server running on localhost:${this.port}`);
+            console.log(`🚀 Flux mesh server running on localhost:${this.options?.port}`);
 
             setInterval(() => {
                 this.redisConnection.setConnected(`${machineAddress}/${processId}`);
