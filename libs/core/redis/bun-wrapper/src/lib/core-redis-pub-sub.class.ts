@@ -75,7 +75,7 @@ export class BunRedisPubSub {
         callback: MessageCallback,
     ): Promise<void> {
         try {
-            await this.subscriber.subscribe(channelId, callback);
+            await this.subscriber.subscribe(channelId, <any>callback); // TODO
         } catch {
             console.log('error caught #2');
         }
@@ -86,7 +86,7 @@ export class BunRedisPubSub {
         callback: MessageCallback,
     ): void {
         try {
-            this.publisher.unsubscribe(channelId, callback);
+            this.publisher.unsubscribe(channelId, <any>callback); // TODO
         } catch {
             console.log('error caught #1');
         }

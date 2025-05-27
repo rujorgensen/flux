@@ -20,7 +20,7 @@ if (!process.env['FLUX_MESH_REDIS_URL']) {
  * @returns
  */
 export const getMeshRedisConnection = (
-
+    connectionString?: string,
 ) => {
     // We have to read the env variable here, because otherwise it can't be modified in tests
     redisConnection ??= new RedisConnection(process.env['FLUX_MESH_REDIS_URL'] as string);

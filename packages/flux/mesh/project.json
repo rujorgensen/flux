@@ -14,45 +14,13 @@
                 "command": "bun --watch run ./packages/flux/mesh/src/main.ts"
             }
         },
-        "bun-build": {
+        "build": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "bun build {projectRoot}/src/main.ts --outdir ./dist/packages/flux/mesh --external bun"
-            }
-        },
-        "build": {
-            "executor": "@nx/esbuild:esbuild",
-            "outputs": [
-                "{options.outputPath}"
-            ],
-            "defaultConfiguration": "production",
-            "options": {
-                "platform": "node",
-                "outputPath": "dist/packages/flux/mesh",
-                "format": [
-                    "cjs"
-                ],
-                "bundle": false,
-                "main": "packages/flux/mesh/src/main.ts",
-                "tsConfig": "packages/flux/mesh/tsconfig.app.json",
-                "generatePackageJson": true,
-                "esbuildOptions": {
-                    "sourcemap": true,
-                    "outExtension": {
-                        ".js": ".js"
-                    }
-                }
-            },
-            "configurations": {
-                "development": {},
-                "production": {
-                    "esbuildOptions": {
-                        "sourcemap": false,
-                        "outExtension": {
-                            ".js": ".js"
-                        }
-                    }
-                }
+                "command": "bun run {projectRoot}/build.js",
+                "args": [
+                    "--projectRoot={projectRoot}"
+                ]
             }
         },
         "serve": {
@@ -73,12 +41,6 @@
                     "buildTarget": "persistica-flux-mesh:build:production"
                 }
             }
-        },
-        "docker-build": {
-            "dependsOn": [
-                "build"
-            ],
-            "command": "docker build -f packages/flux/mesh/Dockerfile . -t flux-backend-mesh"
         },
         "nx-release-publish": {
             "options": {
