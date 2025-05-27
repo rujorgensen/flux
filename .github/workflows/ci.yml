@@ -147,3 +147,41 @@ jobs:
         # RYUK does not work with github actions or Circle CI
         run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected:e2e # --no-agents
  
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [install-deps]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+        
+      - uses: nrwl/nx-set-shas@v4
+
+      - name: 💾 Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      -
+        name: Setup bun cache
+        id: cache-bun
+        uses: actions/cache@v4.2.3
+        with:
+          fail-on-cache-miss: true
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      -
+        name: 💾 Install dependencies (FOR SOME REASON, READING THE CACHE IS NOT ENOUGH)
+        run: bun install --no-cache
+
+      - name: 🛠️ Build
+        # RYUK does not work with github actions or Circle CI
+        run: bunx nx run persistica-flux-mesh:build
+ 
