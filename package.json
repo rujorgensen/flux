@@ -51,7 +51,7 @@
         "madge": "^8.0.0",
         "open-props": "^1.7.15",
         "redis": "^5.1.0",
-        "rollup-plugin-visualizer": "^5.14.0",
+        "rollup-plugin-visualizer": "^6.0.0",
         "svelte": "^5.33.4",
         "typescript": "^5.8.3",
         "webpack-bundle-analyzer": "^4.10.2"
