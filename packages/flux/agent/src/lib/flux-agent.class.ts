@@ -62,7 +62,7 @@ export class FluxAgent {
 
         const ticket = await authenticateAgentOrThrow(
             this.networkId as TNetworkId_S,
-            this.options?.domain ?? 'http://localhost:8080',
+            this.options?.domain ?? 'http://localhost:5100',
             identification,
             {
                 clientUId: clientUId as TAgentOwnUId,

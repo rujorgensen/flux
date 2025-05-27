@@ -64,7 +64,7 @@ export class FluxAuthority {
         const ticket: string = await retry<any>(
             () => authenticateNetworkAuthorityOrThrow(
                 this.networkId as TNetworkId_S,
-                this.options?.domain ?? 'http://localhost:8080',
+                this.options?.domain ?? 'http://localhost:5100',
                 authorityKey,
                 {
                     machineUID,

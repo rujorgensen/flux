@@ -38,6 +38,6 @@ COPY --from=build ./src/dist ./dist
 # Run the app as bun_user
 RUN addgroup -S app_group && adduser -S bun_user -G app_group
 USER bun_user
-EXPOSE 8080/tcp
+EXPOSE 5100/tcp
 
 ENTRYPOINT [ "bun", "run", "./dist/apps/backend/mesh/main.js" ]

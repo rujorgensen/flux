@@ -28,7 +28,7 @@ const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to conne
 
 describe('persistica-flux-mesh', () => {
     let fluxMeshServer: FluxMeshServer;
-    let fluxServerPort: number = 8080;
+    let fluxServerPort: number = 5100;
     let fluxDomain: string = `localhost:${fluxServerPort}`;
 
     beforeAll(async () => {

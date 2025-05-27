@@ -67,3 +67,7 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 
 Issues:
     - "Firewall rules blocked me from connecting to one or more addresses"
+
+## Ports
+
+5100 Default mesh server port

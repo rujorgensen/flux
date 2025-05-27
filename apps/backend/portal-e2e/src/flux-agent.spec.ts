@@ -21,7 +21,7 @@ const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to registe
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 
 describe('persistica-flux-api-agents', () => {
-    let fluxServerPort: number = 8080;
+    let fluxServerPort: number = 5100;
     let domain: string = `localhost:${fluxServerPort}`;
 
     beforeAll(async () => {

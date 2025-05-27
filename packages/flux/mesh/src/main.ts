@@ -134,7 +134,7 @@ export class FluxMeshServer {
     ) {
         this.options = {
             // Defaults
-            port: 8080,
+            port: 5100,
             redisConnectionString: '',
             // Override with provided options
             ...this.options,
