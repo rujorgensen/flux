@@ -2,7 +2,7 @@
 # *** BASE STAGE
 # ******************************************************************************
 # use the official Bun image, see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1.2.14-alpine AS base
+FROM oven/bun:1.2.15-alpine AS base
 
 WORKDIR /src
 
