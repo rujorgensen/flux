@@ -70,4 +70,12 @@ Issues:
 
 ## Ports
 
-5100 Default mesh server port
+    Mesh
+    5100    - Default mesh server port
+
+    Portal
+    3000    - API
+    3001    - UI
+
+    Caddy
+    9000    - Caddy proxy to Portal

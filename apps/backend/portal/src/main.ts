@@ -70,7 +70,7 @@ export const app = new Elysia()
     //   console.log('onBeforeHandle')
     // })
 
-    .use(cors({
+    .use(cors(Bun.env.NODE_ENV === 'production' ? undefined : {
         origin: 'localhost:3001',
         methods: [
             'GET',

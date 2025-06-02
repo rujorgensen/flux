@@ -4,6 +4,15 @@
     "sourceRoot": "apps/backend/src",
     "projectType": "application",
     "targets": {
+        "build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun run {projectRoot}/build.js",
+                "args": [
+                    "--projectRoot={projectRoot}"
+                ]
+            }
+        },
         "serve": {
             "executor": "nx:run-commands",
             "options": {
