@@ -3,12 +3,12 @@
     export let networkId: string;
 
     import { writable } from "svelte/store";
-    import { app } from "../../../../data/api";
-    import type { INetworkChannel } from "@flux/shared/types";
+    import { app } from "../../../data/api";
+    import type { TNetworkAuthority } from "@flux/shared/types";
     import { onMount } from "svelte";
     import { formatDate } from "apps/frontend/portal/src/utils/pipes/data-format.pipe";
 
-    export const dataStore = writable<INetworkChannel[] | undefined>();
+    export const dataStore = writable<TNetworkAuthority[] | undefined>();
 
     onMount(async () => {
         const fetchData = async () => {
@@ -16,13 +16,13 @@
                 .networks({
                     networkId,
                 })
-                .channels.get();
+                .authorities.connected.get();
 
             if (data) {
                 dataStore.set(
                     data.map((a) => ({
                         ...a,
-                        createdAt: new Date(a.createdAt),
+                        connectedAt: new Date(a.connectedAt),
                     })),
                 );
             } else {
@@ -39,10 +39,7 @@
 <table>
     <thead>
         <tr>
-            <th>Channel Name</th>
-            <th>member distribution</th>
-            <th>Member Count</th>
-            <th>Data Usage [bytes]</th>
+            <th>ID</th>
             <th>Created At</th>
         </tr>
     </thead>
@@ -50,11 +47,8 @@
         {#if $activeChannels}
             {#each $activeChannels as row}
                 <tr>
-                    <td>{row.channelName}</td>
-                    <td>{row.memberDistribution}</td>
-                    <td style="text-align: right;">{row.members}</td>
-                    <td style="text-align: right;">{row.bytes}</td>
-                    <td>{formatDate(row.createdAt)}</td>
+                    <td>{row.id}</td>
+                    <td>{formatDate(row.connectedAt)}</td>
                 </tr>
             {/each}
         {/if}

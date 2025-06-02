@@ -3,12 +3,12 @@
     export let networkId: string;
 
     import { writable } from "svelte/store";
-    import { app } from "../../../../data/api";
-    import type { TNetworkAuthority } from "@flux/shared/types";
+    import { app } from "../../../data/api";
     import { onMount } from "svelte";
     import { formatDate } from "apps/frontend/portal/src/utils/pipes/data-format.pipe";
+    import type { TNetworkAgent } from "@flux/mesh/store/redis/network-agent";
 
-    export const dataStore = writable<TNetworkAuthority[] | undefined>();
+    export const dataStore = writable<TNetworkAgent[] | undefined>();
 
     onMount(async () => {
         const fetchData = async () => {
@@ -16,7 +16,7 @@
                 .networks({
                     networkId,
                 })
-                .authorities.connected.get();
+                .agents.connected.get();
 
             if (data) {
                 dataStore.set(
@@ -30,24 +30,39 @@
             }
         };
 
-        fetchData().then().catch();
+        fetchData()
+            .then()
+            .catch((error) => {
+                console.error(
+                    "Error occurred while fetching connected agents:",
+                    error,
+                );
+            });
     });
 
-    export const activeChannels = dataStore;
+    export const connectedAgents = dataStore;
 </script>
 
 <table>
     <thead>
         <tr>
             <th>ID</th>
-            <th>Created At</th>
+            <th>UID</th>
+            <th>IP</th>
+            <th>address</th>
+            <th>bytes</th>
+            <th>Connected At</th>
         </tr>
     </thead>
     <tbody>
-        {#if $activeChannels}
-            {#each $activeChannels as row}
+        {#if $connectedAgents}
+            {#each $connectedAgents as row}
                 <tr>
                     <td>{row.id}</td>
+                    <td>{row.uid}</td>
+                    <td>{row.ip}</td>
+                    <td>{row.address}</td>
+                    <td>{row.bytes}</td>
                     <td>{formatDate(row.connectedAt)}</td>
                 </tr>
             {/each}

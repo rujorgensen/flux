@@ -6,20 +6,25 @@ import type {
 export const readConnectedAuthoritiesCount = async (
     networkId: string,
 ): Promise<TNetworkAuthorityCountAt | null> => {
-    const { data } = await app.api
-        .networks({
-            networkId,
-        })
-        .authorities
-        .count
-        .get({
-            query: {
-                when: 'now',
-            },
-        });
+    try {
+        const { data } = await app.api
+            .networks({
+                networkId,
+            })
+            .authorities
+            .count
+            .get({
+                query: {
+                    when: 'now',
+                },
+            });
 
-    return data ? {
-        ...data,
-        date: new Date(data.date),
-    } : null;
+        return data ? {
+            ...data,
+            date: new Date(data.date),
+        } : null;
+
+    } catch {
+        return null;
+    }
 };
