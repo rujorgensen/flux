@@ -1,6 +1,7 @@
 services:
   portal-ui:
     image: persitica-portal-ui:latest
+    container_name: portal-ui-prod
     build:
       context: .
       dockerfile: ./apps/frontend/portal/Dockerfile
@@ -10,6 +11,7 @@ services:
 
   portal-api:
     image: persitica-portal-api:latest
+    container_name: portal-api-prod
     # Use this locally, otherwise provide on the server env.
     # env_file:
     #   - ../.env.production
@@ -25,6 +27,7 @@ services:
    # ******************************************************************************
   caddy:
     image: caddy:2.10.0
+    container_name: portal-caddy-proxy-prod
     restart: unless-stopped
     ports:
       - "9000:9000"
@@ -38,7 +41,7 @@ services:
       portal-ui:
         condition: service_started
     volumes:
-      - ./Caddyfile.portal.prod:/etc/caddy/Caddyfile
+      - /Caddyfile.portal.prod:/etc/caddy/Caddyfile
     networks:
       - portal-public-network
 
