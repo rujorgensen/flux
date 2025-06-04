@@ -1,11 +1,12 @@
+# Portal PROD Caddyfile
 {
 	auto_https off
 	debug
 }
 
 http://localhost:9000 {
-	reverse_proxy /api* localhost:3000
-	reverse_proxy * localhost:3001
+	reverse_proxy /api* portal-api:3000
+	reverse_proxy * portal-ui:3001
 
 	handle /cddy {
 		respond "Caddytime!"

@@ -41,7 +41,10 @@ services:
       portal-ui:
         condition: service_started
     volumes:
-      - ./.deploy/portal/Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
     networks:
       - portal-public-network
 
@@ -51,3 +54,10 @@ services:
 networks:
   portal-public-network:
     driver: bridge
+
+# *******************************************************************************
+# *** Volumes
+# *******************************************************************************
+volumes:
+  caddy_data:
+  caddy_config:
