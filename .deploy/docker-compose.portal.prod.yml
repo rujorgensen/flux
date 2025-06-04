@@ -1,0 +1,50 @@
+services:
+  portal-ui:
+    image: persitica-portal-ui:latest
+    build:
+      context: ..
+      dockerfile: ./apps/frontend/portal/Dockerfile
+      target: deploy
+    networks:
+      - portal-public-network
+
+  portal-api:
+    image: persitica-portal-api:latest
+    # Use this locally, otherwise provide on the server env.
+    # env_file:
+    #   - ../.env.production
+    build:
+      context: ..
+      dockerfile: ./apps/backend/portal/Dockerfile
+      target: deploy
+    networks:
+      - portal-public-network
+
+   # ******************************************************************************
+   # *** Proxy
+   # ******************************************************************************
+  caddy:
+    image: caddy:2.10.0
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+  #    - "80:80"
+  #    - "443:443"
+  #    - "443:443/udp"
+
+    depends_on:
+      portal-api:
+        condition: service_started
+      portal-ui:
+        condition: service_started
+    volumes:
+      - ./Caddyfile.portal.prod:/etc/caddy/Caddyfile
+    networks:
+      - portal-public-network
+
+# *******************************************************************************
+# *** Networks
+# *******************************************************************************
+networks:
+  portal-public-network:
+    driver: bridge
