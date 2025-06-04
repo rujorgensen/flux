@@ -15,13 +15,12 @@ export default defineConfig({
     adapter: node({
         mode: 'standalone',
     }),
-    site: 'https://example.com',
+    site: 'https://portal.persistica.io',
     integrations: [
         mdx(),
         sitemap(),
         svelte(),
     ],
-
     // Add Vite configuration with proxy settings
     vite: {
         plugins: [
@@ -32,19 +31,7 @@ export default defineConfig({
             }),
         ],
         server: {
-            proxy: {
-                ...proxy,
-                '/auth': {
-                    target: 'http://localhost:3000',
-                    changeOrigin: true,
-                    secure: false,
-                },
-                '/api': {
-                    target: 'http://localhost:3000',
-                    changeOrigin: true,
-                    secure: false
-                }
-            },
+            proxy,
         }
     }
 });

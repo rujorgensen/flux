@@ -1,13 +1,12 @@
 {
     "name": "@persistica/flux-mesh",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Persistica Flux Mesh",
     "type": "module",
     "keywords": [],
     "publishConfig": {
         "access": "public"
     },
-    "main": "./index.cjs",
     "types": "./index.d.ts",
     "repository": {
         "type": "git",
@@ -19,7 +18,5 @@
         "url": "https://github.com/rujorgensen/persistica/issues"
     },
     "homepage": "https://github.com/rujorgensen/persistica#readme",
-    "dependencies": {
-        "alpinejs": "^3.14.9"
-    }
+    "dependencies": {}
 }

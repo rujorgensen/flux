@@ -7,7 +7,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "main": "./index.cjs",
+    "main": "./index.esm",
     "types": "./index.d.ts",
     "repository": {
         "type": "git",

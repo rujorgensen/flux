@@ -19,7 +19,7 @@
                 "tsConfig": "packages/flux/agent/tsconfig.lib.json",
                 "assets": [],
                 "format": [
-                    "cjs"
+                    "esm"
                 ],
                 "generatePackageJson": true
             }
