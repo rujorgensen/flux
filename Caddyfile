@@ -4,7 +4,7 @@
 	debug
 }
 
-http://localhost:9000 {
+http://:9000 {
 	reverse_proxy /api* portal-api:3000
 	reverse_proxy * portal-ui:3001
 
