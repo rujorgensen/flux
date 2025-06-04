@@ -1,6 +1,6 @@
 {
 	auto_https off
-    debug
+	debug
 }
 
 http://localhost:9000 {
