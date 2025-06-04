@@ -41,7 +41,7 @@ services:
       portal-ui:
         condition: service_started
     volumes:
-      - ./.deploy/portal/Caddyfile:/etc/caddy
+      - ./.deploy/portal:/etc/caddy
     networks:
       - portal-public-network
 
