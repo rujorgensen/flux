@@ -2,7 +2,7 @@ services:
   portal-ui:
     image: persitica-portal-ui:latest
     build:
-      context: ..
+      context: .
       dockerfile: ./apps/frontend/portal/Dockerfile
       target: deploy
     networks:
@@ -14,7 +14,7 @@ services:
     # env_file:
     #   - ../.env.production
     build:
-      context: ..
+      context: .
       dockerfile: ./apps/backend/portal/Dockerfile
       target: deploy
     networks:
