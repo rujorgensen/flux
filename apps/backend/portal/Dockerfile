@@ -12,6 +12,7 @@ WORKDIR /src
 FROM base AS install
 
 COPY package.json bun.lock ./
+COPY prisma ./prisma/
 
 RUN bun install --frozen-lockfile
 
@@ -33,6 +34,7 @@ RUN bun run apps/backend/portal/build.js --projectRoot=apps/backend/portal
 FROM base AS deploy
 
 COPY package.json ./
+COPY prisma ./prisma/
 COPY --from=build ./src/dist ./dist
 
 # Run the app as bun_user
