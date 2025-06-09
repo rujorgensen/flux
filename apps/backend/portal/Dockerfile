@@ -32,6 +32,7 @@ RUN bun run apps/backend/portal/build.js --projectRoot=apps/backend/portal
 # Copy production dependencies and source code into final image
 FROM base AS deploy
 
+COPY package.json ./
 COPY --from=build ./src/dist ./dist
 
 # Run the app as bun_user
@@ -39,4 +40,4 @@ RUN addgroup -S app_group && adduser -S bun_user -G app_group
 USER bun_user
 EXPOSE 3000/tcp
 
-ENTRYPOINT [ "bun", "run", "./dist/apps/backend/portal/main.js" ]
+ENTRYPOINT [ "bun" ,"deploy:portal"]

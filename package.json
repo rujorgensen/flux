@@ -14,6 +14,7 @@
         "//-02b": "// *** Prisma                                                                ",
         "//-02c": "// ****************************************************************************",
         "prisma:migrate:dev:portal": "bunx prisma migrate dev --schema=./prisma/schema.prisma",
+        "prisma:deploy": "bunx prisma migrate deploy --schema=./prisma/schema.prisma",
         "//-03a": "// ****************************************************************************",
         "//-03b": "// *** Update                                                                ",
         "//-03c": "// ****************************************************************************",
@@ -24,7 +25,11 @@
         "//-04b": "// *** Caddy                                                                ",
         "//-04c": "// ****************************************************************************",
         "caddy:config:read": "curl localhost:2019/config/",
-        "caddy:config:load": "caddy adapt --config ./Caddyfile && caddy reload"
+        "caddy:config:load": "caddy adapt --config ./Caddyfile && caddy reload",
+        "//-07a": "// ****************************************************************************",
+        "//-07b": "// *** Deploy                                                                  ",
+        "//-07c": "// ****************************************************************************",
+        "deploy:portal": "bun prisma:deploy && bun run ./dist/apps/backend/portal/main.js"
     },
     "dependencies": {
         "@astrojs/mdx": "^4.3.0",
