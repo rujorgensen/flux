@@ -16,15 +16,39 @@ services:
     volumes:
       - dragonflymeshdata:/mesh-dev-data
 
+  mesh-postgres:
+    image: postgres:17.5-alpine
+    restart: always
+    container_name: mesh-postgres
+    environment:
+      POSTGRES_USER: ${MESH_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${MESH_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${MESH_POSTGRES_DB}
+    # ports:
+    #   - "5434:5432"
+    volumes:
+      - mesh-pgdata-dev:/var/lib/postgresql/data
+    networks:
+      - private-mesh-network
+
   mesh-server:
     image: 'rujorgensen/persistica/mesh'
     ports:
       - "6350:6379"
+    networks:
+      - private-mesh-network
 
   portal:
     image: 'rujorgensen/persistica/portal'
     ports:
       - "6350:6379"
+    networks:
+      - private-mesh-network
+
+networks:
+  private-mesh-network:
+    driver: bridge
 
 volumes:
   dragonflymeshdata:
+  mesh-pgdata-dev:

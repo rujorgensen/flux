@@ -31,6 +31,20 @@ services:
     volumes:
       - dragonflyportaldata:/portal-dev-data
 
+  mesh-postgres-dev:
+    image: postgres:17.5-alpine
+    restart: always
+    container_name: mesh-postgres-dev
+    environment:
+      POSTGRES_USER: dev-user
+      POSTGRES_PASSWORD: dev-password
+      POSTGRES_DB: dev-db
+    ports:
+      - "5434:5432"
+    volumes:
+      - mesh-pgdata-dev:/var/lib/postgresql/data
+
 volumes:
   dragonflymeshdata:
   dragonflyportaldata:
+  mesh-pgdata-dev:
