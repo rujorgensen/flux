@@ -75,7 +75,7 @@ export class LiveUpdates {
 
                         const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
 
-                        console.log(`🔒 A client is trying to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
+                        console.log(`🔒 A client is attempting to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
 
                         // console.error(`✅ Client suscribed to channel with identification`);
 
