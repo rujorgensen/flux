@@ -27,7 +27,7 @@
         "//-04c": "// ****************************************************************************",
         "caddy:config:read": "curl localhost:2019/config/",
         "caddy:config:load": "caddy adapt --config ./Caddyfile && caddy reload",
-        "postinstall": "bun run prisma:generate:portal || true",
+        "postinstall": "bun prisma:generate:portal || true",
         "//-07a": "// ****************************************************************************",
         "//-07b": "// *** Deploy                                                                  ",
         "//-07c": "// ****************************************************************************",

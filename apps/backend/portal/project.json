@@ -41,6 +41,15 @@
         },
         "docker-dev": {
             "command": "docker compose -p flux-dev -f '.deploy/docker-compose.dev.yml' up -d --build"
+        },
+        "docker-build": {
+            "command": "docker build -f apps/backend/portal/Dockerfile . -t flux-portal-backend"
+        },
+        "docker-build-and-run": {
+            "dependsOn": [
+                "docker-build"
+            ],
+            "command": "docker run -d --name flux-dev -p 3000:3000 flux-portal-backend"
         }
     },
     "tags": [
