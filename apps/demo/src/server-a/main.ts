@@ -44,7 +44,7 @@ await fluxAuthority
             channelTopic: TChannelName,
             identification: string,
         ): Promise<boolean> => {
-            console.log(`🔒 A client is trying to subscribe to topic '${channelTopic}', using identification '${identification}'`);
+            console.log(`🔒 A client is attempting to subscribe to topic '${channelTopic}', using identification '${identification}'`);
 
             console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
 

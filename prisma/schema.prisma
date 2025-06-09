@@ -1,32 +1,53 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../../node_modules/@prisma-types/flux"
+    provider = "prisma-client-js"
+    output   = "../node_modules/@prisma-types/flux"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("FLUX_DATABASE_URL")
+    provider = "postgresql"
+    url      = env("FLUX_DATABASE_URL")
 }
 
 // ****************************************************************************
 // *** User
 // ****************************************************************************
 model User {
-    id                   Int           @id @default(autoincrement())
+    id                   String        @id @default(nanoid())
     email                String        @unique
     magicLink            String?       @unique
     magicLinkExpiryAt    DateTime?
     magicLinkRequestedAt DateTime?
     userSessions         UserSession[]
+    userNetworks         UserNetwork[]
 }
 
 model UserSession {
-    id        String   @id @default(nanoid())
-    userId    Int
-    user      User     @relation(fields: [userId], references: [id])
-    createdAt DateTime @default(now())
-    ip        String
-    userAgent String
+    id                 String         @id @default(nanoid())
+    userId             String
+    user               User           @relation(fields: [userId], references: [id])
+    createdAt          DateTime       @default(now())
+    ip                 String
+    userAgent          String
+    loginAuthenticator String
+    authenticator      EAuthenticator
+}
+
+model Network {
+    id           String        @id @default(nanoid())
+    alias        String
+    secretKey    String        @unique
+    updatedAt    DateTime      @default(now())
+    createdAt    DateTime      @default(now())
+    userNetworks UserNetwork[]
+}
+
+model UserNetwork {
+    id        String           @id @default(nanoid())
+    userId    String
+    user      User             @relation(fields: [userId], references: [id])
+    role      EUserNetworkRole
+    networkId String
+    network   Network          @relation(fields: [networkId], references: [id])
 }
 
 // ****************************************************************************
@@ -59,4 +80,16 @@ model ChannelsHistory {
     networkId  String   @unique
     count      Int
     timeslotAt DateTime @default(now())
+}
+
+enum EAuthenticator {
+    USERNAME_PASSWORD
+    MAGIC_LINK
+    GOOGLE
+    FACEBOOK
+}
+
+enum EUserNetworkRole {
+    USER
+    ADMIN
 }
