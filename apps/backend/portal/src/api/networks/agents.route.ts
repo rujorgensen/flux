@@ -1,6 +1,6 @@
-import { Elysia, t } from 'elysia';
-import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
+import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
+import { Elysia, t } from 'elysia';
 import type { TNetworkAgentCountAt } from 'libs/flux/shared/types/src/lib/agents/network-agent.type';
 import { networkIdValidatorPlugin } from './plugins';
 
@@ -35,10 +35,32 @@ export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId
     /**
      * '/api/networks/:networkId/agents/connected'
      */
-    .get('/connected', ({ networkId }) => {
-        return networkAgentRedisCacheService
+    .get('/connected', async ({ networkId, query }) => {
+        const agents = await networkAgentRedisCacheService
             .readNetworkAgents(
                 networkId,
             );
+
+        // Apply pagination
+        const page = query.page || 1;
+        const pageSize = query.pageSize || 10;
+        const offset = (page - 1) * pageSize;
+        
+        const paginatedAgents = agents.slice(offset, offset + pageSize);
+        
+        return {
+            data: paginatedAgents,
+            pagination: {
+                page,
+                pageSize,
+                total: agents.length,
+                totalPages: Math.ceil(agents.length / pageSize)
+            }
+        };
+    }, {
+        query: t.Object({
+            page: t.Optional(t.Number({ minimum: 1 })),
+            pageSize: t.Optional(t.Number({ minimum: 1, maximum: 100 }))
+        })
     })
     ;

@@ -1,9 +1,9 @@
-import { Elysia, t } from 'elysia';
-import type {
-    TNetworkChannelCountAt,
-    INetworkChannel,
-} from '@flux/shared/types';
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
+import type {
+    INetworkChannel,
+    TNetworkChannelCountAt,
+} from '@flux/shared/types';
+import { Elysia, t } from 'elysia';
 import {
     type RedisConnection,
     getMeshRedisConnection,
@@ -41,10 +41,32 @@ export const networkChannelRoutes = new Elysia({ prefix: '/api/networks/:network
     /**
      * '/api/networks/:networkId/channels'
      */
-    .get('', ({ networkId }): Promise<INetworkChannel[]> => {
-        return networkChannelRedisCacheService
+    .get('', async ({ networkId, query }) => {
+        const channels = await networkChannelRedisCacheService
             .readNetworkChannels(
                 networkId,
             );
+
+        // Apply pagination
+        const page = query.page || 1;
+        const pageSize = query.pageSize || 10;
+        const offset = (page - 1) * pageSize;
+        
+        const paginatedChannels = channels.slice(offset, offset + pageSize);
+        
+        return {
+            data: paginatedChannels,
+            pagination: {
+                page,
+                pageSize,
+                total: channels.length,
+                totalPages: Math.ceil(channels.length / pageSize)
+            }
+        };
+    }, {
+        query: t.Object({
+            page: t.Optional(t.Number({ minimum: 1 })),
+            pageSize: t.Optional(t.Number({ minimum: 1, maximum: 100 }))
+        })
     })
     ;

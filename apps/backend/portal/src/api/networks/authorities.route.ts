@@ -1,10 +1,10 @@
-import { Elysia, t } from 'elysia';
+import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
+import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 import type {
     TNetworkAuthorityCountAt,
 } from '@flux/shared/types';
-import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
+import { Elysia, t } from 'elysia';
 import { networkIdValidatorPlugin } from './plugins';
-import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAuthorityService: NetworkAuthorityRedisSortedSet = new NetworkAuthorityRedisSortedSet(meshRedisConnection.getClient());
@@ -37,10 +37,32 @@ export const networkAuthorityRoutes = new Elysia({ prefix: '/api/networks/:netwo
     /**
      * '/api/networks/:networkId/authorities/connected'
      */
-    .get('/connected', ({ networkId }) => {
-        return networkAuthorityService
+    .get('/connected', async ({ networkId, query }) => {
+        const authorities = await networkAuthorityService
             .readNetworkAuthorities(
                 networkId,
             );
+
+        // Apply pagination
+        const page = query.page || 1;
+        const pageSize = query.pageSize || 10;
+        const offset = (page - 1) * pageSize;
+        
+        const paginatedAuthorities = authorities.slice(offset, offset + pageSize);
+        
+        return {
+            data: paginatedAuthorities,
+            pagination: {
+                page,
+                pageSize,
+                total: authorities.length,
+                totalPages: Math.ceil(authorities.length / pageSize)
+            }
+        };
+    }, {
+        query: t.Object({
+            page: t.Optional(t.Number({ minimum: 1 })),
+            pageSize: t.Optional(t.Number({ minimum: 1, maximum: 100 }))
+        })
     })
     ;
