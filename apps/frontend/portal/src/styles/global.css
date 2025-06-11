@@ -8,17 +8,20 @@
   */
 @import 'open-props/style';
 
-
 /*
   CSS RESET
   */
 :root {
+
+    /*
     * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
     }
 
+
+    */
     html,
     body {
         height: 100%;
@@ -44,7 +47,6 @@
     --box-shadow: 0 2px 6px rgba(var(--gray), 25%),
     0 8px 24px rgba(var(--gray), 33%),
     0 16px 32px rgba(var(--gray), 33%);
-
 
     /* --roundness-small: var(--radius-4); */
     --roundness-medium: var(--radius-3);
@@ -103,8 +105,6 @@
     --shadow-strength: var(--shadow-strength-dark);
 }
 
-
-
 @font-face {
     font-family: 'Atkinson';
     src: url('/fonts/atkinson-regular.woff') format('woff');
@@ -136,10 +136,7 @@ body {
 
 h1,
 h2,
-h3,
-h4,
-h5,
-h6 {
+h3 {
     margin: 0 0 0.5rem 0;
     color: rgb(var(--black));
     line-height: 1.2;
@@ -155,14 +152,6 @@ h2 {
 
 h3 {
     font-size: 1.953em;
-}
-
-h4 {
-    font-size: 1.563em;
-}
-
-h5 {
-    font-size: 1.25em;
 }
 
 strong,
