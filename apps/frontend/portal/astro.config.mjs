@@ -24,6 +24,9 @@ export default defineConfig({
 
     // Add Vite configuration with proxy settings
     vite: {
+        css: {
+            postcss: './postcss.config.mjs'
+        },
         plugins: [
             tsconfigPaths(),
             visualizer({

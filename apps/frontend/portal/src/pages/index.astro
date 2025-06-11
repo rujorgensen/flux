@@ -13,6 +13,7 @@ import ConnectedAgents from "../components/dashboard/tables/ConnectedAgents.svel
 import ConnectedAuthorities from "../components/dashboard/tables/ConnectedAuthorities.svelte";
 
 import ChartJS from "../components/svelte/ChartJS.svelte";
+import TailwindDemo from "../components/TailwindDemo.svelte";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import Menu from "../components/Menu.svelte";
@@ -195,6 +196,10 @@ const initialChannelCount = await readChannelCount(networkId);
                 <Pane area="ctrl">
                     <h2 slot="header">Control Panel</h2>
                     <p>dasd</p>
+                    <div style="margin-top: 20px;">
+                        <h3>TailwindCSS Demo:</h3>
+                        <TailwindDemo client:load />
+                    </div>
                 </Pane>
             </main>
 
