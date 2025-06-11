@@ -18,6 +18,12 @@
         "skipDefaultLibCheck": true,
         "baseUrl": ".",
         "paths": {
+            "$lib": [
+                "./apps/frontend/portal/src"
+            ],
+            "$lib/*": [
+                "./apps/frontend/portal/src/*"
+            ],
             "@core/redis/bun": [
                 "libs/core/redis/bun-wrapper/src/index.ts"
             ],

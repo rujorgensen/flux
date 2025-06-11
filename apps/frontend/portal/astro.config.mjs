@@ -7,6 +7,8 @@ import proxy from './proxy.conf.json' assert { type: 'json' };
 import node from '@astrojs/node';
 import { visualizer } from 'rollup-plugin-visualizer';
 import tsconfigPaths from 'vite-tsconfig-paths'
+import path from "node:path";
+import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
@@ -30,7 +32,22 @@ export default defineConfig({
                 emitFile: true,
                 filename: 'stats.html',
             }),
+            tailwindcss(),
         ],
+
+
+
+        // ... other options
+        resolve: {
+            alias: {
+                // $lib: path.resolve("./src/lib"),
+                // $lib: path.resolve("./apps/frontend/portal/src"),
+                $lib: path.resolve("./src"),
+            },
+        },
+
+
+
         server: {
             proxy: {
                 ...proxy,

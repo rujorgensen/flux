@@ -30,6 +30,7 @@ const initialConnectedAuthoritiesCount =
     await readConnectedAuthoritiesCount(networkId);
 const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
 const initialChannelCount = await readChannelCount(networkId);
+import { Button } from "$lib/components/ui/button/index.js";
 ---
 
 <!doctype html>
@@ -141,6 +142,13 @@ const initialChannelCount = await readChannelCount(networkId);
         </nav>
 
         <main id="main">
+            <Button>Click me</Button>
+
+            <Button>Click me</Button>
+
+            <Button>Click me</Button>
+
+            <Button>Click me</Button>
             <main id="grid">
                 <Pane id="connected-authorities" area="a">
                     <h2 slot="header">Connected Authorities</h2>
@@ -199,6 +207,14 @@ const initialChannelCount = await readChannelCount(networkId);
             </main>
 
             <MeltUI client:load />
+            <Button>Click me</Button>
+
+            <Button>Click me</Button>
+
+            <Button>Click me</Button>
+
+            <Button>Click me</Button>
+
             <Footer />
         </main>
     </body>
