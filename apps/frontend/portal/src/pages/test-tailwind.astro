@@ -1,0 +1,57 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+import { Button } from "$lib/components/ui/button/index.js";
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <BaseHead title="Test - Tailwind Styles" description="Test page for Tailwind CSS styles" />
+    </head>
+    <body class="min-h-screen bg-background text-foreground p-8">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <h1 class="text-4xl font-bold text-center">Tailwind CSS Test Page</h1>
+            
+            <div class="space-y-4">
+                <h2 class="text-2xl font-semibold">Button Component Tests</h2>
+                
+                <div class="flex flex-wrap gap-4">
+                    <Button>Default Button</Button>
+                    <Button variant="destructive">Destructive Button</Button>
+                    <Button variant="outline">Outline Button</Button>
+                    <Button variant="secondary">Secondary Button</Button>
+                    <Button variant="ghost">Ghost Button</Button>
+                    <Button variant="link">Link Button</Button>
+                </div>
+                
+                <div class="flex flex-wrap gap-4">
+                    <Button size="sm">Small Button</Button>
+                    <Button size="default">Default Size</Button>
+                    <Button size="lg">Large Button</Button>
+                    <Button size="icon">🔥</Button>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <h2 class="text-2xl font-semibold">Basic Tailwind Classes</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-primary text-primary-foreground p-4 rounded-lg">
+                        Primary Background
+                    </div>
+                    <div class="bg-secondary text-secondary-foreground p-4 rounded-lg">
+                        Secondary Background
+                    </div>
+                    <div class="bg-muted text-muted-foreground p-4 rounded-lg">
+                        Muted Background
+                    </div>
+                </div>
+                
+                <div class="border border-border p-4 rounded-lg">
+                    <p class="text-foreground">This is a bordered container with foreground text.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
