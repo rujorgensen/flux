@@ -12,6 +12,7 @@ WORKDIR /src
 FROM base AS install
 
 COPY package.json bun.lock ./
+COPY prisma ./prisma/
 
 RUN bun install --frozen-lockfile
 
@@ -23,9 +24,6 @@ FROM base AS build
 
 COPY --from=install ./src/node_modules node_modules
 COPY . .
-
-# Build Prisma client
-RUN bun prisma:generate:portal
 
 # ENV NODE_ENV=production
 WORKDIR /src/apps/frontend/portal
@@ -43,8 +41,12 @@ ENV PORT=3001
 
 # Can be used for debugging: RUN apk add --no-cache curl
 
+# "COPY --from=install ./src/node_modules node_modules"
+# Fixes error: Cannot find module 'kleur/colors' from '/src/dist/apps/frontend/portal/server/manifest_DmhAtobi.mjs'
+# Bun v1.2.16 (Linux x64 baseline)
+COPY --from=install ./src/node_modules node_modules
 COPY --from=build ./src/dist ./dist
-COPY --from=build ./src/node_modules/@prisma-types  ./node_modules/@prisma-types
+COPY --from=install ./src/node_modules/@prisma-types  ./node_modules/@prisma-types
 
 # Run the app as bun_user
 RUN addgroup -S app_group && adduser -S bun_user -G app_group
