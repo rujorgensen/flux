@@ -44,6 +44,7 @@ ENV PORT=3001
 # Can be used for debugging: RUN apk add --no-cache curl
 
 COPY --from=build ./src/dist ./dist
+COPY --from=build ./src/node_modules/@prisma-types  ./node_modules/@prisma-types
 
 # Run the app as bun_user
 RUN addgroup -S app_group && adduser -S bun_user -G app_group
