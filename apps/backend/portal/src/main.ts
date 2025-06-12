@@ -1,5 +1,5 @@
 import { type Context, Elysia } from 'elysia';
-import { auth } from './auth';
+import { auth } from '@backend/portal/auth';
 // import { $ } from 'bun';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';

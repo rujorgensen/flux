@@ -1,16 +1,16 @@
 ---
-import BaseHead from "../../components/BaseHead.astro";
-import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
-import LoginForm from "$lib/components/LoginForm.svelte";
-import GalleryVerticalEndIcon from "@lucide/svelte/icons/gallery-vertical-end";
-import { auth } from "apps/backend/portal/src/auth";
+import BaseHead from '../../components/BaseHead.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import LoginForm from '$lib/components/LoginForm.svelte';
+import GalleryVerticalEndIcon from '@lucide/svelte/icons/gallery-vertical-end';
+import { auth } from '@backend/portal/auth';
 
 const session = await auth.api.getSession({
     headers: Astro.request.headers,
 });
 
 if (session) {
-    console.log("User is signed in, signing out ...");
+    console.log('User is signed in, signing out ...');
     await auth.api.signOut({
         headers: Astro.request.headers,
     });

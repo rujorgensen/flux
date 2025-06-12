@@ -35,19 +35,11 @@ export default defineConfig({
             tailwindcss(),
         ],
 
-
-
-        // ... other options
         resolve: {
             alias: {
-                // $lib: path.resolve("./src/lib"),
-                // $lib: path.resolve("./apps/frontend/portal/src"),
                 $lib: path.resolve("./src"),
             },
         },
-
-
-
         server: {
             proxy: {
                 ...proxy,

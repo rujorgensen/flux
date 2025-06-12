@@ -24,6 +24,9 @@ FROM base AS build
 COPY --from=install ./src/node_modules node_modules
 COPY . .
 
+# Build Prisma client
+RUN bun prisma:generate:portal
+
 # ENV NODE_ENV=production
 WORKDIR /src/apps/frontend/portal
 RUN bunx --bun astro build

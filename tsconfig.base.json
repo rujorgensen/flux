@@ -24,6 +24,9 @@
             "$lib/*": [
                 "./apps/frontend/portal/src/*"
             ],
+            "@backend/portal/auth": [
+                "libs/portal/backend/auth/src/index.ts"
+            ],
             "@core/redis/bun": [
                 "libs/core/redis/bun-wrapper/src/index.ts"
             ],

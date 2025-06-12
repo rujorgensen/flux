@@ -1,0 +1,12 @@
+{
+    "name": "backend-portal-auth",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/portal/backend/auth/src",
+    "projectType": "library",
+    "tags": [
+        "type:auth",
+        "scope:backend"
+    ],
+    "// targets": "to see all targets run: nx show project backend-portal-auth --web",
+    "targets": {}
+}
