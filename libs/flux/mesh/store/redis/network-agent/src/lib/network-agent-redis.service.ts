@@ -159,6 +159,60 @@ export class NetworkAgentRedisService {
     }
 
     /**
+     * Returns paginated network agents for improved performance.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { number }        page - Page number (1-based)
+     * @param { number }        pageSize - Number of items per page
+     *
+     * @returns { Promise<{ data: TNetworkAgent[], total: number }> }
+     */
+    public async readNetworkAgentsPaginated(
+        networkId: TNetworkId_S,
+        page: number = 1,
+        pageSize: number = 10,
+    ): Promise<{ data: TNetworkAgent[], total: number }> {
+        // Get all agent IDs (lightweight operation)
+        const networkAgentIds = await this._client.smembers(`networks/${networkId}/agents`);
+        const total = networkAgentIds.length;
+
+        // Apply pagination to IDs only
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedIds = networkAgentIds.slice(startIndex, endIndex);
+
+        // Only fetch full data for the paginated subset
+        const agentData: TNetworkAgent[] = [];
+
+        for (const id of paginatedIds) {
+            const key: string = `networks/${networkId}/agents/${id}`;
+
+            const [name, ip, address, bytes, packets, connectedAt] = await this._client.hmget(key, [
+                'name',
+                'ip',
+                'address',
+                'bytes',
+                'packets',
+                'connectedAt',
+            ]);
+
+            if (ip || address || bytes || packets) {
+                agentData.push({
+                    id: id as TClientId,
+                    uid: name ? (name as TAgentOwnUId) : undefined,
+                    ip: ip || null,
+                    address: address as string,
+                    bytes: Number.parseInt(bytes || '0', 10),
+                    packets: Number.parseInt(packets || '0', 10),
+                    connectedAt: new Date(connectedAt as unknown as Date),
+                });
+            }
+        }
+
+        return { data: agentData, total };
+    }
+
+    /**
      * Reads the current number of connected agents on the given network.
      * 
      * @param { TNetworkId_S }  networkId

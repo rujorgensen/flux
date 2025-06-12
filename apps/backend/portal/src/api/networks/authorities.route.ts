@@ -38,25 +38,23 @@ export const networkAuthorityRoutes = new Elysia({ prefix: '/api/networks/:netwo
      * '/api/networks/:networkId/authorities/connected'
      */
     .get('/connected', async ({ networkId, query }) => {
-        const authorities = await networkAuthorityService
-            .readNetworkAuthorities(
-                networkId,
-            );
-
-        // Apply pagination
         const page = query.page || 1;
         const pageSize = query.pageSize || 10;
-        const offset = (page - 1) * pageSize;
         
-        const paginatedAuthorities = authorities.slice(offset, offset + pageSize);
+        const result = await networkAuthorityService
+            .readNetworkAuthoritiesPaginated(
+                networkId,
+                page,
+                pageSize
+            );
         
         return {
-            data: paginatedAuthorities,
+            data: result.data,
             pagination: {
                 page,
                 pageSize,
-                total: authorities.length,
-                totalPages: Math.ceil(authorities.length / pageSize)
+                total: result.total,
+                totalPages: Math.ceil(result.total / pageSize)
             }
         };
     }, {

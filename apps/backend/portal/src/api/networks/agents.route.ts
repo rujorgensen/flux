@@ -36,25 +36,23 @@ export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId
      * '/api/networks/:networkId/agents/connected'
      */
     .get('/connected', async ({ networkId, query }) => {
-        const agents = await networkAgentRedisCacheService
-            .readNetworkAgents(
-                networkId,
-            );
-
-        // Apply pagination
         const page = query.page || 1;
         const pageSize = query.pageSize || 10;
-        const offset = (page - 1) * pageSize;
         
-        const paginatedAgents = agents.slice(offset, offset + pageSize);
+        const result = await networkAgentRedisCacheService
+            .readNetworkAgentsPaginated(
+                networkId,
+                page,
+                pageSize
+            );
         
         return {
-            data: paginatedAgents,
+            data: result.data,
             pagination: {
                 page,
                 pageSize,
-                total: agents.length,
-                totalPages: Math.ceil(agents.length / pageSize)
+                total: result.total,
+                totalPages: Math.ceil(result.total / pageSize)
             }
         };
     }, {

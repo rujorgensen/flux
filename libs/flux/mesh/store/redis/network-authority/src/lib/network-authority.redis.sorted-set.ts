@@ -160,28 +160,83 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
     ): Promise<TNetworkAuthority[]> {
         // Add to network
-        const networkAgents = await this._client.smembers(`networks/${networkId}/agents`);
+        const networkAuthorities = await this._client.smembers(`networks/${networkId}/authorities`);
 
-        // Add to agent
+        // Add to authority
         const authorityData: TNetworkAuthority[] = [];
 
-        for (const id of networkAgents) {
-            const key: string = `networks/${networkId}/agents/${id}`;
+        for (const address of networkAuthorities) {
+            try {
+                const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address as TAddress);
+                const key: string = `networks/${networkId}/authorities/${clientId}`;
 
-            const [address, connectedAt] = await this._client.hmget(key, [
-                'address',
-                'connectedAt',
-            ]);
+                const [connectedAt] = await this._client.hmget(key, [
+                    'connectedAt',
+                ]);
 
-            if (address) {
-                authorityData.push({
-                    id: id as TClientId,
-                    connectedAt: new Date(connectedAt as unknown as Date),
-                });
+                if (connectedAt) {
+                    authorityData.push({
+                        id: clientId as TClientId,
+                        connectedAt: new Date(connectedAt as unknown as Date),
+                    });
+                }
+            } catch (error) {
+                // Skip invalid addresses
+                continue;
             }
         }
 
         return authorityData;
+    }
+
+    /**
+     * Returns paginated network authorities for improved performance.
+     * 
+     * @param { TNetworkId_S }  networkId
+     * @param { number }        page - Page number (1-based)
+     * @param { number }        pageSize - Number of items per page
+     *
+     * @returns { Promise<{ data: TNetworkAuthority[], total: number }> }
+     */
+    public async readNetworkAuthoritiesPaginated(
+        networkId: TNetworkId_S,
+        page: number = 1,
+        pageSize: number = 10,
+    ): Promise<{ data: TNetworkAuthority[], total: number }> {
+        // Get all authority addresses (lightweight operation)
+        const networkAuthorities = await this._client.smembers(`networks/${networkId}/authorities`);
+        const total = networkAuthorities.length;
+
+        // Apply pagination to addresses only
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedAddresses = networkAuthorities.slice(startIndex, endIndex);
+
+        // Only fetch full data for the paginated subset
+        const authorityData: TNetworkAuthority[] = [];
+
+        for (const address of paginatedAddresses) {
+            try {
+                const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address as TAddress);
+                const key: string = `networks/${networkId}/authorities/${clientId}`;
+
+                const [connectedAt] = await this._client.hmget(key, [
+                    'connectedAt',
+                ]);
+
+                if (connectedAt) {
+                    authorityData.push({
+                        id: clientId as TClientId,
+                        connectedAt: new Date(connectedAt as unknown as Date),
+                    });
+                }
+            } catch (error) {
+                // Skip invalid addresses
+                continue;
+            }
+        }
+
+        return { data: authorityData, total };
     }
 
     /**

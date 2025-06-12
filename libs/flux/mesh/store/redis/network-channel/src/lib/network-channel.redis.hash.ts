@@ -105,6 +105,55 @@ export class NetworkChannelHash {
     }
 
     /**
+     * Reads paginated channels on a network for improved performance.
+     *  
+     * @param { TNetworkId_S }  networkId
+     * @param { number }        page - Page number (1-based)
+     * @param { number }        pageSize - Number of items per page
+     *
+     * @returns { Promise<{ data: INetworkChannel[], total: number }> }
+     */
+    public async readNetworkChannelsPaginated(
+        networkId: TNetworkId_S,
+        page: number = 1,
+        pageSize: number = 10,
+    ): Promise<{ data: INetworkChannel[], total: number }> {
+        const channelNames: TChannelName[] = await this.readNetworkChannelNames(networkId);
+        const total = channelNames.length;
+
+        // Apply pagination to channel names only
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedChannelNames = channelNames.slice(startIndex, endIndex);
+
+        // Only fetch full data for the paginated subset
+        const channels: INetworkChannel[] = [];
+
+        for (const channelName of paginatedChannelNames) {
+            const [createdAt, memberDistribution, usage] = await this._redisConnection.hash.hmget(
+                `networks/${networkId}/channels/${channelName}`,
+                [
+                    'createdAt',
+                    'memberDistribution',
+                    'usage',
+                ],
+            );
+
+            if (createdAt && memberDistribution && usage) {
+                channels.push({
+                    channelName,
+                    memberDistribution: memberDistribution as string,
+                    members: await this.readNetworkMemberCount(networkId, channelName),
+                    bytes: Number.parseInt(usage || '0', 10),
+                    createdAt: new Date(createdAt as string),
+                });
+            }
+        }
+
+        return { data: channels, total };
+    }
+
+    /**
      * Reads all channel names on a network.
      *  
      * @param { TNetworkId_S }  networkId
