@@ -10,6 +10,27 @@
         $props();
 
     const id = $props.id();
+    import { authClient } from "./auth-client";
+
+    function googleSignIn() {
+        authClient.signIn.social(
+            {
+                provider: "google",
+                callbackURL: "/",
+            },
+            {
+                onSuccess: () => {
+                    // Redirect to the dashboard or sign in page
+                    console.log("Success");
+                },
+                onError: (ctx) => {
+                    // Display the error message
+                    console.error(ctx.error.message);
+                    alert(ctx.error.message);
+                },
+            },
+        );
+    }
 </script>
 
 <div class={cn("flex flex-col gap-6", className)} {...restProps}>
@@ -37,7 +58,11 @@
                             </svg>
                             Login with GitHub
                         </Button> -->
-                        <Button variant="outline" class="w-full">
+                        <Button
+                            variant="outline"
+                            class="w-full"
+                            onclick={() => googleSignIn()}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"

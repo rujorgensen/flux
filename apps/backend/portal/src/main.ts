@@ -1,6 +1,6 @@
-import { Elysia, status, t } from 'elysia';
+import { type Context, Elysia } from 'elysia';
+import { auth } from './auth';
 // import { $ } from 'bun';
-import jwt from '@elysiajs/jwt';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
@@ -52,14 +52,37 @@ new LiveUpdates(
 //   // console.error('Server might be runnning');
 // }
 
+// user middleware (compute user and session and pass to routes)
+const betterAuth = new Elysia({ name: 'better-auth' })
+    .all('/api/auth/*', (context: Context) => {
+        if (['POST', 'GET'].includes(context.request.method)) {
+            return auth.handler(context.request);
+        }
+
+        context.status(405);
+    })
+
+    .macro({
+        auth: {
+            async resolve({ status, request: { headers } }) {
+                const session = await auth.api.getSession({
+                    headers,
+                });
+
+                if (!session) {
+                    return status(401);
+                }
+
+                return {
+                    user: session.user,
+                    session: session.session,
+                };
+            },
+        },
+    });
+
 // * Host the api
 export const app = new Elysia()
-    .use(
-        jwt({
-            name: 'jwt',
-            secret: 'Fischl von Luftschloss Narfidort'
-        }),
-    )
 
     //  .use(rateLimiter)
     //  .onRequest(({ rateLimiter, ip, set, error }) => {
@@ -82,6 +105,9 @@ export const app = new Elysia()
         path: '/api/docs',
     }))
 
+    // User middleware (compute user and session and pass to routes)
+    .use(betterAuth)
+
     .onRequest(({ request }) => {
         const { method, url } = request;
         const path = new URL(url).pathname;
@@ -99,33 +125,6 @@ export const app = new Elysia()
             portalRedisStatusService.getRedisStatusOrThrow(),
         ];
     })
-
-    .post('/auth', async ({ jwt, query, cookie: { auth }, body, redirect }) => {
-
-        console.log('BODY', { pass: body.password });
-
-        // Check if the user is already authenticated
-        const value = await jwt.sign({ token: query.token as string });
-
-        if (!body.password) {
-            return status(401);
-        }
-
-        auth?.set({
-            value,
-            // httpOnly: true,
-            maxAge: 7 * 86_400,
-            path: '/',
-        });
-
-        return redirect('/', 303);
-    },
-        {
-            body: t.Object({
-                password: t.String()
-            })
-        }
-    )
 
     // return new Response(null, {
     //   status: 303,
