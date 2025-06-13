@@ -23,6 +23,8 @@ export class RedisStatusService {
 
     /**
      * Subscribe to
+     * 
+     * @return { void }
      */
     public onAlert(
         cb: (alerts: string[]) => void,
@@ -31,6 +33,13 @@ export class RedisStatusService {
         this.observerChanged();
     }
 
+    /**
+     * Unsubscribe from alerts.
+     * 
+     * @param cb
+     * 
+     * @return { void }
+     */
     public offAlert(
         cb: (alerts: string[]) => void,
     ): void {
@@ -117,17 +126,9 @@ export class RedisStatusService {
             redisClient.send('LATENCY', ['LATEST']),
         ]);
 
+        // * Parse the raw data
         const info = parseInfoSection(infoRaw);
-
-        const memory = {
-            used_memory: info.used_memory,
-            maxmemory: info.maxmemory,
-        };
-
         const keyspace = parseKeyspaceSection(infoRaw);
-
-        const used = memory.used_memory as number;
-        const max = memory.maxmemory as number;
 
         const latency = Array.isArray(latencyRaw)
             ? latencyRaw.map(([event, ts, latencyMs, samples]) => ({
@@ -137,6 +138,9 @@ export class RedisStatusService {
                 samples,
             }))
             : [];
+
+        const used = info.used_memory as number;
+        const max = info.maxmemory as number;
 
         return {
             memory: {

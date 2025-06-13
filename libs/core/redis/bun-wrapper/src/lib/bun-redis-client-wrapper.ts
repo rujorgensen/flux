@@ -42,8 +42,8 @@ export class BunRedisClient extends EventEmitter<{
         );
 
         /**
-         * Bun v. 1.2.16 appears to have an issue causing the client to not emit the `onclose`-event on disconnects 
-         * leaving the connection states to become out of sync. and not retry connections.
+         * Bun v. 1.2.16 appears to have an issue causing the client to not emit the `onclose`-event
+         * on some disconnects leaving the connection states to become out of sync. and not retry connections.
          */
         setInterval(() => {
             if (
@@ -53,7 +53,7 @@ export class BunRedisClient extends EventEmitter<{
                 console.warn(`Redis client connection state mismatch detected: ${this.connected} !== ${this.client.connected}. Syncing.`);
 
                 this.connected = false;
-                if (!this.connected && !this.reconnecting) {
+                if (!this.reconnecting) {
                     console.error('⬇️ Redis client disconnected');
                     this.emit('end', void 0);
                     this.retryReconnect();
@@ -89,12 +89,30 @@ export class BunRedisClient extends EventEmitter<{
     public async connect(
 
     ): Promise<void> {
-        if (this.connected || this.reconnecting) {
+        if (this.reconnecting) {
+            return;
+        }
+
+        await this.connect_();
+    }
+
+    /**
+     * 
+     * @returns { Promise<void> }
+     */
+    private async connect_(
+
+    ): Promise<void> {
+        if (this.connected) {
             return;
         }
 
         try {
             await this.client.connect();
+
+            if (!this.client.connected) {
+                throw new Error('Unexpected error.');
+            }
 
             this.connected = true;
             this.emit('ready', void 0);
@@ -137,7 +155,8 @@ export class BunRedisClient extends EventEmitter<{
                         autoReconnect: false,
                     },
                 );
-                await this.connect();
+                await this.connect_();
+                console.log('✅ Redis client reconnected');
 
                 break;
             } catch (error) {
