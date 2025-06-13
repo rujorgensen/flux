@@ -149,11 +149,16 @@ export class BunRedisClient extends EventEmitter<{
             this.reconnectAttempts++;
 
             try {
+                /**
+                 * Bun v. 1.2.16 appears to have an issue causing requiring a new instance rather than being able to use client.connect() directly.
+                 */
                 this.client = new RedisClient(
                     this.options.url,
                     {
                         // We're providing our own implementation
                         autoReconnect: false,
+                        connectionTimeout: 20_000,
+                        // idleTimeout: 0,
                     },
                 );
                 await this.connect_();
