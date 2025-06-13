@@ -22,7 +22,7 @@ export class RedisStatusService {
     ) { }
 
     /**
-     * Subscribe to 
+     * Subscribe to
      */
     public onAlert(
         cb: (alerts: string[]) => void,
@@ -44,28 +44,31 @@ export class RedisStatusService {
         if ((this.alertListeners.size === 0) && this.interval) {
             clearInterval(this.interval);
             this.interval = undefined;
-        } else if (this.alertListeners.size > 0 && !this.interval) {
+        } else if ((this.alertListeners.size > 0) && !this.interval) {
             this.interval = setInterval(async () => {
-                const health = await this.getRedisStatusOrThrow();
-                const currentAlerts: string[] = this.getAlerts(health);
+                try {
+                    const health = await this.getRedisStatusOrThrow();
+                    const currentAlerts: string[] = this.getAlerts(health);
 
-                if (currentAlerts.join() !== this.lastAlerts.join()) {
-                    this.lastAlerts = currentAlerts;
+                    if (currentAlerts.join() !== this.lastAlerts.join()) {
+                        this.lastAlerts = currentAlerts;
 
-                    for (const listener of this.alertListeners) {
-                        listener(currentAlerts);
+                        for (const listener of this.alertListeners) {
+                            listener(currentAlerts);
+                        }
                     }
+                } catch {
+                    console.error('Caught error while reading health status.');
                 }
-
             }, this.healthCheckIntervalMs);
         }
     }
 
     /**
-     * 
+     *
      * @param health
-     * 
-     * @returns 
+     *
+     * @returns
      */
     private getAlerts(
         health: Awaited<ReturnType<typeof this.getRedisStatusOrThrow>>,
@@ -94,9 +97,9 @@ export class RedisStatusService {
     }
 
     /**
-     * 
+     *
      * @param { number } threshold
-     * 
+     *
      * @returns { Promise<TRedisStatus> }
      */
     public async getRedisStatusOrThrow(
@@ -109,9 +112,8 @@ export class RedisStatusService {
             throw new Error('Redis client is not connected');
         }
 
-        const [infoRaw, keyspaceRaw, latencyRaw] = await Promise.all([
+        const [infoRaw, latencyRaw] = await Promise.all([
             redisClient.send('INFO', []), // All sections in one
-            redisClient.send('INFO', ['keyspace']), // Still separate parsing logic
             redisClient.send('LATENCY', ['LATEST']),
         ]);
 
@@ -122,7 +124,7 @@ export class RedisStatusService {
             maxmemory: info.maxmemory,
         };
 
-        const keyspace = parseKeyspaceSection(keyspaceRaw);
+        const keyspace = parseKeyspaceSection(infoRaw);
 
         const used = memory.used_memory as number;
         const max = memory.maxmemory as number;
@@ -140,8 +142,8 @@ export class RedisStatusService {
             memory: {
                 used,
                 max,
-                usageRatio: max > 0 ? used / max : null,
-                overThreshold: max > 0 ? used / max > threshold : false,
+                usageRatio: max > 0 ? (used / max) : null,
+                overThreshold: max > 0 ? (used / max) > threshold : false,
             },
             cpu: {
                 sys: info.used_cpu_sys,
@@ -162,9 +164,17 @@ export class RedisStatusService {
             },
             keyspace,
             latency,
+            updatedAt: new Date(),
         };
     }
 
+    /**
+     *
+     * @param { ReturnType<typeof parseInfoSection> } metrics
+     * @param { number } threshold
+     *
+     * @returns { number }
+     */
     private computeHealthScore(
         metrics: ReturnType<typeof parseInfoSection>,
         threshold: number = 0.9,

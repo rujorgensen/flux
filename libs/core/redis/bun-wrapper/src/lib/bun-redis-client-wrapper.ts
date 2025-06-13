@@ -40,6 +40,26 @@ export class BunRedisClient extends EventEmitter<{
                 autoReconnect: false,
             },
         );
+
+        /**
+         * Bun v. 1.2.16 appears to have an issue causing the client to not emit the `onclose`-event on disconnects 
+         * leaving the connection states to become out of sync. and not retry connections.
+         */
+        setInterval(() => {
+            if (
+                (this.connected === true) &&
+                (this.client.connected === false)
+            ) {
+                console.warn(`Redis client connection state mismatch detected: ${this.connected} !== ${this.client.connected}. Syncing.`);
+
+                this.connected = false;
+                if (!this.connected && !this.reconnecting) {
+                    console.error('⬇️ Redis client disconnected');
+                    this.emit('end', void 0);
+                    this.retryReconnect();
+                }
+            }
+        }, 500);
     }
 
     /**
@@ -83,11 +103,12 @@ export class BunRedisClient extends EventEmitter<{
             this.client.onclose = (error) => {
                 console.error('⬇️ Redis client disconnected:', error);
                 this.connected = false;
-                this.retryReconnect();
                 this.emit('end', void 0);
+                this.retryReconnect();
             };
         } catch (error) {
             console.error('Initial Redis connection failed:', error);
+            this.connected = false;
             this.emit('error', error instanceof Error ? error : new Error('Unknown error'));
             this.retryReconnect();
         }
@@ -117,8 +138,7 @@ export class BunRedisClient extends EventEmitter<{
                     },
                 );
                 await this.connect();
-                this.connected = true;
-                this.emit('ready', void 0);
+
                 break;
             } catch (error) {
                 this.emit('error', error instanceof Error ? error : new Error('Reconnection attempt failed: Unknown error'));
