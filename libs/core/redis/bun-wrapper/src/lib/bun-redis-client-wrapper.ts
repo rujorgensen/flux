@@ -38,6 +38,7 @@ export class BunRedisClient extends EventEmitter<{
             {
                 // We're providing our own implementation
                 autoReconnect: false,
+                idleTimeout: 0,
             },
         );
 
