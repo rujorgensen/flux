@@ -14,29 +14,42 @@ export const parseInfoSection = (
     }
 
     return result;
-}
+};
 
 export const parseKeyspaceSection = (
-    info: string,
+    info_: string,
 ) => {
-    const lines = info.split('\n');
-    const dbStats: Record<string, { keys: number; expires: number; avgTtl: number }> = {};
 
-    for (const line of lines) {
-        if (line.startsWith('db')) {
-            const [db, stats] = line.split(':');
-            const entries = stats.split(',').reduce((acc, pair) => {
-                const [k, v] = pair.split('=');
-                acc[k] = Number.parseInt(v);
-                return acc;
-            }, {} as any);
-            dbStats[db] = {
-                keys: entries.keys || 0,
-                expires: entries.expires || 0,
-                avgTtl: entries.avg_ttl || 0,
-            };
+    if (info_.includes('# Keyspace')) {
+        const keyspaceBlock = info_.match(/# Keyspace\n([\s\S]*?)(?:\n\s*\n|$)/);
+        const lines = keyspaceBlock ? keyspaceBlock[1]?.trim().split('\n') ?? [] : [];
+
+        // const lines = info.split('\n');
+        const dbStats: Record<string, { keys: number; expires: number; avgTtl: number; }> = {};
+
+        for (const line of lines) {
+            if (line.startsWith('db')) {
+                const [db, stats] = line.split(':');
+                const entries = stats.split(',').reduce((acc, pair) => {
+                    const [k, v] = pair.split('=');
+                    acc[k] = Number.parseInt(v);
+
+                    return acc;
+                }, {} as any);
+                dbStats[db] = {
+                    keys: entries.keys || 0,
+                    expires: entries.expires || 0,
+                    avgTtl: entries.avg_ttl || 0,
+                };
+            }
         }
+
+        return dbStats;
     }
 
-    return dbStats;
-}
+    return {
+        keys: undefined,
+        expires: undefined,
+        avgTtl: undefined,
+    };
+};
