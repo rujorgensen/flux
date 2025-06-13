@@ -1,7 +1,6 @@
 # Portal PROD Caddyfile
 {
 	auto_https off
-	debug
 }
 
 http://:9000 {
