@@ -44,10 +44,17 @@ export class RedisConnection {
     public readonly hash;
 
     constructor(
-        private readonly url: string,
+        private readonly _optionsOrURL: string | {
+            name?: string, // Optional name for the client to tell them apart in the logs
+            url: string,
+        },
     ) {
+        const url = typeof this._optionsOrURL === 'string'
+            ? this._optionsOrURL
+            : this._optionsOrURL.url;
+
         this.cacheClient = new BunRedisClient({
-            url: this.url,
+            url,
             socket: {
                 reconnectStrategy: (
                     retries: number,
