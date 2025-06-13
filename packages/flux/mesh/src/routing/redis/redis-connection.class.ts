@@ -94,7 +94,8 @@ export class RedisConnection {
         // *** Create Redis subscriber
         this.pubSub = new BunRedisPubSub(
             {
-                url: this.url,
+                name: (typeof this._optionsOrURL === 'object') ? this._optionsOrURL.name : undefined,
+                url,
                 socket: {
                     reconnectStrategy: (
                         retries: number,
@@ -109,7 +110,7 @@ export class RedisConnection {
 
         this.pubSub
             .connect()
-            .catch(() => console.log('pubsub connection failed'));
+            .catch(() => console.error('pubsub connection failed'));
 
         // Dedicated client
         const hashClient = this.cacheClient.getClient();
