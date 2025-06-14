@@ -12,6 +12,11 @@ generator client {
     output   = "../node_modules/@prisma-types/flux"
 }
 
+generator dbml {
+    provider   = "prisma-dbml-generator"
+    outputName = "flux.dbml"
+}
+
 datasource db {
     provider = "postgresql"
     url      = env("FLUX_DATABASE_URL")
