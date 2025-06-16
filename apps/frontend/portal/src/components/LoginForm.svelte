@@ -126,6 +126,6 @@
         class="text-muted-foreground *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4 text-balance text-center text-xs"
     >
         By clicking continue, you agree to our <a href="##">Terms of Service</a>
-        and <a href="##">Privacy Policy</a>.
+        and <a href="/privacy-policy">Privacy Policy</a>.
     </div>
 </div>
