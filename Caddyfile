@@ -1,8 +1,26 @@
 # Portal PROD Caddyfile
 {
-	auto_https off
+	email rujorgensen@gmail.com
+	debug
 }
 
+# Force HTTP to HTTPS for main domains
+http://persistica.io, http://portal.persistica.io {
+	redir https://{host}{uri} permanent
+}
+
+portal.persistica.io,
+persistica.io {
+	encode gzip
+	reverse_proxy /api* portal-api:3000
+	reverse_proxy * portal-ui:3001
+
+	handle /cddy {
+		respond "Caddytime!"
+	}
+}
+
+# Optional local dev / health-check port (no TLS)
 http://:9000 {
 	reverse_proxy /api* portal-api:3000
 	reverse_proxy * portal-ui:3001

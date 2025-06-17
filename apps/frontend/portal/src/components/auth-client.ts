@@ -1,7 +1,7 @@
 import { createAuthClient } from 'better-auth/svelte';
 
 const baseURL = import.meta.env.PROD
-    ? 'https://portal.persistica.io'
+    ? undefined
     : 'http://localhost:3001';
 
 export const authClient = createAuthClient({
