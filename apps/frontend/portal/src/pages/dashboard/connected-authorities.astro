@@ -1,0 +1,12 @@
+---
+import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
+
+// * Dashboard Tables
+import ConnectedAuthorities from "$lib/components/dashboard/tables/ConnectedAuthorities.svelte";
+
+const networkId: string = "rAnD0M-demo-network-id";
+---
+
+<DashboardLayout>
+    <ConnectedAuthorities client:load networkId={networkId} />
+</DashboardLayout>

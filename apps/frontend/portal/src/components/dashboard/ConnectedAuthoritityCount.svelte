@@ -10,16 +10,15 @@
     import { getFluxNetworkConnection } from "../../data/flux-connection.fn";
     import { onConnectedAuthoritiesCount } from "../../data/flux/connected-authorities.service.fn";
 
+    // * Stores
+    import { type Network, activeNetwork } from "$lib/stores/activeNetwork";
+
     // Passed by Astro
     export let initial: TNetworkAuthorityCountAt;
     export let networkId: TNetworkId_S;
     export let networkCode: string;
 
-    // Export the store directly
-    export const connectedAuthorities =
-        writable<TNetworkAuthorityCountAt>(initial);
-
-    onMount(async () => {
+    const update = async (networkId: TNetworkId_S, networkCode: string) => {
         try {
             const fluxAgentNetworkConnection: FluxAgentNetworkConnection =
                 await getFluxNetworkConnection(
@@ -35,6 +34,21 @@
         } catch (error) {
             console.error("Error connecting agent to network:", error);
         }
+    };
+
+    // Export the store directly
+    export const connectedAuthorities =
+        writable<TNetworkAuthorityCountAt>(initial);
+
+    onMount(() => {
+        update(networkId, networkCode);
+        activeNetwork.subscribe(async (network: Network | null) => {
+            if (network === null) {
+                return;
+            }
+
+            update(network.networkId, networkCode);
+        });
     });
 </script>
 

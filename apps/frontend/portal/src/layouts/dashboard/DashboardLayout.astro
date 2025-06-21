@@ -1,10 +1,9 @@
 ---
-import BaseHead from "$lib/components/BaseHead.astro";
-import { SITE_TITLE, SITE_DESCRIPTION } from "$lib/consts";
+import DashboardLayout from "$lib/components/svelte/DashboardLayout.svelte";
+import BaseHead from "../../components/BaseHead.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
 
 import { auth } from "@backend/portal/auth";
-import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
-import Dashboard from "$lib/components/svelte/Dashboard.svelte";
 
 // * Data fetching functions
 import { readConnectedAgentCount } from "$lib/data/api/connected-agents.service.fn";
@@ -22,6 +21,8 @@ if (!session) {
     return Astro.redirect("/sign-in");
 }
 
+const userSession = session.user;
+
 const initialConnectedAuthoritiesCount =
     await readConnectedAuthoritiesCount(networkId);
 const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
@@ -34,15 +35,16 @@ const initialChannelCount = await readChannelCount(networkId);
         <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
     </head>
     <body>
-        <DashboardLayout client:load>
-            <Dashboard
-                client:load
-                {networkId}
-                {networkCode}
-                {initialConnectedAuthoritiesCount}
-                {initialConnectedAgentsCount}
-                {initialChannelCount}
-            />
+        <DashboardLayout
+            client:load
+            {userSession}
+            {networkId}
+            {networkCode}
+            {initialConnectedAuthoritiesCount}
+            {initialConnectedAgentsCount}
+            {initialChannelCount}
+        >
+            <slot />
         </DashboardLayout>
     </body>
 </html>
