@@ -10,15 +10,15 @@
     import { onActiveChannelCount } from "../../data/flux/channels.service.fn";
     import { getFluxNetworkConnection } from "../../data/flux-connection.fn";
 
+    // * Stores
+    import { type Network, activeNetwork } from "$lib/stores/activeNetwork";
+
     // Passed by Astro
     export let initial: TNetworkChannelCountAt;
     export let networkId: TNetworkId_S;
     export let networkCode: string;
 
-    // Export the store directly
-    export const activeChannels = writable<TNetworkChannelCountAt>(initial);
-
-    onMount(async () => {
+    const update = async (networkId: TNetworkId_S, networkCode: string) => {
         try {
             const fluxAgentNetworkConnection: FluxAgentNetworkConnection =
                 await getFluxNetworkConnection(
@@ -34,6 +34,20 @@
         } catch (error) {
             console.error("Error connecting agent to network:", error);
         }
+    };
+
+    // Export the store directly
+    export const activeChannels = writable<TNetworkChannelCountAt>(initial);
+
+    onMount(async () => {
+        update(networkId, networkCode);
+        activeNetwork.subscribe(async (network: Network | null) => {
+            if (network === null) {
+                return;
+            }
+
+            update(network.networkId, networkCode);
+        });
     });
 </script>
 
