@@ -1,0 +1,12 @@
+---
+import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
+
+// * Dashboard Tables
+import ActiveChannels from "$lib/components/dashboard/tables/ActiveChannels.svelte";
+
+const networkId: string = "rAnD0M-demo-network-id";
+---
+
+<DashboardLayout>
+    <ActiveChannels client:load networkId={networkId} />
+</DashboardLayout>
