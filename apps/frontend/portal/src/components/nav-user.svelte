@@ -3,12 +3,18 @@
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
     import { useSidebar } from "$lib/components/ui/sidebar/index.js";
-    import BadgeCheckIcon from "@lucide/svelte/icons/badge-check";
-    import BellIcon from "@lucide/svelte/icons/bell";
-    import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
-    import CreditCardIcon from "@lucide/svelte/icons/credit-card";
-    import LogOutIcon from "@lucide/svelte/icons/log-out";
-    import SparklesIcon from "@lucide/svelte/icons/sparkles";
+    import {
+        BadgeCheckIcon,
+        BellIcon,
+        LogOutIcon,
+        SunIcon,
+        MoonIcon,
+        ChevronsUpDownIcon,
+        SparklesIcon,
+        CreditCardIcon,
+    } from "@lucide/svelte";
+    import { ModeWatcher, mode } from "mode-watcher";
+    import { toggleMode } from "mode-watcher";
 
     let {
         user,
@@ -18,6 +24,7 @@
     const sidebar = useSidebar();
 </script>
 
+<ModeWatcher />
 <Sidebar.Menu>
     <Sidebar.MenuItem>
         <DropdownMenu.Root>
@@ -73,6 +80,28 @@
                         </div>
                     </div>
                 </DropdownMenu.Label>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Group>
+                    <DropdownMenu.Item
+                        onclick={toggleMode}
+                        aria-label="Toggle theme"
+                    >
+                        {#if $mode === "dark"}
+                            <MoonIcon />
+                            Dark mode
+                        {:else}
+                            <SunIcon />
+                            Light mode
+                        {/if}
+
+                        <!-- <SunIcon
+                            class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+                        />
+                        <MoonIcon
+                            class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+                        /> -->
+                    </DropdownMenu.Item>
+                </DropdownMenu.Group>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Group>
                     <DropdownMenu.Item>
