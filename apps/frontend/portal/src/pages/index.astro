@@ -34,7 +34,7 @@ const initialChannelCount = await readChannelCount(networkId);
         <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
     </head>
     <body>
-        <DashboardLayout client:load>
+        <DashboardLayout>
             <Dashboard
                 client:load
                 {networkId}

@@ -19,10 +19,7 @@
         "baseUrl": ".",
         "paths": {
             "$lib": [
-                "./apps/frontend/portal/src"
-            ],
-            "$lib/*": [
-                "./apps/frontend/portal/src/*"
+                "apps/frontend/portal/src"
             ],
             "@backend/portal/auth": [
                 "libs/portal/backend/auth/src/index.ts"
