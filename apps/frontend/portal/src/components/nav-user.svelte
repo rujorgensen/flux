@@ -126,8 +126,10 @@
                 </DropdownMenu.Group>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item>
-                    <LogOutIcon />
-                    Log out
+                    <a href="/sign-in" class="flex items-center gap-2">
+                        <LogOutIcon />
+                        Log out
+                    </a>
                 </DropdownMenu.Item>
             </DropdownMenu.Content>
         </DropdownMenu.Root>
