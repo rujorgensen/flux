@@ -79,3 +79,10 @@ Issues:
 
     Caddy
     9000    - Caddy proxy to Portal
+
+## Endpoints
+
+### Astro Server Health Check
+- **GET /ping** - Returns 'pong' for server availability detection
+  - Endpoint: `http://localhost:3001/ping`
+  - Response: Plain text 'pong' with HTTP 200 status
