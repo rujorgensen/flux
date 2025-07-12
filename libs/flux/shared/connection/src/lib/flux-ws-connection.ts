@@ -88,7 +88,7 @@ export class FluxWebSocketConnection {
         this.options = {
             // Defaults
             retries: 10_000,
-            port: 5100,
+            port: 5_100,
             // Override with provided options
             ...this.options,
         };
