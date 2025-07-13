@@ -5,7 +5,7 @@ import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
 import { LiveUpdates } from './live-updates.class';
-import { networkChannelRoutes } from './api/networks/networks.route';
+import { networkChannelRoutes } from './api/networks/networks-channels.route';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
 import { networkAuthorityRoutes } from './api/networks/authorities.route';
