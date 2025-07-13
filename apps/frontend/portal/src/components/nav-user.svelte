@@ -87,11 +87,11 @@
                         aria-label="Toggle theme"
                     >
                         {#if $mode === "dark"}
-                            <MoonIcon />
-                            Dark mode
-                        {:else}
                             <SunIcon />
-                            Light mode
+                            Switch to light mode
+                        {:else}
+                            <MoonIcon />
+                            Switch to dark mode
                         {/if}
 
                         <!-- <SunIcon
