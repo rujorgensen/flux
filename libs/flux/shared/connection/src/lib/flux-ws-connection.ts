@@ -515,14 +515,14 @@ export class FluxWebSocketConnection {
             case RPC_RESPONSE: {
                 const payload = message_.substring(message_.indexOf(':') + 1);
 
-                PicoLogger.log("[WS Client] 🔌 Unhandled type rpc response", 'ws-client');
-                PicoLogger.log(`[WS Client] payload: ${payload}`, 'ws-client');
+                PicoLogger.log("🔌 Unhandled type rpc response", 'ws-client');
+                PicoLogger.log(`payload: ${payload}`, 'ws-client');
 
                 break;
             }
 
             default:
-                PicoLogger.log(`[WS Client] 🔌 Unhandled type: "${message_}"`);
+                PicoLogger.log(`🔌 Unhandled type: "${message_}"`, 'ws-client');
                 break;
         }
     }
