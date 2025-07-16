@@ -118,6 +118,11 @@ const clientRPCResponseCallbacks: Map<
 //     },
 // );
 
+type TOptions = {
+    port?: number;
+    redisConnectionString?: string;
+};
+
 export class FluxMeshServer {
 
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
@@ -125,19 +130,21 @@ export class FluxMeshServer {
     private readonly bunServer: Bun.Server;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
+    private readonly options: TOptions;
 
     constructor(
-        private readonly options?: {
-            port?: number,
-            redisConnectionString?: string;
-        },
+        private readonly optionsOrPort?: TOptions | number,
     ) {
-        this.options = {
+        this.options = (typeof optionsOrPort === 'number') ? {
             // Defaults
-            port: 5100,
+            port: this.optionsOrPort as number,
+            redisConnectionString: '',
+        } : {
+            // Defaults
+            port: 5_100,
             redisConnectionString: '',
             // Override with provided options
-            ...this.options,
+            ...(this.optionsOrPort as TOptions),
         };
 
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
@@ -645,7 +652,7 @@ export class FluxMeshServer {
         // TODO: DETECT WHEN READY
         setTimeout(() => {
             console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
-            console.log(`🚀 Flux mesh server running on localhost:${this.options?.port}`);
+            console.log(`🚀 Flux mesh server running on localhost:${this.optionsOrPort?.port}`);
 
             setInterval(() => {
                 this.redisConnection.setConnected(`${machineAddress}/${processId}`);

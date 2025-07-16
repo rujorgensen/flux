@@ -10,6 +10,7 @@ import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
 import { networkAuthorityRoutes } from './api/networks/authorities.route';
 import { networkAgentRoutes } from './api/networks/agents.route';
+import { networkRoutes } from './api/networks/networks.route';
 
 // ****************************************************************************
 // * Env
@@ -119,6 +120,7 @@ export const app = new Elysia()
     .use(networkAuthorityRoutes)
     .use(networkAgentRoutes)
     .use(networkChannelRoutes)
+    .use(networkRoutes)
     .get('/api/status', () => {
         return [
             meshRedisStatusService.getRedisStatusOrThrow(),

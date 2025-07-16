@@ -1,6 +1,9 @@
-import type { Network, PrismaClient } from '@prisma-types/flux';
+import type {
+    PrismaClient,
+    Network,
+} from '@prisma-types/flux';
 import { nanoid } from 'nanoid';
-import type { TNetworkId_S } from '@flux/shared/types';
+import type { TNetworkId_S, TNetworkKey_S } from '@flux/shared/types';
 
 type NetworkWithUserNetworks = Network & {
     userNetworks: {
@@ -13,16 +16,20 @@ type NetworkWithUserNetworks = Network & {
 export interface INetwork_S {
     id: string;
     alias: string;
-    user: {
+    users: {
         userId: string;
         role: string;
     }[];
 }
 export class NetworkRepository {
+
     constructor(
         private readonly _prismaClient: PrismaClient,
     ) { }
 
+    // ****************************************************************************
+    // *** Create
+    // ****************************************************************************
     /**
      * 
      * @param param0
@@ -63,8 +70,60 @@ export class NetworkRepository {
             ;
     }
 
+    // ****************************************************************************
+    // *** Read
+    // ****************************************************************************
+
+    /**
+     * 
+     * @param param0
+     * 
+     * @returns 
+     */
+    public readUserNetworks(
+        userId: string,
+    ): Promise<INetwork_S[]> {
+        return this._prismaClient
+            .network
+            .findMany({
+                where: {
+                    userNetworks: {
+                        some: {
+                            userId,
+                        },
+                    },
+                },
+                include: {
+                    userNetworks: {
+                        include: {
+                            user: true,
+                        },
+                    },
+                },
+            })
+            .then((networks: NetworkWithUserNetworks[]) => networks.map(this.convert.bind(this)))
+            ;
+    }
+
+    public readNetworkKeyByNetworkIdOrThrow(
+        networkId: TNetworkId_S,
+    ): Promise<TNetworkKey_S> {
+        return this._prismaClient
+            .network
+            .findUniqueOrThrow({
+                where: {
+                    id: networkId,
+                },
+                select: {
+                    secretKey: true,
+                },
+            })
+            .then((response: { secretKey: string; }) => response.secretKey as TNetworkKey_S)
+            ;
+    }
+
     public readNetworkBySecretKeyOrThrow(
-        secretKey: string,
+        secretKey: TNetworkKey_S,
     ): Promise<INetwork_S> {
         return this._prismaClient
             .network
@@ -90,7 +149,7 @@ export class NetworkRepository {
         return {
             id: network.id as TNetworkId_S,
             alias: network.alias,
-            user: network.userNetworks.map((userNetwork) => ({
+            users: network.userNetworks.map((userNetwork) => ({
                 userId: userNetwork.userId,
                 role: userNetwork.role,
             })),
