@@ -10,6 +10,7 @@ import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
 import { networkAuthorityRoutes } from './api/networks/authorities.route';
 import { networkAgentRoutes } from './api/networks/agents.route';
+import { betterAuth } from './_decorators/auth.decorator';
 import { networkRoutes } from './api/networks/networks.route';
 
 // ****************************************************************************
@@ -52,35 +53,6 @@ new LiveUpdates(
 // } catch {
 //   // console.error('Server might be runnning');
 // }
-
-// user middleware (compute user and session and pass to routes)
-const betterAuth = new Elysia({ name: 'better-auth' })
-    .all('/api/auth/*', (context: Context) => {
-        if (['POST', 'GET'].includes(context.request.method)) {
-            return auth.handler(context.request);
-        }
-
-        context.status(405);
-    })
-
-    .macro({
-        auth: {
-            async resolve({ status, request: { headers } }) {
-                const session = await auth.api.getSession({
-                    headers,
-                });
-
-                if (!session) {
-                    return status(401);
-                }
-
-                return {
-                    user: session.user,
-                    session: session.session,
-                };
-            },
-        },
-    });
 
 // * Host the api
 export const app = new Elysia()
