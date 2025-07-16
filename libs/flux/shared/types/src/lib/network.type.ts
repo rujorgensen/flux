@@ -1,4 +1,5 @@
 export type TNetworkId_S = string & { __brand: 'NetworkId'; };
+export type TNetworkKey_S = string & { __brand: 'NetworkKey'; };
 
 /**
  * Validates a network ID.

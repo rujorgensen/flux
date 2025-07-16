@@ -1,50 +1,70 @@
 import { Elysia, t } from 'elysia';
-import type {
-    TNetworkChannelCountAt,
-    INetworkChannel,
-} from '@flux/shared/types';
-import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
-import {
-    type RedisConnection,
-    getMeshRedisConnection,
-} from 'packages/flux/mesh/src/routing/redis/redis-connection.class';
-import { networkIdValidatorPlugin } from './plugins';
+import { networkService } from '../../_decorators/network-service.decorator';
+import { betterAuth } from '../../_decorators/auth.decorator';
+import type { INetwork_S } from '../../repository/network.repository';
 
-const redisConnection_: RedisConnection = getMeshRedisConnection();
-const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
+const createNetworkDTO = t.Object({
+    alias: t.String()
+});
 
-export const networkChannelRoutes = new Elysia({ prefix: '/api/networks/:networkId/channels' })
-    .use(networkIdValidatorPlugin)
+export const apiRoutes = new Elysia({ prefix: '/api/networks' })
+    .use(betterAuth);
+
+export const networkRoutes = apiRoutes
+    .use(networkService)
 
     /**
-     * '/api/networks/:networkId/channels/count?when={'now'}'
-     * '/api/networks/:networkId/channels/count?startDate={startDate}&endDate={endDate}'
+     * Creates a new network.
+     * 
+     * '/api/networks'
      */
-    .get('/count', ({ networkId, query }): Promise<TNetworkChannelCountAt> => {
-        if (query.when === 'now') {
-            return networkChannelRedisCacheService
-                .readNetworkChannelCount(
-                    networkId,
-                );
-        }
+    .post(
+        '',
+        ({
+            body,
+            networkService,
+            user,
+        }): Promise<INetwork_S> => {
+            console.log('Creating network with body:', body);
 
-        throw new Error('Only ?when=now is supported as query parameter');
-    },
+            return networkService
+                .networkRepository
+                .createNetwork(
+                    {
+                        userId: user.id,
+                        alias: body.alias,
+                    },
+                );
+        },
+
+        // Validate body
         {
-            query: t.Object({
-                when: t.Optional(t.Literal('now')),
-                startDate: t.Optional(t.Date()),
-                endDate: t.Optional(t.Date()),
-            })
+            body: createNetworkDTO,
+            auth: true,
         })
 
     /**
-     * '/api/networks/:networkId/channels'
+     * Reads all networks of the user.
+     * 
+     * '/api/networks'
      */
-    .get('', ({ networkId }): Promise<INetworkChannel[]> => {
-        return networkChannelRedisCacheService
-            .readNetworkChannels(
-                networkId,
-            );
-    })
+    .get(
+        '',
+        async ({
+            networkService,
+            user,
+        }) => {
+            console.log('Reading networks for user:', user.id);
+
+            return await networkService
+                .networkRepository
+                .readUserNetworks(
+                    user.id,
+                );
+        },
+
+        // Validate body
+        {
+            auth: true,
+        })
     ;

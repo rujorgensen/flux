@@ -33,6 +33,7 @@ services:
 
   mesh-server:
     image: 'rujorgensen/persistica/mesh'
+    container_name: mesh-server 
     ports:
       - "6350:6379"
     networks:
@@ -40,6 +41,7 @@ services:
 
   portal:
     image: 'rujorgensen/persistica/portal'
+    container_name: portal-server 
     ports:
       - "6350:6379"
     networks:

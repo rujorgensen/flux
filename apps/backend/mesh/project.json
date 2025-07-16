@@ -20,12 +20,6 @@
                 ]
             }
         },
-        "bun-test": {
-            "executor": "nx:run-commands",
-            "options": {
-                "command": "bun test {projectRoot}/ --env-file=.env.test"
-            }
-        },
         "docker-build": {
             "dependsOn": [
                 "build"

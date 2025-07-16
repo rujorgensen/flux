@@ -57,6 +57,7 @@ export {
 // * Types
 export {
     type TNetworkId_S,
+    type TNetworkKey_S,
     validateNetworkIdOrThrow,
 } from './lib/network.type';
 export type {

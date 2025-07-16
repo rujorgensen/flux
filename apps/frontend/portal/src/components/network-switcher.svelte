@@ -5,17 +5,28 @@
     import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
     import PlusIcon from "@lucide/svelte/icons/plus";
     import { type Network, activeNetwork } from "$lib/stores/activeNetwork";
+    import { Button } from "$lib/components/ui/button/index.js";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
+    import { Label } from "$lib/components/ui/label/index.js";
+    import { createNetwork } from "$lib/data/api/networks.service.fn";
 
     let { networks }: { networks: Network[] } = $props();
     const sidebar = useSidebar();
 
-    // import { onMount } from "svelte";
-
-    //onMount(() => {
+    let networkAlias_: string = "Network Name"; // Default value for the input field
     activeNetwork.set(networks[0]); // or however you get the default
+    // import { onMount } from "svelte";
+    // onMount(() => {
     // });
+    import { writable } from "svelte/store";
 
-    // let activeNetwork = $state(networks[0]);
+    export const open = writable<boolean>(false);
+
+    const createNetworkAndCloseModal = async (networkAlias: string) => {
+        await createNetwork(networkAlias);
+        open.set(false);
+    };
 </script>
 
 {#if $activeNetwork}
@@ -85,7 +96,13 @@
                         >
                             <PlusIcon class="size-4" />
                         </div>
-                        <div class="text-muted-foreground font-medium">
+
+                        <div
+                            class="text-muted-foreground font-medium"
+                            onclick={() => {
+                                open.set(true);
+                            }}
+                        >
                             Add network
                         </div>
                     </DropdownMenu.Item>
@@ -93,4 +110,47 @@
             </DropdownMenu.Root>
         </Sidebar.MenuItem>
     </Sidebar.Menu>
+
+    <Dialog.Root open={$open}>
+        <!--
+                                <Dialog.Trigger>
+                                    <div class="text-muted-foreground font-medium">
+                                        Add network
+                                    </div>
+                                </Dialog.Trigger>
+                            -->
+        <!-- Create new network modal -->
+        <Dialog.Content class="sm:max-w-[425px]">
+            <Dialog.Header>
+                <Dialog.Title>Create Network</Dialog.Title>
+                <Dialog.Description>
+                    Create a new network here. Click save when you're done.
+                </Dialog.Description>
+            </Dialog.Header>
+            <div class="grid gap-4 py-4">
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <Label for="name" class="text-right">Network Name</Label>
+                    <Input
+                        id="name"
+                        class="col-span-3"
+                        bind:value={networkAlias_}
+                    />
+                </div>
+                <!--
+                    <div class="grid grid-cols-4 items-center gap-4">
+                        <Label for="username" class="text-right">Username</Label>
+                        <Input id="username" value="@peduarte" class="col-span-3" />
+                    </div>
+                -->
+            </div>
+            <Dialog.Footer>
+                <Button
+                    type="submit"
+                    onclick={() => createNetworkAndCloseModal(networkAlias_)}
+                >
+                    Save changes
+                </Button>
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
 {/if}
