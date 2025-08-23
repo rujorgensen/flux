@@ -1,3 +1,8 @@
+// Make TypeScript happy
+declare global {
+	var agentLoadCount: number | null | undefined;
+}
+
 // Check env
 // const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;
 
@@ -11,9 +16,7 @@ import {
     type TNetworkId_S,
     validateAgentUIDOrThrow,
 } from '@flux/shared/types';
-import type {
-    TMessageCallback,
-} from '@flux/shared/ws';
+import type { TMessageCallback } from '@flux/shared/ws';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
 import {
     type FluxWebSocketConnection,
@@ -25,7 +28,6 @@ import { FluxClientData } from './connector/flux-client-data.class';
 import { getMachineUID, StateManager } from '@flux/shared/utils';
 
 export class FluxAgent {
-
     public readonly id: string = nanoid();
 
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
@@ -36,11 +38,11 @@ export class FluxAgent {
     constructor(
         private readonly networkId: string,
         private readonly options?: {
-            domain?: string,
+			domain?: string;
             secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
             retries?: number; // Number of times to retry a failed message
         },
-    ) { }
+	) { }
 
     /**
      * Connect to the network using provided identification.
@@ -66,7 +68,7 @@ export class FluxAgent {
             identification,
             {
                 clientUId: clientUId as TAgentOwnUId,
-                machineUID: await getMachineUID() ?? undefined,
+                machineUID: (await getMachineUID() )?? undefined,
             },
         );
 
