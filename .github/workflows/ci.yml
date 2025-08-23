@@ -183,5 +183,5 @@ jobs:
 
       - name: 🛠️ Build
         # RYUK does not work with github actions or Circle CI
-        run: bunx nx run persistica-flux-mesh:build
- 
+        # Not all projects currently build, switch this to affected, when they do
+        run: bunx nx run-many -t build -p  persistica-flux-agent core-redis-bun-wrapper persistica-flux-mesh utils-logger backend-portal-auth backend-portal frontend-portal backend-mesh persistica-flux-authority
