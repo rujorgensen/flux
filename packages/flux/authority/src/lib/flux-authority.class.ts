@@ -1,3 +1,8 @@
+// Make TypeScript happy
+declare global {
+    var authorityLoadCount: number | null;
+}
+
 globalThis.authorityLoadCount ??= 0;
 globalThis.authorityLoadCount++;
 
