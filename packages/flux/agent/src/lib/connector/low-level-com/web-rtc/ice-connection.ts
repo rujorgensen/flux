@@ -23,6 +23,7 @@ const peerConnectionConfig = {
 export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 'acceptAnswer'> {
     private readonly peerConnection = new RTCPeerConnection(peerConnectionConfig);
     private dataChannel: any; //  = this.peerConnection.createDataChannel('flux-channel');
+    private offerSDP: string | undefined;
 
     constructor(
         private readonly _fluxWebSocketClientConnection: FluxWebSocketClientConnection,
@@ -57,7 +58,7 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
 
             if (event.candidate === null) {
                 this.offerSDP = JSON.stringify(this.peerConnection.localDescription);
-                //       console.log("offerSDP:", this.offerSDP);
+                console.log("offerSDP:", this.offerSDP);
             }
         };
 
