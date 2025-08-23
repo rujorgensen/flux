@@ -45,7 +45,10 @@
         "nx-release-publish": {
             "options": {
                 "packageRoot": "dist/{projectRoot}"
-            }
+            },
+            "dependsOn": [
+                "build"
+            ]
         },
         "bun-test": {
             "executor": "nx:run-commands",

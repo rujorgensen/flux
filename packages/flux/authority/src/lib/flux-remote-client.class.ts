@@ -2,7 +2,7 @@
  * A connection to another known client
  */
 
-import { ICEConnection } from './connector/low-level-com/web-rtc/ice-connection';
+import { ICEConnection } from './low-level-com/web-rtc/ice-connection';
 
 export class FluxRemoteClient {
 
