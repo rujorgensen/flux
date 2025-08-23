@@ -7,6 +7,7 @@
       "node"
     ],
     "target": "ESNext",
+    "module": "preserve",
     "moduleResolution": "bundler"
   },
   "include": [
