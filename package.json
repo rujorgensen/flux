@@ -1,5 +1,5 @@
 {
-    "name": "@proper-proxima/source",
+    "name": "@persistica/source",
     "type": "module",
     "version": "0.0.1",
     "scripts": {
@@ -28,8 +28,14 @@
         "caddy:config:load": "caddy adapt --config ./Caddyfile && caddy reload",
         "postinstall": "bun prisma:generate:portal || true",
         "//-06a": "// ****************************************************************************",
-        "//-06b": "// *** Better Auth                                                             ",
+        "//-06b": "// *** NPM Publish                                                             ",
         "//-06c": "// ****************************************************************************",
+        "publish:agent": "bunx nx run persistica-flux-agent:nx-release-publish",
+        "publish:authority": "bunx nx run persistica-flux-authority:nx-release-publish",
+        "publish:mesh": "bunx nx run persistica-flux-mesh:nx-release-publish",
+        "//-08a": "// ****************************************************************************",
+        "//-08b": "// *** Better Auth                                                             ",
+        "//-08c": "// ****************************************************************************",
         "auth:generate": "npx @better-auth/cli@latest generate --config=./apps/backend/portal/src/auth.ts",
         "auth:migrate": "npx @better-auth/cli@latest migrate --config=./apps/backend/portal/src/auth.ts",
         "//-07a": "// ****************************************************************************",

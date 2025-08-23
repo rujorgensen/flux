@@ -19,3 +19,7 @@ await Bun.build({
     target: 'bun', // Use 'bun' as the target for Bun's native build
     minify: true,
 });
+
+// Copy package.json
+const file = Bun.file(`./${values.projectRoot}/package.json`);
+await Bun.write(`./dist/${values.projectRoot}/package.json`, file);

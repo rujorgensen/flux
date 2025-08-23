@@ -7,8 +7,8 @@
             "node"
         ],
         "target": "ESNext",
-        "moduleResolution": "bundler",
-        "module": "EsNext"
+        "module": "EsNext",
+        "moduleResolution": "bundler"
     },
     "include": [
         "src/**/*.ts"
