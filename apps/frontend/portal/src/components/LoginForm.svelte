@@ -16,7 +16,9 @@
         authClient.signIn.social(
             {
                 provider: "google",
-                callbackURL: "/",
+                callbackURL: import.meta.env.PROD
+                    ? "/"
+                    : "http://localhost:3001",
             },
             {
                 onSuccess: () => {

@@ -5,6 +5,9 @@ export {
 export {
     GlobalRPCTimeoutError,
 } from './lib/errors/global-rpc-timeout.error';
+export {
+    NetworkAuthorityNotFoundError,
+} from './lib/errors/network-authority-not-found.error';
 
 export * from './lib/flux-shared';
 

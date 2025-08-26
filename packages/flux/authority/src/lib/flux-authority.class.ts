@@ -17,7 +17,11 @@ import { FluxClientData } from './connector/flux-client-data.class';
 import type {
     TChannnelAuthCallback,
 } from './channel/channel.type';
-import type { TAuthorizeCallback, TNetworkId_S } from '@flux/shared/types';
+import {
+    type TAuthorizeCallback,
+    type TNetworkId_S,
+    validateNetworkIdOrThrow,
+} from '@flux/shared/types';
 import {
     type TFluxClientUID,
     getMachineUID,
@@ -46,7 +50,10 @@ export class FluxAuthority {
             secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
             retries?: number; // Number of times to retry a failed message
         },
-    ) { }
+    ) {
+        // Validate user input
+        validateNetworkIdOrThrow(this.networkId);
+    }
 
     /**
      * Registers an authority on the network.

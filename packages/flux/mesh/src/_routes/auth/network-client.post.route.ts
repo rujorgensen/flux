@@ -7,6 +7,7 @@ import {
     UnknownClientError,
     validateAgentUIDOrThrow,
     validateNetworkIdOrThrow,
+    NetworkAuthorityNotFoundError,
 } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
@@ -51,7 +52,7 @@ export const authorizeNetworkAgent = async (
         return new Response('Missing networkId', {
             status: 500,
             headers: {
-                //   'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Origin': '*',
             },
         });
     }
@@ -147,7 +148,7 @@ export const authorizeNetworkAgent = async (
                 generateToken({
                     networkId,
                     claim: authorizedJWT,
-                    agentUID: requestedAgentUidString,
+                    agentUID: requestedAgentUidString as string,
                     machineUID: machineUID,
                 }),
                 {
@@ -161,9 +162,21 @@ export const authorizeNetworkAgent = async (
         }
     } catch (error) {
         console.error('Error authorizing:', error);
+
+        if (error instanceof NetworkAuthorityNotFoundError) {
+            return new Response(error.message, {
+                status: 401, // 401 'Unauthorized'
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                },
+            });
+        }
     }
 
     return new Response('Unauthorized', {
-        status: 500,
+        status: 500, // 500 'Internal error'
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+        },
     });
 };

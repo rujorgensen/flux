@@ -42,7 +42,10 @@ import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
 import { OutgoingMessageRouter } from './routing/outgoing-message-router.class';
 import { NetworkAuthorityManager } from './register/register-network-authority.class';
-import { verifyTokenOrThrow } from './auth/auth';
+import {
+    type TTokenPayload,
+    verifyTokenOrThrow,
+} from './auth/auth';
 import { GlobalRPCClient } from './routing/rpc/core/global-rpc-client.class';
 import { ProcessMessageRouter } from './routing/process-message-router.class';
 import {
@@ -212,13 +215,7 @@ export class FluxMeshServer {
                     .query['token'];
 
                 try {
-                    const decodedToken: {
-                        networkId: TNetworkId_S;
-                        claim?: string;
-                        isAuthority?: boolean;
-                        agentUID?: string,
-                        machineUID?: TFluxClientUID,
-                    } = verifyTokenOrThrow(token) as any;
+                    const decodedToken: TTokenPayload = verifyTokenOrThrow(token);
 
                     const socketId: TClientId = nanoid() as TClientId;
 
@@ -241,8 +238,12 @@ export class FluxMeshServer {
                             },
                         })
                     ) {
-                        // Do not return a Response
-                        return;
+                        return new Response('Request upgrade failed', {
+                            status: 500,
+                            headers: {
+                                'Access-Control-Allow-Origin': '*',
+                            },
+                        });
                     }
                 } catch {
                     console.error('Token verification failed');
@@ -477,7 +478,7 @@ export class FluxMeshServer {
                                     ws.send(`${ERROR}:Unknown error`);
                                 }
                             } catch {
-                                ws.send(`${ERROR}:Not netrowk authority found`);
+                                ws.send(`${ERROR}:No network authority found`);
                                 return;
                             }
                             break;

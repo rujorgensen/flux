@@ -16,16 +16,19 @@
                 name: "Acme Inc",
                 logo: GalleryVerticalEndIcon,
                 plan: "Enterprise",
+                networkId: "acme-network-id" as TNetworkId_S,
             },
             {
                 name: "Acme Corp.",
                 logo: AudioWaveformIcon,
                 plan: "Startup",
+                networkId: "acme-2-network-id" as TNetworkId_S,
             },
             {
                 name: "Evil Corp.",
                 logo: CommandIcon,
                 plan: "Free",
+                networkId: "evil-corp-network-id" as TNetworkId_S,
             },
         ],
         navMain: [
@@ -143,6 +146,7 @@
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
     import type { ComponentProps } from "svelte";
     import { LayoutDashboardIcon } from "@lucide/svelte";
+    import type { TNetworkId_S } from "@flux/shared/types";
 
     let {
         ref = $bindable(null),

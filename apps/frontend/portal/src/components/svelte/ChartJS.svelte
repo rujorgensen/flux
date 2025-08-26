@@ -34,18 +34,18 @@ Chart.register(
     let canvas;
 
     onMount(() => {
-
-        let lineColor = '#111';
+        let lineColor = "#111";
 
         setInterval(() => {
-
             const rootStyles = getComputedStyle(document.documentElement);
             lineColor = rootStyles.getPropertyValue("--pop-color-1").trim();
-            const fillColor = rootStyles.getPropertyValue("--pop-color-2").trim();
-            
-            console.log(lineColor,fillColor);
-        });
-      
+            const fillColor = rootStyles
+                .getPropertyValue("--pop-color-2")
+                .trim();
+
+            console.log({ lineColor, fillColor });
+        }, 200);
+
         ctx = canvas.getContext("2d");
         const chart = new Chart(ctx, {
             options: {
@@ -110,7 +110,6 @@ Chart.register(
                         label: "Unit Sales",
                         data: data,
                         tension: 0.4, // smoothness (0 = straight lines, 1 = max curve)
-
 
                         borderColor: lineColor,
                         //backgroundColor: fillColor, // "", // Fill under line (if `fill: true`)
