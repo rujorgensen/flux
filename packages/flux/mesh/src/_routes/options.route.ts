@@ -1,6 +1,11 @@
+/**
+ * Standard CORS response.
+ * 
+ * @returns { Response }
+ */
 export const OPTIONS_RESPONSE = () =>
     new Response(null, {
-        status: 204,
+        status: 204, // "204 No Content"
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',

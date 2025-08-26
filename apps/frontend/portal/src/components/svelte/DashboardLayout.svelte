@@ -5,7 +5,8 @@
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
     import type { ComponentProps } from "svelte";
 
-    let { userSession }: ComponentProps<typeof Sidebar.Root> = $props();
+    const { userSession, children }: ComponentProps<typeof Sidebar.Root> =
+        $props();
 
     import { activeNetwork } from "$lib/stores/activeNetwork";
 </script>
@@ -38,6 +39,6 @@
                 </Breadcrumb.Root>
             </div>
         </header>
-        <slot></slot>
+        {@render children?.()}
     </Sidebar.Inset>
 </Sidebar.Provider>

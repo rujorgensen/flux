@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
-import proxy from './proxy.conf.json' assert { type: 'json' };
+import proxy from './proxy.conf.json' with { type: 'json' };
 import node from '@astrojs/node';
 import { visualizer } from 'rollup-plugin-visualizer';
 import tsconfigPaths from 'vite-tsconfig-paths'

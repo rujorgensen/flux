@@ -17,6 +17,7 @@ import {
     AUTHORITY_CHANNEL_SUBSCRIBE,
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
+    ERROR,
 } from '@flux/shared/types';
 import {
     type RPCRequest,
@@ -522,6 +523,10 @@ export class FluxWebSocketConnection {
             }
 
             default:
+                if (message_.startsWith(`${ERROR}:`)) {
+                    throw new Error(message_.substring(message_.indexOf(':') + 1) ?? 'Unknown error');
+                }
+
                 PicoLogger.log(`🔌 Unhandled type: "${message_}"`, 'ws-client');
                 break;
         }

@@ -86,7 +86,7 @@
                         onclick={toggleMode}
                         aria-label="Toggle theme"
                     >
-                        {#if $mode === "dark"}
+                        {#if mode.current === "dark"}
                             <SunIcon />
                             Switch to light mode
                         {:else}

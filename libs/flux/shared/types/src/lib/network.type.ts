@@ -15,6 +15,14 @@ export const validateNetworkIdOrThrow = (
         throw new Error('Network ID must be a string');
     }
 
+    if (networkId === '') {
+        throw new Error('Network ID cannot be empty');
+    }
+
+    if (networkId === 'undefined' || networkId === 'null') {
+        throw new Error('Network ID cannot be "null" or "undefined"');
+    }
+
     if (networkId.includes(':')) {
         throw new Error('Network ID cannot contain :');
     }

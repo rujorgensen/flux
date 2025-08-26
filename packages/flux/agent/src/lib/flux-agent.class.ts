@@ -1,6 +1,6 @@
 // Make TypeScript happy
 declare global {
-	var agentLoadCount: number | null | undefined;
+    var agentLoadCount: number | null | undefined;
 }
 
 // Check env
@@ -15,6 +15,7 @@ import {
     type TAgentOwnUId,
     type TNetworkId_S,
     validateAgentUIDOrThrow,
+    validateNetworkIdOrThrow,
 } from '@flux/shared/types';
 import type { TMessageCallback } from '@flux/shared/ws';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
@@ -38,11 +39,14 @@ export class FluxAgent {
     constructor(
         private readonly networkId: string,
         private readonly options?: {
-			domain?: string;
+            domain?: string;
             secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
             retries?: number; // Number of times to retry a failed message
         },
-	) { }
+    ) {
+        // Validate user input
+        validateNetworkIdOrThrow(this.networkId);
+    }
 
     /**
      * Connect to the network using provided identification.
@@ -68,7 +72,7 @@ export class FluxAgent {
             identification,
             {
                 clientUId: clientUId as TAgentOwnUId,
-                machineUID: (await getMachineUID() )?? undefined,
+                machineUID: (await getMachineUID()) ?? undefined,
             },
         );
 

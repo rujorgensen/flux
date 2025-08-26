@@ -5,6 +5,9 @@ import { PrismaClient } from "@prisma-types/flux";
 const prisma = new PrismaClient();
 
 export const auth = betterAuth({
+    telemetry: {
+        enabled: false,
+    },
     database: prismaAdapter(prisma, {
         provider: "postgresql",
     }),

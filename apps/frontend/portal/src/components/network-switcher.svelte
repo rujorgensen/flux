@@ -14,8 +14,9 @@
     let { networks }: { networks: Network[] } = $props();
     const sidebar = useSidebar();
 
-    let networkAlias_: string = "Network Name"; // Default value for the input field
-    activeNetwork.set(networks[0]); // or however you get the default
+    // Default value for the input field
+    let createNetworkAlias: string = $state("Network Name");
+    activeNetwork.set(networks[0] ?? null); // or however you get the default
     // import { onMount } from "svelte";
     // onMount(() => {
     // });
@@ -97,14 +98,14 @@
                             <PlusIcon class="size-4" />
                         </div>
 
-                        <div
+                        <button
                             class="text-muted-foreground font-medium"
                             onclick={() => {
                                 open.set(true);
                             }}
                         >
                             Add network
-                        </div>
+                        </button>
                     </DropdownMenu.Item>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
@@ -133,7 +134,8 @@
                     <Input
                         id="name"
                         class="col-span-3"
-                        bind:value={networkAlias_}
+                        placeholder="Network name"
+                        bind:value={createNetworkAlias}
                     />
                 </div>
                 <!--
@@ -146,7 +148,8 @@
             <Dialog.Footer>
                 <Button
                     type="submit"
-                    onclick={() => createNetworkAndCloseModal(networkAlias_)}
+                    onclick={() =>
+                        createNetworkAndCloseModal(createNetworkAlias)}
                 >
                     Save changes
                 </Button>

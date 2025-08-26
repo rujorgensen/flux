@@ -10,6 +10,16 @@ import {
 
 let fluxNetworkConnection: FluxAgentNetworkConnection | undefined;
 
+/**
+ * Returns a flux agent connection to the provided network ID, 
+ * if valid identification is provided.
+ *  
+ * @param { TNetworkId_S }  networkId
+ * @param { string }        identification
+ * @param { string }        userEmail
+ * 
+ * @returns { Promise<FluxAgentNetworkConnection> }
+ */
 export const getFluxNetworkConnection = async (
     networkId: TNetworkId_S,
     identification: string,

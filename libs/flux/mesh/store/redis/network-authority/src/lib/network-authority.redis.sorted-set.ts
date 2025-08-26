@@ -8,6 +8,7 @@ import {
     type TNetworkId_S,
     type TProcessId,
     splitAddressOrThrow,
+    NetworkAuthorityNotFoundError,
 } from '@flux/shared/types';
 import {
     readMachineAddress,
@@ -203,7 +204,7 @@ export class NetworkAuthorityRedisSortedSet {
         );
 
         if (list.length === 0) {
-            throw new Error(`Network authority not found for networkId: '${networkId}'`);
+            throw new NetworkAuthorityNotFoundError(networkId);
         }
 
         return list as TAddress[];
