@@ -17,11 +17,12 @@
                 "outputPath": "dist/packages/flux/agent",
                 "main": "packages/flux/agent/src/index.ts",
                 "tsConfig": "packages/flux/agent/tsconfig.lib.json",
-                "assets": [],
+                "assets": [
+                    "{projectRoot}/README.md"
+                ],
                 "format": [
                     "cjs"
-                ],
-                "generatePackageJson": true
+                ]
             }
         },
         "bun-serve": {

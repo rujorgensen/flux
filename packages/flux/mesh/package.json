@@ -18,8 +18,5 @@
     "bugs": {
         "url": "https://github.com/rujorgensen/persistica/issues"
     },
-    "homepage": "https://github.com/rujorgensen/persistica#readme",
-    "dependencies": {
-        "alpinejs": "^3.14.9"
-    }
+    "homepage": "https://github.com/rujorgensen/persistica#readme"
 }
