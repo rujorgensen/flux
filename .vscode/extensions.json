@@ -4,7 +4,8 @@
         "unifiedjs.vscode-mdx",
         "firsttris.vscode-jest-runner",
         "ms-azuretools.vscode-docker",
-        "aaron-bond.better-comments"
+        "aaron-bond.better-comments",
+        "pomdtr.excalidraw-editor"
     ],
     "unwantedRecommendations": [
         "esbenp.prettier-vscode"
