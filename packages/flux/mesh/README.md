@@ -2,7 +2,7 @@
 
 const fluxMeshServer: FluxMeshServer = new FluxMeshServer();
 
-fluxMeshServer.onReady(async () => {
+fluxMeshServer.onReady(() => {
     console.log('🚀 Mesh server running! Ready to receive connections.');
 });
 
