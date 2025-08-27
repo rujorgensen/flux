@@ -21,5 +21,10 @@ await Bun.build({
 });
 
 // Copy package.json
-const file = Bun.file(`./${values.projectRoot}/package.json`);
-await Bun.write(`./dist/${values.projectRoot}/package.json`, file);
+const packageJSONFilePath = `/${values.projectRoot}/package.json`;
+await Bun.write(`./dist${packageJSONFilePath}`, Bun.file(`.${packageJSONFilePath}`));
+
+// Copy package.json
+const readmeFile = `/${values.projectRoot}/README.md`;
+await Bun.write(`./dist${readmeFile}`, Bun.file(`.${readmeFile}`));
+
