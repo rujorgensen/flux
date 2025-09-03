@@ -1,3 +1,5 @@
+# Flux Mesh (server)
+
 ```TypeScript
 import { FluxMeshServer } from '@persistica/flux-mesh';
 

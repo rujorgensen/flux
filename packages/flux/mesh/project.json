@@ -23,6 +23,15 @@
                 ]
             }
         },
+        "build:declaration": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "tsc",
+                "args": [
+                    "--project {projectRoot}/tsconfig.types.json"
+                ]
+            }
+        },
         "serve": {
             "executor": "@nx/js:node",
             "defaultConfiguration": "development",
