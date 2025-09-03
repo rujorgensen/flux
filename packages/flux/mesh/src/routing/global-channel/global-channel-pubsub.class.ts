@@ -6,7 +6,7 @@
  */
 
 import type { TProcessAddress } from '@flux/shared/types';
-import type { TConnectedClientSocket } from '../../main';
+import type { TConnectedClientSocket } from '../../connected-client-socket.types';
 import type { RedisConnection } from '../redis/redis-connection.class';
 
 export type TGlobalChannel = string & { __brand: 'global-channel'; };

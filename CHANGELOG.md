@@ -1,3 +1,57 @@
+## 0.0.12 (2025-09-03)
+
+### 🩹 Fixes
+
+- generating types ([3457991](https://github.com/rujorgensen/solid-octo-spoon/commit/3457991))
+
+### ❤️ Thank You
+
+- rj
+
+## 0.0.11 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.11-0 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.10 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.9 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.8 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.7-0 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.6-0 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.5-0 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.4-2 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.4-1 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
+## 0.0.4-0 (2025-09-03)
+
+This was a version bump only, there were no code changes.
+
 ## 0.0.7 (2025-08-27)
 
 This was a version bump only, there were no code changes.

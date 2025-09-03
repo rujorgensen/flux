@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import type { TNetworkId_S } from '@flux/shared/types';
 import type { TFluxClientUID } from '@flux/shared/utils';
 

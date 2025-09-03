@@ -1,4 +1,7 @@
+# Flux Mesh (server)
+
 ```TypeScript
+import { FluxMeshServer } from '@persistica/flux-mesh';
 
 const fluxMeshServer: FluxMeshServer = new FluxMeshServer();
 

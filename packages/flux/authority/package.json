@@ -1,14 +1,15 @@
 {
     "name": "@persistica/flux-authority",
-    "version": "0.0.2",
+    "version": "0.0.12",
     "description": "Persistica Flux Authority",
     "type": "module",
     "keywords": [],
     "publishConfig": {
         "access": "public"
     },
-    "main": "./index.cjs",
-    "types": "./index.d.ts",
+    "exports": "./index.js",
+    "main": "./index.js",
+    "types": "./src/index.d.ts",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/rujorgensen/persistica.git"
