@@ -35,4 +35,3 @@ await Bun.write(`./dist${readmeFile}`, Bun.file(`.${readmeFile}`));
 
 // Generate types and move to correct folder
 await Bun.$`nx run persistica-flux-mesh:build:declaration`;
-await Bun.$`mv ./dist/${values.projectRoot}/src/* ./dist/${values.projectRoot}`;
