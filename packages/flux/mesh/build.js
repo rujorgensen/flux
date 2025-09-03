@@ -12,19 +12,24 @@ const { values } = parseArgs({
     allowPositionals: true,
 });
 
+// Clear the build folder
+await Bun.$`rm -rf dist/${values.projectRoot}`;
+
 // Build the project using Bun
 await Bun.build({
     entrypoints: [`./${values.projectRoot}/src/main.ts`],
     outdir: `./dist/${values.projectRoot}`,
+    naming: 'index.js',
     target: 'bun', // Use 'bun' as the target for Bun's native build
     minify: true,
+    format: "esm"
 });
 
 // Copy package.json
 const packageJSONFilePath = `/${values.projectRoot}/package.json`;
 await Bun.write(`./dist${packageJSONFilePath}`, Bun.file(`.${packageJSONFilePath}`));
 
-// Copy package.json
+// Copy README.md
 const readmeFile = `/${values.projectRoot}/README.md`;
 await Bun.write(`./dist${readmeFile}`, Bun.file(`.${readmeFile}`));
 

@@ -16,7 +16,6 @@ console.log(`[flux-mesh] Reloaded ${globalThis.meshLoadCount} time(s)`);
 // }
 
 import {
-    type TNetworkId_S,
     type TAddress,
     type TChannelName,
     type TClientId,
@@ -63,7 +62,6 @@ import { OPTIONS_RESPONSE } from './_routes/options.route';
 import { authorizeNetworkAuthority } from './_routes/auth/network-authority.post.route';
 import { authorizeNetworkAgent } from './_routes/auth/network-client.post.route';
 import type {
-    RPCClient,
     RPCResponse,
     TRPCResponseCallbackFunction,
 } from '@flux/shared/ws';
@@ -76,31 +74,12 @@ import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pub
 import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
 import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
 import { PicoLogger } from '@utils/pico-logger';
-import type { TFluxClientUID } from '@flux/shared/utils';
+import { TConnectedClientSocket } from './connected-client-socket.types';
 
 PicoLogger.configure({
     allowScopes: '*',
 });
 
-export type TConnectedClientSocket = Bun.ServerWebSocket<{
-    ip: Bun.SocketAddress | null;
-    id: TClientId;
-    uid?: TAgentOwnUId;
-    address: TAddress;
-    networkId: TNetworkId_S;
-    isAuthority?: boolean;
-    rtcClient?: WebRTCClient;
-    claim?: string;
-    rpcClient: RPCClient<'channel'>;
-    channelNames: Set<TChannelName>;
-    machineUID?: TFluxClientUID,
-
-    // The amount of data sent
-    throughput: {
-        bytes: number;
-        packets: number;
-    };
-}>;
 
 const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
 const processId: TProcessId = readProcessId();
