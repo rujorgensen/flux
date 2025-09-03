@@ -21,7 +21,7 @@
                     "{projectRoot}/README.md"
                 ],
                 "format": [
-                    "cjs"
+                    "esm"
                 ]
             }
         },
