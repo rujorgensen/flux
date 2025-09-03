@@ -150,6 +150,8 @@ export class FluxMeshServer {
             ...(this.optionsOrPort as TOptions),
         };
 
+        const port: number = typeof this.optionsOrPort === 'number' ? this.optionsOrPort : (this.optionsOrPort?.port ?? 5_100);
+
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
         const networkAgentManager: NetworkAgentManager = new NetworkAgentManager();
 
@@ -653,7 +655,7 @@ export class FluxMeshServer {
         // TODO: DETECT WHEN READY
         setTimeout(() => {
             console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
-            console.log(`🚀 Flux mesh server running on localhost:${this.optionsOrPort?.port}`);
+            console.log(`🚀 Flux mesh server running on localhost:${port}`);
 
             setInterval(() => {
                 this.redisConnection.setConnected(`${machineAddress}/${processId}`);
