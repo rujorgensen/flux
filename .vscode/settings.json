@@ -11,7 +11,9 @@
     "typescript.format.semicolons": "insert",
     "search.exclude": {
         "**/node_modules": true,
-        "**/dist": true
+        "**/dist": true,
+        "**/*.excalidraw": true,
+        "bun.lock": true
     },
     "files.watcherExclude": {
         "**/.git/**": true,
@@ -19,6 +21,7 @@
         "**/env/**": true,
         "**/backup/**": true,
         "**/dist/**": true,
-        "**/.angular/**": true
+        "**/.angular/**": true,
+        "**/*.excalidraw": true,
     }
 }
