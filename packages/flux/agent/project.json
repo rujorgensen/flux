@@ -37,6 +37,15 @@
                 "command": "npx madge --image graph.svg --extensions ts,tsx ./apps/flux/agent/src"
             }
         },
+        "link": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd ./dist/{projectRoot} && bun link"
+            },
+            "dependsOn": [
+                "build"
+            ]
+        },
         "nx-release-publish": {
             "options": {
                 "packageRoot": "dist/{projectRoot}"
