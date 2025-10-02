@@ -67,7 +67,7 @@ export class BunRedisClient extends EventEmitter<{
      * ! Please note that this may be re-instantiated on reconnections,
      * ! so make sure to request this continuously, if used.
      * 
-     * @returns { RedisClient}
+     * @returns { RedisClient }
      */
     public getClient(
 
@@ -78,6 +78,7 @@ export class BunRedisClient extends EventEmitter<{
     public clone(
 
     ): BunRedisClient {
+        // return this.getClient().duplicate();
         return new BunRedisClient(this.options);
     }
 

@@ -14,7 +14,9 @@ const NANOID_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqr
 export const isNanoId = (
     id: unknown,
 ): id is TClientId => {
-    if (typeof id !== 'string') return false;
+    if (typeof id !== 'string') {
+        return false;
+    }
     // Check if illegal chars exit
     const regex = new RegExp(`^[${NANOID_ALPHABET}]{${NANOID_LENGTH}}$`);
 
