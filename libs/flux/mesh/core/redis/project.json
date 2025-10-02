@@ -14,7 +14,7 @@
             "options": {
                 "command": "bun build {projectRoot}/src/index.ts",
                 "args": [
-                    "--outdir=dist/libs/flux/mesh/core/redis",
+                    "--outdir=dist/{projectRoot}",
                     "--target=bun",
                     "--format=esm",
                     "--minify"
