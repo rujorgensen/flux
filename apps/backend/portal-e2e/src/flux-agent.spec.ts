@@ -130,7 +130,7 @@ async function connectToRedisAndFlush(
     url: string,
 ): Promise<void> {
     if (!url.includes('localhost')) {
-        throw new Error('No way I\'m flushing a Redis server which is not running locally!');
+        throw new Error('No way I\'m flushing a Redis server that is not running locally!');
     }
 
     const client = new RedisClient(url);

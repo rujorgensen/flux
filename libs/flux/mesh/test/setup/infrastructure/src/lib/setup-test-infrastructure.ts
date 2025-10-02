@@ -13,11 +13,12 @@ declare global {
     var infrastructureRedisContainer: StartedRedisContainer | null;
 }
 
+let globalRedisContainer: StartedRedisContainer | null = null;
 beforeAll(async () => {
     // global setup
     console.info('🛠️\tSetting up test infrastructure...');
 
-    if (process.env['FLUX_TEST_INFRASTRUCTURE'] !== 'local') {
+    if ((process.env['FLUX_TEST_INFRASTRUCTURE'] !== 'local') && (globalRedisContainer !== null)) {
 
         // * Start Redis container
         const redisContainer: StartedRedisContainer = await new RedisContainer('redis:8.2.1')
@@ -26,7 +27,7 @@ beforeAll(async () => {
             .start();
 
         globalThis['infrastructureRedisURL'] = redisContainer.getConnectionUrl();
-        globalThis['infrastructureRedisContainer'] = redisContainer;
+        globalRedisContainer = redisContainer;
     } else {
         globalThis['infrastructureRedisURL'] = 'redis://localhost:6381';
     }
@@ -40,7 +41,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
     console.log('Tearing down test infrastructure...');
-    await globalThis['infrastructureRedisContainer']?.stop();
+    await globalRedisContainer?.stop();
+
+    globalRedisContainer = null;
 });
 
 /**
