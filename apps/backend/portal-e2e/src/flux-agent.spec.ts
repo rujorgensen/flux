@@ -42,7 +42,7 @@ describe('persistica-flux-api-agents', () => {
         // 👉 Wait until the API is accepting connections
         await waitUntilAvailable(
             `${portalDomain}/api/ping`,
-            30_000,
+            10_000,
             300,
         );
 
