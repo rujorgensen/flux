@@ -1,11 +1,8 @@
-import {
-    type RedisClientType,
-    createClient,
-} from 'redis';
+import { RedisClient } from 'bun';
 import { BunRedisPubSub } from './core-redis-pub-sub.class';
 
 describe('BunRedisPubSub', () => {
-    let redisClient: RedisClientType;
+    let redisClient: RedisClient;
     let pubsub: BunRedisPubSub;
 
     beforeAll(async () => {
@@ -13,9 +10,7 @@ describe('BunRedisPubSub', () => {
 
         console.log(`Redis is ready at ${url}`);
 
-        redisClient = createClient({
-            url,
-        });
+        redisClient = new RedisClient(url);
 
         pubsub = new BunRedisPubSub({
             url,
@@ -29,7 +24,7 @@ describe('BunRedisPubSub', () => {
     });
 
     afterAll(async () => {
-        await redisClient?.disconnect();
+        await redisClient?.close();
         await pubsub?.disconnect();
     });
 

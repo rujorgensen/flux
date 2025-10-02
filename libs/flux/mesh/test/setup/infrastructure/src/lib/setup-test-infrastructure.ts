@@ -1,3 +1,4 @@
+import { RedisClient } from 'bun';
 import { beforeAll, afterAll } from 'bun:test';
 import {
     type StartedRedisContainer,
@@ -6,9 +7,6 @@ import {
 import {
     Wait,
 } from 'testcontainers';
-import {
-    createClient,
-} from 'redis';
 
 declare global {
     var infrastructureRedisURL: string | null;
@@ -56,14 +54,12 @@ async function testRedisConnection(
     url: string,
 ): Promise<boolean> {
     try {
-        const client = createClient({
-            url,
-        });
+        const client = new RedisClient(url);
 
         await client.connect();
 
-        if (client.isOpen) {
-            client.destroy();
+        if (client.connected) {
+            client.close();
 
             return true;
         }

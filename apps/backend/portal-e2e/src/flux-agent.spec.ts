@@ -1,6 +1,4 @@
-import {
-    createClient,
-} from 'redis';
+import { RedisClient } from 'bun';
 import {
     FluxAuthority
 } from '@persistica/flux-authority';
@@ -135,15 +133,13 @@ async function connectToRedisAndFlush(
         throw new Error('No way I\'m flushing a Redis server which is not running locally!');
     }
 
-    const client = createClient({
-        url,
-    });
+    const client = new RedisClient(url);
     console.log(`Connecting to Redis at '${url}' for flushing...`);
     await client.connect();
-    expect(client.isOpen).toBeTruthy();
+    expect(client.connected).toBeTruthy();
     console.warn(`Connection to Redis at '${url}' is open. Flushing data...`);
-    await client.flushAll();
+    await client.send('FLUSHALL', ['ASYNC']);
 
     console.warn(`Flushed all data from Redis at '${url}', disconnecting.`);
-    client.destroy();
+    client.close();
 }
