@@ -10,7 +10,7 @@ export class BunRedisClient extends EventEmitter<{
     end: unknown,
 }> {
     public connected = false;
-    private client: RedisClient;
+    private readonly client: RedisClient;
     private readonly handlers: Map<string, Set<MessageHandler>> = new Map();
     private reconnecting = false;
 
@@ -64,9 +64,6 @@ export class BunRedisClient extends EventEmitter<{
     /**
      * Returns the raw Redis client.
      * 
-     * ! Please note that this may be re-instantiated on reconnections,
-     * ! so make sure to request this continuously, if used.
-     * 
      * @returns { RedisClient }
      */
     public getClient(
@@ -78,7 +75,6 @@ export class BunRedisClient extends EventEmitter<{
     public clone(
 
     ): BunRedisClient {
-        // return this.getClient().duplicate();
         return new BunRedisClient(this.options);
     }
 
@@ -148,18 +144,6 @@ export class BunRedisClient extends EventEmitter<{
             this.reconnectAttempts++;
 
             try {
-                /**
-                 * Bun v. 1.2.16 appears to have an issue causing requiring a new instance rather than being able to use client.connect() directly.
-                 */
-                this.client = new RedisClient(
-                    this.options.url,
-                    {
-                        // We're providing our own implementation
-                        autoReconnect: false,
-                        connectionTimeout: 20_000,
-                        // idleTimeout: 0,
-                    },
-                );
                 await this.connect_();
                 console.log('✅ Redis client reconnected');
 
