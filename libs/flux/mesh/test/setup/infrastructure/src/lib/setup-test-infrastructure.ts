@@ -17,12 +17,12 @@ declare global {
 
 beforeAll(async () => {
     // global setup
-    console.log('🛠️\tSetting up test infrastructure...');
+    console.info('🛠️\tSetting up test infrastructure...');
 
     if (process.env['FLUX_TEST_INFRASTRUCTURE'] !== 'local') {
 
         // * Start Redis container
-        const redisContainer: StartedRedisContainer = await new RedisContainer('redis:7.4.3')
+        const redisContainer: StartedRedisContainer = await new RedisContainer('redis:8.2.1')
             .withExposedPorts(6379)
             .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
             .start();
@@ -34,7 +34,7 @@ beforeAll(async () => {
     }
 
     if (await testRedisConnection(globalThis['infrastructureRedisURL'])) {
-        console.log(`✅\tRedis is ready at ${globalThis['infrastructureRedisURL']} for testing`);
+        console.info(`✅\tRedis is ready at ${globalThis['infrastructureRedisURL']} for testing`);
     } else {
         throw new Error(`💀\tRedis is NOT running ${globalThis['infrastructureRedisURL']}`);
     }

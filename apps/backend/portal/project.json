@@ -22,9 +22,6 @@
                 ],
                 "parallel": true
             },
-            "dependsOn": [
-                "docker-dev"
-            ],
             "continuous": true
         },
         "serve-static": {
