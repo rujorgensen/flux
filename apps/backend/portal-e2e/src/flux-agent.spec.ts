@@ -1,6 +1,4 @@
-import {
-    createClient,
-} from 'redis';
+import { RedisClient } from 'bun';
 import {
     FluxAuthority
 } from '@persistica/flux-authority';
@@ -22,7 +20,8 @@ const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to conne
 
 describe('persistica-flux-api-agents', () => {
     let fluxServerPort: number = 5100;
-    let domain: string = `localhost:${fluxServerPort}`;
+    let fluxDomain: string = `localhost:${fluxServerPort}`;
+    let portalDomain: string = 'http://localhost:3000';
 
     beforeAll(async () => {
         let redisURL: string = 'redis://localhost:6381';
@@ -35,9 +34,19 @@ describe('persistica-flux-api-agents', () => {
         // Modify env so the Flux Mesh connects to the test Redis container
         process.env.FLUX_MESH_REDIS_URL = redisURL;
 
-        console.log(`Redis is ready at '${redisURL}'`);
+        console.log(`⚗️ Redis is ready at '${redisURL}', starting portal server on port 3000`);
 
+        //$`bun nx run backend-portal:serve`.nothrow();
         $`bun nx run backend-portal:serve`.then().catch();
+
+        // 👉 Wait until the API is accepting connections
+        await waitUntilAvailable(
+            `${portalDomain}/api/ping`,
+            10_000,
+            300,
+        );
+
+        console.log(`⚗️ 🚀 Portal server is ready at port 3000`);
 
         // * Clear the container
         if (
@@ -50,7 +59,7 @@ describe('persistica-flux-api-agents', () => {
         await new FluxAuthority(
             NETWORK_ID,
             {
-                domain,
+                domain: fluxDomain,
             },
         )
             .registerAuthority(
@@ -59,11 +68,11 @@ describe('persistica-flux-api-agents', () => {
                 () => Promise.resolve(true),
             );
 
-        console.log(`Authority is connected to Mesh at '${domain}'`);
+        console.log(`Authority is connected to Mesh at '${fluxDomain}'`);
     });
 
     it('should return the agent count', async () => {
-        const res = await fetch(`http://localhost:3000/api/networks/${NETWORK_ID}/agents/count?when=now`);
+        const res = await fetch(`${portalDomain}/api/networks/${NETWORK_ID}/agents/count?when=now`);
         const data = await res.json();
 
         expect(data.count).toBe(0);
@@ -78,7 +87,7 @@ describe('persistica-flux-api-agents', () => {
                 'backend-agent-1',
             );
 
-        const res_ = await fetch(`http://localhost:3000/api/networks/${NETWORK_ID}/agents/count?when=now`);
+        const res_ = await fetch(`${portalDomain}/api/networks/${NETWORK_ID}/agents/count?when=now`);
         const data_ = await res_.json();
 
         expect(data_.count).toBe(1);
@@ -103,7 +112,7 @@ describe('persistica-flux-api-agents', () => {
                 CODE_TO_ACCESS_NETWORK,
             );
 
-        const res = await fetch(`http://localhost:3000/api/networks/${NETWORK_ID}/agents/connected`);
+        const res = await fetch(`${portalDomain}/api/networks/${NETWORK_ID}/agents/connected`);
 
         const data = await res.json();
         expect(data).toHaveLength(3);
@@ -132,18 +141,37 @@ async function connectToRedisAndFlush(
     url: string,
 ): Promise<void> {
     if (!url.includes('localhost')) {
-        throw new Error('No way I\'m flushing a Redis server which is not running locally!');
+        throw new Error('No way I\'m flushing a Redis server that is not running locally!');
     }
 
-    const client = createClient({
-        url,
-    });
+    const client = new RedisClient(url);
     console.log(`Connecting to Redis at '${url}' for flushing...`);
     await client.connect();
-    expect(client.isOpen).toBeTruthy();
+    expect(client.connected).toBeTruthy();
     console.warn(`Connection to Redis at '${url}' is open. Flushing data...`);
-    await client.flushAll();
+    await client.send('FLUSHALL', ['ASYNC']);
 
     console.warn(`Flushed all data from Redis at '${url}', disconnecting.`);
-    client.destroy();
+    client.close();
+}
+
+async function waitUntilAvailable(
+    url: string,
+    timeoutMs: number,
+    intervalMs: number,
+): Promise<void> {
+    const start: number = Date.now();
+    // Accept any HTTP status as “available”; we only need a TCP accept
+    while ((Date.now() - start) < timeoutMs) {
+        try {
+            const r: Response = await fetch(url);
+            if (r.ok || r.status >= 200) {
+                return;
+            }
+        } catch {
+            // ignore until next retry
+        }
+        await new Promise((r) => setTimeout(r, intervalMs));
+    }
+    throw new Error(`API did not become ready at ${url} within ${timeoutMs}ms`);
 }
