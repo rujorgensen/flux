@@ -35,7 +35,7 @@ describe('persistica-flux-api-agents', () => {
 
         console.log(`Redis is ready at '${redisURL}'`);
 
-        $`bun nx run backend-portal:serve`.then().catch();
+        $`bun nx run backend-portal:serve`.then(() => { console.log('DEBUG SUCCESS!!!!'); }).catch((error: any) => { console.error("CAUGHT ERTOTOTO", error); });
 
         // * Clear the container
         if (
