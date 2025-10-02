@@ -18,7 +18,7 @@ beforeAll(async () => {
     // global setup
     console.info('🛠️\tSetting up test infrastructure...');
 
-    if ((process.env['FLUX_TEST_INFRASTRUCTURE'] !== 'local') && (globalRedisContainer !== null)) {
+    if ((process.env['FLUX_TEST_INFRASTRUCTURE'] !== 'local') && (globalRedisContainer === null)) {
 
         // * Start Redis container
         const redisContainer: StartedRedisContainer = await new RedisContainer('redis:8.2.1')
