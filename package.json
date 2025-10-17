@@ -16,6 +16,7 @@
         "prisma:generate:portal": "bunx prisma generate --schema=./prisma/schema.prisma",
         "prisma:migrate:dev:portal": "bunx prisma migrate dev --schema=./prisma/schema.prisma --name=init",
         "prisma:deploy": "bunx prisma migrate deploy --schema=./prisma/schema.prisma",
+        "prisma:studio": "bunx prisma studio",
         "//-03a": "// ****************************************************************************",
         "//-03b": "// *** Update                                                                ",
         "//-03c": "// ****************************************************************************",
