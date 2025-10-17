@@ -100,6 +100,8 @@ const clientRPCResponseCallbacks: Map<
 //     },
 // );
 
+// type TWebsocketData = {};
+
 type TOptions = {
     port?: number;
     redisConnectionString?: string;
@@ -109,7 +111,7 @@ export class FluxMeshServer {
 
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly onReadyListeners: Set<() => void> = new Set();
-    private readonly bunServer: Bun.Server;
+    private readonly bunServer: Bun.Server; // Bun.Server<TWebsocketData>;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
     private readonly options: TOptions;
@@ -184,7 +186,7 @@ export class FluxMeshServer {
 
             async fetch(
                 request: Request,
-                server: Bun.Server,
+                server: Bun.Server, //  Bun.Server<TWebsocketData>,
             ) {
                 // Upgrade the request to a WebSocket
 

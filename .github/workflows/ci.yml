@@ -19,6 +19,7 @@ env:
   is-main-branch: ${{ github.ref == 'refs/heads/main' }}
   is-pull-request: ${{ github.event_name == 'pull_request' }}
   sha: ${{ github.sha }}
+  BUN_TEST_DISABLE_ANSI: '1'
 
 jobs:
   install-deps:
@@ -137,7 +138,7 @@ jobs:
 
       - name: 🧪 Run E2E tests
         # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected:e2e # --no-agents
+        run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
 
   build:
     runs-on: ubuntu-latest
