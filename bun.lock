@@ -28,11 +28,13 @@
         "@nx/js": "21.6.5",
         "@nx/plugin": "21.6.5",
         "@prisma/client": "^6.17.1",
+        "@tailwindcss/postcss": "^4.1.14",
         "@types/jsonwebtoken": "^9.0.10",
         "astro": "5.14.6",
         "better-auth": "1.3.27",
         "chart.js": "^4.5.1",
         "clsx": "^2.1.1",
+        "daisyui": "^5.3.7",
         "elysia": "1.4.12",
         "flowbite": "^3.1.2",
         "flowbite-svelte": "^1.18.0",
@@ -40,7 +42,9 @@
         "jsonwebtoken": "9.0.2",
         "madge": "^8.0.0",
         "mode-watcher": "1.1.0",
+        "nanoid": "^5.1.6",
         "open-props": "^1.7.16",
+        "postcss": "^8.5.6",
         "prisma-dbml-generator": "^0.12.0",
         "redis": "^5.8.3",
         "rollup-plugin-visualizer": "^6.0.5",
@@ -85,6 +89,8 @@
     },
   },
   "packages": {
+    "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
+
     "@ampproject/remapping": ["@ampproject/remapping@2.3.0", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw=="],
 
     "@analogjs/astro-angular": ["@analogjs/astro-angular@1.21.3", "", { "dependencies": { "@analogjs/vite-plugin-angular": "^1.21.3" }, "peerDependencies": { "@angular-devkit/build-angular": ">=16.0.0", "@angular/animations": ">=16.0.0", "@angular/common": ">=16.0.0", "@angular/compiler": ">=16.0.0", "@angular/compiler-cli": ">=16.0.0", "@angular/core": ">=16.0.0", "@angular/language-service": ">=16.0.0", "@angular/platform-browser": ">=16.0.0", "@angular/platform-browser-dynamic": ">=16.0.0", "@angular/platform-server": ">=16.0.0", "rxjs": "^7.5.6", "tslib": "^2.4.0", "zone.js": ">=0.13.3" } }, "sha512-wmKS1D56b88Gydz54efFRlL0k+1kVQY9A5zJ0nF/M64edNlWlhA5TWjkodOkqa6NLA6/QZv07dGHU2YCD48p0w=="],
@@ -1039,6 +1045,8 @@
 
     "@tailwindcss/oxide-win32-x64-msvc": ["@tailwindcss/oxide-win32-x64-msvc@4.1.14", "", { "os": "win32", "cpu": "x64" }, "sha512-ttblVGHgf68kEE4om1n/n44I0yGPkCPbLsqzjvybhpwa6mKKtgFfAzy6btc3HRmuW7nHe0OOrSeNP9sQmmH9XA=="],
 
+    "@tailwindcss/postcss": ["@tailwindcss/postcss@4.1.14", "", { "dependencies": { "@alloc/quick-lru": "^5.2.0", "@tailwindcss/node": "4.1.14", "@tailwindcss/oxide": "4.1.14", "postcss": "^8.4.41", "tailwindcss": "4.1.14" } }, "sha512-BdMjIxy7HUNThK87C7BC8I1rE8BVUsfNQSI5siQ4JK3iIa3w0XyVvVL9SXLWO//CtYTcp1v7zci0fYwJOjB+Zg=="],
+
     "@tailwindcss/vite": ["@tailwindcss/vite@4.1.14", "", { "dependencies": { "@tailwindcss/node": "4.1.14", "@tailwindcss/oxide": "4.1.14", "tailwindcss": "4.1.14" }, "peerDependencies": { "vite": "^5.2.0 || ^6 || ^7" } }, "sha512-BoFUoU0XqgCUS1UXWhmDJroKKhNXeDzD7/XwabjkDIAbMnc4ULn5e2FuEuBbhZ6ENZoSYzKlzvZ44Yr6EUDUSA=="],
 
     "@testcontainers/redis": ["@testcontainers/redis@11.7.1", "", { "dependencies": { "testcontainers": "^11.7.1" } }, "sha512-nyM7HjtF1lSiL6MjI3uQpJCYxvkwxtqYlButCLT3wJOnCPomiAe2OoWPmsVpI1FvbAcTrm2ck4r5Jzx5GXbMUQ=="],
@@ -1666,6 +1674,8 @@
     "cssstyle": ["cssstyle@5.3.1", "", { "dependencies": { "@asamuzakjp/css-color": "^4.0.3", "@csstools/css-syntax-patches-for-csstree": "^1.0.14", "css-tree": "^3.1.0" } }, "sha512-g5PC9Aiph9eiczFpcgUhd9S4UUO3F+LHGRIi5NUMZ+4xtoIYbHNZwZnWA2JsFGe8OU8nl4WyaEFiZuGuxlutJQ=="],
 
     "csstype": ["csstype@3.1.3", "", {}, "sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw=="],
+
+    "daisyui": ["daisyui@5.3.7", "", {}, "sha512-0+8PaSGift0HlIQABCeZzWOBV5Nx/vsI2TihB9hbaEyZENPlZZz+se2JnAH5rz9gBYTyDLB7NJup8hkREr6WBw=="],
 
     "data-urls": ["data-urls@6.0.0", "", { "dependencies": { "whatwg-mimetype": "^4.0.0", "whatwg-url": "^15.0.0" } }, "sha512-BnBS08aLUM+DKamupXs3w2tJJoqU+AkaE/+6vQxi/G/DPmIZFJJp9Dkb1kM03AZx8ADehDUZgsNxju3mPXZYIA=="],
 
