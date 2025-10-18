@@ -9,6 +9,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import tsconfigPaths from 'vite-tsconfig-paths'
 import path from "node:path";
 import tailwindcss from '@tailwindcss/vite';
+import angular from '@analogjs/astro-angular';
 
 // https://astro.build/config
 export default defineConfig({
@@ -19,6 +20,15 @@ export default defineConfig({
     }),
     site: 'https://example.com',
     integrations: [
+        angular({
+
+            vite: {
+                //     inlineStylesExtension: 'scss|sass|less',
+                transformFilter: (_code, id) => {
+                    return id.includes('src/components/angular'); // <- only transform Angular TypeScript files
+                },
+            },
+        }),
         mdx(),
         sitemap(),
         svelte(),
@@ -26,6 +36,11 @@ export default defineConfig({
 
     // Add Vite configuration with proxy settings
     vite: {
+        ssr: {
+            // transform these packages during SSR. Globs supported
+            noExternal: ['@rx-angular/**'],
+        },
+
         plugins: [
             tsconfigPaths(),
             visualizer({

@@ -446,6 +446,13 @@ export class FluxWebSocketConnection {
     // *** Internal Helpers
     // ****************************************************************************
 
+    /**
+     * Handles incoming WebSocket messages.
+     * 
+     * @param { string } message_
+     * 
+     * @returns { void } 
+     */
     private handleMessage(
         message_: string,
     ): void {
@@ -524,7 +531,7 @@ export class FluxWebSocketConnection {
 
             default:
                 if (message_.startsWith(`${ERROR}:`)) {
-                    throw new Error(message_.substring(message_.indexOf(':') + 1) ?? 'Unknown error');
+                    // ! TODO HANDLE ERRORS BETTER throw new Error(message_.substring(message_.indexOf(':') + 1) ?? 'Unknown error');
                 }
 
                 PicoLogger.log(`🔌 Unhandled type: "${message_}"`, 'ws-client');
