@@ -1,7 +1,7 @@
 ---
 import BaseHead from "$lib/components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "$lib/consts";
-import { HelloComponent } from '../components/angular/hello/hello.component';
+import { HelloComponent } from "../components/angular/hello/hello.component";
 
 import { auth } from "@backend/portal/auth";
 import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
@@ -38,9 +38,12 @@ const helpText = "Helping binding from parent";
     </head>
     <body>
         <DashboardLayout>
-            <!-- 
-                <HelloComponent client:visible data-analog-id="hello-component-1" helpText={helpText} />
-             -->
+            <HelloComponent
+                client:visible
+                data-analog-id="hello-component-1"
+                helpText={helpText}
+            />
+
             <Dashboard
                 client:load
                 {networkId}
@@ -54,9 +57,9 @@ const helpText = "Helping binding from parent";
 </html>
 
 <script>
-  import { addOutputListener } from '@analogjs/astro-angular/utils';
+    import { addOutputListener } from "@analogjs/astro-angular/utils";
 
-  addOutputListener('hello-component-1', 'outputName', (event) => {
-    console.log(event.detail);
-  });
+    addOutputListener("hello-component-1", "outputName", (event) => {
+        console.log(event.detail);
+    });
 </script>
