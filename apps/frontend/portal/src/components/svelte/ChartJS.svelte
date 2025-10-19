@@ -43,7 +43,7 @@ Chart.register(
                 .getPropertyValue("--pop-color-2")
                 .trim();
 
-            console.log({ lineColor, fillColor });
+            // console.log({ lineColor, fillColor });
         }, 200);
 
         ctx = canvas.getContext("2d");
