@@ -80,7 +80,6 @@ PicoLogger.configure({
     allowScopes: '*',
 });
 
-
 const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
 const processId: TProcessId = readProcessId();
 const machineAddress: TMachineAddress = readMachineAddress();
