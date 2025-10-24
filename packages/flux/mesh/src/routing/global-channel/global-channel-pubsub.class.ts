@@ -11,12 +11,12 @@ import type { RedisConnection } from '../redis/redis-connection.class';
 
 export type TGlobalChannel = string & { __brand: 'global-channel'; };
 
-// type TWebsocketData = {};
+type TWebsocketData = {};
 export class GlobalChannelPubsub {
 
     constructor(
         private readonly redisConnection: RedisConnection,
-        private readonly bunServer: Bun.Server, // <TWebsocketData>,
+        private readonly bunServer: Bun.Server<TWebsocketData>,
         private readonly processAddress: TProcessAddress,
     ) {
         this.subscribeWebsocketChannelEvent();
