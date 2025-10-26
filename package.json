@@ -105,7 +105,7 @@
         "webpack-bundle-analyzer": "^4.10.2"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.3.0",
+        "@biomejs/biome": "2.3.1",
         "@internationalized/date": "^3.10.0",
         "@melt-ui/pp": "^0.3.2",
         "@melt-ui/svelte": "^0.86.6",
