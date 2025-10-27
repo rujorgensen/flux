@@ -8,5 +8,5 @@ import type { TNetworkAuthorityCountAt } from '@flux/shared/types';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectedAuthoritiesComponent {
-    connectedAuthoritiesCount = input.required<TNetworkAuthorityCountAt>();
+    public readonly connectedAuthoritiesCount = input.required<TNetworkAuthorityCountAt>();
 }

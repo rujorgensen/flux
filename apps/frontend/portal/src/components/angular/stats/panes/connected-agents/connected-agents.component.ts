@@ -8,5 +8,5 @@ import type { TNetworkAgentCountAt } from '@flux/shared/types';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectedAgentsComponent {
-    activeAgentCount = input.required<TNetworkAgentCountAt>();
+    public readonly activeAgentCount = input.required<TNetworkAgentCountAt>();
 }

@@ -21,7 +21,6 @@ export default defineConfig({
     site: 'https://example.com',
     integrations: [
         angular({
-
             vite: {
                 //     inlineStylesExtension: 'scss|sass|less',
                 transformFilter: (_code, id) => {
@@ -38,7 +37,7 @@ export default defineConfig({
     vite: {
         ssr: {
             // transform these packages during SSR. Globs supported
-            noExternal: ['@rx-angular/**'],
+            //     noExternal: ['@rx-angular/**'],
         },
 
         plugins: [
