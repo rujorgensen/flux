@@ -8,5 +8,5 @@ import type { TNetworkChannelCountAt } from '@flux/shared/types';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActiveChannelsComponent {
-    activeChannelCount = input.required<TNetworkChannelCountAt>();
+    public readonly activeChannelCount = input.required<TNetworkChannelCountAt>();
 }

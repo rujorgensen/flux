@@ -7,5 +7,5 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TotalDataUsageComponent {
-    totalDataUsage = input.required<number>();
+    public readonly totalDataUsage = input.required<number>();
 }

@@ -1,6 +1,5 @@
 import { inject, Component, input, signal, type OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
 import { provideHttpClient, HttpClient, withFetch } from '@angular/common/http';
-
 import { onDataUsageUpdate } from "../../../data/flux/data-usage.service.fn.ts";
 import type { TNetworkAgentCountAt, TNetworkAuthorityCountAt, TNetworkChannelCountAt, TNetworkId_S } from "@flux/shared/types";
 import type { FluxAgentNetworkConnection } from "@persistica/flux-agent";
@@ -20,7 +19,7 @@ interface Todo {
 }
 
 @Component({
-    selector: 'app-hello',
+    selector: 'app-stats',
     imports: [
         TotalDataUsageComponent,
         ConnectedAuthoritiesComponent,
@@ -32,8 +31,8 @@ interface Todo {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatsComponent implements OnInit {
-    networkId = input.required<TNetworkId_S | null>();
-    networkCode = input.required<string | null>();
+    public readonly networkId = input.required<TNetworkId_S | null>();
+    public readonly networkCode = input.required<string | null>();
 
     protected readonly totalDataUsage = signal<number | undefined>(undefined);
     protected readonly activeChannelCount = signal<TNetworkChannelCountAt | undefined>(undefined);
