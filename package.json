@@ -83,7 +83,7 @@
         "chart.js": "^4.5.1",
         "clsx": "^2.1.1",
         "daisyui": "^5.5.0",
-        "elysia": "1.4.15",
+        "elysia": "1.4.16",
         "flowbite": "^4.0.0",
         "flowbite-svelte": "^1.28.0",
         "flowbite-svelte-icons": "^3.0.0",
