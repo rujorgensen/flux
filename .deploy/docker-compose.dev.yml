@@ -32,7 +32,7 @@ services:
       - dragonflyportaldata:/portal-dev-data
 
   mesh-postgres-dev:
-    image: postgres:18.0-alpine
+    image: postgres:18.1-alpine
     restart: always
     container_name: mesh-postgres-dev
     environment:
