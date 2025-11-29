@@ -78,7 +78,7 @@
         "@prisma/client": "^6.19.0",
         "@tailwindcss/postcss": "^4.1.17",
         "@types/jsonwebtoken": "^9.0.10",
-        "astro": "5.16.2",
+        "astro": "5.16.3",
         "better-auth": "1.4.3",
         "chart.js": "^4.5.1",
         "clsx": "^2.1.1",
