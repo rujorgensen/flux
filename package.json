@@ -79,7 +79,7 @@
         "@tailwindcss/postcss": "^4.1.17",
         "@types/jsonwebtoken": "^9.0.10",
         "astro": "5.16.3",
-        "better-auth": "1.4.3",
+        "better-auth": "1.4.4",
         "chart.js": "^4.5.1",
         "clsx": "^2.1.1",
         "daisyui": "^5.5.0",
