@@ -2,7 +2,7 @@ services:
 
   mesh-dragonfly:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
-    container_name: mesh-dragonfly-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    container_name: mesh-dragonfly-selfhosted # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
     ulimits:
       memlock: -1
     # Don't use all threads, occasionally fails with "There are 20 threads, so 5.00GiB are required. Exiting..."
@@ -19,7 +19,7 @@ services:
   mesh-postgres:
     image: postgres:18.1-alpine
     restart: always
-    container_name: mesh-postgres
+    container_name: mesh-postgres-selfhosted
     environment:
       POSTGRES_USER: ${MESH_POSTGRES_USER}
       POSTGRES_PASSWORD: ${MESH_POSTGRES_PASSWORD}
@@ -32,16 +32,16 @@ services:
       - private-mesh-network
 
   mesh-server:
-    image: 'rujorgensen/persistica/mesh'
-    container_name: mesh-server 
+    image: rujorgensen/persistica-mesh:latest
+    container_name: mesh-server-selfhosted
     ports:
       - "6350:6379"
     networks:
       - private-mesh-network
 
   portal:
-    image: 'rujorgensen/persistica/portal'
-    container_name: portal-server 
+    image: rujorgensen/persistica-portal:latest
+    container_name: portal-server-selfhosted
     ports:
       - "6350:6379"
     networks:

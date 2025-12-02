@@ -48,14 +48,14 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 ## Ports
 
     Mesh
-    5100    - Default mesh server port
+        5100    - Default mesh server port
 
     Portal
-    3000    - API
-    3001    - UI
+        3000    - API
+        3001    - UI
 
     Caddy
-    9000    - Caddy proxy to Portal
+        9000    - Caddy proxy to Portal
 
 ## Endpoints
 
