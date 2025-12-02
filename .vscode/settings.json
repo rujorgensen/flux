@@ -23,5 +23,8 @@
         "**/dist/**": true,
         "**/.angular/**": true,
         "**/*.excalidraw": true,
-    }
+    },
+    "cssVariables.lookupFiles": [
+        "node_modules/open-props/open-props.min.css"
+	]
 }
