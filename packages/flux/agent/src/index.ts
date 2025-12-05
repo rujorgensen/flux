@@ -5,6 +5,7 @@ export type {
 export {
     FluxAgent,
 } from './lib/flux-agent.class';
+
 export {
     FluxNetworkChannel,
 } from '@flux/shared/connection';
