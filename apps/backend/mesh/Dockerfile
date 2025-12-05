@@ -11,9 +11,25 @@ WORKDIR /src
 # ******************************************************************************
 FROM base AS install
 
-COPY package.json bun.lock ./
+COPY bunfig.toml package.json bun.lock ./
 
-RUN bun install --frozen-lockfile
+# Avoid copying over all the package.json files--we need this until --ignore-missing-workspaces is supported (https://github.com/oven-sh/bun/issues/10930)
+RUN bun pm pkg set --json workspaces.packages='["**/*"]'
+
+# Copy over all the package.json files--we need this until --ignore-missing-workspaces is supported (https://github.com/oven-sh/bun/issues/10930)
+COPY apps/backend/mesh/package.json ./apps/backend/mesh/
+COPY apps/backend/portal/package.json ./apps/backend/portal/
+COPY apps/demo/package.json ./apps/demo/
+COPY apps/frontend/portal/package.json ./apps/frontend/portal/
+COPY packages/flux/agent/package.json ./packages/flux/agent/
+COPY packages/flux/authority/package.json ./packages/flux/authority/
+COPY packages/flux/mesh/package.json ./packages/flux/mesh/
+
+# Don't run postinstall--you need to manually run the Prisma generate step
+#   --frozen-lockfile: don't update bun.lock
+#   --ignore-scripts: dont run the postinstall script
+#   --filter: only install seleceted workspace packages (skip others to save space/time)
+RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/mesh'
 
 # ******************************************************************************
 # *** BUILD STAGE

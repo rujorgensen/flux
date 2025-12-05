@@ -4,7 +4,7 @@ This is a TypeScript based repository using Bun and Elysia.
 - **Language**: TypeScript
 - **Runtime**: Bun
 - **Backend Frameworks**: Elysia / Bun
-- **Frontend Frameworks**: Astro and Svelte for frontend-portal, alpinejs for the demo application 
+- **Frontend Frameworks**: Astro and Svelte for @flux/portal-ui, alpinejs for the demo application 
 - **Package Manager and Dependency Management**: Bun / Bun.lockb
 - **Testing**: Bun
 - **Linting**: Biome

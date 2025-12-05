@@ -11,10 +11,22 @@ WORKDIR /src
 # ******************************************************************************
 FROM base AS install
 
-COPY package.json bun.lock ./
-COPY prisma ./prisma/
+COPY bunfig.toml package.json bun.lock ./
 
-RUN bun install --frozen-lockfile
+# Copy over all the package.json files--we need this until --ignore-missing-workspaces is supported (https://github.com/oven-sh/bun/issues/10930)
+COPY apps/backend/mesh/package.json ./apps/backend/mesh/
+COPY apps/backend/portal/package.json ./apps/backend/portal/
+COPY apps/demo/package.json ./apps/demo/
+COPY apps/frontend/portal/package.json ./apps/frontend/portal/
+COPY packages/flux/agent/package.json ./packages/flux/agent/
+COPY packages/flux/authority/package.json ./packages/flux/authority/
+COPY packages/flux/mesh/package.json ./packages/flux/mesh/
+
+# Don't run postinstall--you need to manually run the Prisma generate step
+#   --frozen-lockfile: don't update bun.lock
+#   --ignore-scripts: dont run the postinstall script
+#   --filter: only install seleceted workspace packages (skip others to save space/time)
+RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/portal-ui'
 
 # ******************************************************************************
 # *** BUILD STAGE
@@ -27,7 +39,7 @@ COPY . .
 
 # ENV NODE_ENV=production
 WORKDIR /src/apps/frontend/portal
-RUN bunx --bun astro build
+RUN bunx astro build
 
 # ******************************************************************************
 # *** DEPLOY STAGE
@@ -39,15 +51,8 @@ FROM base AS deploy
 ENV HOST=0.0.0.0
 ENV PORT=3001
 
-# Can be used for debugging: RUN apk add --no-cache curl
-
-# "COPY --from=install ./src/node_modules node_modules"
-# Fixes error: Cannot find module 'kleur/colors' from '/src/dist/apps/frontend/portal/server/manifest_DmhAtobi.mjs'
-# Bun v1.2.16 (Linux x64 baseline)
 COPY --from=install ./src/node_modules node_modules
-
 COPY --from=build ./src/dist ./dist
-COPY --from=install ./src/node_modules/@prisma-types  ./node_modules/@prisma-types
 
 # Run the app as bun_user
 RUN addgroup -S app_group && adduser -S bun_user -G app_group

@@ -1,0 +1,14 @@
+{
+    "name": "@flux/portal-api",
+    "version": "0.0.1",
+    "type": "module",
+    "private": true,
+    "dependencies": {
+        "@elysiajs/cors": "catalog:elysia",
+        "@elysiajs/swagger": "catalog:elysia",
+        "@prisma/client": "catalog:",
+        "better-auth": "catalog:",
+        "jsonwebtoken": "catalog:",
+        "redis": "catalog:"
+    }
+}
