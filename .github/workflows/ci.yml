@@ -20,6 +20,8 @@ env:
   is-pull-request: ${{ github.event_name == 'pull_request' }}
   sha: ${{ github.sha }}
   BUN_TEST_DISABLE_ANSI: '1'
+  NX_BATCH_MODE: true
+  CI: true
 
 jobs:
   install-deps:
@@ -93,7 +95,7 @@ jobs:
 
       - name: 🧪 Run unit tests
         # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected -t bun-test # --no-agents
+        run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected -t bun-test # --no-agents
 
   e2e-test:
     runs-on: ubuntu-latest
@@ -138,7 +140,7 @@ jobs:
 
       - name: 🧪 Run E2E tests
         # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
+        run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
 
   build:
     runs-on: ubuntu-latest
@@ -149,7 +151,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           filter: tree:0
-          fetch-depth: 0
+          fetch-depth: 0    # 👈 Required to retrieve git history
 
       - uses: nrwl/nx-set-shas@v4
 
@@ -173,4 +175,4 @@ jobs:
 
       - name: 🛠️ Build
         # Demo does not currently build
-        run: bunx nx affected -t build --exclude demo
+        run: bun nx affected -t build --exclude demo
