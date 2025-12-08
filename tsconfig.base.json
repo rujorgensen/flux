@@ -75,7 +75,10 @@
             ],
             "@utils/pico-logger": [
                 "libs/utils/logger/src/index.ts"
-            ]
+            ],
+            "@prisma-types/flux": [
+                "@prisma-types/flux/client.ts"
+    ]
         }
     },
     "exclude": [

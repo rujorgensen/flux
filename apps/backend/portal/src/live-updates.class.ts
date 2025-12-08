@@ -159,6 +159,17 @@ export class LiveUpdates {
                 fluxNetworkChannel.publish(fluxActiveChannelsAt);
             }, 3_000);
 
+
+            // * Emit data usage
+            const fluxDataUsageNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
+                .joinChannel('data-usage');
+
+            let num5: number = -100;
+            setInterval(() => {
+                num5++;
+                fluxDataUsageNetworkChannel.publish(num5);
+            }, 3_000);
+
             // * Listen to Redis health
             const portalRedisHealthChannel: FluxNetworkChannel = await fluxNetworkConnection
                 .joinChannel('protected-portal-redis-health-alerts');

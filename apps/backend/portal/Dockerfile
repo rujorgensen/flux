@@ -2,7 +2,7 @@
 # *** BASE STAGE
 # ******************************************************************************
 # use the official Bun image, see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1.2.23-alpine AS base
+FROM oven/bun:1.3.4-alpine AS base
 
 WORKDIR /src
 
@@ -11,10 +11,27 @@ WORKDIR /src
 # ******************************************************************************
 FROM base AS install
 
-COPY package.json bun.lock ./
+COPY bunfig.toml package.json bun.lock ./
 COPY prisma ./prisma/
 
-RUN bun install --frozen-lockfile
+# Copy over all the package.json files--we need this until --ignore-missing-workspaces is supported (https://github.com/oven-sh/bun/issues/10930)
+COPY apps/backend/mesh/package.json ./apps/backend/mesh/
+COPY apps/backend/portal/package.json ./apps/backend/portal/
+COPY apps/demo/package.json ./apps/demo/
+COPY apps/frontend/portal/package.json ./apps/frontend/portal/
+COPY packages/flux/agent/package.json ./packages/flux/agent/
+COPY packages/flux/authority/package.json ./packages/flux/authority/
+COPY packages/flux/mesh/package.json ./packages/flux/mesh/
+
+# Don't run postinstall--you need to manually run the Prisma generate step
+#   --frozen-lockfile: don't update bun.lock
+#   --ignore-scripts: don't run the postinstall script
+#   --filter: only install seleceted workspace packages (skip others to save space/time)
+RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/portal-api'
+
+# Generate Prisma types
+#   --generator: only run the 'client' generator to avoid generating dbml output
+RUN bunx prisma generate --config=./prisma/prisma.config.ts --generator=client
 
 # ******************************************************************************
 # *** BUILD STAGE
@@ -36,7 +53,7 @@ FROM base AS deploy
 COPY package.json ./
 COPY prisma ./prisma/
 COPY --from=build ./src/dist ./dist
-COPY --from=install ./src/node_modules/@prisma-types  ./node_modules/@prisma-types
+COPY --from=install ./src/@prisma-types/flux  ./@prisma-types/flux
 
 # Run the app as bun_user
 RUN addgroup -S app_group && adduser -S bun_user -G app_group

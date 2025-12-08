@@ -19,6 +19,10 @@ env:
   is-main-branch: ${{ github.ref == 'refs/heads/main' }}
   is-pull-request: ${{ github.event_name == 'pull_request' }}
   sha: ${{ github.sha }}
+  BUN_TEST_DISABLE_ANSI: '1'
+  NX_BATCH_MODE: true
+  CI: true
+  FLUX_DATABASE_URL: 'redis://:non-important-dev-redis-password@localhost:1234'
 
 jobs:
   install-deps:
@@ -26,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
         # Temporarily skip, as pre-caching doesnt work
   #      - name: 💾 Install Bun
@@ -55,7 +59,7 @@ jobs:
     needs: [install-deps]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           filter: tree:0
           fetch-depth: 0
@@ -92,7 +96,7 @@ jobs:
 
       - name: 🧪 Run unit tests
         # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected -t bun-test # --no-agents
+        run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected -t bun-test # --no-agents
 
   e2e-test:
     runs-on: ubuntu-latest
@@ -100,7 +104,7 @@ jobs:
     needs: [install-deps]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           filter: tree:0
           fetch-depth: 0
@@ -137,7 +141,7 @@ jobs:
 
       - name: 🧪 Run E2E tests
         # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true bunx nx affected:e2e # --no-agents
+        run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
 
   build:
     runs-on: ubuntu-latest
@@ -145,10 +149,10 @@ jobs:
     needs: [install-deps]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           filter: tree:0
-          fetch-depth: 0
+          fetch-depth: 0    # 👈 Required to retrieve git history
 
       - uses: nrwl/nx-set-shas@v4
 
@@ -172,4 +176,4 @@ jobs:
 
       - name: 🛠️ Build
         # Demo does not currently build
-        run: bunx nx affected -t build --exclude demo
+        run: bun nx affected -t build --exclude demo

@@ -1,5 +1,4 @@
 {
-    "name": "frontend-portal",
     "$schema": "../../../node_modules/nx/schemas/project-schema.json",
     "targets": {
         "build": {
@@ -17,6 +16,11 @@
         },
         "docker-build": {
             "command": "docker build -f apps/frontend/portal/Dockerfile . -t flux-portal"
+        },
+        "nx-release-publish": {
+            "options": {
+                "packageRoot": "dist/{projectRoot}"
+            }
         }
     }
 }

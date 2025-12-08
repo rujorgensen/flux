@@ -12,7 +12,8 @@ const clearAndBuild = async (
     await build();
 };
 
-let server: Bun.Server;
+// type TWebsocketData = {};
+let server: Bun.Server; // <TWebsocketData>;
 
 // Create a Set to store all connected WebSocket clients
 const clients: Set<ReadableStreamDirectController> = new Set();

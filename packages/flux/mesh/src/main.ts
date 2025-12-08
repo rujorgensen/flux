@@ -80,7 +80,6 @@ PicoLogger.configure({
     allowScopes: '*',
 });
 
-
 const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
 const processId: TProcessId = readProcessId();
 const machineAddress: TMachineAddress = readMachineAddress();
@@ -100,6 +99,8 @@ const clientRPCResponseCallbacks: Map<
 //     },
 // );
 
+type TWebSocketData = {};
+
 type TOptions = {
     port?: number;
     redisConnectionString?: string;
@@ -109,7 +110,7 @@ export class FluxMeshServer {
 
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly onReadyListeners: Set<() => void> = new Set();
-    private readonly bunServer: Bun.Server;
+    private readonly bunServer: Bun.Server<TWebSocketData>; // Bun.Server<TWebsocketData>;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
     private readonly options: TOptions;
@@ -184,7 +185,7 @@ export class FluxMeshServer {
 
             async fetch(
                 request: Request,
-                server: Bun.Server,
+                server: Bun.Server<TWebSocketData>, //  Bun.Server<TWebsocketData>,
             ) {
                 // Upgrade the request to a WebSocket
 

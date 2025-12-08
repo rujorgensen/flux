@@ -1,0 +1,14 @@
+{
+    "name": "@flux/mesh",
+    "version": "0.0.1",
+    "type": "module",
+    "private": true,
+    "dependencies": {
+        "@elysiajs/cors": "catalog:elysia",
+        "@elysiajs/swagger": "catalog:elysia",
+        "elysia": "catalog:elysia",
+        "jsonwebtoken": "catalog:",
+        "nanoid": "catalog:",
+        "redis": "catalog:"
+    }
+}

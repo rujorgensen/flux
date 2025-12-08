@@ -5,7 +5,8 @@
         "firsttris.vscode-jest-runner",
         "ms-azuretools.vscode-docker",
         "aaron-bond.better-comments",
-        "pomdtr.excalidraw-editor"
+        "pomdtr.excalidraw-editor",
+        "vunguyentuan.vscode-css-variables"
     ],
     "unwantedRecommendations": [
         "esbenp.prettier-vscode"
