@@ -11,6 +11,9 @@
         "noUncheckedIndexedAccess": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
-        "strict": true
+        "strict": true,
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "target": "ES2023",
     }
 }

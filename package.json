@@ -13,7 +13,7 @@
         "//-02a": "// ****************************************************************************",
         "//-02b": "// *** Prisma                                                                ",
         "//-02c": "// ****************************************************************************",
-        "prisma:generate:portal": "bunx prisma generate --config=./prisma/prisma.config.ts",
+        "prisma:generate:portal": "rm -rf ./@prisma-types && bunx prisma generate --config=./prisma/prisma.config.ts",
         "prisma:migrate:dev:portal": "bunx prisma migrate dev --config=./prisma/prisma.config.ts --name=init",
         "prisma:deploy": "bunx prisma migrate deploy --config=./prisma/prisma.config.ts",
         "prisma:studio": "bunx prisma studio --config=./prisma/prisma.config.ts",
