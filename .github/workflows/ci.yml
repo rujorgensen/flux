@@ -22,6 +22,7 @@ env:
   BUN_TEST_DISABLE_ANSI: '1'
   NX_BATCH_MODE: true
   CI: true
+  FLUX_DATABASE_URL: 'redis://:non-important-dev-redis-password@localhost:1234'
 
 jobs:
   install-deps:
