@@ -27,7 +27,7 @@ env:
 jobs:
   install-deps:
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -54,7 +54,7 @@ jobs:
   #          run: bun install --no-cache
 
   unit-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 5
     needs: [install-deps]
     steps:
@@ -99,7 +99,7 @@ jobs:
         run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected -t bun-test # --no-agents
 
   e2e-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 5
     needs: [install-deps]
     steps:
@@ -144,7 +144,7 @@ jobs:
         run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 5
     needs: [install-deps]
     steps:
