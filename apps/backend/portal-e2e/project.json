@@ -4,7 +4,7 @@
     "projectType": "application",
     "sourceRoot": "apps/backend/portal-e2e/src",
     "implicitDependencies": [
-        "backend-portal"
+        "@flux/portal-api"
     ],
     "targets": {
         "e2e": {
