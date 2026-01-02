@@ -11,11 +11,11 @@ if (!process.env['GOOGLE_CLIENT_SECRET']) {
     throw new Error('GOOGLE_CLIENT_SECRET is not set in environment variables');
 }
 
-if (!Bun.env['FLUX_DATABASE_URL']) {
+if (!process.env['FLUX_DATABASE_URL']) {
     throw new Error('FLUX_DATABASE_URL is not set in environment variables');
 }
 
-const FLUX_DATABASE_URL: string = Bun.env['FLUX_DATABASE_URL'];
+const FLUX_DATABASE_URL: string = process.env['FLUX_DATABASE_URL'];
 
 const prisma = new PrismaClient({
     adapter: new PrismaPg({
