@@ -58,7 +58,6 @@
         "@nx/plugin": "22.3.3",
         "clsx": "^2.1.1",
         "jsonwebtoken": "catalog:",
-        "mode-watcher": "1.1.0",
         "nanoid": "catalog:",
         "rxjs": "^7.8.2",
         "svelte": "catalog:",
