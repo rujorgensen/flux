@@ -1,3 +1,5 @@
+ARG FLUX_DATABASE_URL
+
 # ******************************************************************************
 # *** BASE STAGE
 # ******************************************************************************
@@ -10,6 +12,10 @@ WORKDIR /src
 # *** INSTALL STAGE
 # ******************************************************************************
 FROM base AS install
+
+ARG FLUX_DATABASE_URL
+
+ENV FLUX_DATABASE_URL=$FLUX_DATABASE_URL
 
 COPY bunfig.toml package.json bun.lock ./
 COPY prisma ./prisma/
