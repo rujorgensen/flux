@@ -10,7 +10,7 @@
         "docker:portal:e2e:down": "docker compose -p flux-portal -f .deploy/docker-compose.e2e.yml down",
         "docker:dev:up": "docker compose -p flux-dev -f .deploy/docker-compose.dev.yml up -d --build",
         "docker:dev:down": "docker compose -p flux-dev -f .deploy/docker-compose.dev.yml down",
-        "start:self-hosted:dev": "docker compose --env-file .env.dev -f 'docker-compose.portal.prod.yml' -f '.deploy/docker-compose.dev.yml' up -d --build ",
+        "start:self-hosted:dev": "docker compose --env-file .env.dev -f 'docker-compose.portal.prod.yml' -f '.deploy/docker-compose.dev.yml' up -d --build",
         "//-02a": "// ****************************************************************************",
         "//-02b": "// *** Prisma                                                                ",
         "//-02c": "// ****************************************************************************",

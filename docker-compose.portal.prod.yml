@@ -1,5 +1,5 @@
 services:
-  portal-ui:
+  portal-ui-prod:
     image: persitica-portal-ui:latest
     container_name: portal-ui-prod
     build:
@@ -9,11 +9,16 @@ services:
     networks:
       - portal-public-network
 
-  portal-api:
+  portal-api-prod:
     image: persitica-portal-api:latest
     container_name: portal-api-prod
     environment:
       FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
+      FLUX_MESH_REDIS_URL: ${FLUX_MESH_REDIS_URL}
+      FLUX_PORTAL_REDIS_URL: ${FLUX_PORTAL_REDIS_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      FLUX_AUTHORITY_JWT_SECRET: ${FLUX_AUTHORITY_JWT_SECRET}
     build:
       context: .
       dockerfile: ./apps/backend/portal/Dockerfile
@@ -22,6 +27,7 @@ services:
         FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
     networks:
       - portal-public-network
+      - portal-internal-network
 
   # ******************************************************************************
   # *** Proxy
@@ -37,9 +43,9 @@ services:
     #    - "443:443/udp"
 
     depends_on:
-      portal-api:
+      portal-api-prod:
         condition: service_started
-      portal-ui:
+      portal-ui-prod:
         condition: service_started
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
@@ -53,6 +59,9 @@ services:
 # *******************************************************************************
 networks:
   portal-public-network:
+    driver: bridge
+
+  portal-internal-network:
     driver: bridge
 
 # *******************************************************************************
