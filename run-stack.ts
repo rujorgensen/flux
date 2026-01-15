@@ -21,11 +21,11 @@ const run = async () => {
         [
             'nx',
             'serve',
-            'backend-portal',
+            '@flux/portal-api',
         ],
         spawnOptions,
     );
-    // Bun.spawn(["nx", "serve-static", "backend-portal"], spawnOptions)
+    // Bun.spawn(["nx", "serve-static", "@flux/portal-api"], spawnOptions)
 
     process.on('SIGINT', async () => {
         console.log('Cleaning up...');

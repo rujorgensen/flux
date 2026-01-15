@@ -36,8 +36,8 @@ describe('persistica-flux-api-agents', () => {
 
         console.log(`⚗️ Redis is ready at '${redisURL}', starting portal server on port 3000`);
 
-        //$`bun nx run backend-portal:serve`.nothrow();
-        $`bun nx run backend-portal:serve`.then().catch();
+        //$`bun nx run @flux/portal-api:serve`.nothrow();
+        $`bun nx run @flux/portal-api:serve`.then().catch();
 
         // 👉 Wait until the API is accepting connections
         await waitUntilAvailable(
