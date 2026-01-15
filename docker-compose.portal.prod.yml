@@ -1,5 +1,5 @@
 services:
-  portal-ui:
+  portal-ui-prod:
     image: persitica-portal-ui:latest
     container_name: portal-ui-prod
     build:
@@ -9,36 +9,43 @@ services:
     networks:
       - portal-public-network
 
-  portal-api:
+  portal-api-prod:
     image: persitica-portal-api:latest
     container_name: portal-api-prod
-    # Use this locally, otherwise provide on the server env.
-    # env_file:
-    #   - ../.env.production
+    environment:
+      FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
+      FLUX_MESH_REDIS_URL: ${FLUX_MESH_REDIS_URL}
+      FLUX_PORTAL_REDIS_URL: ${FLUX_PORTAL_REDIS_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      FLUX_AUTHORITY_JWT_SECRET: ${FLUX_AUTHORITY_JWT_SECRET}
     build:
       context: .
       dockerfile: ./apps/backend/portal/Dockerfile
       target: deploy
+      args:
+        FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
     networks:
       - portal-public-network
+      - portal-internal-network
 
-   # ******************************************************************************
-   # *** Proxy
-   # ******************************************************************************
+  # ******************************************************************************
+  # *** Proxy
+  # ******************************************************************************
   caddy:
     image: caddy:2.10.2
     container_name: portal-caddy-proxy-prod
     restart: unless-stopped
     ports:
       - "9000:9000"
-  #    - "80:80"
-  #    - "443:443"
-  #    - "443:443/udp"
+    #    - "80:80"
+    #    - "443:443"
+    #    - "443:443/udp"
 
     depends_on:
-      portal-api:
+      portal-api-prod:
         condition: service_started
-      portal-ui:
+      portal-ui-prod:
         condition: service_started
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
@@ -52,6 +59,9 @@ services:
 # *******************************************************************************
 networks:
   portal-public-network:
+    driver: bridge
+
+  portal-internal-network:
     driver: bridge
 
 # *******************************************************************************

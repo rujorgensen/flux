@@ -13,8 +13,7 @@
         SparklesIcon,
         CreditCardIcon,
     } from "@lucide/svelte";
-    import { ModeWatcher, mode } from "mode-watcher";
-    import { toggleMode } from "mode-watcher";
+    import { toggleMode, ModeWatcher, mode } from "mode-watcher";
 
     let {
         user,

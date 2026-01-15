@@ -12,8 +12,8 @@ http://persistica.io, http://portal.persistica.io {
 portal.persistica.io,
 persistica.io {
 	encode gzip
-	reverse_proxy /api* portal-api:3000
-	reverse_proxy * portal-ui:3001
+	reverse_proxy /api* portal-api-prod:3000
+	reverse_proxy * portal-ui-prod:3001
 
 	handle /cddy {
 		respond "Caddytime!"
@@ -22,8 +22,8 @@ persistica.io {
 
 # Optional local dev / health-check port (no TLS)
 http://:9000 {
-	reverse_proxy /api* portal-api:3000
-	reverse_proxy * portal-ui:3001
+	reverse_proxy /api* portal-api-prod:3000
+	reverse_proxy * portal-ui-prod:3001
 
 	handle /cddy {
 		respond "Caddytime!"
