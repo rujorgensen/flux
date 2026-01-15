@@ -53,5 +53,6 @@ export default defineConfig(() => ({
             reportsDirectory: '../../../coverage/libs/utils/logger',
             provider: 'v8' as const,
         },
+        passWithNoTests: true,
     },
 }));
