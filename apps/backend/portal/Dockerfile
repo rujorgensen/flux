@@ -31,7 +31,7 @@ RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/portal-api'
 
 # Generate Prisma types
 #   --generator: only run the 'client' generator to avoid generating dbml output
-RUN bunx prisma generate --config=./prisma/prisma.config.ts --generator=client
+RUN bunx --bun prisma generate --config=./prisma/prisma.config.ts --generator=client
 
 # ******************************************************************************
 # *** BUILD STAGE
