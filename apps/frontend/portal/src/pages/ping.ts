@@ -5,6 +5,7 @@ export const GET: APIRoute = async () => {
         status: 200,
         headers: {
             'Content-Type': 'text/plain',
+            "X-server": "astro"
         },
     });
 };

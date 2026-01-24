@@ -2,12 +2,17 @@ services:
   portal-ui-prod:
     image: persitica-portal-ui:latest
     container_name: portal-ui-prod
+    environment:
+      FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     build:
       context: .
       dockerfile: ./apps/frontend/portal/Dockerfile
       target: deploy
     networks:
       - portal-public-network
+      - portal-internal-network-2
 
   portal-api-prod:
     image: persitica-portal-api:latest
@@ -27,7 +32,7 @@ services:
         FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
     networks:
       - portal-public-network
-      - portal-internal-network
+      - portal-internal-network-2
 
   # ******************************************************************************
   # *** Proxy
@@ -61,7 +66,7 @@ networks:
   portal-public-network:
     driver: bridge
 
-  portal-internal-network:
+  portal-internal-network-2:
     driver: bridge
 
 # *******************************************************************************

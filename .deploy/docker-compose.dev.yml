@@ -15,7 +15,7 @@ services:
     volumes:
       - dragonflymeshdata:/mesh-dev-data
     networks:
-      - portal-internal-network
+      - portal-internal-network-2
 
   portal-dragonfly-dev:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
@@ -33,7 +33,7 @@ services:
     volumes:
       - dragonflyportaldata:/portal-dev-data
     networks:
-      - portal-internal-network
+      - portal-internal-network-2
 
   mesh-postgres-dev:
     image: postgres:18.1-alpine
@@ -48,14 +48,18 @@ services:
     volumes:
       - mesh-pgdata-dev:/var/lib/postgresql/data
     networks:
-      - portal-internal-network
+      - portal-internal-network-2
 
+# *******************************************************************************
+# *** Networks
+# *******************************************************************************
+networks:
+  portal-internal-network-2:
+    driver: bridge
+    # *******************************************************************************
+    # *** Volumes
+    # *******************************************************************************
 volumes:
   dragonflymeshdata:
   dragonflyportaldata:
   mesh-pgdata-dev:
-
-
-networks:
-  portal-internal-network:
-    driver: bridge
