@@ -2,6 +2,10 @@ services:
   portal-ui-prod:
     image: persitica-portal-ui:latest
     container_name: portal-ui-prod
+    environment:
+      FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     build:
       context: .
       dockerfile: ./apps/frontend/portal/Dockerfile
