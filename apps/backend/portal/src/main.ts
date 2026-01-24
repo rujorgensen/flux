@@ -93,10 +93,10 @@ export const app = new Elysia()
     .use(networkAgentRoutes)
     .use(networkChannelRoutes)
     .use(networkRoutes)
-    .get('/api/status', () => {
+    .get('/api/status', async () => {
         return [
-            meshRedisStatusService.getRedisStatusOrThrow(),
-            portalRedisStatusService.getRedisStatusOrThrow(),
+            await meshRedisStatusService.getRedisStatusOrThrow(),
+            await portalRedisStatusService.getRedisStatusOrThrow(),
         ];
     })
 
