@@ -10,6 +10,7 @@ import { FormatDatePipe } from '../../pipes/format-date.pipe';
     templateUrl: './connected-authorities-table.component.html',
     styleUrls: ['./connected-authorities-table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
 })
 export class ConnectedAuthoritiesTableComponent implements OnInit {
     public readonly networkId = input.required<string>();

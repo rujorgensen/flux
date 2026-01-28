@@ -10,6 +10,7 @@ import { FormatDatePipe } from '../../pipes/format-date.pipe';
     templateUrl: './active-channels-table.component.html',
     styleUrls: ['./active-channels-table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
 })
 export class ActiveChannelsTableComponent implements OnInit {
     public readonly networkId = input.required<string>();
