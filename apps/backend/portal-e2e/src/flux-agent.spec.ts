@@ -64,9 +64,10 @@ describe('persistica-flux-api-agents', () => {
         )
             .registerAuthority(
                 NETWORK_AUTHORITY_KEY,
-                () => Promise.resolve('allowed'),
-                () => Promise.resolve(true),
-            );
+                {
+                    authorizeNetworkAgent: () => Promise.resolve('allowed'),
+                    authorizeNetworkChannel: () => Promise.resolve(true),
+                });
 
         console.log(`Authority is connected to Mesh at '${fluxDomain}'`);
     });

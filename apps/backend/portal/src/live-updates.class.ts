@@ -46,52 +46,53 @@ export class LiveUpdates {
             await fluxAuthority
                 .registerAuthority(
                     NETWORK_AUTHORITY_KEY,
-                    (
-                        auth: unknown,
-                    ): Promise<string> => {
-                        console.log('🔑 A client is trying to access the network', auth);
+                    {
+                        authorizeNetworkAgent: (
+                            auth: unknown,
+                        ): Promise<string> => {
+                            console.log('🔑 A client is trying to access the network', auth);
 
-                        // Test the agents claim to access network
-                        if (
-                            (auth !== CODE_TO_ACCESS_NETWORK)
-                        ) {
-                            return Promise.reject(new Error('Not allowed, bad agent claim'));
-                        }
-
-                        // console.log('✅ Network access authorized');
-
-                        return Promise.resolve(jwt.sign({
-                            user: {
-                                allowAllChannels: true,
-                            },
-                        }, this.FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
-                    },
-
-                    // * Authorize channel
-                    (
-                        channelTopic: string,
-                        identification: string,
-                    ): Promise<boolean> => {
-
-                        const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
-
-                        console.log(`🔒 A client is attempting to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
-
-                        // console.error(`✅ Client suscribed to channel with identification`);
-
-                        if (channelTopic.startsWith('protected')) {
-                            if (agentJWT.user.allowAllChannels) {
-                                console.log('✅ Agent is allowed on all channels');
-                                return Promise.resolve(true);
+                            // Test the agents claim to access network
+                            if (
+                                (auth !== CODE_TO_ACCESS_NETWORK)
+                            ) {
+                                return Promise.reject(new Error('Not allowed, bad agent claim'));
                             }
 
-                            console.log('TODO: chcek if this agent is allowed to access the channel');
-                            return Promise.resolve(false);
-                        }
+                            // console.log('✅ Network access authorized');
 
-                        return Promise.resolve(true);
-                    },
-                );
+                            return Promise.resolve(jwt.sign({
+                                user: {
+                                    allowAllChannels: true,
+                                },
+                            }, this.FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
+                        },
+
+                        // * Authorize channel
+                        authorizeNetworkChannel: (
+                            channelTopic: string,
+                            identification: string,
+                        ): Promise<boolean> => {
+
+                            const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
+
+                            console.log(`🔒 A client is attempting to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
+
+                            // console.error(`✅ Client suscribed to channel with identification`);
+
+                            if (channelTopic.startsWith('protected')) {
+                                if (agentJWT.user.allowAllChannels) {
+                                    console.log('✅ Agent is allowed on all channels');
+                                    return Promise.resolve(true);
+                                }
+
+                                console.log('TODO: chcek if this agent is allowed to access the channel');
+                                return Promise.resolve(false);
+                            }
+
+                            return Promise.resolve(true);
+                        },
+                    });
 
             // ****************************************************************************
             // * Setup Agent
@@ -177,7 +178,7 @@ export class LiveUpdates {
             const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
                 .joinChannel('protected-mesh-redis-health-alerts');
 
-            console.log(`✅ Agent connected to network channel topics: "${fluxNetworkConnection.readConnectedChannels().join('","')}"`);
+            console.log(`✅ Agent connected to network channel topics: "${fluxNetworkConnection.readConnectedChannels().join('","\n\r')}"`);
 
             this.portalRedisStatusService
                 .onAlert((alerts: string[]) => {

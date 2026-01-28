@@ -172,25 +172,28 @@ describe('persistica-flux-mesh', () => {
             const fluxAuthorityNetworkConnection: FluxAuthorityNetworkConnection = await fluxAuthority
                 .registerAuthority(
                     NETWORK_AUTHORITY_KEY,
-                    (
-                        auth: unknown,
-                    ): Promise<string> => {
+                    {
 
-                        // Test the agents claim to access network
-                        if (
-                            (auth !== CODE_TO_ACCESS_NETWORK)
-                        ) {
-                            return Promise.reject(new Error('Not allowed, bad agent claim'));
-                        }
+                        authorizeNetworkAgent: (
+                            auth: unknown,
+                        ): Promise<string> => {
 
-                        return Promise.resolve('allowed');
-                    },
+                            // Test the agents claim to access network
+                            if (
+                                (auth !== CODE_TO_ACCESS_NETWORK)
+                            ) {
+                                return Promise.reject(new Error('Not allowed, bad agent claim'));
+                            }
 
-                    (
-                        _channelTopic: string,
-                        _identification: string,
-                    ): Promise<boolean> => {
-                        return Promise.resolve(true);
+                            return Promise.resolve('allowed');
+                        },
+
+                        authorizeNetworkChannel: (
+                            _channelTopic: string,
+                            _identification: string,
+                        ): Promise<boolean> => {
+                            return Promise.resolve(true);
+                        },
                     },
                 );
 

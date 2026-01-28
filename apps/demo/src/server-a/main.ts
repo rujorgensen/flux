@@ -25,31 +25,32 @@ const fluxAuthority: FluxAuthority = new FluxAuthority(
 await fluxAuthority
     .registerAuthority(
         NETWORK_AUTHORITY_KEY,
-        (
-            auth: unknown,
-        ): Promise<string> => {
-            // Test the agents claim to access network
-            if ((<any>auth).code !== DEMO_CHANNEL_PASSWORD) {
-                console.warn(`❌ Client is not allowed to access the network, with auth: ${JSON.stringify(auth)}}`);
-                return Promise.reject(new Error('Not allowed'));
-            }
+        {
+            authorizeNetworkAgent: (
+                auth: unknown,
+            ): Promise<string> => {
+                // Test the agents claim to access network
+                if ((<any>auth).code !== DEMO_CHANNEL_PASSWORD) {
+                    console.warn(`❌ Client is not allowed to access the network, with auth: ${JSON.stringify(auth)}`);
+                    return Promise.reject(new Error('Not allowed'));
+                }
 
-            console.log('✅ Client is allowed to access the network');
-            return Promise.resolve(jwt.sign({
-                userId: (<any>auth).user,
-            }, secret, { expiresIn: 120_000 }));
-        },
+                console.log(`✅ Client is allowed to access the network ID: "${DEMO_NETWORK_ID}"`);
+                return Promise.resolve(jwt.sign({
+                    userId: (<any>auth).user,
+                }, secret, { expiresIn: 120_000 }));
+            },
 
-        (
-            channelTopic: TChannelName,
-            identification: string,
-        ): Promise<boolean> => {
-            console.log(`🔒 A client is attempting to subscribe to topic '${channelTopic}', using identification '${identification}'`);
+            authorizeNetworkChannel: (
+                channelTopic: TChannelName,
+                identification: string,
+            ): Promise<boolean> => {
+                console.log(`🔒 A client is attempting to subscribe to topic '${channelTopic}', using identification '${identification}'`);
 
-            console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
+                console.log(`✅ Client suscribed to channel with topic '${channelTopic}'`);
 
-            return Promise.resolve(true);
-        },
-    );
+                return Promise.resolve(true);
+            },
+        });
 
 console.log('✅ Demo Authority registered');
