@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, input, signal, effect, type OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient, HttpClient, withFetch } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { INetworkChannel } from '@flux/shared/types';
 import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
@@ -12,40 +13,33 @@ import { FormatDatePipe } from '../../pipes/format-date.pipe';
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
 })
-export class ActiveChannelsTableComponent implements OnInit {
+export class ActiveChannelsTableComponent {
     public readonly networkId = input.required<string>();
 
     protected readonly dataStore = signal<INetworkChannel[] | undefined>(undefined);
+
+    private http = inject(HttpClient);
+    private destroyRef = takeUntilDestroyed();
 
     static clientProviders = [provideHttpClient(
         withFetch()
     )];
     static renderProviders = [ActiveChannelsTableComponent.clientProviders];
 
-    constructor(
-        private http: HttpClient,
-    ) {
-        effect(() => {
-            const networkId = this.networkId();
-            if (networkId) {
-                this.fetchData(networkId);
-            }
-        });
-    }
-
-    ngOnInit() {
+    constructor() {
         const networkId = this.networkId();
         if (networkId) {
             this.fetchData(networkId);
         }
     }
 
-    private async fetchData(
+    private fetchData(
         networkId: string,
     ) {
-        try {
-            const url = `/api/networks/${networkId}/channels`;
-            this.http.get<INetworkChannel[]>(url).subscribe({
+        const url = `/api/networks/${networkId}/channels`;
+        this.http.get<INetworkChannel[]>(url)
+            .pipe(this.destroyRef)
+            .subscribe({
                 next: (data) => {
                     const mappedData = data.map((a) => ({
                         ...a,
@@ -57,8 +51,5 @@ export class ActiveChannelsTableComponent implements OnInit {
                     console.error('Error fetching data', error);
                 },
             });
-        } catch (error) {
-            console.error('Error fetching data', error);
-        }
     }
 }
