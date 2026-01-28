@@ -1,0 +1,18 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (dataStore()) {
+            @for (row of dataStore(); track row.id) {
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.connectedAt | formatDate }}</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

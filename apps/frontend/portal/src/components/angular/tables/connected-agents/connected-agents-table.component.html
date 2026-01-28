@@ -1,0 +1,26 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>UID</th>
+            <th>IP</th>
+            <th>address</th>
+            <th>bytes</th>
+            <th>Connected At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (dataStore()) {
+            @for (row of dataStore(); track row.id) {
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.uid }}</td>
+                    <td>{{ row.ip }}</td>
+                    <td>{{ row.address }}</td>
+                    <td>{{ row.bytes }}</td>
+                    <td>{{ row.connectedAt | formatDate }}</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

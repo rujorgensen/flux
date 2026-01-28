@@ -1,0 +1,24 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>Channel Name</th>
+            <th>member distribution</th>
+            <th>Member Count</th>
+            <th>Data Usage [bytes]</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (dataStore()) {
+            @for (row of dataStore(); track row.channelName) {
+                <tr>
+                    <td>{{ row.channelName }}</td>
+                    <td>{{ row.memberDistribution }}</td>
+                    <td style="text-align: right;">{{ row.members }}</td>
+                    <td style="text-align: right;">{{ row.bytes }}</td>
+                    <td>{{ row.createdAt | formatDate }}</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

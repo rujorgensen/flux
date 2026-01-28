@@ -2,11 +2,11 @@
 import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
 
 // * Dashboard Tables
-import SvelteActiveChannels from "$lib/components/dashboard/tables/SvelteActiveChannels.svelte";
+import { ActiveChannelsTableComponent } from "../../components/angular/tables/active-channels/active-channels-table.component";
 
 const networkId: string = "rAnD0M-demo-network-id";
 ---
 
 <DashboardLayout>
-    <SvelteActiveChannels client:load networkId={networkId} />
+    <ActiveChannelsTableComponent client:load networkId={networkId} />
 </DashboardLayout>
