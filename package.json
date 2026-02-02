@@ -75,7 +75,7 @@
         "@types/node": "25.1.0",
         "@vitest/coverage-v8": "^4.0.18",
         "@vitest/ui": "^4.0.18",
-        "jsdom": "~27.4.0",
+        "jsdom": "~28.0.0",
         "nx": "22.4.2",
         "open-cli": "^8.0.0",
         "testcontainers": "^11.10.0",
