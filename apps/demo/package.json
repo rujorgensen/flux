@@ -20,6 +20,6 @@
     },
     "homepage": "https://github.com/rujorgensen/persistica#readme",
     "dependencies": {
-        "alpinejs": "^3.15.4"
+        "alpinejs": "^3.15.8"
     }
 }
