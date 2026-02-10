@@ -5,14 +5,6 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
 
 import { auth } from "@backend/portal/auth";
 
-// * Data fetching functions
-import { readConnectedAgentCount } from "$lib/data/api/connected-agents.service.fn";
-import { readChannelCount } from "$lib/data/api/channels.service.fn";
-import { readConnectedAuthoritiesCount } from "$lib/data/api/connected-authorities.service.fn";
-
-const networkId: string = "rAnD0M-demo-network-id";
-const networkCode: string = "code-to-access-network"; // Key to connect to a network, unknown and irelevant to flux
-
 const session = await auth.api.getSession({
     headers: Astro.request.headers,
 });
@@ -22,11 +14,6 @@ if (!session) {
 }
 
 const userSession = session.user;
-
-const initialConnectedAuthoritiesCount =
-    await readConnectedAuthoritiesCount(networkId);
-const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
-const initialChannelCount = await readChannelCount(networkId);
 ---
 
 <!doctype html>
@@ -38,11 +25,6 @@ const initialChannelCount = await readChannelCount(networkId);
         <DashboardLayout
             client:load
             {userSession}
-            {networkId}
-            {networkCode}
-            {initialConnectedAuthoritiesCount}
-            {initialConnectedAgentsCount}
-            {initialChannelCount}
         >
             <slot />
         </DashboardLayout>
