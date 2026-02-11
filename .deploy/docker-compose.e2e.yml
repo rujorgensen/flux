@@ -1,6 +1,6 @@
 services:
   portal-redis-e2e:
-    image: redis:8.4.0
+    image: redis:8.6.0
     command: redis-server --requirepass e2e-redis-password
     restart: always
     container_name: portal-redis-e2e # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
