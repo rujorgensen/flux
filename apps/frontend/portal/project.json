@@ -7,12 +7,24 @@
                 "script": "astro build"
             }
         },
+        "open": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bunx open-cli http://localhost:3001"
+            }
+        },
         "serve": {
             "executor": "nx:run-script",
             "options": {
                 "script": "astro dev --port=3001",
                 "proxyConfig": "apps/frontend/portal/proxy.conf.json"
-            }
+            },
+            "dependsOn": [
+                "backend-mesh:serve",
+                "@flux/portal-api:serve",
+                "open"
+            ],
+            "continuous": true
         },
         "docker-build": {
             "command": "docker build -f apps/frontend/portal/Dockerfile . -t flux-portal"

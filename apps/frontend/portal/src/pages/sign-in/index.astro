@@ -1,7 +1,7 @@
 ---
 import BaseHead from '../../components/BaseHead.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
-import LoginForm from '$lib/components/LoginForm.svelte';
+import { LoginFormComponent } from '../../components/angular/login-form/login-form.component';
 import GalleryVerticalEndIcon from '@lucide/svelte/icons/gallery-vertical-end';
 import { auth } from '@backend/portal/auth';
 
@@ -40,7 +40,7 @@ if (session) {
                             </div>
                             Persistica Flux
                         </a>
-                        <LoginForm client:load />
+                        <LoginFormComponent client:load />
                     </div>
                 </div>
             </section>

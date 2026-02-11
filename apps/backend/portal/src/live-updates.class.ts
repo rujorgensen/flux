@@ -21,7 +21,9 @@ export class LiveUpdates {
         private readonly meshRedisStatusService: RedisStatusService,
         private readonly FLUX_AUTHORITY_JWT_SECRET: string,
     ) {
-        const fluxMeshServer: FluxMeshServer = new FluxMeshServer();
+        const fluxMeshServer: FluxMeshServer = new FluxMeshServer({
+            port: 5101,
+        });
 
         fluxMeshServer.onReady(async () => {
 
