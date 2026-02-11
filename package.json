@@ -47,6 +47,7 @@
         "link:authority": "nx run persistica-flux-authority:link",
         "link:mesh": "nx run persistica-flux-mesh:link",
         "link:all": "echo 'links all packages for local use' && bun run link:agent && bun run link:authority && bun run link:mesh",
+        "dev": "nx run @flux/portal-ui:serve",
         "//-09a": "// ****************************************************************************",
         "//-09b": "// *** Deploy                                                                  ",
         "//-09c": "// ****************************************************************************",
