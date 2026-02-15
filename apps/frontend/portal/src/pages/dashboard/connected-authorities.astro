@@ -2,11 +2,11 @@
 import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
 
 // * Dashboard Tables
-import SvelteConnectedAuthorities from "$lib/components/dashboard/tables/SvelteConnectedAuthorities.svelte";
+import { ConnectedAuthoritiesTableComponent } from "../../components/angular/tables/connected-authorities/connected-authorities-table.component";
 
 const networkId: string = "rAnD0M-demo-network-id";
 ---
 
 <DashboardLayout>
-    <SvelteConnectedAuthorities client:load networkId={networkId} />
+    <ConnectedAuthoritiesTableComponent client:load networkId={networkId} />
 </DashboardLayout>
