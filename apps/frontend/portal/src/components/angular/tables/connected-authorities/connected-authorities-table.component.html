@@ -10,7 +10,7 @@
             @for (row of dataStore(); track row.id) {
                 <tr>
                     <td>{{ row.id }}</td>
-                    <td>{{ row.connectedAt | formatDate }}</td>
+                    <td>{{ row.connectedAt | date:'fullDate' }}</td>
                 </tr>
             }
         }

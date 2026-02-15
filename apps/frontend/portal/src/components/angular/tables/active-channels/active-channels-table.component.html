@@ -16,7 +16,7 @@
                     <td>{{ row.memberDistribution }}</td>
                     <td class="text-right">{{ row.members }}</td>
                     <td class="text-right">{{ row.bytes }}</td>
-                    <td>{{ row.createdAt | formatDate }}</td>
+                    <td>{{ row.createdAt | date:'fullDate' }}</td>
                 </tr>
             }
         }

@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { provideHttpClient, HttpClient, withFetch } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { TNetworkAgent } from '@flux/mesh/store/redis/network-agent';
-import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 @Component({
     selector: 'app-connected-agents-table',
-    imports: [CommonModule, FormatDatePipe],
+    imports: [CommonModule],
     templateUrl: './connected-agents-table.component.html',
     styleUrls: ['./connected-agents-table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,

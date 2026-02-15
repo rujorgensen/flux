@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { provideHttpClient, HttpClient, withFetch } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { TNetworkAuthority } from '@flux/shared/types';
-import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 @Component({
     selector: 'app-connected-authorities-table',
-    imports: [CommonModule, FormatDatePipe],
+    imports: [CommonModule],
     templateUrl: './connected-authorities-table.component.html',
     styleUrls: ['./connected-authorities-table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
