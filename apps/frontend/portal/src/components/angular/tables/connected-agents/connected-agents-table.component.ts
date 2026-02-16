@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient, HttpClient, withFetch } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -25,11 +25,15 @@ export class ConnectedAgentsTableComponent {
     )];
     static renderProviders = [ConnectedAgentsTableComponent.clientProviders];
 
-    constructor() {
-        const networkId = this.networkId();
-        if (networkId) {
-            this.fetchData(networkId);
-        }
+    constructor(
+
+    ) {
+        effect(() => {
+            const networkId = this.networkId();
+            if (networkId) {
+                this.fetchData(networkId);
+            }
+        });
     }
 
     private fetchData(
