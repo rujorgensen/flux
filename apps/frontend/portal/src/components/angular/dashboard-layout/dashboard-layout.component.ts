@@ -1,6 +1,13 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+interface UserSession {
+    id?: string;
+    name?: string;
+    email?: string;
+    image?: string;
+}
+
 @Component({
     selector: 'app-dashboard-layout',
     templateUrl: './dashboard-layout.component.html',
@@ -9,6 +16,6 @@ import { CommonModule } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardLayoutComponent {
-    userSession = input<any>();
+    userSession = input<UserSession | null>();
     activeNetworkName = input<string>('Network');
 }
