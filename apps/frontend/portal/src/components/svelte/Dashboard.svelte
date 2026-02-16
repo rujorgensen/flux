@@ -1,12 +1,4 @@
 <script lang="ts">
-    // * Types
-    import type {
-        TNetworkAgentCountAt,
-        TNetworkAuthorityCountAt,
-        TNetworkChannelCountAt,
-        TNetworkId_S,
-    } from "@flux/shared/types";
-
     // * Data sources
     import ChartJs from "./ChartJS.svelte";
 </script>
