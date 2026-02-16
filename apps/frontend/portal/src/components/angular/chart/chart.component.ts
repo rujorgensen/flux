@@ -32,7 +32,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
     }
 
     private initChart() {
-        let lineColor = "#111";
+        const lineColor = "#111";
 
         const ctx = this.canvas.nativeElement.getContext("2d");
         if (!ctx) return;
