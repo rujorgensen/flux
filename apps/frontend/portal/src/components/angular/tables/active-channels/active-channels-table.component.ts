@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient, HttpClient, withFetch } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -6,11 +6,12 @@ import type { INetworkChannel } from '@flux/shared/types';
 
 @Component({
     selector: 'app-active-channels-table',
-    imports: [CommonModule],
+    imports: [
+        CommonModule,
+    ],
     templateUrl: './active-channels-table.component.html',
     styleUrls: ['./active-channels-table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
 })
 export class ActiveChannelsTableComponent {
     public readonly networkId = input.required<string>();
@@ -25,11 +26,15 @@ export class ActiveChannelsTableComponent {
     )];
     static renderProviders = [ActiveChannelsTableComponent.clientProviders];
 
-    constructor() {
-        const networkId = this.networkId();
-        if (networkId) {
-            this.fetchData(networkId);
-        }
+    constructor(
+
+    ) {
+        effect(() => {
+            const networkId = this.networkId();
+            if (networkId) {
+                this.fetchData(networkId);
+            }
+        });
     }
 
     private fetchData(
