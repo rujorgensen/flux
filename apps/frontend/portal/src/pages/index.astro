@@ -2,6 +2,7 @@
 import BaseHead from "$lib/components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "$lib/consts";
 import { StatsComponent } from "../components/angular/stats/stats.component";
+import { ChartComponent } from "../components/angular/chart/chart.component";
 
 import { auth } from "@backend/portal/auth";
 import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
@@ -50,10 +51,33 @@ const initialChannelCount = await readChannelCount(networkId);
                 {initialConnectedAuthoritiesCount}
                 {initialConnectedAgentsCount}
                 {initialChannelCount}
-            />
+            >
+                <div class="panel bg-muted/50 max-h-[50vh] flex-1 rounded-xl md:min-h-min">
+                    <h2>Agents</h2>
+                    <ChartComponent
+                        client:visible
+                        data-analog-id="chart-component-1"
+                    />
+                </div>
+            </Dashboard>
         </DashboardLayout>
     </body>
 </html>
+
+<style>
+    .panel {
+        border-radius: var(--roundness-medium);
+        border: 1px solid var(--outline-1);
+        background: var(--surface-1);
+        box-shadow: var(--shadow-2);
+        color: var(--text-1);
+        display: grid;
+
+        grid-template-rows: auto 1fr;
+        gap: var(--size-2);
+        padding: var(--padding-medium);
+    }
+</style>
 
 <script>
     import { addOutputListener } from "@analogjs/astro-angular/utils";
