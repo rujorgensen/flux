@@ -21,7 +21,7 @@ beforeAll(async () => {
     if ((process.env['FLUX_TEST_INFRASTRUCTURE'] !== 'local') && (globalRedisContainer === null)) {
 
         // * Start Redis container
-        const redisContainer: StartedRedisContainer = await new RedisContainer('redis:8.2.1')
+        const redisContainer: StartedRedisContainer = await new RedisContainer('redis:8.6.0')
             .withExposedPorts(6379)
             .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
             .start();
