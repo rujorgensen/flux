@@ -42,7 +42,7 @@ describe('persistica-flux-api-agents', () => {
         // 👉 Wait until the API is accepting connections
         await waitUntilAvailable(
             `${portalDomain}/api/ping`,
-            10_000,
+            30_000,
             300,
         );
 
@@ -173,5 +173,5 @@ async function waitUntilAvailable(
         }
         await new Promise((r) => setTimeout(r, intervalMs));
     }
-    throw new Error(`API did not become ready at ${url} within ${timeoutMs}ms`);
+    throw new Error(`API did not become ready at '${url}' within ${timeoutMs}ms`);
 }
