@@ -1,11 +1,9 @@
 import {
     Component,
     signal,
-    inject,
     ChangeDetectionStrategy,
     OnInit,
 } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -17,8 +15,6 @@ import { CommonModule } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApiCallComponent implements OnInit {
-    private http = inject(HttpClient);
-
     protected data = signal<string | null>(null);
     protected error = signal<string | null>(null);
     protected loading = signal(true);

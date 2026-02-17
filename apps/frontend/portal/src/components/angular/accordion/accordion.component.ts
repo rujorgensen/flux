@@ -38,15 +38,11 @@ export class AccordionComponent {
 
     protected selectedId = signal<string | null>(null);
 
-    toggleItem(
-        id: string,
-    ) {
+    toggleItem(id: string) {
         this.selectedId.update((current) => (current === id ? null : id));
     }
 
-    isSelected(
-        id: string,
-    ): boolean {
+    isSelected(id: string): boolean {
         return this.selectedId() === id;
     }
 }
