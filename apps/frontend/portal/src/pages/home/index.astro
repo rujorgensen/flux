@@ -1,6 +1,6 @@
 ---
-import ApiCall from "../../components/svelte/ApiCall.svelte";
-import MeltUI from "../../components/svelte/melt-ui/MeltUI.svelte";
+import { ApiCallComponent } from "../../components/angular/api-call/api-call.component";
+import { AccordionComponent } from "../../components/angular/accordion/accordion.component";
 import BaseHead from "../../components/BaseHead.astro";
 import Footer from "../../components/Footer.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
@@ -12,8 +12,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
         <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
     </head>
     <body>
-        <ApiCall client:load />
-        <MeltUI client:load />
+        <ApiCallComponent client:load />
+        <AccordionComponent client:load />
       
         <Footer />
     </body>

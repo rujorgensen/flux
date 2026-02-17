@@ -1,0 +1,15 @@
+<div class="collapse collapse-arrow bg-base-200 shadow-xl max-w-md mx-auto rounded-md">
+    @for (item of items; track item.id) {
+    <div class="collapse" [class.collapse-open]="isSelected(item.id)">
+        <input type="radio" name="accordion" [checked]="isSelected(item.id)" />
+        <div class="collapse-title text-xl font-medium cursor-pointer" (click)="toggleItem(item.id)">
+            {{ item.title }}
+        </div>
+        @if (isSelected(item.id)) {
+        <div class="collapse-content">
+            <p>{{ item.description }}</p>
+        </div>
+        }
+    </div>
+    }
+</div>
