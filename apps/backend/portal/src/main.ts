@@ -1,5 +1,4 @@
-import { type Context, Elysia } from 'elysia';
-import { auth } from '@backend/portal/auth';
+import { Elysia } from 'elysia';
 // import { $ } from 'bun';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
@@ -12,6 +11,7 @@ import { networkAuthorityRoutes } from './api/networks/authorities.route';
 import { networkAgentRoutes } from './api/networks/agents.route';
 import { betterAuth } from './_decorators/auth.decorator';
 import { networkRoutes } from './api/networks/networks.route';
+import { version } from '../package.json';
 
 // ****************************************************************************
 // * Env
@@ -37,7 +37,13 @@ const meshRedisStatusService: RedisStatusService = new RedisStatusService(meshRe
 // * Start server
 // ****************************************************************************
 
+const redisPort: number = Bun.env.PORTAL_MESH_SERVER_PORT ?
+    Number.parseInt(Bun.env.PORTAL_MESH_SERVER_PORT)
+    :
+    5_101;
+
 new LiveUpdates(
+    redisPort,
     portalRedisStatusService,
     meshRedisStatusService,
     FLUX_AUTHORITY_JWT_SECRET,
@@ -114,9 +120,11 @@ export const app = new Elysia()
     //   return `Hello ${profile.name}`
     // })
 
-    .listen(3_000)
-    ;
+    .onStart(({ server }) => {
+        console.log(`🦊 Elysia API server (${version}) running at ${server?.hostname}:${server?.port}`);
+    })
 
-console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
+    .listen(Bun.env.PORT ?? 3_000)
+    ;
 
 export type App = typeof app;

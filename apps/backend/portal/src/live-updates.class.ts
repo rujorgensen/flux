@@ -17,12 +17,13 @@ const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, kn
 export class LiveUpdates {
 
     constructor(
+        private readonly localMestServerPort: number,
         private readonly portalRedisStatusService: RedisStatusService,
         private readonly meshRedisStatusService: RedisStatusService,
         private readonly FLUX_AUTHORITY_JWT_SECRET: string,
     ) {
         const fluxMeshServer: FluxMeshServer = new FluxMeshServer({
-            port: 5101,
+            port: this.localMestServerPort,
         });
 
         fluxMeshServer.onReady(async () => {
@@ -39,7 +40,7 @@ export class LiveUpdates {
             const fluxAuthority = new FluxAuthority(
                 NETWORK_ID,
                 {
-                    //         domain?: string,
+                    domain: `http://localhost:${port}`,
                     //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
                     //         retries?: number; // Number of times to retry a failed message
                 },

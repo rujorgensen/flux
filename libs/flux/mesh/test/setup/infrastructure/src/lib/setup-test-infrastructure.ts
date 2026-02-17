@@ -18,18 +18,18 @@ beforeAll(async () => {
     // global setup
     console.info('🛠️\tSetting up test infrastructure...');
 
-    if ((process.env['FLUX_TEST_INFRASTRUCTURE'] !== 'local') && (globalRedisContainer === null)) {
+    if (globalRedisContainer === null) {
 
         // * Start Redis container
         const redisContainer: StartedRedisContainer = await new RedisContainer('redis:8.6.0')
-            .withExposedPorts(6379)
             .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
             .start();
 
         globalThis['infrastructureRedisURL'] = redisContainer.getConnectionUrl();
+
         globalRedisContainer = redisContainer;
     } else {
-        globalThis['infrastructureRedisURL'] = 'redis://localhost:6381';
+        globalThis['infrastructureRedisURL'] = globalRedisContainer.getConnectionUrl();
     }
 
     if (await testRedisConnection(globalThis['infrastructureRedisURL'])) {
