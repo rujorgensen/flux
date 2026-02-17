@@ -1,5 +1,5 @@
 ---
-import DashboardLayout from "$lib/components/svelte/DashboardLayout.svelte";
+import { DashboardLayoutComponent } from "../../components/angular/dashboard-layout/dashboard-layout.component";
 import BaseHead from "../../components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
 
@@ -22,11 +22,12 @@ const userSession = session.user;
         <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
     </head>
     <body>
-        <DashboardLayout
+        <DashboardLayoutComponent
             client:load
-            {userSession}
+            userSession={userSession}
+            activeNetworkName="Acme Inc"
         >
             <slot />
-        </DashboardLayout>
+        </DashboardLayoutComponent>
     </body>
 </html>

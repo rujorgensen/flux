@@ -3,10 +3,10 @@ import BaseHead from "$lib/components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "$lib/consts";
 import { StatsComponent } from "../components/angular/stats/stats.component";
 import { ChartComponent } from "../components/angular/chart/chart.component";
+import { DashboardComponent } from "../components/angular/dashboard/dashboard.component";
 
 import { auth } from "@backend/portal/auth";
 import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
-import Dashboard from "$lib/components/svelte/Dashboard.svelte";
 
 // * Data fetching functions
 import { readConnectedAgentCount } from "$lib/data/api/connected-agents.service.fn";
@@ -44,14 +44,7 @@ const initialChannelCount = await readChannelCount(networkId);
                 networkCode={networkCode}
             />
 
-            <Dashboard
-                client:load
-                {networkId}
-                {networkCode}
-                {initialConnectedAuthoritiesCount}
-                {initialConnectedAgentsCount}
-                {initialChannelCount}
-            >
+            <DashboardComponent client:load>
                 <div class="panel bg-muted/50 max-h-[50vh] flex-1 rounded-xl md:min-h-min">
                     <h2>Agents</h2>
                     <ChartComponent
@@ -59,7 +52,7 @@ const initialChannelCount = await readChannelCount(networkId);
                         data-analog-id="chart-component-1"
                     />
                 </div>
-            </Dashboard>
+            </DashboardComponent>
         </DashboardLayout>
     </body>
 </html>
