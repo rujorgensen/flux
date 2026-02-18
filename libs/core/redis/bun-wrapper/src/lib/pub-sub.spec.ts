@@ -1,5 +1,6 @@
 import { RedisClient } from 'bun';
 import { BunRedisPubSub } from './core-redis-pub-sub.class';
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 
 describe('BunRedisPubSub', () => {
     let redisClient: RedisClient;
@@ -19,12 +20,12 @@ describe('BunRedisPubSub', () => {
         });
 
         await pubsub.connect();
-    });
+    }, { timeout: 60_000 });
 
     afterAll(async () => {
         await redisClient?.close();
         await pubsub?.disconnect();
-    });
+    }, { timeout: 60_000 });
 
     it('works', async () => {
         await redisClient.set('key', 'val');
