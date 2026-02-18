@@ -126,9 +126,9 @@
         },
         "catalogs": {
             "prisma": {
-                "@prisma/client": "7.3.0",
-                "@prisma/adapter-pg": "7.3.0",
-                "prisma": "7.3.0"
+                "@prisma/client": "7.4.0",
+                "@prisma/adapter-pg": "7.4.0",
+                "prisma": "7.4.0"
             },
             "elysia": {
                 "@elysiajs/cors": "^1.4.1",

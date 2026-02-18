@@ -18,7 +18,8 @@ import {
 import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
-import type { FluxAuthorityNetworkConnection } from 'packages/flux/authority/src/lib/flux-authority-network.class';
+import type { FluxAuthorityNetworkConnection, } from 'packages/flux/authority/src/lib/flux-authority-network.class';
+import { connectToRedisAndFlush } from '@flux/mesh/test/setup/infrastructure';
 
 const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
@@ -30,12 +31,7 @@ describe('persistica-flux-mesh', () => {
     let fluxDomain: string = `localhost:${fluxServerPort}`;
 
     beforeAll(async () => {
-        let redisURL: string = 'redis://localhost:6381';
-
-        if (process.env.FLUX_TEST_INFRASTRUCTURE !== 'local') {
-            // * Start Redis container
-            redisURL = globalThis['infrastructureRedisURL'];
-        }
+        const redisURL: string = globalThis['infrastructureRedisURL'];
 
         // Modify env so the Flux Mesh connects to the test Redis container
         process.env.FLUX_MESH_REDIS_URL = redisURL;
@@ -66,12 +62,10 @@ describe('persistica-flux-mesh', () => {
             throw new Error('Timeout waiting for Mesh server to be ready');
         }
 
-        // if (process.env.FLUX_TEST_INFRASTRUCTURE !== 'local') {
         //     const queryResult = await redisContainer.executeCliCmd('info', ['clients']);
         //     if (queryResult !== expect.stringContaining('connected_clients:1')) {
         //         throw new Error(`Expected 1 client connected to Redis, got queryResult: '${queryResult}'`);
         //     }
-        // }
 
         console.log(`Client is connected at '${redisURL}'`);
     });
@@ -126,6 +120,9 @@ describe('persistica-flux-mesh', () => {
 
             fluxAgent = new FluxAgent(
                 NETWORK_ID,
+                {
+                    domain: fluxDomain
+                },
             );
 
             fluxAgentNetworkConnection = await fluxAgent
@@ -194,6 +191,9 @@ describe('persistica-flux-mesh', () => {
 
             const fluxAgent = new FluxAgent(
                 NETWORK_ID,
+                {
+                    domain: fluxDomain
+                },
             );
 
             const fluxAgentNetworkConnection = await fluxAgent
@@ -238,33 +238,3 @@ describe('persistica-flux-mesh', () => {
         });
     });
 });
-
-/**
- * Connects to a Redis server and flushes all data before starting.
- *  !NB This should not be necessary once multi/missing authorities are handled better.
- * 
- * @param { string } url
- * 
- * @returns { Promise<void> }
- */
-async function connectToRedisAndFlush(
-    url: string,
-): Promise<void> {
-    if (!url.includes('localhost')) {
-        throw new Error('No way I\'m flushing a Redis server that is not running locally!');
-    }
-
-    const client = new RedisClient(url);
-    console.log(`Connecting to Redis at '${url}' for flushing...`);
-    await client.connect();
-
-    if (!client.connected) {
-        throw new Error(`Failed to connect to Redis at '${url}' for flushing!`);
-    }
-
-    console.warn(`Connection to Redis at '${url}' is open. Flushing data...`);
-    await client.send('FLUSHALL', ['ASYNC']);
-
-    console.warn(`Flushed all data from Redis at '${url}', disconnecting.`);
-    client.close();
-}

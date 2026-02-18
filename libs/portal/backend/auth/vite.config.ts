@@ -53,5 +53,6 @@ export default defineConfig(() => ({
             reportsDirectory: '../../../../coverage/libs/portal/backend/auth',
             provider: 'v8' as const,
         },
+        passWithNoTests: true,
     },
 }));
