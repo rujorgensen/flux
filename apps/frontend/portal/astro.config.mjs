@@ -2,7 +2,6 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import svelte from '@astrojs/svelte';
 import proxy from './proxy.conf.json' with { type: 'json' };
 import node from '@astrojs/node';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -30,7 +29,6 @@ export default defineConfig({
         }),
         mdx(),
         sitemap(),
-        svelte(),
     ],
 
     // Add Vite configuration with proxy settings

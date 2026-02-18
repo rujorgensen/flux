@@ -17,7 +17,7 @@ services:
       - dragonflymeshdata:/mesh-dev-data
 
   mesh-postgres:
-    image: postgres:18.1-alpine
+    image: postgres:18.2-alpine
     restart: always
     container_name: mesh-postgres-selfhosted
     environment:

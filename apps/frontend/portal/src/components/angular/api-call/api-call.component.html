@@ -1,0 +1,9 @@
+@if (error()) {
+<p class="text-error">{{ error() }}</p>
+}
+@else if (data()) {
+<pre>{{ data() }}</pre>
+}
+@else {
+<p>Loading...</p>
+}
