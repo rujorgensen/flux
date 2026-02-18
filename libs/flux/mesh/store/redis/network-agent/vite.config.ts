@@ -55,5 +55,6 @@ export default defineConfig(() => ({
                 '../../../../../../coverage/libs/flux/mesh/store/redis/network-agent',
             provider: 'v8' as const,
         },
+        passWithNoTests: true,
     },
 }));
