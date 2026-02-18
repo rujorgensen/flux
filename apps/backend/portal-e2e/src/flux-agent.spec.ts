@@ -13,28 +13,37 @@ import {
 } from 'bun:test';
 import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
 import { $ } from 'bun';
+import {
+    waitUntilAvailable,
+    connectToRedisAndFlush,
+    generateRandomSafePort,
+} from '@flux/mesh/test/setup/infrastructure';
 
 const NETWORK_ID: string = 'agent-api-testing-network-id'; // Key to register a network, known to flux´
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 
 describe('persistica-flux-api-agents', () => {
-    let fluxServerPort: number = 5100;
-    let fluxDomain: string = `localhost:${fluxServerPort}`;
-    let portalDomain: string = 'http://localhost:3000';
+    let portalDomain: string = '';
+    let fluxDomain: string | undefined;
 
     beforeAll(async () => {
-        let redisURL: string = 'redis://localhost:6381';
+        const redisURL = globalThis['infrastructureRedisURL'];
 
-        if (process.env.FLUX_TEST_INFRASTRUCTURE !== 'local') {
-            // * Start Redis container
-            redisURL = globalThis['infrastructureRedisURL'];
-        }
+        // Generate random port to avoid conflicts with other tests running in parallel
+        const randomAPIPort = generateRandomSafePort();
+        const randomMeshPort = generateRandomSafePort();
 
-        // Modify env so the Flux Mesh connects to the test Redis container
-        process.env.FLUX_MESH_REDIS_URL = redisURL;
+        portalDomain = `http://localhost:${randomAPIPort}`;
 
-        console.log(`⚗️ Redis is ready at '${redisURL}', starting portal server on port 3000`);
+        process.env.PORTAL_MESH_SERVER_PORT = randomMeshPort.toString();
+        process.env.PORT = randomAPIPort.toString();
+        process.env.FLUX_PORTAL_REDIS_URL = redisURL;
+        process.env.FLUX_MESH_REDIS_URL = redisURL; // Modify env so the Flux Mesh connects to the test Redis container
+
+        fluxDomain = `http://localhost:${randomMeshPort}`;
+
+        console.log(`⚗️ Redis is ready at '${redisURL}', starting portal server on port ${randomAPIPort}`);
 
         //$`bun nx run @flux/portal-api:serve`.nothrow();
         $`bun nx run @flux/portal-api:serve`.then().catch();
@@ -42,18 +51,17 @@ describe('persistica-flux-api-agents', () => {
         // 👉 Wait until the API is accepting connections
         await waitUntilAvailable(
             `${portalDomain}/api/ping`,
-            10_000,
+            30_000,
             300,
         );
 
-        console.log(`⚗️ 🚀 Portal server is ready at port 3000`);
+        console.log(`⚗️ 🚀 Portal server is ready at port ${randomAPIPort}. Connecting FluxAuthority to Mesh server at '${fluxDomain}'`);
 
         // * Clear the container
-        if (
-            redisURL.includes('localhost') &&
-            (process.env.FLUX_TEST_INFRASTRUCTURE === 'local')
-        ) {
-            await connectToRedisAndFlush(redisURL);
+        await connectToRedisAndFlush(redisURL);
+
+        if (!fluxDomain) {
+            throw new Error('Flux domain is not defined');
         }
 
         await new FluxAuthority(
@@ -68,7 +76,7 @@ describe('persistica-flux-api-agents', () => {
                 () => Promise.resolve(true),
             );
 
-        console.log(`Authority is connected to Mesh at '${fluxDomain}'`);
+        console.log(`⚗️ Authority is connected to Mesh at '${fluxDomain}'`);
     });
 
     it('should return the agent count', async () => {
@@ -79,6 +87,9 @@ describe('persistica-flux-api-agents', () => {
 
         const fluxAgent = new FluxAgent(
             NETWORK_ID,
+            {
+                domain: fluxDomain,
+            },
         );
 
         await fluxAgent
@@ -97,6 +108,9 @@ describe('persistica-flux-api-agents', () => {
     it('should return a list of connected agents', async () => {
         const fluxAgent = new FluxAgent(
             NETWORK_ID,
+            {
+                domain: fluxDomain,
+            },
         );
 
         await fluxAgent
@@ -107,6 +121,9 @@ describe('persistica-flux-api-agents', () => {
 
         await (new FluxAgent(
             NETWORK_ID,
+            {
+                domain: fluxDomain,
+            },
         ))
             .connect(
                 CODE_TO_ACCESS_NETWORK,
@@ -128,50 +145,3 @@ describe('persistica-flux-api-agents', () => {
     });
 
 });
-
-/**
- * Connects to a Redis server and flushes all data before starting.
- *  !NB This should not be necessary once multi/missing authorities are handled better.
- * 
- * @param { string } url
- * 
- * @returns { Promise<void> }
- */
-async function connectToRedisAndFlush(
-    url: string,
-): Promise<void> {
-    if (!url.includes('localhost')) {
-        throw new Error('No way I\'m flushing a Redis server that is not running locally!');
-    }
-
-    const client = new RedisClient(url);
-    console.log(`Connecting to Redis at '${url}' for flushing...`);
-    await client.connect();
-    expect(client.connected).toBeTruthy();
-    console.warn(`Connection to Redis at '${url}' is open. Flushing data...`);
-    await client.send('FLUSHALL', ['ASYNC']);
-
-    console.warn(`Flushed all data from Redis at '${url}', disconnecting.`);
-    client.close();
-}
-
-async function waitUntilAvailable(
-    url: string,
-    timeoutMs: number,
-    intervalMs: number,
-): Promise<void> {
-    const start: number = Date.now();
-    // Accept any HTTP status as “available”; we only need a TCP accept
-    while ((Date.now() - start) < timeoutMs) {
-        try {
-            const r: Response = await fetch(url);
-            if (r.ok || r.status >= 200) {
-                return;
-            }
-        } catch {
-            // ignore until next retry
-        }
-        await new Promise((r) => setTimeout(r, intervalMs));
-    }
-    throw new Error(`API did not become ready at ${url} within ${timeoutMs}ms`);
-}
