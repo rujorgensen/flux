@@ -29,29 +29,30 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          filter: tree:0
+          fetch-depth: 0
 
-        # Temporarily skip, as pre-caching doesnt work
-  #      - name: 💾 Install Bun
-  #        uses: oven-sh/setup-bun@v2
-  #        with:
-  #          bun-version-file: package.json
-  #
-  #      -
-  #        name: Setup bun cache
-  #        id: cache-bun
-  #        uses: actions/cache@v4.2.3
-  #        with:
-  #          path: ~/.bun/install/cache
-  #          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-  #          restore-keys: |
-  #            ${{ runner.os }}-bun-
-  #
-  #      -
-  #          name: 💾 Install dependencies on cache miss
-  #          if : ${{ steps.cache-bun.outputs.cache-hit != 'true' }}
-  #          run: bun install --no-cache
+      - name: 💾 Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: 💾 Cache Bun dependencies
+        uses: actions/cache@v5
+        id: bun-cache
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 💾 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile --ignore-scripts
 
   unit-test:
     runs-on: ubuntu-latest
@@ -71,18 +72,15 @@ jobs:
         with:
           bun-version-file: package.json
 
-      - name: Setup bun cache
-        id: cache-bun
-        uses: actions/cache@v5.0.3
+      - name: 💾 Restore cached dependencies
+        uses: actions/cache@v5
         with:
-          # fail-on-cache-miss: true
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-
-      - name: 💾 Install dependencies (FOR SOME REASON, READING THE CACHE IS NOT ENOUGH)
-        run: bun install --no-cache
 
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
@@ -115,18 +113,15 @@ jobs:
         with:
           bun-version-file: package.json
 
-      - name: Setup bun cache
-        id: cache-bun
-        uses: actions/cache@v5.0.3
+      - name: 💾 Restore cached dependencies
+        uses: actions/cache@v5
         with:
-          # fail-on-cache-miss: true
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-
-      - name: 💾 Install dependencies (FOR SOME REASON, READING THE CACHE IS NOT ENOUGH)
-        run: bun install --no-cache
 
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
@@ -159,18 +154,15 @@ jobs:
         with:
           bun-version-file: package.json
 
-      - name: Setup bun cache
-        id: cache-bun
-        uses: actions/cache@v5.0.3
+      - name: 💾 Restore cached dependencies
+        uses: actions/cache@v5
         with:
-          # fail-on-cache-miss: true
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
-
-      - name: 💾 Install dependencies (FOR SOME REASON, READING THE CACHE IS NOT ENOUGH)
-        run: bun install --no-cache
 
       - name: 🛠️ Build
         # Demo does not currently build
