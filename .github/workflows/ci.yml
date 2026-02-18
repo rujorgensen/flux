@@ -119,10 +119,7 @@ jobs:
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
 
       - name: 🧪 Run unit tests
-        run: bun nx affected -t bun-test # --no-agents
-      
-      - name: 🧪 Run tests
-        run: bun nx affected -t test
+        run: bun nx affected -t bun-test test lint # --no-agents
 
   e2e-test:
     runs-on: ubuntu-latest
