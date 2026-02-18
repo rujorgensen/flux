@@ -75,6 +75,7 @@ import { NetworkChannelManager } from './business-logic/channels/channel-manager
 import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
+import { waitUntilAvailable } from '@flux/mesh/test/setup/infrastructure';
 
 PicoLogger.configure({
     allowScopes: '*',
@@ -180,6 +181,10 @@ export class FluxMeshServer {
                             networkAuthorityManager,
                             globalRPCClient,
                         ),
+                },
+
+                '/health': {
+                    GET: () => new Response('OK'),
                 },
             },
 
@@ -632,19 +637,26 @@ export class FluxMeshServer {
 
         this.channelManager = new NetworkChannelManager(this.globalChannelPubsub);
 
-        // TODO: DETECT WHEN READY
-        setTimeout(() => {
-            console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
-            console.log(`🚀 Flux mesh server running on localhost:${port}`);
+        waitUntilAvailable(`localhost:${this.options.port}/health`,
+            5_000,
+            10,
+        )
+            .then(() => {
+                console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
+                console.log(`🚀 Flux mesh server running on localhost:${port}`);
 
-            setInterval(() => {
-                this.redisConnection.setConnected(`${machineAddress}/${processId}`);
-            }, 3_000);
+                setInterval(() => {
+                    this.redisConnection.setConnected(`${machineAddress}/${processId}`);
+                }, 3_000);
 
-            for (const cb of this.onReadyListeners) {
-                cb();
-            }
-        }, 50);
+                for (const cb of this.onReadyListeners) {
+                    cb();
+                }
+            })
+            .catch(() => {
+                throw new Error(`Server did not become healthy within timeout`);
+            })
+            ;
     }
 
     public onReady(

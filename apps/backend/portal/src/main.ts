@@ -71,8 +71,7 @@ export const app = new Elysia()
     // .onBeforeHandle(() => {
     //   console.log('onBeforeHandle')
     // })
-
-    .use(cors(Bun.env.NODE_ENV === 'production' ? undefined : {
+    .use(Bun.env.NODE_ENV === 'production' ? undefined : cors({
         origin: 'localhost:3001',
         methods: [
             'GET',

@@ -26,32 +26,31 @@ const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to conne
 
 describe('persistica-flux-mesh', () => {
     let fluxMeshServer: FluxMeshServer;
-    let fluxServerPort: number = 5_100;
-    let fluxDomain: string = `localhost:${fluxServerPort}`;
+    let fluxDomain: string | undefined;
 
     beforeAll(async () => {
-        let redisURL: string = 'redis://localhost:6381';
+        const redisURL: string = globalThis['infrastructureRedisURL'];
 
-        if (process.env.FLUX_TEST_INFRASTRUCTURE !== 'local') {
-            // * Start Redis container
-            redisURL = globalThis['infrastructureRedisURL'];
-        }
+        // Generate random port to avoid conflicts with other tests running in parallel
+        const randomAPIPort = generateRandomSafePort();
+        const randomMeshPort = generateRandomSafePort();
 
         // Modify env so the Flux Mesh connects to the test Redis container
+        process.env.PORTAL_MESH_SERVER_PORT = randomMeshPort.toString();
+        process.env.PORT = randomAPIPort.toString();
+        process.env.FLUX_PORTAL_REDIS_URL = redisURL;
         process.env.FLUX_MESH_REDIS_URL = redisURL;
 
         console.log(`Redis is ready at '${redisURL}'`);
 
         // * Clear the container
-        if (
-            redisURL.includes('localhost') &&
-            (process.env.FLUX_TEST_INFRASTRUCTURE === 'local')
-        ) {
-            await connectToRedisAndFlush(redisURL);
-        }
+        await connectToRedisAndFlush(redisURL);
+
+        fluxDomain = `http://localhost:${randomMeshPort}`;
 
         // * Start mesh server
-        fluxMeshServer = new FluxMeshServer(fluxServerPort);
+        console.log(`Starting Flux Mesh server on port ${randomMeshPort}...`);
+        fluxMeshServer = new FluxMeshServer(randomMeshPort);
 
         let timeout: ReturnType<typeof setTimeout> | undefined;
         await new Promise((resolve, reject) => {
@@ -64,18 +63,22 @@ describe('persistica-flux-mesh', () => {
             });
         });
 
+        console.log(`Flux Mesh server started on port ${randomMeshPort}`);
+
         if (timeout !== null) {
             throw new Error('Timeout waiting for Mesh server to be ready');
         }
 
-        // if (process.env.FLUX_TEST_INFRASTRUCTURE !== 'local') {
         //     const queryResult = await redisContainer.executeCliCmd('info', ['clients']);
         //     if (queryResult !== expect.stringContaining('connected_clients:1')) {
         //         throw new Error(`Expected 1 client connected to Redis, got queryResult: '${queryResult}'`);
         //     }
-        // }
 
         console.log(`Client is connected at '${redisURL}'`);
+
+        if (!fluxDomain) {
+            throw new Error('⚗️ Flux domain is not defined');
+        }
     });
 
     afterAll(async () => {
@@ -128,6 +131,9 @@ describe('persistica-flux-mesh', () => {
 
             fluxAgent = new FluxAgent(
                 NETWORK_ID,
+                {
+                    domain: fluxDomain,
+                },
             );
 
             fluxAgentNetworkConnection = await fluxAgent
@@ -196,6 +202,9 @@ describe('persistica-flux-mesh', () => {
 
             const fluxAgent = new FluxAgent(
                 NETWORK_ID,
+                {
+                    domain: fluxDomain,
+                },
             );
 
             const fluxAgentNetworkConnection = await fluxAgent

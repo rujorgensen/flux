@@ -97,6 +97,9 @@ jobs:
       - name: 🧪 Run unit tests
         # RYUK does not work with github actions or Circle CI
         run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected -t bun-test # --no-agents
+      
+      - name: 🧪 Run tests
+        run: bun nx affected -t test
 
   e2e-test:
     runs-on: ubuntu-latest
@@ -143,7 +146,7 @@ jobs:
         # RYUK does not work with github actions or Circle CI
         run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
 
-  build:
+  build-lint:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [install-deps]
@@ -177,3 +180,6 @@ jobs:
       - name: 🛠️ Build
         # Demo does not currently build
         run: bun nx affected -t build --exclude demo
+
+      - name: 🎨 Lint
+        run: bun nx affected -t lint

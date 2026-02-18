@@ -118,13 +118,13 @@ export class BunRedisClient extends EventEmitter<{
             this.reconnectAttempts = 0;
 
             this.client.onclose = (error) => {
-                console.error('⬇️ Redis client disconnected:', error);
+                console.error(`⬇️ Redis client on '${this.options.url}' disconnected:`, error?.message ?? 'Unknown error');
                 this.connected = false;
                 this.emit('end', void 0);
                 this.retryReconnect();
             };
         } catch (error) {
-            console.error('Initial Redis connection failed:', error);
+            console.error(`Initial Redis connection on '${this.options.url}' failed:`, error);
             this.connected = false;
             this.emit('error', error instanceof Error ? error : new Error('Unknown error'));
             this.retryReconnect();
