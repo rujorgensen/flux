@@ -10,7 +10,6 @@
         "@prisma/adapter-pg": "catalog:prisma",
         "better-auth": "catalog:",
         "jsonwebtoken": "catalog:",
-        "prisma": "catalog:prisma",
-        "redis": "catalog:"
+        "prisma": "catalog:prisma"
     }
 }
