@@ -1,7 +1,4 @@
-import {
-    type RedisClientType,
-    createClient,
-} from 'redis';
+import { RedisClient } from 'bun';
 
 export type TRedisEventChannel = string & { __brand: 'redis-event-channel'; };
 export type MessageCallback = (message: string, channel: TRedisEventChannel) => unknown;
@@ -9,8 +6,11 @@ export type MessageCallback = (message: string, channel: TRedisEventChannel) => 
 export class BunRedisPubSub {
 
     // Needs two clients, one for publishing and one for subscribing
-    private readonly publisher: RedisClientType;
-    private readonly subscriber: RedisClientType;
+    private readonly publisher: RedisClient;
+    private readonly subscriber: RedisClient;
+
+    // Map to track callback wrappers for proper unsubscription
+    private readonly callbackMap = new Map<MessageCallback, (message: string, channel: string) => void>();
 
     constructor(
         private readonly _options: {
@@ -23,24 +23,47 @@ export class BunRedisPubSub {
             },
         },
     ) {
-        this.publisher = createClient(this._options);
+        // Create publisher client
+        this.publisher = new RedisClient(
+            this._options.url,
+            {
+                autoReconnect: true,
+                maxRetries: 10,
+            },
+        );
 
-        this.publisher
-            .on('error', (error) => {
-                console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub client error:`, error.message);
-            })
-            .on('reconnecting', () => {
-                console.log(`${this._options.name ? `[${this._options.name}]` : ''}🔄 Redis pub/sub reconnecting...`);
-            })
-            .on('ready', () => {
-                console.log(`${this._options.name ? `[${this._options.name}]` : ''}✅ Redis pub/sub client ready`);
-            })
-            .on('end', () => {
-                console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub connection closed`);
-            });
+        // Set up event handlers for publisher
+        this.publisher.onconnect = () => {
+            console.log(`${this._options.name ? `[${this._options.name}]` : ''}✅ Redis pub/sub publisher ready`);
+        };
 
-        // * Create Redis subscriber
-        this.subscriber = this.publisher.duplicate();
+        this.publisher.onclose = (error) => {
+            if (error) {
+                console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub publisher error:`, error);
+            }
+            console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub publisher connection closed`);
+        };
+
+        // Create subscriber client
+        this.subscriber = new RedisClient(
+            this._options.url,
+            {
+                autoReconnect: true,
+                maxRetries: 10,
+            },
+        );
+
+        // Set up event handlers for subscriber
+        this.subscriber.onconnect = () => {
+            console.log(`${this._options.name ? `[${this._options.name}]` : ''}✅ Redis pub/sub subscriber ready`);
+        };
+
+        this.subscriber.onclose = (error) => {
+            if (error) {
+                console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub subscriber error:`, error);
+            }
+            console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub subscriber connection closed`);
+        };
     }
 
     public async connect(
@@ -75,18 +98,42 @@ export class BunRedisPubSub {
         callback: MessageCallback,
     ): Promise<void> {
         try {
-            await this.subscriber.subscribe(channelId, <any>callback); // TODO
+            // Create wrapper that adapts Bun's callback signature to our signature
+            const wrappedCallback = (
+                message: string,
+                channel: string,
+            ) => {
+                callback(message, channel as TRedisEventChannel);
+            };
+
+            // Store the mapping for unsubscribe
+            this.callbackMap.set(callback, wrappedCallback);
+
+            await this.subscriber.subscribe(channelId, wrappedCallback);
         } catch {
             console.log('error caught #2');
         }
     }
 
-    public unsubscribe(
+    public async unsubscribe(
         channelId: string,
-        callback: MessageCallback,
-    ): void {
+        callback?: MessageCallback,
+    ): Promise<void> {
         try {
-            this.publisher.unsubscribe(channelId, <any>callback); // TODO
+            if (callback) {
+                // Get the wrapped callback we used in subscribe
+                const wrappedCallback = this.callbackMap.get(callback);
+                if (wrappedCallback) {
+                    await this.subscriber.unsubscribe(channelId, wrappedCallback);
+                    this.callbackMap.delete(callback);
+                } else {
+                    // Fallback: unsubscribe from channel entirely
+                    await this.subscriber.unsubscribe(channelId);
+                }
+            } else {
+                // Unsubscribe from the channel entirely
+                await this.subscriber.unsubscribe(channelId);
+            }
         } catch {
             console.log('error caught #1');
         }
@@ -100,114 +147,8 @@ export class BunRedisPubSub {
     public disconnect(
 
     ) {
-        this.subscriber.destroy();
-        this.publisher.destroy();
+        this.callbackMap.clear();
+        this.subscriber.close();
+        this.publisher.close();
     }
 }
-
-/*
-export class BunRedisPubSub {
-  private readonly subClient: BunRedisClient;
-  private readonly pubClient: BunRedisClient;
-  private readonly handlers: Map<string, Set<MessageHandler>> = new Map();
-
-  constructor(
-    private readonly _options: {
-      url: string,
-      socket: {
-        reconnectStrategy: (
-          retries: number,
-        ) => number,
-      },
-    },
-  ) {
-    this.subClient = new BunRedisClient(this._options);
-    this.pubClient = new BunRedisClient(this._options);
-
-    // Restore connections on reconnect
-    this.subClient
-      .on('ready', async () => {
-        await this.restoreSubscriptions();
-        console.log('Reconnected and subscriptions restored.');
-      });
-  }
-
-  public async connect(
-
-  ) {
-    await Promise.all([
-      this.subClient.connect(),
-      this.pubClient.connect(),
-    ]);
-  }
-
-  public emit(
-    channel: string,
-    message: string,
-  ) {
-    const listeners = this.handlers.get(channel);
-    if (listeners) {
-      for (const cb of listeners) {
-        cb(channel, message);
-      }
-    }
-  }
-
-  private async restoreSubscriptions(
-
-  ) {
-    for (const channel of this.handlers.keys()) {
-      await this.subClient.getClient().send('SUBSCRIBE', [channel]);
-    }
-  }
-
-  public async subscribe(
-    channel: string,
-    handler: MessageHandler,
-  ) {
-    await this.connect();
-
-    if (!this.handlers.has(channel)) {
-      this.handlers.set(channel, new Set());
-      await this.subClient.getClient().send('SUBSCRIBE', [channel]);
-    }
-
-    this.handlers.get(channel)?.add(handler);
-  }
-
-  public async unsubscribe(
-    channel: string,
-    handler?: MessageHandler,
-  ) {
-    const listeners = this.handlers.get(channel);
-    if (!listeners) return;
-
-    if (handler) {
-      listeners.delete(handler);
-    }
-
-    if (!handler || listeners.size === 0) {
-      this.handlers.delete(channel);
-      if (this.subClient.connected) {
-        await this.subClient.getClient().send('UNSUBSCRIBE', [channel]);
-      }
-    }
-  }
-
-  public async publish(
-    channel: string,
-    message: string,
-  ) {
-    await this.connect();
-    await this.pubClient.getClient().send('PUBLISH', [channel, message]);
-  }
-
-  public async disconnect(
-
-  ) {
-    this.handlers.clear();
-    this.subClient.disconnect();
-    this.pubClient.disconnect();
-  }
-}
-   */

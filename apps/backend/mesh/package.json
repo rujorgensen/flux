@@ -8,7 +8,6 @@
         "@elysiajs/swagger": "catalog:elysia",
         "elysia": "catalog:elysia",
         "jsonwebtoken": "catalog:",
-        "nanoid": "catalog:",
-        "redis": "catalog:"
+        "nanoid": "catalog:"
     }
 }
