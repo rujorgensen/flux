@@ -4,14 +4,8 @@
 	debug
 }
 
-# Force HTTP to HTTPS for main domains
-http://persistica.io, http://portal.persistica.io {
-	redir https://{host}{uri} permanent
-}
-
-portal.persistica.io,
-persistica.io {
-	encode gzip
+# Optional local dev / health-check port (no TLS)
+http://:9000 {
 	reverse_proxy /api* portal-api-prod:3000
 	reverse_proxy * portal-ui-prod:3001
 
