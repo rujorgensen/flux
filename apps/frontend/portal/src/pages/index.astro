@@ -8,11 +8,6 @@ import { DashboardComponent } from "../components/angular/dashboard/dashboard.co
 import { auth } from "@backend/portal/auth";
 import DashboardLayout from "$lib/layouts/dashboard/DashboardLayout.astro";
 
-// * Data fetching functions
-import { readConnectedAgentCount } from "$lib/data/api/connected-agents.service.fn";
-import { readChannelCount } from "$lib/data/api/channels.service.fn";
-import { readConnectedAuthoritiesCount } from "$lib/data/api/connected-authorities.service.fn";
-
 const networkId: string = "rAnD0M-demo-network-id";
 const networkCode: string = "code-to-access-network"; // Key to connect to a network, unknown and irelevant to flux
 
@@ -24,10 +19,6 @@ if (!session) {
     return Astro.redirect("/sign-in");
 }
 
-const initialConnectedAuthoritiesCount =
-    await readConnectedAuthoritiesCount(networkId);
-const initialConnectedAgentsCount = await readConnectedAgentCount(networkId);
-const initialChannelCount = await readChannelCount(networkId);
 ---
 
 <!doctype html>

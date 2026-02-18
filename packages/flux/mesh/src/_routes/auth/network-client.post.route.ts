@@ -161,7 +161,7 @@ export const authorizeNetworkAgent = async (
             );
         }
     } catch (error) {
-        console.error('Error authorizing:', error);
+        console.error('Error authorizing:', error instanceof Error ? error.message : error);
 
         if (error instanceof NetworkAuthorityNotFoundError) {
             return new Response(error.message, {
