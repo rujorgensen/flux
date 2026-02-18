@@ -50,9 +50,26 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
-      - name: 💾 Install dependencies
+      -
+        name: 💾 Cache Prisma types
+        uses: actions/cache@v5
+        id: prisma-cache
+        with:
+          path: |
+            @prisma-types
+          key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
+
+      -
+        name: 💾 Install dependencies
         if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile --ignore-scripts
+
+      -
+        name: 🔧 Generate Prisma types
+        if: steps.prisma-cache.outputs.cache-hit != 'true'
+        run: bun prisma:generate:portal
 
   unit-test:
     runs-on: ubuntu-latest
@@ -81,6 +98,15 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
+
+      - name: 💾 Restore Prisma types
+        uses: actions/cache@v5
+        with:
+          path: |
+            @prisma-types
+          key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
 
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
@@ -123,6 +149,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
+      - name: 💾 Restore Prisma types
+        uses: actions/cache@v5
+        with:
+          path: |
+            @prisma-types
+          key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
+
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
       # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
@@ -163,6 +198,15 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
+
+      - name: 💾 Restore Prisma types
+        uses: actions/cache@v5
+        with:
+          path: |
+            @prisma-types
+          key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
 
       - name: 🛠️ Build
         # Demo does not currently build
