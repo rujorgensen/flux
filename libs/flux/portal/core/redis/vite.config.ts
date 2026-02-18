@@ -28,5 +28,6 @@ export default defineConfig(() => ({
                 '../../../../../coverage/libs/flux/portal/core/redis/conection',
             provider: 'v8' as const,
         },
+        passWithNoTests: true,
     },
 }));

@@ -37,13 +37,13 @@ const meshRedisStatusService: RedisStatusService = new RedisStatusService(meshRe
 // * Start server
 // ****************************************************************************
 
-const redisPort: number = Bun.env.PORTAL_MESH_SERVER_PORT ?
+const fluxMeshServerPort: number = Bun.env.PORTAL_MESH_SERVER_PORT ?
     Number.parseInt(Bun.env.PORTAL_MESH_SERVER_PORT)
     :
     5_101;
 
 new LiveUpdates(
-    redisPort,
+    fluxMeshServerPort,
     portalRedisStatusService,
     meshRedisStatusService,
     FLUX_AUTHORITY_JWT_SECRET,

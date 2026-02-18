@@ -20,5 +20,6 @@ export default defineConfig(() => ({
             reportsDirectory: '../../../../coverage/libs/flux/shared/ws',
             provider: 'v8' as const,
         },
+        passWithNoTests: true,
     },
 }));

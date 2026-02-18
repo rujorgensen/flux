@@ -50,3 +50,24 @@ export const waitUntilAvailable = async (
 
     throw new Error(`API did not become ready at '${url}' within ${timeoutMs}ms`);
 };
+
+const portsThisSession: Set<number> = new Set();
+export const generateRandomSafePort = (
+
+): number => {
+    let port;
+    let tries = 0;
+    const triesLimit = 1_000;
+
+    do {
+        port = 30_000 + Math.floor(Math.random() * 35_535);
+    } while (portsThisSession.has(port) && (++tries < triesLimit));
+
+    if (tries >= triesLimit) {
+        throw new Error(`Failed to generate a random safe port after ${triesLimit} tries`);
+    }
+
+    portsThisSession.add(port);
+
+    return port;
+};

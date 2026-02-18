@@ -1,6 +1,7 @@
 export * from './lib/setup-test-infrastructure';
 
 export {
-    connectToRedisAndFlush,
     waitUntilAvailable,
+    connectToRedisAndFlush,
+    generateRandomSafePort,
 } from './lib/helpers.utils';
