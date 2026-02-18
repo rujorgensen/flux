@@ -14,12 +14,10 @@ let portalRedis: BunRedisClient | undefined;
 
 /**
  * Singleton function to get the Redis connection
- *
- * @returns
  */
 export const getPortalRedisConnection = async (
 
-) => {
+): Promise<BunRedisClient> => {
     // * Connect to Redis
     if (!portalRedis) {
 

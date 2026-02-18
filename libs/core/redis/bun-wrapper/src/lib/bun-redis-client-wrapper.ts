@@ -39,26 +39,6 @@ export class BunRedisClient extends EventEmitter<{
                 idleTimeout: 0,
             },
         );
-
-        /**
-         * Bun v. 1.2.16 appears to have an issue causing the client to not emit the `onclose`-event
-         * on some disconnects leaving the connection states to become out of sync. and not retry connections.
-         */
-        setInterval(() => {
-            if (
-                (this.connected === true) &&
-                (this.client.connected === false)
-            ) {
-                console.warn(`Redis client connection state mismatch detected: ${this.connected} !== ${this.client.connected}. Syncing.`);
-
-                this.connected = false;
-                if (!this.reconnecting) {
-                    console.error('⬇️ Redis client disconnected');
-                    this.emit('end', void 0);
-                    this.retryReconnect();
-                }
-            }
-        }, 500);
     }
 
     /**
@@ -141,7 +121,7 @@ export class BunRedisClient extends EventEmitter<{
             const delay: number = this.options.socket.reconnectStrategy(this.reconnectAttempts) ?? Math.min(this.baseDelay * 2 ** this.reconnectAttempts, this.maxDelay);
 
             this.emit('reconnecting', void 0);
-            console.log(`Reconnecting to Redis in ${delay}ms...`);
+            console.log(this.options.url, `Reconnecting (${this.reconnectAttempts}) to Redis in ${delay}ms...`);
 
             await new Promise(res => setTimeout(res, delay));
             this.reconnectAttempts++;

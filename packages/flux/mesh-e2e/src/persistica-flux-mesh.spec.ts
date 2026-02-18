@@ -40,8 +40,6 @@ describe('persistica-flux-mesh', () => {
         // Modify env so the Flux Mesh connects to the test Redis container
         process.env.FLUX_MESH_REDIS_URL = redisURL;
 
-        console.log(`Redis is ready at '${redisURL}'`);
-
         // * Clear the container
         if (
             redisURL.includes('localhost') &&
@@ -259,7 +257,11 @@ async function connectToRedisAndFlush(
     const client = new RedisClient(url);
     console.log(`Connecting to Redis at '${url}' for flushing...`);
     await client.connect();
-    expect(client.connected).toBeTruthy();
+
+    if (!client.connected) {
+        throw new Error(`Failed to connect to Redis at '${url}' for flushing!`);
+    }
+
     console.warn(`Connection to Redis at '${url}' is open. Flushing data...`);
     await client.send('FLUSHALL', ['ASYNC']);
 
