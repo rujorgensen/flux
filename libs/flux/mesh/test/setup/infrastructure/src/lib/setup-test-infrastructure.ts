@@ -36,7 +36,9 @@ beforeAll(async () => {
     } else {
         throw new Error(`💀\tRedis is NOT running ${globalThis['infrastructureRedisURL']}`);
     }
-});
+
+    // Allow pulling the image if needed
+}, { timeout: 60_000 });
 
 afterAll(async () => {
     console.log('Tearing down test infrastructure...');

@@ -20,12 +20,12 @@ describe('BunRedisPubSub', () => {
         });
 
         await pubsub.connect();
-    }, { timeout: 60_000 });
+    });
 
     afterAll(async () => {
         await redisClient?.close();
         await pubsub?.disconnect();
-    }, { timeout: 60_000 });
+    });
 
     it('works', async () => {
         await redisClient.set('key', 'val');
