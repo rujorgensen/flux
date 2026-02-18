@@ -39,10 +39,10 @@ interface IOptions {
 }
 
 /**
- * @param { string }        id
- * @param { string }        ticket
- * @param { StateManager }  stateManager
- * @param { () => void }    onReconnectCallback
+ * @param { string } id
+ * @param { string } ticket
+ * @param { StateManager } stateManager
+ * @param { () => void } onReconnectCallback
  * @param options 
  * 
  * @returns { FluxWebSocketConnection }
@@ -63,7 +63,11 @@ export const createWSConnection = <T, M>(
         onReconnectCallback,
         stateManager,
         ticket,
-        options,
+        {
+            secretKey: options?.secretKey,
+            retries: options?.retries,
+            port: options?.domain ? new URL(options.domain).port ? Number.parseInt(new URL(options.domain).port) : undefined : undefined,
+        },
     );
 };
 
