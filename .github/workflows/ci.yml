@@ -95,8 +95,7 @@ jobs:
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
 
       - name: 🧪 Run unit tests
-        # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected -t bun-test # --no-agents
+        run: bun nx affected -t bun-test # --no-agents
 
   e2e-test:
     runs-on: ubuntu-latest
@@ -140,8 +139,7 @@ jobs:
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
 
       - name: 🧪 Run E2E tests
-        # RYUK does not work with github actions or Circle CI
-        run: TESTCONTAINERS_RYUK_DISABLED=true bun nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
+        run: bun nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
 
   build:
     runs-on: ubuntu-latest
