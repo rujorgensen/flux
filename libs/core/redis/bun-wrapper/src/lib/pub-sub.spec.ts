@@ -6,21 +6,19 @@ describe('BunRedisPubSub', () => {
     let pubsub: BunRedisPubSub;
 
     beforeAll(async () => {
-        const url: string = globalThis['infrastructureRedisURL'];
+        const redisURL: string = globalThis['infrastructureRedisURL'];
 
-        console.log(`Redis is ready at ${url}`);
-
-        redisClient = new RedisClient(url);
+        redisClient = new RedisClient(redisURL);
+        await redisClient.connect();
 
         pubsub = new BunRedisPubSub({
-            url,
+            url: redisURL,
             socket: {
                 reconnectStrategy: () => 100,
             },
         });
 
         await pubsub.connect();
-        await redisClient.connect();
     });
 
     afterAll(async () => {

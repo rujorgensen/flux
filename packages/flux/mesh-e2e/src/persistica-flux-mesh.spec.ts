@@ -40,8 +40,6 @@ describe('persistica-flux-mesh', () => {
         // Modify env so the Flux Mesh connects to the test Redis container
         process.env.FLUX_MESH_REDIS_URL = redisURL;
 
-        console.log(`Redis is ready at '${redisURL}'`);
-
         // * Clear the container
         if (
             redisURL.includes('localhost') &&
