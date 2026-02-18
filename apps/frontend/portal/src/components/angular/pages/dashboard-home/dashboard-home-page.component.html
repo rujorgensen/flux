@@ -1,0 +1,10 @@
+<app-dashboard-layout [userSession]="userSession()" [activeNetworkName]="activeNetworkName()">
+	<app-stats [networkId]="networkId()" [networkCode]="networkCode()" />
+	
+	<app-dashboard>
+		<div class="panel bg-muted/50 max-h-[50vh] flex-1 rounded-xl md:min-h-min">
+			<h2>Agents</h2>
+			<app-chart />
+		</div>
+	</app-dashboard>
+</app-dashboard-layout>

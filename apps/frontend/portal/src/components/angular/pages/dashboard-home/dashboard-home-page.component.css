@@ -1,0 +1,13 @@
+/* Dashboard Home Page Styles */
+
+.panel {
+	border-radius: var(--roundness-medium);
+	border: 1px solid var(--outline-1);
+	background: var(--surface-1);
+	box-shadow: var(--shadow-2);
+	color: var(--text-1);
+	display: grid;
+	grid-template-rows: auto 1fr;
+	gap: var(--size-2);
+	padding: var(--padding-medium);
+}
