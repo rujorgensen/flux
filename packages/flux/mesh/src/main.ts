@@ -114,23 +114,10 @@ export class FluxMeshServer {
     private readonly bunServer: Bun.Server<TWebSocketData>; // Bun.Server<TWebsocketData>;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
-    private readonly options: TOptions;
 
     constructor(
         private readonly optionsOrPort?: TOptions | number,
     ) {
-        this.options = (typeof optionsOrPort === 'number') ? {
-            // Defaults
-            port: this.optionsOrPort as number,
-            redisConnectionString: '',
-        } : {
-            // Defaults
-            port: 5_100,
-            redisConnectionString: '',
-            // Override with provided options
-            ...(this.optionsOrPort as TOptions),
-        };
-
         const port: number = typeof this.optionsOrPort === 'number' ? this.optionsOrPort : (this.optionsOrPort?.port ?? 5_100);
 
         const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
@@ -159,7 +146,7 @@ export class FluxMeshServer {
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
         this.bunServer = Bun.serve({
-            port: this.options.port,
+            port,
             idleTimeout: 0, // deactivate timeout
             routes: {
                 // ****************************************************************************

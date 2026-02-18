@@ -120,7 +120,7 @@ export const app = new Elysia()
     // })
 
     .onStart(({ server }) => {
-        console.log(`🦊 Elysia API server (${version}) running at ${server?.hostname}:${server?.port}`);
+        console.log(`🦊. Elysia API server v. ${version} is running at ${server?.hostname}:${server?.port}`);
     })
 
     .listen(Bun.env.PORT ?? 3_000)

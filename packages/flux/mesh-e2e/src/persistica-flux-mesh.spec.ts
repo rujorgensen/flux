@@ -41,8 +41,6 @@ describe('persistica-flux-mesh', () => {
         process.env.FLUX_PORTAL_REDIS_URL = redisURL;
         process.env.FLUX_MESH_REDIS_URL = redisURL;
 
-        console.log(`Redis is ready at '${redisURL}'`);
-
         // * Clear the container
         await connectToRedisAndFlush(redisURL);
 

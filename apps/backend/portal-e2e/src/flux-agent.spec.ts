@@ -43,7 +43,7 @@ describe('persistica-flux-api-agents', () => {
 
         fluxDomain = `http://localhost:${randomMeshPort}`;
 
-        console.log(`⚗️ Redis is ready at '${redisURL}', starting portal server on port ${randomAPIPort}`);
+        console.log(`⚗️ Starting portal server on port ${randomAPIPort}`);
 
         //$`bun nx run @flux/portal-api:serve`.nothrow();
         $`bun nx run @flux/portal-api:serve`.then().catch();

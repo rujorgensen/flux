@@ -40,7 +40,7 @@ export class LiveUpdates {
             const fluxAuthority = new FluxAuthority(
                 NETWORK_ID,
                 {
-                    domain: `http://localhost:${localMestServerPort}`,
+                    domain: `http://localhost:${this.localMestServerPort}`,
                     //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
                     //         retries?: number; // Number of times to retry a failed message
                 },
@@ -103,7 +103,7 @@ export class LiveUpdates {
             const fluxAgent = new FluxAgent(
                 NETWORK_ID,
                 {
-                    domain: `http://localhost:${localMestServerPort}`,
+                    domain: `http://localhost:${this.localMestServerPort}`,
                     //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
                     //         retries?: number; // Number of times to retry a failed message
                 },

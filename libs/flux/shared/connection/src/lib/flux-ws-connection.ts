@@ -91,11 +91,9 @@ export class FluxWebSocketConnection {
         private readonly options?: IOptions,
     ) {
         this.options = {
-            // Defaults
-            retries: 10_000,
-            port: 5_100,
-            // Override with provided options
-            ...this.options,
+            secretKey: this.options?.secretKey,
+            retries: this.options?.retries ?? 10_000,
+            port: this.options?.port ?? 5_100,
         };
 
         // 1. Connect to websocket
