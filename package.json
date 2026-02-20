@@ -22,7 +22,7 @@
         "//-03b": "// *** Update                                                                ",
         "//-03c": "// ****************************************************************************",
         "bupd": "bun upgrade && bun update --interactive --recursive --save",
-        "serve:stack:portal": "bun run run-stack",
+        "serve:stack:portal": "bun run --parallel 'nx serve @flux/portal-ui' 'nx serve @flux/portal-api'",
         "//-04a": "// ****************************************************************************",
         "//-04b": "// *** Caddy                                                                ",
         "//-04c": "// ****************************************************************************",
