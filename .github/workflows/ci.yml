@@ -30,16 +30,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        timeout-minutes: 2
         with:
           filter: tree:0
           fetch-depth: 0
 
       - name: 💾 Install Bun
+        timeout-minutes: 2
         uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
 
       - name: 💾 Cache Bun dependencies
+        timeout-minutes: 2
         uses: actions/cache@v5
         id: bun-cache
         with:
@@ -52,6 +55,7 @@ jobs:
 
       -
         name: 💾 Cache Prisma types
+        timeout-minutes: 2
         uses: actions/cache@v5
         id: prisma-cache
         with:
@@ -63,11 +67,13 @@ jobs:
 
       -
         name: 💾 Install dependencies
+        timeout-minutes: 2
         if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile --ignore-scripts
 
       -
         name: 🔧 Generate Prisma types
+        timeout-minutes: 2
         if: steps.prisma-cache.outputs.cache-hit != 'true'
         run: bun prisma:generate:portal
 
@@ -77,19 +83,23 @@ jobs:
     needs: [install-deps]
     steps:
       - name: Checkout code
+        timeout-minutes: 2
         uses: actions/checkout@v6
         with:
           filter: tree:0
           fetch-depth: 0
 
       - uses: nrwl/nx-set-shas@v4
+        timeout-minutes: 2
 
       - name: 💾 Install Bun
+        timeout-minutes: 2
         uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
 
       - name: 💾 Restore cached dependencies
+        timeout-minutes: 2
         uses: actions/cache@v5
         with:
           path: |
@@ -100,6 +110,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: 💾 Restore Prisma types
+        timeout-minutes: 2
         uses: actions/cache@v5
         with:
           path: |
@@ -119,6 +130,7 @@ jobs:
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
 
       - name: 🧪 Run unit tests
+        timeout-minutes: 2
         run: bun nx affected -t bun-test test lint # --no-agents
 
   e2e-test:
@@ -127,19 +139,23 @@ jobs:
     needs: [install-deps]
     steps:
       - name: Checkout code
+        timeout-minutes: 2
         uses: actions/checkout@v6
         with:
           filter: tree:0
           fetch-depth: 0
 
       - uses: nrwl/nx-set-shas@v4
+        timeout-minutes: 2
 
       - name: 💾 Install Bun
+        timeout-minutes: 2
         uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
 
       - name: 💾 Restore cached dependencies
+        timeout-minutes: 2
         uses: actions/cache@v5
         with:
           path: |
@@ -150,6 +166,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: 💾 Restore Prisma types
+        timeout-minutes: 2
         uses: actions/cache@v5
         with:
           path: |
@@ -169,6 +186,7 @@ jobs:
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
 
       - name: 🧪 Run E2E tests
+        timeout-minutes: 2
         run: bun nx affected:e2e --output-style=stream --verbose --timeout=30000 # --no-agents
 
   build:
@@ -177,19 +195,23 @@ jobs:
     needs: [install-deps]
     steps:
       - name: Checkout code
+        timeout-minutes: 2
         uses: actions/checkout@v6
         with:
           filter: tree:0
           fetch-depth: 0    # 👈 Required to retrieve git history
 
       - uses: nrwl/nx-set-shas@v4
+        timeout-minutes: 2
 
       - name: 💾 Install Bun
+        timeout-minutes: 2
         uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
 
       - name: 💾 Restore cached dependencies
+        timeout-minutes: 2
         uses: actions/cache@v5
         with:
           path: |
@@ -200,6 +222,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: 💾 Restore Prisma types
+        timeout-minutes: 2
         uses: actions/cache@v5
         with:
           path: |
@@ -209,5 +232,6 @@ jobs:
             ${{ runner.os }}-prisma-
 
       - name: 🛠️ Build
+        timeout-minutes: 2
         # Demo does not currently build
         run: bun nx affected -t build --exclude demo
