@@ -82,7 +82,7 @@ jobs:
           filter: tree:0
           fetch-depth: 0
 
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@v5
 
       - name: 💾 Install Bun
         uses: oven-sh/setup-bun@v2
@@ -133,7 +133,7 @@ jobs:
           filter: tree:0
           fetch-depth: 0
 
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@v5
 
       - name: 💾 Install Bun
         uses: oven-sh/setup-bun@v2
@@ -184,7 +184,7 @@ jobs:
           filter: tree:0
           fetch-depth: 0    # 👈 Required to retrieve git history
 
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@v5
 
       - name: 💾 Install Bun
         uses: oven-sh/setup-bun@v2
