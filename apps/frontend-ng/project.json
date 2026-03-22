@@ -1,0 +1,88 @@
+{
+    "name": "@flux/portal-ui-2",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "application",
+    "prefix": "prtl",
+    "sourceRoot": "apps/frontend-ng/src",
+    "tags": [
+        "type:app",
+        "scope:frontend"
+    ],
+    "targets": {
+        "build": {
+            "executor": "@angular/build:application",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/apps/frontend-ng",
+                "browser": "apps/frontend-ng/src/main.ts",
+                "tsConfig": "apps/frontend-ng/tsconfig.app.json",
+                "inlineStyleLanguage": "scss",
+                "assets": [
+                    {
+                        "glob": "**/*",
+                        "input": "apps/frontend-ng/public"
+                    }
+                ],
+                "styles": [
+                    "apps/frontend-ng/src/styles.scss"
+                ]
+            },
+            "configurations": {
+                "production": {
+                    "budgets": [
+                        {
+                            "type": "initial",
+                            "maximumWarning": "500kb",
+                            "maximumError": "1mb"
+                        },
+                        {
+                            "type": "anyComponentStyle",
+                            "maximumWarning": "4kb",
+                            "maximumError": "8kb"
+                        }
+                    ],
+                    "outputHashing": "all"
+                },
+                "development": {
+                    "optimization": false,
+                    "extractLicenses": false,
+                    "sourceMap": true
+                }
+            },
+            "defaultConfiguration": "production"
+        },
+        "serve": {
+            "continuous": true,
+            "executor": "@angular/build:dev-server",
+            "options": {
+                "port": 3001,
+                "proxyConfig": "apps/frontend-ng/proxy.conf.json"
+            },
+            "configurations": {
+                "production": {
+                    "buildTarget": "@flux/portal-ui-2:build:production"
+                },
+                "development": {
+                    "buildTarget": "@flux/portal-ui-2:build:development"
+                }
+            },
+            "defaultConfiguration": "development"
+        },
+        "test": {
+            "executor": "@angular/build:unit-test",
+            "options": {}
+        },
+        "serve-static": {
+            "continuous": true,
+            "executor": "@nx/web:file-server",
+            "options": {
+                "buildTarget": "@flux/portal-ui-2:build",
+                "port": 3001,
+                "staticFilePath": "dist/apps/frontend-ng/browser",
+                "spa": true
+            }
+        }
+    }
+}
