@@ -60,6 +60,6 @@
     "tui": {
         "enabled": true
     },
-    "TEMP_IGNORE_nxCloudId_TEMP_IGNORE": "6809319308a2a647ce903863",
+    "nxCloudId": "6809319308a2a647ce903863",
     "analytics": false
 }
