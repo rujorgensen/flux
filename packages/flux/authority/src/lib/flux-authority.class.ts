@@ -57,12 +57,6 @@ export class FluxAuthority {
 
     /**
      * Registers an authority on the network.
-     * 
-     * @param { string }                    authorityKey
-     * @param { TAuthorizeCallback }        authorizeNetworkAgent
-     * @param { TChannnelAuthCallback }     authorizeNetworkChannel
-     *
-     * @returns { Promise<void> }
      */
     public async registerAuthority<T, M>(
         authorityKey: string,
@@ -121,5 +115,8 @@ export class FluxAuthority {
         return Promise.resolve(new FluxAuthorityNetworkConnection(this.fluxWebSocketConnection));
     }
 
+    /**
+     * Attaches a listener for network connection state changes.
+     */
     public readonly onNetworkState = this.stateManager.attachNetworkStateListener.bind(this.stateManager);
 }

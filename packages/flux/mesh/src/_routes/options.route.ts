@@ -1,7 +1,5 @@
 /**
  * Standard CORS response.
- * 
- * @returns { Response }
  */
 export const OPTIONS_RESPONSE = () =>
     new Response(null, {

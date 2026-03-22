@@ -3,10 +3,6 @@ export type TNetworkKey_S = string & { __brand: 'NetworkKey'; };
 
 /**
  * Validates a network ID.
- * 
- * @param { unknown } networkId
- *  
- * @returns { boolean } 
  */
 export const validateNetworkIdOrThrow = (
     networkId: unknown,

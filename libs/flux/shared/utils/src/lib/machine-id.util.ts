@@ -5,6 +5,9 @@ declare global {
     var __flux_client_id: TFluxClientUID | null;
 }
 
+/**
+ * Validates that the machine UID is a valid string.
+ */
 export const validateMachineUID = (
     machineUID: unknown,
 ): machineUID is TFluxClientUID => {
@@ -30,8 +33,6 @@ export const validateMachineUID = (
  * Returns the machine UID or NULL.
  * 
  * NB! node-machine-id' turned out to fail catastrophically on non-bun/node environments.
- * 
- * @returns { TFluxClientUID | null }
  */
 export const getMachineUID = async (
 ): Promise<TFluxClientUID | null> => {

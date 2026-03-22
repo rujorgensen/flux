@@ -3,10 +3,6 @@ import { RedisClient } from 'bun';
 /**
  * Connects to a Redis server and flushes all data before starting.
  *  !NB This should not be necessary once multi/missing authorities are handled better.
- * 
- * @param { string } url
- * 
- * @returns { Promise<void> }
  */
 export const connectToRedisAndFlush = async (
     url: string,
@@ -29,6 +25,9 @@ export const connectToRedisAndFlush = async (
     client.close();
 };
 
+/**
+ * Polls a URL until it responds with a successful status code or the timeout is reached.
+ */
 export const waitUntilAvailable = async (
     url: string,
     timeoutMs: number,
@@ -52,6 +51,9 @@ export const waitUntilAvailable = async (
 };
 
 const portsThisSession: Set<number> = new Set();
+/**
+ * Generates a random port number that is safe to use in the current test session.
+ */
 export const generateRandomSafePort = (
 
 ): number => {

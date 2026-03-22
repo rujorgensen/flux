@@ -1,10 +1,5 @@
 /**
- * 
- * @param fn
- * @param shouldRetry
- * @param options
- * 
- * @returns { Promise<T> }
+ * Retries a function until it succeeds or the retry limit is reached.
  */
 export const retry = async <T>(
     fn: () => Promise<T>,

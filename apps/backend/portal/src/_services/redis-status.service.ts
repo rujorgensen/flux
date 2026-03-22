@@ -56,9 +56,7 @@ export class RedisStatusService {
     ) { }
 
     /**
-     * Subscribe to
-     * 
-     * @return { void }
+     * Subscribe to alerts.
      */
     public onAlert(
         cb: (alerts: string[]) => void,
@@ -69,10 +67,6 @@ export class RedisStatusService {
 
     /**
      * Unsubscribe from alerts.
-     * 
-     * @param cb
-     * 
-     * @return { void }
      */
     public offAlert(
         cb: (alerts: string[]) => void,
@@ -108,10 +102,7 @@ export class RedisStatusService {
     }
 
     /**
-     *
-     * @param health
-     *
-     * @returns
+     * Returns the alerts for the given health status.
      */
     private getAlerts(
         health: Awaited<ReturnType<typeof this.getRedisStatusOrThrow>>,
@@ -204,11 +195,7 @@ export class RedisStatusService {
     }
 
     /**
-     *
-     * @param { ReturnType<typeof parseInfoSection> } metrics
-     * @param { number } threshold
-     *
-     * @returns { number }
+     * Computes a health score based on Redis metrics.
      */
     private computeHealthScore(
         metrics: ReturnType<typeof parseInfoSection>,

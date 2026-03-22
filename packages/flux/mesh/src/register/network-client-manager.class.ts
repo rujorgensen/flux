@@ -35,14 +35,6 @@ export class NetworkAgentManager {
 
     /**
      * Register an agent.
-     *
-     * @param { TNetworkId_S }              networkId
-     * @param { TClientId }                 id
-     * @param { Bun.SocketAddress | null }  ip
-     * @param { TAddress }                  address
-     * @param { TAgentOwnUId }              [uid]
-     * 
-     * @returns { void }
      */
     public registerAgent(
         networkId: TNetworkId_S,
@@ -94,12 +86,6 @@ export class NetworkAgentManager {
 
     /**
      * Unregisters a network agent UID and associated data from the Redis hash.
-     *
-     * @param { TNetworkId_S }      networkId
-     * @param { TClientId }         clientId
-     * @param { TAgentOwnUId }     clientOwnUId
-     * 
-     * @returns { void }
      */
     public unregisterNetworkAgent(
         networkId: TNetworkId_S,
@@ -121,6 +107,9 @@ export class NetworkAgentManager {
         clearInterval(this.timers.get(clientId));
     }
 
+    /**
+     * Resolves the network client address by an agent's UID, using a local cache to avoid unnecessary Redis calls.
+     */
     public async resolveNetworkClientAddressByUid(
         networkId: TNetworkId_S,
         clientOwnUId: TAgentOwnUId,

@@ -25,11 +25,6 @@ export class NetworkAgentRedis {
 
     /**
      * Registers a network agent in the sorted set.
-     * 
-     * @param { TNetworkId_S } networkId
-     * @param { TClientId } socketId
-     * 
-     * @returns { Promise<void> }
      */
     public async registerNetworkAgent(
         networkId: TNetworkId_S,
@@ -64,11 +59,6 @@ export class NetworkAgentRedis {
 
     /**
      * Unregisters a network agent from the sorted set.
-     * 
-     * @param { TNetworkId_S } networkId
-     * @param { TClientId } socketId
-     * 
-     * @returns { Promise<number> }
      */
     public async unregisterNetworkAgent(
         networkId: TNetworkId_S,
@@ -89,11 +79,7 @@ export class NetworkAgentRedis {
     }
 
     /**
-     * 
-     * @param socketId 
-     * @param usage
-     * 
-     * @returns { void }
+     * Caches the data usage for a network agent to be pushed periodically.
      */
     public registerDataUsage(
         networkId: TNetworkId_S,
@@ -113,8 +99,6 @@ export class NetworkAgentRedis {
 
     /**
      * Pushes the data usage to the Redis server.
-     * 
-     * @returns { Promise<void> }
      */
     private async pushDataUsage(
 

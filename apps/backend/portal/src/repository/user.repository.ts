@@ -28,6 +28,9 @@ export class UserRepository {
         private readonly _prismaClient: PrismaClient,
     ) { }
 
+    /**
+     * Reads a user by their ID or throws if not found.
+     */
     public readUserByIdOrThrow(
         userId: TUserId_S,
     ): Promise<IUser_S> {
@@ -50,6 +53,9 @@ export class UserRepository {
             ;
     }
 
+    /**
+     * Updates a user's email address.
+     */
     public updateUser(
         userId: TUserId_S,
         email: TEmail_S,
@@ -76,6 +82,9 @@ export class UserRepository {
             ;
     }
 
+    /**
+     * Deletes a user by their ID.
+     */
     public deleteUser(
         userId: TUserId_S,
     ): Promise<IUser_S> {
@@ -98,8 +107,10 @@ export class UserRepository {
             ;
     }
 
+    /**
+     * Converts a Prisma user entity to the internal user representation.
+     */
     private convert(
-        user: UserWithNetworks,
     ): IUser_S {
         return {
             id: user.id as TUserId_S,

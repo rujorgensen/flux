@@ -2,12 +2,7 @@ const ALGORITHM = { name: "AES-GCM", length: 256 };
 const PBKDF2_ITERATIONS = 100000;
 
 /**
- * Derive a cryptographic key from a password using PBKDF2
- * 
- * @param { string } password - User-provided password
- * @param { Uint8Array } salt - Salt for key derivation
- * 
- * @returns { Promise<CryptoKey> } - AES-256-GCM key
+ * Derives a cryptographic key from a password using PBKDF2.
  */
 export async function deriveKey(
     password: string,

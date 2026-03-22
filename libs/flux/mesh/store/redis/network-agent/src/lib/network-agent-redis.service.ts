@@ -26,13 +26,6 @@ export class NetworkAgentRedisService {
 
     /**
      * Register an agent.
-     *
-     * @param { TNetworkId_S }              networkId
-     * @param { TClientId }                 clientId
-     * @param { Bun.SocketAddress | null }  ip
-     * @param { TAddress }                  address
-     * 
-     * @returns { void }
      */
     public async registerAgent(
         networkId: TNetworkId_S,
@@ -85,11 +78,7 @@ export class NetworkAgentRedisService {
     }
 
     /**
-     * 
-     * @param networkId 
-     * @param clientId 
-     * @param bytes 
-     * @param packets 
+     * Updates the throughput statistics for a registered agent.
      */
     public async registerAgentThroughput(
         networkId: TNetworkId_S,
@@ -116,10 +105,6 @@ export class NetworkAgentRedisService {
 
     /**
      * Returns all network agents.
-     * 
-     * @param { TNetworkId_S }  networkId
-     *
-     * @returns { Promise<TNetworkAgent> }
      */
     public async readNetworkAgents(
         networkId: TNetworkId_S,
@@ -160,10 +145,6 @@ export class NetworkAgentRedisService {
 
     /**
      * Reads the current number of connected agents on the given network.
-     * 
-     * @param { TNetworkId_S }  networkId
-     *
-     * @returns { Promise<TNetworkAgentCountAt> }
      */
     public async readNetworkAgentCount(
         networkId: TNetworkId_S,
@@ -176,11 +157,6 @@ export class NetworkAgentRedisService {
 
     /**
      * Resolves the network client address by an agent's UID or throws.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TAgentOwnUId }  networkId
-     *
-     * @returns { Promise<TAddress> }
      */
     public async readNetworkClientAddressByUIDOrThrow(
         networkId: TNetworkId_S,
@@ -201,12 +177,6 @@ export class NetworkAgentRedisService {
 
     /**
      * Unregisters a network agent UID and address in the Redis hash.
-     *
-     * @param { TNetworkId_S }      networkId
-     * @param { TClientId }         clientId
-     * @param { TAgentOwnUId }      [uid]
-     * 
-     * @returns { void }
      */
     public async unregisterNetworkAgent(
         networkId: TNetworkId_S,

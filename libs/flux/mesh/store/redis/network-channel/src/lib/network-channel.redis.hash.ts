@@ -32,11 +32,6 @@ export class NetworkChannelHash {
     /**
      * Creates a channel on a network if it does not already exist.
      * Returns true if the channel was created, false if it already existed.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TChannelName }  channelName
-     * 
-     * @returns { Promise<boolean> }
      */
     public async createNetworkChannelIfNotExist(
         networkId: TNetworkId_S,
@@ -67,10 +62,6 @@ export class NetworkChannelHash {
 
     /**
      * Reads all channels on a network.
-     *  
-     * @param networkId
-     *
-     * @returns { Promise<TAddress> }
      */
     public async readNetworkChannels(
         networkId: TNetworkId_S,
@@ -106,10 +97,6 @@ export class NetworkChannelHash {
 
     /**
      * Reads all channel names on a network.
-     *  
-     * @param { TNetworkId_S }  networkId
-     *
-     * @returns { Promise<TChannelName[]> }
      */
     public async readNetworkChannelNames(
         networkId: TNetworkId_S,
@@ -128,11 +115,7 @@ export class NetworkChannelHash {
     }
 
     /**
-     * Reads all channels on a network.
-     *  
-     * @param networkId
-     *
-     * @returns { Promise<TNetworkChannelCountAt> }
+     * Reads the total number of active channels on a network.
      */
     public async readNetworkChannelCount(
         networkId: TNetworkId_S,
@@ -144,12 +127,7 @@ export class NetworkChannelHash {
     }
 
     /**
-     * Reads all channels on a network.
-     *  
-     * @param { TNetworkId_S } networkId
-     * @param { TChannelName } channelName
-     *
-     * @returns { Promise<TAddress> }
+     * Reads the number of members in a channel on a network.
      */
     public async readNetworkMemberCount(
         networkId: TNetworkId_S,
@@ -166,11 +144,6 @@ export class NetworkChannelHash {
 
     /**
      * Deletes a channel on a network.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TChannelName }  channelName
-     * 
-     * @returns { Promise<void> }
      */
     public async deleteNetworkChannel(
         networkId: TNetworkId_S,
@@ -182,12 +155,7 @@ export class NetworkChannelHash {
     }
 
     /**
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TChannelName }  channelName
-     * @param { TAddress }      clientAddress
-     * 
-     * @returns { Promise<number> }
+     * Adds a client to a channel on a network.
      */
     public async joinNetworkChannel(
         networkId: TNetworkId_S,
@@ -205,12 +173,8 @@ export class NetworkChannelHash {
     }
 
     /**
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TChannelName }  channelName
-     * @param { TAddress }      clientAddress
-     * 
-     * @returns { Promise<number> } 
+     * Removes a client from a channel on a network.
+     * Deletes the channel if there are no members left.
      */
     public async leaveNetworkChannel(
         networkId: TNetworkId_S,
@@ -237,12 +201,6 @@ export class NetworkChannelHash {
 
     /**
      * Leaves all network channels.
-     * 
-     * @param { TNetworkId_S }          networkId
-     * @param { TAddress }              clientAddress
-     * @param { Set<TChannelName> }     channelNames
-     * 
-     * @returns { void } 
      */
     public async leaveAllNetworkChannels(
         networkId: TNetworkId_S,
@@ -264,6 +222,9 @@ export class NetworkChannelHash {
     // ****************************************************************************
     // * Update
     // ****************************************************************************
+    /**
+     * Increments the usage counter of a channel.
+     */
     public async incrementUsage(
         networkId: TNetworkId_S,
         channelName: TChannelName,
@@ -279,11 +240,6 @@ export class NetworkChannelHash {
 
     /**
      * Reads all members of a channel on a network.
-     *  
-     * @param { TNetworkId_S } networkId
-     * @param { TChannelName } channelName
-     *
-     * @returns { Promise<TAddress[]> }
      */
     private async readNetworkChannelMemberAddresses(
         networkId: TNetworkId_S,
@@ -296,11 +252,6 @@ export class NetworkChannelHash {
      * Checks if the connected members are all on the same process, same machine or distributed, and updates the channel's hash.
      * 
      * Optimal is 'same-process', then 'same-machine' and finally 'distributed'.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TChannelName }  channelName
-     * 
-     * @returns { 'same-process' | 'same-machine' | 'distributed' }
      */
     private async checkAndUpdateChannelMemberDistribution(
         networkId: TNetworkId_S,

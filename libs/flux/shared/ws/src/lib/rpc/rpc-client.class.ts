@@ -29,10 +29,6 @@ export abstract class RPCClient<TMethods> {
     ) {
         /**
          * Handles the response from the server.
-         * 
-         * @param { RPCResponse }   response
-         *  
-         * @returns { boolean } 
          */
         this.handleResponseMessage(
             (
@@ -54,11 +50,6 @@ export abstract class RPCClient<TMethods> {
 
     /**
      * Calls a function on the other side.
-     * 
-     * @param { TMethods } method
-     * @param { any } params
-     * 
-     * @returns { Promise<any> }
      */
     public call(
         originProcessAddress: TProcessAddress,

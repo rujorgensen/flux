@@ -7,10 +7,7 @@ interface IEncryptedData {
 }
 
 /**
- * Decrypts an AES-256-GCM encrypted JSON object using a password
- * @param {IEncryptedData} encryptedData - The encrypted data object
- * @param {string} password - The password
- * @returns {Promise<Object>} - Decrypted JSON object
+ * Decrypts an AES-256-GCM encrypted JSON object using a password.
  */
 export async function decrypt(
     encryptedData: IEncryptedData,

@@ -18,10 +18,6 @@ export class FluxNetworkChannel {
 
     /**
      * Broadcasts a message to the channel.
-     * 
-     * @param { string } channelName
-     * 
-     * @returns { void }
      */
     public publish<T>(
         message: string | T,
@@ -35,10 +31,6 @@ export class FluxNetworkChannel {
 
     /**
      * Listen to messages on this channel.
-     * 
-     * @param { TMessageCallback } fn
-     * 
-     * @returns { void }
      */
     public onPublish<T>(
         fn: (message: T) => void,

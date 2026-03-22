@@ -13,8 +13,6 @@ import {
 
 /**
  * This route is used to authorize a network authority.
- * 
- * @returns { Promise<Response> }
  */
 export const authorizeNetworkAuthority = async (
     request: Bun.BunRequest,

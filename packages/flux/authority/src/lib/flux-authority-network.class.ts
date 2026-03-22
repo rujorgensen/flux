@@ -26,10 +26,6 @@ export class FluxAuthorityNetworkConnection {
 
     /**
      * Removes an agent from the network.
-     * 
-     * @param { string } id
-     * 
-     * @returns { void }
      */
     public disconnectAgent(
         id: string,

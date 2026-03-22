@@ -87,8 +87,7 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
     }
 
     /**
-     * 
-     * @param { RTCSessionDescriptionInit } offer 
+     * Accepts a WebRTC offer from the peer and generates an answer.
      */
     private async acceptOffer(
         offer: RTCSessionDescriptionInit,
@@ -104,6 +103,9 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
         return answer;
     }
 
+    /**
+     * Accepts a WebRTC answer from the peer.
+     */
     private async acceptAnswer(
         answer: any,
     ): Promise<boolean> {
@@ -118,9 +120,6 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
 
     /**
      * If remote (not initiator) the answer was accepted.
-     * 
-     * @param answer 
-     * @returns 
      */
     private answerAcceptedByInitiator(
         answerAccepted: boolean,
@@ -128,6 +127,9 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
         this._stateChange(answerAccepted ? 'connected' : 'failed');
     }
 
+    /**
+     * Sends a message to the connected peer via the WebRTC data channel.
+     */
     public sendMessage(
         message: string,
     ): void {

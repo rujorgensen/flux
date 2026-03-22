@@ -28,11 +28,6 @@ export class ProcessMessageRouter {
 
     /**
      * Sends a message to a process.
-     *
-     * @param { TProcessAddress }   address
-     * @param { string }            message
-     *
-     * @returns
      */
     public message(
         address: TProcessAddress,
@@ -66,11 +61,7 @@ export class ProcessMessageRouter {
     }
 
     /**
-     * Subscribe to mesaages for local process.
-     *
-     * @param message
-     *
-     * @returns { void }
+     * Subscribes to messages for the local process.
      */
     public subscribe(
         onMessage: TCallbackFunction,

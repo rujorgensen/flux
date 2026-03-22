@@ -9,10 +9,6 @@ export type TMemberDistribution = 'same-process' | 'same-machine' | 'distributed
 
 /**
  * Checks the distribution of members in a channel.
- * 
- * @param { TAddress[] } memberAddresses
- * 
- * @returns 
  */
 export const checkMemberDistribution = (
     memberAddresses: TAddress[],

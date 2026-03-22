@@ -13,9 +13,7 @@ if (!FLUX_MESH_REDIS_URL) {
 let meshRedis: BunRedisClient | undefined;
 
 /**
- * Singleton function to get the Redis connection
- *
- * @returns
+ * Singleton function to get the Redis connection.
  */
 export const getMeshBunRedisConnection = async (
 

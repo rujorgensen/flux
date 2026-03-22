@@ -8,12 +8,7 @@ export class RetryableError extends Error { }
 export class ConnectionError extends RetryableError { }
 
 /**
- * Authenticaktes with the server and returns a ticket for connecting the websocket.
- * 
- * @param { string }    domain The domain of the authority server.
- * @param { unknown }   customPayload The payload to send to the authority server.
- * 
- * @returns { Promise<TAuthenticationTicket> }
+ * Authenticates with the server and returns a ticket for connecting the websocket.
  */
 export const authenticateNetworkAuthorityOrThrow = async (
     networkId: TNetworkId_S,

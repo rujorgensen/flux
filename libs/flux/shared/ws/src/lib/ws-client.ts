@@ -48,8 +48,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     }
 
     /**
-     * 
-     * @returns { Promise<void> }
+     * Opens the WebSocket connection.
      */
     public connect(
     ): Promise<void> {
@@ -115,6 +114,9 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         });
     }
 
+    /**
+     * Emits a WebSocket event to all registered listeners.
+     */
     private emit(
         event: WebSocketEvent,
         data?: any,
@@ -124,6 +126,9 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         }
     }
 
+    /**
+     * Registers an event listener.
+     */
     public on(
         event: WebSocketEvent,
         listener: (
@@ -137,8 +142,6 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 
     /**
      * Clears all subscribers.
-     * 
-     * @returns { void }
      */
     public clearEventSubscribers(
 
@@ -150,6 +153,9 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         this.eventListeners.error = [];
     }
 
+    /**
+     * Sends a message over the WebSocket connection.
+     */
     public send(
         message: string,
     ) {
@@ -160,6 +166,9 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         }
     }
 
+    /**
+     * Closes the WebSocket connection and prevents auto-reconnect.
+     */
     public close(
 
     ) {

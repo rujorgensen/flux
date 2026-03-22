@@ -15,9 +15,7 @@ if (!process.env['FLUX_MESH_REDIS_URL']) {
 }
 
 /**
- * Singleton function to get the Redis connection
- *
- * @returns
+ * Singleton function to get the Redis connection.
  */
 export const getMeshRedisConnection = (
     connectionString?: string,
@@ -140,12 +138,7 @@ export class RedisConnection {
     // ****************************************************************************
 
     /**
-     * 
-     * @param { TProcessAddress }   skipProcessAddress
-     * @param { TGlobalChannel  }   channel
-     * @param { string }            message
-     * 
-     * @returns { Promise<void> }
+     * Publishes a websocket channel event to all processes, except the one specified.
      */
     public async publishWebsocketChannelEvent(
         skipProcessAddress: TProcessAddress,
@@ -160,8 +153,7 @@ export class RedisConnection {
     }
 
     /**
-     * 
-     * @returns { void }
+     * Subscribes to websocket channel events from all processes.
      */
     public async subscribeWebsocketChannelEvent(
         callback: (
@@ -197,11 +189,7 @@ export class RedisConnection {
     // ****************************************************************************
 
     /**
-     * 
-     * @param { TAddress | TProcessAddress }    address
-     * @param { string }                        message
-     * 
-     * @returns { Promise<void> }
+     * Publishes a message directly to an address.
      */
     public async directPublish(
         address: TAddress | TProcessAddress,
@@ -214,6 +202,9 @@ export class RedisConnection {
         }
     }
 
+    /**
+     * Subscribes to messages on a Redis channel.
+     */
     public subscribe(
         channelId: TProcessAddress | TClientId,
         callback: MessageCallback
@@ -227,6 +218,9 @@ export class RedisConnection {
         }
     }
 
+    /**
+     * Unsubscribes from messages on a Redis channel.
+     */
     public unsubscribe(
         channelId: string,
         callback: MessageCallback,
@@ -238,6 +232,9 @@ export class RedisConnection {
         }
     }
 
+    /**
+     * Marks the given address as connected in Redis.
+     */
     public async setConnected(
         address: string,
     ): Promise<void> {
@@ -249,6 +246,9 @@ export class RedisConnection {
         await this.hash.expire(`machines/processes/${address}`, 5);
     }
 
+    /**
+     * Marks the given address as disconnected in Redis.
+     */
     public async setDisconnected(
         _address: string,
     ): Promise<void> {
@@ -257,8 +257,6 @@ export class RedisConnection {
 
     /**
      * Disconnects the Redis cache and pub/sub.
-     * 
-     * @returns { void }
      */
     public disconnect(
 

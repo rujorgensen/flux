@@ -24,11 +24,8 @@ export const checkNAATTicketShape = (
 };
 
 /**
- * The callback to authorize a network join request from an client agent.
- * 
- * @param { T } auth - The agents claim to access network
- * 
- * @returns { Promise<string> } - possible a JWT for later identification (type so it matches the claim when validating channel topic subscription)
+ * The callback to authorize a network join request from a client agent.
+ * Returns a JWT for later identification.
  */
 export type TAuthorizeCallback<T> = (
     auth: T,

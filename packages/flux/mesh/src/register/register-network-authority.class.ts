@@ -11,6 +11,9 @@ export class NetworkAuthorityManager {
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly cache: Map<TNetworkId_S, Set<TAddress>> = new Map();
 
+    /**
+     * Registers a network authority.
+     */
     public async register(
         networkId: TNetworkId_S,
         socketId: TClientId,
@@ -24,6 +27,9 @@ export class NetworkAuthorityManager {
             );
     }
 
+    /**
+     * Unregisters a network authority from the local network.
+     */
     public unregister(
         networkId: TNetworkId_S,
         networkAuthorityAddress: TAddress,
@@ -43,11 +49,6 @@ export class NetworkAuthorityManager {
 
     /**
      * Used for cleanup, in case of discovering an idle authority.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TAddress }      networkAuthorityAddress
-     * 
-     * @returns { void }
      */
     public unregisterGlobal(
         networkId: TNetworkId_S,
@@ -67,10 +68,6 @@ export class NetworkAuthorityManager {
 
     /**
      * Resolves a random network authority address for a given network ID.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * 
-     * @returns { Promise<TAddress> }
      */
     public async resolveNetworkAuthorityAddressOrThrow(
         networkId: TNetworkId_S
@@ -107,12 +104,7 @@ export class NetworkAuthorityManager {
     }
 
     /**
-     * Removes a client.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TAddress }      networkAuthorityAddress
-     * 
-     * @returns { void }
+     * Removes a client from the cache and unregisters it globally.
      */
     public removeUnresponsiveClient(
         networkId: TNetworkId_S,

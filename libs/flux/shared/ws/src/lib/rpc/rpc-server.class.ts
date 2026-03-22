@@ -10,11 +10,6 @@ export class RPCServer<TMethodName extends string> {
 
     /**
      * Registers a method to be called by the client.
-     * 
-     * @param { TMethodName }   methodName
-     * @param { TCallback }     fn
-     * 
-     * @returns { void }
      */
     public registerMethod(
         methodName: TMethodName,
@@ -31,11 +26,6 @@ export class RPCServer<TMethodName extends string> {
 
     /**
      * Handles the request from the client.
-     * 
-     * @param { RPCRequest }    request
-     * @param { Function }      sendToRPCClient
-     * 
-     * @returns { void } 
      */
     public async handleMessage(
         request: RPCRequest<TMethodName>,

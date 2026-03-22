@@ -50,11 +50,6 @@ export class NetworkChannelManager {
      * Checks if a channel can have more members.
      *  
      * ! TODO Don't query the database repeatedly, implement local synced cache.
-     * 
-     * @param { TNetworkId_S } networkId
-     * @param { TChannelName } channelName
-     *
-     * @returns { Promise<boolean> }
      */
     public async canHaveMembers(
         networkId: TNetworkId_S,
@@ -70,12 +65,6 @@ export class NetworkChannelManager {
 
     /**
      * Joins a network channel.
-     * 
-     * @param { TNetworkId_S }  networkId 
-     * @param { TChannelName }  channelName 
-     * @param { TAddress }      clientAddress
-     * 
-     * @returns { void } 
      */
     public joinNetworkChannel(
         networkId: TNetworkId_S,
@@ -96,12 +85,6 @@ export class NetworkChannelManager {
 
     /**
      * Leaves a network channel.
-     * 
-     * @param { TNetworkId_S }  networkId 
-     * @param { TChannelName }  channelName 
-     * @param { TAddress }      clientAddress
-     * 
-     * @returns { Promise<void> } 
      */
     public async leaveNetworkChannel(
         networkId: TNetworkId_S,
@@ -126,12 +109,6 @@ export class NetworkChannelManager {
 
     /**
      * Leaves all network channels.
-     * 
-     * @param { TNetworkId_S }          networkId
-     * @param { TAddress }              clientAddress
-     * @param { Set<TChannelName> }     channelNames
-     * 
-     * @returns { void } 
      */
     public leaveAllNetworkChannels(
         networkId: TNetworkId_S,
@@ -147,11 +124,6 @@ export class NetworkChannelManager {
 
     /**
      * Creates a network channel if it does not exist.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TChannelName }  channelName
-     * 
-     * @returns { void } 
      */
     private async createNetworkChannelIfNotExist(
         networkId: TNetworkId_S,
@@ -178,12 +150,6 @@ export class NetworkChannelManager {
 
     /**
      * Increases the usage count of a channel.
-     * 
-     * @param { TNetworkId_S } networkId
-     * @param { TChannelName } channelName
-     * @param { number } usage
-     * 
-     * @returns { void }
      */
     public increaseUsageCount(
         networkId: TNetworkId_S,

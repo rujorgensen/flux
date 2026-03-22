@@ -642,8 +642,6 @@ export class FluxMeshServer {
 
     /**
      * Gracefully shuts down the server.
-     * 
-     * @returns { Promise<void> }
      */
     public async stop(
     ): Promise<void> {

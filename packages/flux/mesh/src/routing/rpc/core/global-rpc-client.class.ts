@@ -42,11 +42,6 @@ export class GlobalRPCClient<TMethods> {
 
     /**
      * Calls a function on the other side.
-     *
-     * @param { TAddress } rpcServerClientAddress
-     * @param { TMethods } method
-     *
-     * @returns { Promise<any> }
      */
     public call(
         rpcServerClientAddress: TAddress,
@@ -88,10 +83,6 @@ export class GlobalRPCClient<TMethods> {
 
     /**
      * Handles the response from the server.
-     *
-     * @param { RPCResponse }   response
-     *
-     * @returns { boolean }
      */
     private handleResponseMessage(
         response: RPCResponse,
@@ -141,11 +132,6 @@ export class GlobalRPCClient2<TMethods> {
 
     /**
      * Calls a function on the other side.
-     *
-     * @param { TAddress } rpcServerClientAddress
-     * @param { TMethods } method
-     *
-     * @returns { Promise<any> }
      */
     public call(
         method: TMethods,
@@ -187,10 +173,6 @@ export class GlobalRPCClient2<TMethods> {
 
     /**
      * Handles the response from the server.
-     *
-     * @param { RPCResponse }   response
-     *
-     * @returns { boolean }
      */
     private handleResponseMessage(
         response: RPCResponse,

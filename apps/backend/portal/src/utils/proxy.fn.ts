@@ -1,8 +1,6 @@
 
 /**
- * 
- * @param param
- * @returns 
+ * Creates a reverse proxy handler to the given target URL.
  */
 const proxy = (
     proxyTo: string = 'http://localhost:3001',

@@ -25,11 +25,17 @@ export class WebRTCClient extends RPCClient<
         super(_sendToRPCServer, _handleResponseMessage);
     }
 
+    /**
+     * Creates a WebRTC offer.
+     */
     public createOffer(): Promise<unknown> {
         // TODO TYPE OFFER
         return super.call(this._originProcessAddress, 'createOffer');
     }
 
+    /**
+     * Accepts a WebRTC offer and creates an answer.
+     */
     public acceptOfferAndCreateAnswer(
         offer: unknown // TODO TYPE OFFER
     ): Promise<unknown> {
@@ -37,12 +43,18 @@ export class WebRTCClient extends RPCClient<
         return super.call(this._originProcessAddress, 'acceptOffer', offer);
     }
 
+    /**
+     * Accepts a WebRTC answer from the remote client.
+     */
     public acceptAnswer(
         answer: unknown // TODO TYPE answer
     ): Promise<boolean> {
         return super.call(this._originProcessAddress, 'acceptAnswer', answer);
     }
 
+    /**
+     * Notifies the remote client that the answer was accepted.
+     */
     public answerWasAccepted(answerAccepted: boolean): Promise<boolean> {
         return super.call(
             this._originProcessAddress,
@@ -55,11 +67,17 @@ export class WebRTCClient extends RPCClient<
 export class GlobalWebRTCClient extends GlobalRPCClient2<
     'createOffer' | 'acceptOffer' | 'acceptAnswer' | 'answerAcceptedByInitiator'
 > {
+    /**
+     * Creates a WebRTC offer.
+     */
     public createOffer(): Promise<unknown> {
         // TODO TYPE OFFER
         return super.call('createOffer');
     }
 
+    /**
+     * Accepts a WebRTC offer and creates an answer.
+     */
     public acceptOfferAndCreateAnswer(
         offer: unknown // TODO TYPE OFFER
     ): Promise<unknown> {
@@ -67,12 +85,18 @@ export class GlobalWebRTCClient extends GlobalRPCClient2<
         return super.call('acceptOffer', offer);
     }
 
+    /**
+     * Accepts a WebRTC answer from the remote client.
+     */
     public acceptAnswer(
         answer: unknown // TODO TYPE answer
     ): Promise<boolean> {
         return super.call('acceptAnswer', answer);
     }
 
+    /**
+     * Notifies the remote client that the answer was accepted.
+     */
     public answerWasAccepted(answerAccepted: boolean): Promise<boolean> {
         return super.call('answerAcceptedByInitiator', answerAccepted);
     }
