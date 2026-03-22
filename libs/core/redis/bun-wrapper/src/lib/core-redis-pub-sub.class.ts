@@ -149,15 +149,12 @@ export class BunRedisPubSub {
     ) {
         this.callbackMap.clear();
 
-        // Guard against calling close() on already-closed connections,
-        // which can throw uncatchable errors in CI environments (similar
-        // to the issue in BunRedisClient).
-        if (this.subscriber.connected) {
-            this.subscriber.close();
-        }
-
-        if (this.publisher.connected) {
-            this.publisher.close();
-        }
+        // Clear handlers before disconnecting to prevent callbacks from firing.
+        // Calling close() on connections that may be in a closing/error state throws
+        // uncatchable errors (same behaviour as BunRedisClient, see comment there).
+        this.subscriber.onclose = null;
+        this.publisher.onclose = null;
+        this.subscriber.onconnect = null;
+        this.publisher.onconnect = null;
     }
 }

@@ -13,6 +13,7 @@ export class BunRedisClient extends EventEmitter<{
     private client: RedisClient;
     private readonly handlers: Map<string, Set<MessageHandler>> = new Map();
     private reconnecting = false;
+    private disconnected = false;
 
     private reconnectAttempts = 0;
     private readonly maxReconnects: number | null = null;
@@ -115,9 +116,10 @@ export class BunRedisClient extends EventEmitter<{
 
     ) {
         if (this.reconnecting) return;
+        if (this.disconnected) return;
         this.reconnecting = true;
 
-        while (!this.connected && (this.reconnectAttempts <= (this.maxReconnects ?? Number.POSITIVE_INFINITY))) {
+        while (!this.connected && !this.disconnected && (this.reconnectAttempts <= (this.maxReconnects ?? Number.POSITIVE_INFINITY))) {
             const delay: number = this.options.socket.reconnectStrategy(this.reconnectAttempts) ?? Math.min(this.baseDelay * 2 ** this.reconnectAttempts, this.maxDelay);
 
             this.emit('reconnecting', void 0);
@@ -148,7 +150,7 @@ export class BunRedisClient extends EventEmitter<{
             }
         }
 
-        if (!this.connected) {
+        if (!this.connected && !this.disconnected) {
             this.emit('error', new Error('Max reconnection attempts reached. Will not retry.'));
         }
 
@@ -161,8 +163,13 @@ export class BunRedisClient extends EventEmitter<{
     public disconnect(
 
     ) {
+        this.disconnected = true;
         this.handlers.clear();
         this.connected = false;
+        // Clear onclose so that when the Redis container stops after disconnect()
+        // is called, the handler does not fire and trigger retryReconnect(),
+        // which would emit unhandled 'error' events.
+        this.client.onclose = null;
         // this.client.close(); // This keeps randomly failing in CI, and is uncatchable
     }
 }
