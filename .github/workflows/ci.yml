@@ -48,7 +48,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
 
       -
         name: 💾 Cache Prisma types
@@ -59,7 +59,7 @@ jobs:
             @prisma-types
           key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
           restore-keys: |
-            ${{ runner.os }}-prisma-
+            ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
 
       -
         name: 💾 Install dependencies
@@ -97,7 +97,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
 
       - name: 💾 Restore Prisma types
         uses: actions/cache@v5
@@ -106,7 +106,7 @@ jobs:
             @prisma-types
           key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
           restore-keys: |
-            ${{ runner.os }}-prisma-
+            ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
 
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
@@ -148,7 +148,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
 
       - name: 💾 Restore Prisma types
         uses: actions/cache@v5
@@ -157,7 +157,7 @@ jobs:
             @prisma-types
           key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
           restore-keys: |
-            ${{ runner.os }}-prisma-
+            ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
 
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
@@ -199,7 +199,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
 
       - name: 💾 Restore Prisma types
         uses: actions/cache@v5
@@ -208,7 +208,7 @@ jobs:
             @prisma-types
           key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
           restore-keys: |
-            ${{ runner.os }}-prisma-
+            ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
 
       - name: 🛠️ Build
         timeout-minutes: 2
