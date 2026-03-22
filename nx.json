@@ -17,6 +17,16 @@
                 "^default"
             ]
         },
+        "test": {
+            "cache": true,
+            "inputs": [
+                "default",
+                "^production"
+            ],
+            "outputs": [
+                "{projectRoot}/coverage"
+            ]
+        },
         "bun-test": {
             "inputs": [
                 "default",
@@ -39,6 +49,13 @@
                 "typecheckTargetName": "typecheck",
                 "buildDepsTargetName": "build-deps",
                 "watchDepsTargetName": "watch-deps"
+            }
+        },
+        {
+            "plugin": "@nx/vitest/plugin",
+            "options": {
+                "testTargetName": "test",
+                "coverageTargetName": "coverage"
             }
         }
     ],
