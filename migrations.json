@@ -1,32 +1,28 @@
 {
   "migrations": [
     {
-      "version": "21.0.0-beta.8",
-      "description": "Removes the legacy cache configuration from nx.json",
-      "implementation": "./src/migrations/update-21-0-0/remove-legacy-cache",
+      "cli": "nx",
+      "version": "22.6.0-beta.10",
+      "description": "Adds .claude/worktrees to .gitignore",
+      "implementation": "./src/migrations/update-22-6-0/add-claude-worktrees-to-git-ignore",
       "package": "nx",
-      "name": "remove-legacy-cache"
+      "name": "22-6-1-add-claude-worktrees-to-git-ignore"
     },
     {
-      "version": "21.0.0-beta.8",
-      "description": "Removes the legacy cache configuration from nx.json",
-      "implementation": "./src/migrations/update-21-0-0/remove-custom-tasks-runner",
+      "cli": "nx",
+      "version": "22.6.0-rc.0",
+      "description": "Adds .claude/settings.local.json to .gitignore",
+      "implementation": "./src/migrations/update-22-6-0/add-claude-settings-local-to-git-ignore",
       "package": "nx",
-      "name": "remove-custom-tasks-runner"
+      "name": "22-6-0-add-claude-settings-local-to-git-ignore"
     },
     {
-      "version": "21.0.0-beta.11",
-      "description": "Updates release version config based on the breaking changes in Nx v21",
-      "implementation": "./src/migrations/update-21-0-0/release-version-config-changes",
+      "cli": "nx",
+      "version": "22.6.0-beta.11",
+      "description": "Prompts to enable usage analytics",
+      "implementation": "./src/migrations/update-22-6-0/enable-analytics-prompt",
       "package": "nx",
-      "name": "release-version-config-changes"
-    },
-    {
-      "version": "21.0.0-beta.11",
-      "description": "Updates release changelog config based on the breaking changes in Nx v21",
-      "implementation": "./src/migrations/update-21-0-0/release-changelog-config-changes",
-      "package": "nx",
-      "name": "release-changelog-config-changes"
+      "name": "22-6-0-enable-analytics-prompt"
     }
   ]
 }

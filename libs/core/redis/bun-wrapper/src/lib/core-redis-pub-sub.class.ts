@@ -148,7 +148,7 @@ export class BunRedisPubSub {
 
     ) {
         this.callbackMap.clear();
-        this.subscriber.close();
-        this.publisher.close();
+        try { this.subscriber.close(); } catch { }
+        try { this.publisher.close(); } catch { }
     }
 }
