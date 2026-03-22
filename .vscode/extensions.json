@@ -1,7 +1,6 @@
 {
     "recommendations": [
         "astro-build.astro-vscode",
-        "firsttris.vscode-jest-runner",
         "ms-azuretools.vscode-docker",
         "aaron-bond.better-comments",
         "pomdtr.excalidraw-editor",
