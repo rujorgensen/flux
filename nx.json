@@ -23,6 +23,13 @@
                 "^production"
             ],
             "cache": true
+        },
+        "@nx/vitest:test": {
+            "cache": true,
+            "inputs": [
+                "default",
+                "^production"
+            ]
         }
     },
     "defaultBase": "main",

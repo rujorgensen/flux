@@ -66,6 +66,7 @@
     "devDependencies": {
         "@biomejs/biome": "2.4.2",
         "@nx/vite": "22.5.0",
+        "@nx/vitest": "22.5.0",
         "@nx/web": "22.5.0",
         "@nx/workspace": "22.5.0",
         "@testcontainers/redis": "^11.10.0",
