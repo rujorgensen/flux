@@ -16,6 +16,10 @@ if (!process.env['FLUX_MESH_REDIS_URL']) {
 
 /**
  * Singleton function to get the Redis connection.
+ * 
+ * @param { string } [connectionString] - Optional connection string override
+ * 
+ * @returns { RedisConnection } The singleton Redis connection
  */
 export const getMeshRedisConnection = (
     connectionString?: string,

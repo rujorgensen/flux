@@ -8,6 +8,11 @@ interface IEncryptedData {
 
 /**
  * Decrypts an AES-256-GCM encrypted JSON object using a password.
+ * 
+ * @param { IEncryptedData } encryptedData - The encrypted data object containing iv, salt, and ciphertext
+ * @param { string } password - The password to derive the decryption key from
+ * 
+ * @returns { Promise<Object> } The decrypted JSON object
  */
 export async function decrypt(
     encryptedData: IEncryptedData,

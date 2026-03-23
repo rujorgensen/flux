@@ -21,6 +21,8 @@ export class FluxRemoteClient {
 
     /**
      * Sends a message to the connected client.
+     * 
+     * @param { string } message - The message to send to the connected client
      */
     public send(
         message: string,

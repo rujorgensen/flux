@@ -16,6 +16,11 @@ export type TTokenPayloadJWT = string & { __brand: 'TokenPayloadJWT'; };
 
 /**
  * Generates JWT string from a token payload.
+ * 
+ * @param { TTokenPayload } payload - The token payload to sign
+ * @param { number } [expiresIn] - Token expiry time in seconds
+ * 
+ * @returns { string } The signed JWT string
  */
 export const generateToken = (
     payload: TTokenPayload,
@@ -26,6 +31,10 @@ export const generateToken = (
 
 /**
  * Verifies a JWT token and returns the payload or throws if invalid.
+ * 
+ * @param { unknown } token - The JWT token string to verify
+ * 
+ * @returns { TTokenPayload } The decoded token payload
  */
 export const verifyTokenOrThrow = (
     token: unknown,

@@ -50,6 +50,11 @@ export class FluxAgent {
 
     /**
      * Connect to the network using provided identification.
+     * 
+     * @param { unknown } identification - The identification payload to authenticate with
+     * @param { string } [clientUId] - Optional client UID to use
+     * 
+     * @returns { Promise<FluxAgentNetworkConnection> } The network connection
      */
     public async connect(
         identification: unknown,
@@ -114,6 +119,8 @@ export class FluxAgent {
 
     /**
      * Registers a callback to be called when a message is received.
+     * 
+     * @param { TMessageCallback } cb - Callback to invoke when a message is received
      */
     public onMessage(
         cb: TMessageCallback,

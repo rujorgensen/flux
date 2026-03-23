@@ -70,6 +70,8 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
 
     /**
      * This offer must be sent to the other peer.
+     * 
+     * @returns { Promise<RTCSessionDescriptionInit> } The WebRTC offer
      */
     private async createOffer(
 
@@ -88,6 +90,10 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
 
     /**
      * Accepts a WebRTC offer from the peer and generates an answer.
+     * 
+     * @param { RTCSessionDescriptionInit } offer - The offer from the remote peer
+     * 
+     * @returns { Promise<RTCSessionDescriptionInit> } The answer to send back
      */
     private async acceptOffer(
         offer: RTCSessionDescriptionInit,
@@ -105,6 +111,10 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
 
     /**
      * Accepts a WebRTC answer from the peer.
+     * 
+     * @param { any } answer - The answer from the initiating peer
+     * 
+     * @returns { Promise<boolean> } True if the answer was accepted
      */
     private async acceptAnswer(
         answer: any,
@@ -120,6 +130,8 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
 
     /**
      * If remote (not initiator) the answer was accepted.
+     * 
+     * @param { boolean } answerAccepted - Whether the answer was accepted
      */
     private answerAcceptedByInitiator(
         answerAccepted: boolean,
@@ -129,6 +141,8 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
 
     /**
      * Sends a message to the connected peer via the WebRTC data channel.
+     * 
+     * @param { string } message - The message to send
      */
     public sendMessage(
         message: string,

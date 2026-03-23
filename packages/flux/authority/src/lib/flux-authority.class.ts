@@ -57,6 +57,12 @@ export class FluxAuthority {
 
     /**
      * Registers an authority on the network.
+     * 
+     * @param { string } authorityKey - The key to authenticate with the network
+     * @param { TAuthorizeCallback<T> } authorizeNetworkAgent - Callback to authorize network agents
+     * @param { TChannnelAuthCallback<M> } authorizeNetworkChannel - Callback to authorize channel connections
+     * 
+     * @returns { Promise<FluxAuthorityNetworkConnection> } The authority network connection
      */
     public async registerAuthority<T, M>(
         authorityKey: string,

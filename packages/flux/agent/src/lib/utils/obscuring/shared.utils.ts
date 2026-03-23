@@ -3,6 +3,11 @@ const PBKDF2_ITERATIONS = 100000;
 
 /**
  * Derives a cryptographic key from a password using PBKDF2.
+ * 
+ * @param { string } password - The password to derive the key from
+ * @param { any } salt - The salt for key derivation
+ * 
+ * @returns { Promise<CryptoKey> } The derived cryptographic key
  */
 export async function deriveKey(
     password: string,

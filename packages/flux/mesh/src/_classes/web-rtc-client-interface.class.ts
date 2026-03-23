@@ -27,6 +27,8 @@ export class WebRTCClient extends RPCClient<
 
     /**
      * Creates a WebRTC offer.
+     * 
+     * @returns { Promise<unknown> } The WebRTC offer
      */
     public createOffer(): Promise<unknown> {
         // TODO TYPE OFFER
@@ -35,6 +37,10 @@ export class WebRTCClient extends RPCClient<
 
     /**
      * Accepts a WebRTC offer and creates an answer.
+     * 
+     * @param { unknown } offer - The WebRTC offer from remote
+     * 
+     * @returns { Promise<unknown> } The answer
      */
     public acceptOfferAndCreateAnswer(
         offer: unknown // TODO TYPE OFFER
@@ -45,6 +51,10 @@ export class WebRTCClient extends RPCClient<
 
     /**
      * Accepts a WebRTC answer from the remote client.
+     * 
+     * @param { unknown } answer - The WebRTC answer
+     * 
+     * @returns { Promise<boolean> } True if accepted
      */
     public acceptAnswer(
         answer: unknown // TODO TYPE answer
@@ -54,6 +64,10 @@ export class WebRTCClient extends RPCClient<
 
     /**
      * Notifies the remote client that the answer was accepted.
+     * 
+     * @param { boolean } answerAccepted - Whether the answer was accepted
+     * 
+     * @returns { Promise<boolean> }
      */
     public answerWasAccepted(answerAccepted: boolean): Promise<boolean> {
         return super.call(
@@ -69,6 +83,8 @@ export class GlobalWebRTCClient extends GlobalRPCClient2<
 > {
     /**
      * Creates a WebRTC offer.
+     * 
+     * @returns { Promise<unknown> } The WebRTC offer
      */
     public createOffer(): Promise<unknown> {
         // TODO TYPE OFFER
@@ -77,6 +93,10 @@ export class GlobalWebRTCClient extends GlobalRPCClient2<
 
     /**
      * Accepts a WebRTC offer and creates an answer.
+     * 
+     * @param { unknown } offer - The WebRTC offer from remote
+     * 
+     * @returns { Promise<unknown> } The answer
      */
     public acceptOfferAndCreateAnswer(
         offer: unknown // TODO TYPE OFFER
@@ -87,6 +107,10 @@ export class GlobalWebRTCClient extends GlobalRPCClient2<
 
     /**
      * Accepts a WebRTC answer from the remote client.
+     * 
+     * @param { unknown } answer - The WebRTC answer
+     * 
+     * @returns { Promise<boolean> } True if accepted
      */
     public acceptAnswer(
         answer: unknown // TODO TYPE answer
@@ -96,6 +120,10 @@ export class GlobalWebRTCClient extends GlobalRPCClient2<
 
     /**
      * Notifies the remote client that the answer was accepted.
+     * 
+     * @param { boolean } answerAccepted - Whether the answer was accepted
+     * 
+     * @returns { Promise<boolean> }
      */
     public answerWasAccepted(answerAccepted: boolean): Promise<boolean> {
         return super.call('answerAcceptedByInitiator', answerAccepted);

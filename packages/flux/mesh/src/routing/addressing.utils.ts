@@ -7,6 +7,8 @@ import type {
 
 /**
  * Returns the current process ID.
+ * 
+ * @returns { TProcessId } The current process ID
  */
 export const readProcessId = (): TProcessId => {
     return process.pid as TProcessId;
@@ -15,6 +17,8 @@ export const readProcessId = (): TProcessId => {
 let machineAddress: TMachineAddress | undefined;
 /**
  * Returns the current machine's network address.
+ * 
+ * @returns { TMachineAddress } The current machine's network address
  */
 export const readMachineAddress = (): TMachineAddress => {
     if (machineAddress) {
@@ -32,6 +36,8 @@ export const readMachineAddress = (): TMachineAddress => {
 
 /**
  * Returns the process address.
+ * 
+ * @returns { TProcessAddress } The current process address
  */
 export const readProcessAddress = (): TProcessAddress => {
     return `${readMachineAddress()}/${readProcessId()}`;

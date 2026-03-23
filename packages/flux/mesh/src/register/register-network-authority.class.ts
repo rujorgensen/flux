@@ -13,6 +13,12 @@ export class NetworkAuthorityManager {
 
     /**
      * Registers a network authority.
+     * 
+     * @param { TNetworkId_S } networkId - The network ID to register on
+     * @param { TClientId } socketId - The socket ID of the authority
+     * @param { TFluxClientUID } [machineUID] - Optional machine UID
+     * 
+     * @returns { Promise<void> }
      */
     public async register(
         networkId: TNetworkId_S,
@@ -29,6 +35,9 @@ export class NetworkAuthorityManager {
 
     /**
      * Unregisters a network authority from the local network.
+     * 
+     * @param { TNetworkId_S } networkId - The network ID
+     * @param { TAddress } networkAuthorityAddress - The address of the authority to unregister
      */
     public unregister(
         networkId: TNetworkId_S,
@@ -49,6 +58,9 @@ export class NetworkAuthorityManager {
 
     /**
      * Used for cleanup, in case of discovering an idle authority.
+     * 
+     * @param { TNetworkId_S } networkId - The network ID
+     * @param { TAddress } networkAuthorityAddress - The address of the authority to unregister globally
      */
     public unregisterGlobal(
         networkId: TNetworkId_S,
@@ -68,6 +80,10 @@ export class NetworkAuthorityManager {
 
     /**
      * Resolves a random network authority address for a given network ID.
+     * 
+     * @param { TNetworkId_S } networkId - The network ID to resolve an authority for
+     * 
+     * @returns { Promise<TAddress> } The resolved authority address
      */
     public async resolveNetworkAuthorityAddressOrThrow(
         networkId: TNetworkId_S
@@ -105,6 +121,9 @@ export class NetworkAuthorityManager {
 
     /**
      * Removes a client from the cache and unregisters it globally.
+     * 
+     * @param { TNetworkId_S } networkId - The network ID
+     * @param { TAddress } networkAuthorityAddress - The address of the unresponsive client
      */
     public removeUnresponsiveClient(
         networkId: TNetworkId_S,

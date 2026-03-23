@@ -9,6 +9,13 @@ export class ConnectionError extends RetryableError { }
 
 /**
  * Authenticates with the server and returns a ticket for connecting the websocket.
+ * 
+ * @param { TNetworkId_S } networkId - The network ID to connect to
+ * @param { string } domain - The domain of the authority server
+ * @param { string } authorityKey - The authority key for authentication
+ * @param { object } clientInfo - Optional client identification info
+ * 
+ * @returns { Promise<unknown> } The authentication ticket
  */
 export const authenticateNetworkAuthorityOrThrow = async (
     networkId: TNetworkId_S,

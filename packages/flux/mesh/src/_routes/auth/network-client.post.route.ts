@@ -20,6 +20,12 @@ import {
 
 /**
  * This route is used to authorize a network agent.
+ * 
+ * @param { BunRequest } request - The incoming HTTP request
+ * @param { NetworkAuthorityManager } networkAuthorityManager - The network authority manager
+ * @param { GlobalRPCClient<'authorize'> } globalRPCClient - The global RPC client
+ * 
+ * @returns { Promise<Response> } The HTTP response with auth token or error
  */
 export const authorizeNetworkAgent = async (
     request: BunRequest,
