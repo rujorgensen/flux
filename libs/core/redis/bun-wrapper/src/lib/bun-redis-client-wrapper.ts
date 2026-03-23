@@ -175,10 +175,9 @@ export class BunRedisClient extends EventEmitter<{
         this.disconnected = true;
         this.handlers.clear();
         this.connected = false;
-        try {
-            this.client.close();
-        } catch {
-            // Ignore close errors - connection may already be closed
-        }
+        // Do not call this.client.close() — Bun's RedisClient fires ERR_REDIS_CONNECTION_CLOSED
+        // asynchronously (bypassing try/catch) when the connection is already closed.
+        // Setting disconnected = true is sufficient: the onclose callback and retryReconnect
+        // loop both check this flag and exit early, preventing any unhandled errors.
     }
 }
