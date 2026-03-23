@@ -6,6 +6,6 @@
     "implicitDependencies": [
         "@flux/portal-ui"
     ],
-    "// targets": "to see all targets run: nx show project @flux/portal-ui-e2e --web",
+    "// targets": "to see all targets run: nx show project @flux/portal-ui-2-e2e --web",
     "targets": {}
 }

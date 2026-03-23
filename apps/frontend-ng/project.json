@@ -87,7 +87,7 @@
                 "backend-mesh:serve",
                 "@flux/portal-api:serve",
                 "open"
-            ],
+            ]
         },
         "test": {
             "executor": "@angular/build:unit-test",
