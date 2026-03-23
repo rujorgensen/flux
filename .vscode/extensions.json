@@ -1,12 +1,10 @@
 {
     "recommendations": [
-        "astro-build.astro-vscode",
         "ms-azuretools.vscode-docker",
         "aaron-bond.better-comments",
         "pomdtr.excalidraw-editor",
-        "vunguyentuan.vscode-css-variables"
+        "vunguyentuan.vscode-css-variables",
+        "ms-playwright.playwright"
     ],
-    "unwantedRecommendations": [
-        "esbenp.prettier-vscode"
-    ]
+    "unwantedRecommendations": ["esbenp.prettier-vscode"]
 }

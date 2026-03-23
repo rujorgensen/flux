@@ -1,0 +1,5 @@
+@use 'tailwindcss';
+
+@plugin 'daisyui' {
+    themes: light --default;
+}

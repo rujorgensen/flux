@@ -30,6 +30,23 @@
                 "default",
                 "^production"
             ]
+        },
+        "@angular/build:application": {
+            "cache": true,
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "production",
+                "^production"
+            ]
+        },
+        "@angular/build:unit-test": {
+            "cache": true,
+            "inputs": [
+                "default",
+                "^production"
+            ]
         }
     },
     "defaultBase": "main",
@@ -46,6 +63,12 @@
                 "typecheckTargetName": "typecheck",
                 "buildDepsTargetName": "build-deps",
                 "watchDepsTargetName": "watch-deps"
+            }
+        },
+        {
+            "plugin": "@nx/playwright/plugin",
+            "options": {
+                "targetName": "e2e"
             }
         }
     ],
@@ -68,5 +91,13 @@
         "enabled": true
     },
     "nxCloudId": "6809319308a2a647ce903863",
-    "analytics": false
+    "analytics": false,
+    "generators": {
+        "@nx/angular:application": {
+            "e2eTestRunner": "playwright",
+            "linter": "none",
+            "style": "scss",
+            "unitTestRunner": "vitest-angular"
+        }
+    }
 }

@@ -148,7 +148,9 @@ export class BunRedisPubSub {
 
     ) {
         this.callbackMap.clear();
-        try { this.subscriber.close(); } catch { }
-        try { this.publisher.close(); } catch { }
+        // Note: explicitly calling close() on Bun's RedisClient with autoReconnect:true
+        // causes uncatchable reconnect errors (ERR_REDIS_CONNECTION_CLOSED) in Bun's test
+        // runner. The connections are cleaned up on process exit instead — consistent with
+        // how BunRedisClient.disconnect() handles the same issue.
     }
 }
