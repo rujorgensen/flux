@@ -140,21 +140,18 @@ export class BunRedisPubSub {
     /**
      * Disconnects the Redis client and the subscriber.
      * 
+     * Note: We intentionally do not call .close() on publisher/subscriber.
+     * Bun's RedisClient.close() fires ERR_REDIS_CONNECTION_CLOSED asynchronously
+     * (bypassing try/catch) when the connection is already closed at teardown time,
+     * causing "unhandled error between tests" in the test runner.
+     * With autoReconnect: false there is no reconnect loop to stop, so clearing
+     * the callback map is sufficient.
+     * 
      * @returns { void }
      */
     public disconnect(
 
     ) {
         this.callbackMap.clear();
-        try {
-            this.publisher.close();
-        } catch {
-            // Ignore close errors - connection may already be closed
-        }
-        try {
-            this.subscriber.close();
-        } catch {
-            // Ignore close errors - connection may already be closed
-        }
     }
 }
