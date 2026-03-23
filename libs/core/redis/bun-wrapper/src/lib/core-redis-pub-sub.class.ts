@@ -43,11 +43,6 @@ export class BunRedisPubSub {
             console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub publisher connection closed`);
         };
 
-        // Swallow reconnect/close errors so they don't surface as unhandled errors in test runners
-        this.publisher.onerror = (error) => {
-            console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub publisher error:`, error);
-        };
-
         // Create subscriber client
         this.subscriber = new RedisClient(
             this._options.url,
@@ -66,11 +61,6 @@ export class BunRedisPubSub {
                 console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub subscriber error:`, error);
             }
             console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub subscriber connection closed`);
-        };
-
-        // Swallow reconnect/close errors so they don't surface as unhandled errors in test runners
-        this.subscriber.onerror = (error) => {
-            console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub subscriber error:`, error);
         };
     }
 
