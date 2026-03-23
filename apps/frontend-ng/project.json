@@ -84,8 +84,6 @@
             },
             "defaultConfiguration": "development",
             "dependsOn": [
-                "backend-mesh:serve",
-                "@flux/portal-api:serve",
                 "open"
             ]
         },
