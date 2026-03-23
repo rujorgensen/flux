@@ -27,8 +27,7 @@ export class BunRedisPubSub {
         this.publisher = new RedisClient(
             this._options.url,
             {
-                autoReconnect: true,
-                maxRetries: 10,
+                autoReconnect: false,
             },
         );
 
@@ -44,12 +43,16 @@ export class BunRedisPubSub {
             console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub publisher connection closed`);
         };
 
+        // Swallow reconnect/close errors so they don't surface as unhandled errors in test runners
+        this.publisher.onerror = (error) => {
+            console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub publisher error:`, error);
+        };
+
         // Create subscriber client
         this.subscriber = new RedisClient(
             this._options.url,
             {
-                autoReconnect: true,
-                maxRetries: 10,
+                autoReconnect: false,
             },
         );
 
@@ -63,6 +66,11 @@ export class BunRedisPubSub {
                 console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub subscriber error:`, error);
             }
             console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub subscriber connection closed`);
+        };
+
+        // Swallow reconnect/close errors so they don't surface as unhandled errors in test runners
+        this.subscriber.onerror = (error) => {
+            console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub subscriber error:`, error);
         };
     }
 
@@ -148,9 +156,15 @@ export class BunRedisPubSub {
 
     ) {
         this.callbackMap.clear();
-        // Note: explicitly calling close() on Bun's RedisClient with autoReconnect:true
-        // causes uncatchable reconnect errors (ERR_REDIS_CONNECTION_CLOSED) in Bun's test
-        // runner. The connections are cleaned up on process exit instead — consistent with
-        // how BunRedisClient.disconnect() handles the same issue.
+        try {
+            this.publisher.close();
+        } catch {
+            // Ignore close errors - connection may already be closed
+        }
+        try {
+            this.subscriber.close();
+        } catch {
+            // Ignore close errors - connection may already be closed
+        }
     }
 }
