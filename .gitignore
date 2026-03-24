@@ -31,3 +31,7 @@ vitest.config.*.timestamp*
 
 # Prisma generated types. Don't check in the generated types, keeping one source of truth; the Prisma schemas
 @prisma-types/**/*
+
+.angular
+
+__screenshots__/

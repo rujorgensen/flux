@@ -1,0 +1,38 @@
+{
+    "name": "@flux/portal-ui",
+    "version": "0.0.1",
+    "type": "module",
+    "private": true,
+    "dependencies": {
+        "@angular/animations": "catalog:angular",
+        "@angular/build": "catalog:angular",
+        "@angular/common": "catalog:angular",
+        "@angular/compiler": "catalog:angular",
+        "@angular/compiler-cli": "catalog:angular",
+        "@angular/core": "catalog:angular",
+        "@angular/forms": "catalog:angular",
+        "@angular/language-service": "catalog:angular",
+        "@angular/platform-browser": "catalog:angular",
+        "@angular/platform-server": "catalog:angular",
+        "@elysiajs/eden": "catalog:elysia",
+        "@prisma/adapter-pg": "catalog:prisma",
+        "@tailwindcss/postcss": "catalog:",
+        "better-auth": "catalog:",
+        "chart.js": "catalog:",
+        "daisyui": "catalog:",
+        "open-props": "catalog:",
+        "postcss": "catalog:",
+        "rollup-plugin-visualizer": "catalog:",
+        "tailwind-merge": "catalog:",
+        "tailwind-variants": "catalog:",
+        "tailwindcss": "catalog:",
+        "tw-animate-css": "catalog:",
+        "zod": "catalog:"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "catalog:",
+        "vite": "catalog:",
+        "vite-plugin-dts": "catalog:",
+        "vite-tsconfig-paths": "catalog:"
+    }
+}
