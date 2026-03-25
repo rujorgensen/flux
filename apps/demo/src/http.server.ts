@@ -94,7 +94,7 @@ const build = async () => {
 };
 
 const serverConf = {
-    port: 3_001,
+    port: 4_000,
     idleTimeout: 0, // deactivate timeout
     hostname: '0.0.0.0',
     fetch: async (request: Request) => {
