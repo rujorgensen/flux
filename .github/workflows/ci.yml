@@ -123,7 +123,7 @@ jobs:
         run: bun nx affected -t bun-test test lint # --no-agents
 
   e2e-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     needs: [install-deps]
     steps:
