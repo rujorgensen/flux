@@ -13,7 +13,8 @@
                 "outputPath": "dist/libs/flux/shared/ws",
                 "main": "libs/flux/shared/ws/src/index.ts",
                 "tsConfig": "libs/flux/shared/ws/tsconfig.lib.json",
-                "assets": []
+                "assets": [],
+                "deleteOutputPath": false
             }
         }
     },

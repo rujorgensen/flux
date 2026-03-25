@@ -1,0 +1,232 @@
+@use 'tailwindcss';
+
+@plugin 'daisyui' {
+    themes: light --default;
+}
+
+/* Fonts */
+// @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Quicksand:wght@300..700&display=swap');
+
+/* CSS Custom Properties */
+:root {
+    --clr-pop-1: hsl(316, 60%, 34%);
+    --clr-pop-2: hsl(316, 60%, 44%);
+    --clr-pop-10: hsl(316, 60%, 93%);
+
+    --foreground-1: #333;
+    --foreground-2: rgb(61, 58, 58);
+
+    // eg. discrete, faintest, readable text
+    --foreground-5: #757575;
+
+    // More faint, not intended to be read, borders and such
+    --foreground-negative-6: #C6C6C6;
+
+    // Translate from DaisyUI
+    --surface-1: var(--color-base-100);
+
+    --surface-hovered-1: var(--color-base-200);
+
+    // The very outer padding against the outer edge of the viewport. Changes by device
+    --viewport-padding-responsive: 20px;
+
+    // * Shadows
+    --shadow-stuck-bottom-dock: 0 0 20px 0 #cecece;
+
+    // ****************************************************************************
+    // * Customize DaisyUI Palette
+    // ****************************************************************************
+    --color-accent: hsl(316, 60%, 34%);
+    --color-accent-content: hsl(316, 60%, 93%);
+
+    // ****************************************************************************
+    // * If mobile
+    // ****************************************************************************
+
+    @media (max-width: 768px) {
+        --viewport-padding-responsive: 8px;
+    }
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+input {
+    box-sizing: border-box;
+}
+
+/* CSS Reset */
+html,
+body,
+menu,
+li,
+h1 {
+    padding: 0;
+    margin: 0;
+}
+
+
+button {
+    cursor: pointer;
+}
+
+/* CSS Utilities */
+.hide-on-mobile {
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.square-top-borders-on-mobile {
+    @media (max-width: 768px) {
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+    }
+}
+
+.grid {
+    display: grid;
+
+    &._end {
+        justify-content: flex-end;
+    }
+
+    &._center {
+        align-content: center;
+    }
+
+    &._middle {
+        align-items: center;
+    }
+}
+
+.flex {
+    display: flex;
+
+    &._end {
+        justify-content: flex-end;
+    }
+
+    &._middle {
+        align-items: center;
+    }
+
+    &._center {
+        justify-content: center;
+    }
+
+    &.space-between {
+        justify-content: space-between;
+    }
+}
+
+.row-to-column {
+    display: flex;
+    flex-wrap: wrap;
+
+    &>* {
+        flex: 0 1 auto;
+    }
+}
+
+// Centers both axes
+._center {
+    place-items: center;
+}
+
+._2xn_auto {
+    grid-template-columns: 1fr auto;
+}
+
+._2xauto_n {
+    grid-template-columns: auto 1fr;
+}
+
+._2xn {
+    grid-template-columns: 1fr 1fr;
+}
+
+._gap_1 {
+    gap: 10px;
+}
+
+._gap_2 {
+    gap: 20px;
+}
+
+._gap_3 {
+    gap: 30px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Business Styles */
+h1 {
+    color: var(--clr-pop-1);
+    font-family: "Quicksand", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 26px;
+}
+
+// Use "like-*" to style other elements like the heading, eg. the <legend> of a fieldset.
+h2,
+.like-h2 {
+    color: var(--foreground-2);
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 20px;
+}
+
+h3 {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+p,
+strong,
+small {
+    font-family: "Nunito", sans-serif;
+}
+
+.overlay-backdrop {
+    backdrop-filter: blur(6px) saturate(1.1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.70), rgba(255, 255, 255, 0.62)) padding-box;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    display: block;
+}
+
+/**
+ * Colors
+ */
+
+.discrete {
+    font-family: "Nunito", sans-serif;
+    color: var(--foreground-5);
+    font-size: 0.9rem;
+}
+
+small {
+    color: var(--foreground-5);
+}

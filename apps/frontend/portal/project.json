@@ -1,30 +1,19 @@
 {
-    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "name": "@flux/portal-ui",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "application",
+    "prefix": "prtl",
+    "sourceRoot": "apps/frontend/portal/src",
+    "tags": [
+        "type:app",
+        "scope:frontend"
+    ],
     "targets": {
-        "build": {
-            "executor": "nx:run-script",
-            "options": {
-                "script": "astro build"
-            }
-        },
         "open": {
             "executor": "nx:run-commands",
             "options": {
                 "command": "bunx open-cli http://localhost:3001"
             }
-        },
-        "serve": {
-            "executor": "nx:run-script",
-            "options": {
-                "script": "astro dev --port=3001",
-                "proxyConfig": "apps/frontend/portal/proxy.conf.json"
-            },
-            "dependsOn": [
-                "backend-mesh:serve",
-                "@flux/portal-api:serve",
-                "open"
-            ],
-            "continuous": true
         },
         "docker-build": {
             "command": "docker build -f apps/frontend/portal/Dockerfile . -t flux-portal"
@@ -32,6 +21,82 @@
         "nx-release-publish": {
             "options": {
                 "packageRoot": "dist/{projectRoot}"
+            }
+        },
+        "build": {
+            "executor": "@angular/build:application",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/apps/frontend/portal",
+                "browser": "apps/frontend/portal/src/main.ts",
+                "tsConfig": "apps/frontend/portal/tsconfig.app.json",
+                "inlineStyleLanguage": "scss",
+                "assets": [{
+                        "glob": "**/*",
+                        "input": "apps/frontend/portal/public"
+                }],
+                "styles": [
+                    "apps/frontend/portal/src/styles.scss"
+                ]
+            },
+            "configurations": {
+                "production": {
+                    "budgets": [{
+                            "type": "initial",
+                            "maximumWarning": "500kb",
+                            "maximumError": "1mb"
+                        },
+                        {
+                            "type": "anyComponentStyle",
+                            "maximumWarning": "4kb",
+                            "maximumError": "8kb"
+                        }
+                    ],
+                    "outputHashing": "all"
+                },
+                "development": {
+                    "optimization": false,
+                    "extractLicenses": false,
+                    "sourceMap": true
+                }
+            },
+            "defaultConfiguration": "production"
+        },
+        "serve": {
+            "continuous": true,
+            "executor": "@angular/build:dev-server",
+            "options": {
+                "port": 3001,
+                "proxyConfig": "apps/frontend/portal/proxy.conf.json"
+            },
+            "configurations": {
+                "production": {
+                    "buildTarget": "@flux/portal-ui:build:production"
+                },
+                "development": {
+                    "buildTarget": "@flux/portal-ui:build:development"
+                }
+            },
+            "defaultConfiguration": "development",
+            "dependsOn": [
+                "@flux/portal-api:serve",
+                "open"
+            ]
+        },
+        "test": {
+            "executor": "@angular/build:unit-test",
+            "options": {}
+        },
+        "serve-static": {
+            "continuous": true,
+            "executor": "@nx/web:file-server",
+            "options": {
+                "buildTarget": "@flux/portal-ui:build",
+                "port": 3001,
+                "staticFilePath": "dist/apps/frontend/portal/browser",
+                "spa": true
             }
         }
     }
