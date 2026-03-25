@@ -36,6 +36,9 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 
 ## Ports
 
+    Demo
+        4000    - UI
+        
     Mesh
         5100    - Default mesh server port
 
@@ -48,7 +51,7 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 
 ## Endpoints
 
-### Astro Server Health Check
+### Server Health Check
 - **GET /ping** - Returns 'pong' for server availability detection
-  - Endpoint: `http://localhost:3001/ping`
+  - Endpoint: `http://localhost:3000/ping`
   - Response: Plain text 'pong' with HTTP 200 status
