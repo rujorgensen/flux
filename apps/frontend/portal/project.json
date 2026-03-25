@@ -33,20 +33,17 @@
                 "browser": "apps/frontend/portal/src/main.ts",
                 "tsConfig": "apps/frontend/portal/tsconfig.app.json",
                 "inlineStyleLanguage": "scss",
-                "assets": [
-                    {
+                "assets": [{
                         "glob": "**/*",
                         "input": "apps/frontend/portal/public"
-                    }
-                ],
+                }],
                 "styles": [
                     "apps/frontend/portal/src/styles.scss"
                 ]
             },
             "configurations": {
                 "production": {
-                    "budgets": [
-                        {
+                    "budgets": [{
                             "type": "initial",
                             "maximumWarning": "500kb",
                             "maximumError": "1mb"
@@ -84,6 +81,7 @@
             },
             "defaultConfiguration": "development",
             "dependsOn": [
+                "@flux/portal-api:serve",
                 "open"
             ]
         },
