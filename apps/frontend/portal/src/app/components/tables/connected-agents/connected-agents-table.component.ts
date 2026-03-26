@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, input, signal, inject, effect, DestroyRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { provideHttpClient, HttpClient, withFetch } from '@angular/common/http';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { TNetworkAgent } from '@flux/mesh/store/redis/network-agent';
+import { api } from '$lib/app/_services/api/api';
 
 @Component({
     selector: 'app-connected-agents-table',
@@ -16,15 +15,9 @@ export class ConnectedAgentsTableComponent {
 
     protected readonly dataStore = signal<TNetworkAgent[] | undefined>(undefined);
 
-    private readonly http = inject(HttpClient);
-    private readonly destroyRef = inject(DestroyRef);
+    constructor(
 
-    static clientProviders = [provideHttpClient(
-        withFetch()
-    )];
-    static renderProviders = [ConnectedAgentsTableComponent.clientProviders];
-
-    constructor() {
+    ) {
         effect(() => {
             const networkId = this.networkId();
             if (networkId) {
@@ -33,23 +26,28 @@ export class ConnectedAgentsTableComponent {
         });
     }
 
-    private fetchData(
+    private async fetchData(
         networkId: string,
     ) {
-        const url = `/api/networks/${networkId}/agents/connected`;
-        this.http.get<TNetworkAgent[]>(url)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (data: TNetworkAgent[]) => {
-                    const mappedData = data.map((a) => ({
-                        ...a,
-                        connectedAt: new Date(a.connectedAt),
-                    }));
-                    this.dataStore.set(mappedData);
-                },
-                error: (error: unknown) => {
-                    console.error('Error fetching data', error);
-                },
-            });
+        await api
+            .api
+            .networks({
+                networkId,
+            })
+            .agents
+            .connected
+            .get({
+
+            })
+
+            .then((response) => {
+                if (response.data) {
+                    this.dataStore.set(response.data);
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching connected agents:', error);
+            })
+            ;
     }
 }

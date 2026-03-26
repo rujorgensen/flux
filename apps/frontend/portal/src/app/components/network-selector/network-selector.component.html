@@ -1,0 +1,104 @@
+<!-- Network Selector Dropdown -->
+@if (vm$ | async; as vm) {
+<div class="dropdown w-full">
+    <div
+        tabindex="0"
+        role="button"
+        class="btn btn-ghost btn-sm w-full justify-between normal-case"
+    >
+        <span class="truncate">
+            @if (vm.isLoading) {
+                Loading...
+            } @else if (vm.selectedNetwork; as network) {
+                {{ network.alias }}
+            } @else {
+                No network selected
+            }
+        </span>
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            class="inline-block h-4 w-4 stroke-current shrink-0"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+            ></path>
+        </svg>
+    </div>
+    <ul
+        tabindex="0"
+        class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow"
+    >
+        @for (network of vm.networks; track network.id) {
+            <li>
+                <div class="flex items-center justify-between w-full">
+                    <button
+                        class="flex-1 text-left"
+                        [class.font-semibold]="vm.selectedNetwork?.id === network.id"
+                        (click)="selectNetwork(network)"
+                        type="button"
+                    >
+                        {{ network.alias }}
+                        @if (vm.selectedNetwork?.id === network.id) {
+                            <span class="badge badge-primary badge-xs ml-1">active</span>
+                        }
+                    </button>
+                    <button
+                        class="btn btn-ghost btn-xs text-error"
+                        (click)="requestDelete(network, $event)"
+                        type="button"
+                        title="Delete network"
+                        aria-label="Delete {{ network.alias }}"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            class="inline-block h-4 w-4 stroke-current"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            ></path>
+                        </svg>
+                    </button>
+                </div>
+            </li>
+        }
+        @if (!vm.hasNetworks && !vm.isLoading) {
+            <li>
+                <span class="text-base-content/50 text-sm italic">No networks yet</span>
+            </li>
+        }
+        <li class="mt-1">
+            <button
+                class="btn btn-primary btn-sm w-full"
+                [disabled]="!vm.canCreateNetwork"
+                (click)="requestCreate()"
+                type="button"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    class="inline-block h-4 w-4 stroke-current"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 4v16m8-8H4"
+                    ></path>
+                </svg>
+                New Network
+            </button>
+        </li>
+    </ul>
+</div>
+}

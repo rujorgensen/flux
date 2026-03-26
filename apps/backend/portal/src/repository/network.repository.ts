@@ -122,6 +122,38 @@ export class NetworkRepository {
             ;
     }
 
+    public async deleteNetwork(
+        {
+            networkId,
+            userId,
+        }: {
+            networkId: TNetworkId_S,
+            userId: string,
+        },
+    ): Promise<void> {
+        // Verify the user is an admin of this network before deleting
+        const userNetwork = await this._prismaClient.userNetwork.findFirst({
+            where: {
+                networkId,
+                userId,
+                role: 'ADMIN',
+            },
+        });
+
+        if (!userNetwork) {
+            throw new Error('Network not found or access denied');
+        }
+
+        // Delete related UserNetwork records first (no cascade configured)
+        await this._prismaClient.userNetwork.deleteMany({
+            where: { networkId },
+        });
+
+        await this._prismaClient.network.delete({
+            where: { id: networkId },
+        });
+    }
+
     public readNetworkBySecretKeyOrThrow(
         secretKey: TNetworkKey_S,
     ): Promise<INetwork_S> {
