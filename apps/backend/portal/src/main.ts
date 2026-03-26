@@ -12,6 +12,7 @@ import { networkAgentRoutes } from './api/networks/agents.route';
 import { betterAuth } from './_decorators/auth.decorator';
 import { networkRoutes } from './api/networks/networks.route';
 import { version } from '../package.json';
+import { networkTokenRoutes } from './api/networks/tokens/tokens.route';
 
 // ****************************************************************************
 // * Env
@@ -100,6 +101,7 @@ export const app = new Elysia()
     .use(networkAgentRoutes)
     .use(networkChannelRoutes)
     .use(networkRoutes)
+    .use(networkTokenRoutes)
     .get('/api/status', async () => {
         return [
             await meshRedisStatusService.getRedisStatusOrThrow(),

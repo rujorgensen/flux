@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { NetworksService } from '../data/networks.service';
+import { NetworksService } from '../_services/networks.service';
 import { combineLatest, filter, firstValueFrom, map } from 'rxjs';
 
 export const networkGuard = async () => {

@@ -15,16 +15,18 @@ export interface INetwork {
 const STORAGE_KEY = 'flux_selected_network_id';
 export const MAX_NETWORKS = 3;
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+    providedIn: 'root',
+})
 export class NetworksService {
     private readonly _networks$ = new BehaviorSubject<INetwork[]>([]);
     private readonly _selectedNetwork$ = new BehaviorSubject<INetwork | null>(null);
     private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
 
-    readonly networks$: Observable<INetwork[]> = this._networks$.asObservable();
-    readonly selectedNetwork$: Observable<INetwork | null> = this._selectedNetwork$.asObservable();
-    readonly isLoading$: Observable<boolean> = this._isLoading$.asObservable();
-    readonly canCreateNetwork$: Observable<boolean> = this._networks$.pipe(
+    public readonly networks$: Observable<INetwork[]> = this._networks$.asObservable();
+    public readonly selectedNetwork$: Observable<INetwork | null> = this._selectedNetwork$.asObservable();
+    public readonly isLoading$: Observable<boolean> = this._isLoading$.asObservable();
+    public readonly canCreateNetwork$: Observable<boolean> = this._networks$.pipe(
         map((nets) => nets.length < MAX_NETWORKS),
     );
 

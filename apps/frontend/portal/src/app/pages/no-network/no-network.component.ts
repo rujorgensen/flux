@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { createAuthClient } from 'better-auth/client';
 import { Subscription, filter } from 'rxjs';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
-import { NetworksService } from '../../data/networks.service';
+import { NetworksService } from '../../_services/networks.service';
 
 interface UserSession {
     id?: string;

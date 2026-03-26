@@ -9,7 +9,8 @@ const createNetworkDTO = t.Object({
 });
 
 export const apiRoutes = new Elysia({ prefix: '/api/networks' })
-    .use(betterAuth);
+    .use(betterAuth)
+    ;
 
 export const networkRoutes = apiRoutes
     .use(networkService)

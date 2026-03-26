@@ -17,7 +17,7 @@
                                 <a href="#">{{ network.alias }}</a>
                             }
                         </li>
-                        <li>Dashboard</li>
+                        <li>{{ pageTitle() }}</li>
                     </ul>
                 </div>
             </div>
@@ -94,7 +94,11 @@
                                 Settings
                             </summary>
                             <ul>
-                                <li><a href="#">General</a></li>
+                                <li>
+                                    <a routerLink="/dashboard/settings/general">
+                                        General
+                                    </a>
+                                </li>
                                 <li><a href="#">Team</a></li>
                                 <li><a href="#">Billing</a></li>
                                 <li><a href="#">Limits</a></li>

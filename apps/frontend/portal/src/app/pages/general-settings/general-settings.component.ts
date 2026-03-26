@@ -1,14 +1,10 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    signal,
-    OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserService } from '$lib/app/_services/auth/user.service';
+import type { Observable } from 'rxjs';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
-import { ActiveChannelsTableComponent } from '../../components/tables/active-channels/active-channels-table.component';
-import { NetworksService } from '$lib/app/_services/networks.service';
+import { NetworkTokensComponent } from '../../components/network-tokens/network-tokens.component';
+import { UserService } from '$lib/app/_services/auth/user.service';
+import { NetworksService, type INetwork } from '../../_services/networks.service';
 
 interface UserSession {
     id?: string;
@@ -18,19 +14,19 @@ interface UserSession {
 }
 
 @Component({
-    selector: 'app-active-channels',
+    selector: 'app-general-settings',
     imports: [
         CommonModule,
         DashboardLayoutComponent,
-        ActiveChannelsTableComponent,
+        NetworkTokensComponent,
     ],
-    templateUrl: './active-channels.component.html',
-    styleUrls: ['./active-channels.component.css'],
+    templateUrl: './general-settings.component.html',
+    styleUrls: ['./general-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ActiveChannelsPageComponent implements OnInit {
+export class GeneralSettingsPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
-    protected readonly selectedNetwork$;
+    protected readonly selectedNetwork$: Observable<INetwork | null>;
 
     constructor(
         private readonly networksService: NetworksService,
@@ -39,11 +35,10 @@ export class ActiveChannelsPageComponent implements OnInit {
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
     }
 
-    async ngOnInit() {
-        const session = await this._userService
-            .authClient
-            .getSession();
+    async ngOnInit(
 
+    ) {
+        const session = await this._userService.authClient.getSession();
         if (session.data) {
             this.userSession.set(session.data.user as UserSession);
         }

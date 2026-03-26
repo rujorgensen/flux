@@ -33,6 +33,11 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./pages/active-channels/active-channels.component').then(m => m.ActiveChannelsPageComponent),
     },
     {
+        path: 'dashboard/settings/general',
+        canActivate: [authGuard, networkGuard],
+        loadComponent: () => import('./pages/general-settings/general-settings.component').then(m => m.GeneralSettingsPageComponent),
+    },
+    {
         path: 'privacy-policy',
         loadComponent: () => import('./pages/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyPageComponent),
     },
