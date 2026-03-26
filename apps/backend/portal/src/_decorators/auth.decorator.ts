@@ -9,6 +9,8 @@ export const betterAuth = new Elysia({ name: 'better-auth' })
         }
 
         context.status(405);
+
+        return undefined;
     })
 
     .macro({

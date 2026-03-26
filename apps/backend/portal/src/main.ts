@@ -16,7 +16,7 @@ import { version } from '../package.json';
 // ****************************************************************************
 // * Env
 // ****************************************************************************
-const FLUX_AUTHORITY_JWT_SECRET: string | undefined = process.env.FLUX_AUTHORITY_JWT_SECRET;
+const FLUX_AUTHORITY_JWT_SECRET: string | undefined = process.env['FLUX_AUTHORITY_JWT_SECRET'];
 if (!FLUX_AUTHORITY_JWT_SECRET) {
     throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
 }
@@ -37,8 +37,8 @@ const meshRedisStatusService: RedisStatusService = new RedisStatusService(meshRe
 // * Start server
 // ****************************************************************************
 
-const fluxMeshServerPort: number = Bun.env.PORTAL_MESH_SERVER_PORT ?
-    Number.parseInt(Bun.env.PORTAL_MESH_SERVER_PORT)
+const fluxMeshServerPort: number = Bun.env['PORTAL_MESH_SERVER_PORT'] ?
+    Number.parseInt(Bun.env['PORTAL_MESH_SERVER_PORT'])
     :
     5_101;
 
@@ -77,6 +77,7 @@ export const app = new Elysia()
         methods: [
             'GET',
             'POST',
+            'DELETE',
         ],
     }))
 
@@ -121,10 +122,10 @@ export const app = new Elysia()
     // })
 
     .onStart(({ server }) => {
-        console.log(`🦊 Elysia API server v. ${version} is running at ${server?.hostname}:${server?.port}`);
+        console.log(`🦊. Elysia API server v. ${version} is running at ${server?.hostname}:${server?.port}`);
     })
 
-    .listen(Bun.env.PORT ?? 3_000)
+    .listen(Bun.env['PORT'] ?? 3_000)
     ;
 
-export type App = typeof app;
+export type TApp = typeof app;

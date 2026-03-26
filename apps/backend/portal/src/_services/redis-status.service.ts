@@ -170,8 +170,8 @@ export class RedisStatusService {
             }))
             : [];
 
-        const used = info.used_memory as number;
-        const max = info.maxmemory as number;
+        const used = info['used_memory'] as number;
+        const max = info['maxmemory'] as number;
 
         return {
             memory: {
@@ -181,21 +181,21 @@ export class RedisStatusService {
                 overThreshold: max > 0 ? (used / max) > threshold : false,
             },
             cpu: {
-                sys: info.used_cpu_sys,
-                user: info.used_cpu_user,
-                sysChildren: info.used_cpu_sys_children,
-                userChildren: info.used_cpu_user_children,
+                sys: info['used_cpu_sys'],
+                user: info['used_cpu_user'],
+                sysChildren: info['used_cpu_sys_children'],
+                userChildren: info['used_cpu_user_children'],
             },
             stats: {
-                evictedKeys: info.evicted_keys,
-                expiredKeys: info.expired_keys,
-                keyspaceHits: info.keyspace_hits,
-                keyspaceMisses: info.keyspace_misses,
-                rejectedConnections: info.rejected_connections,
+                evictedKeys: info['evicted_keys'],
+                expiredKeys: info['expired_keys'],
+                keyspaceHits: info['keyspace_hits'],
+                keyspaceMisses: info['keyspace_misses'],
+                rejectedConnections: info['rejected_connections'],
             },
             clients: {
-                connected: info.connected_clients,
-                blocked: info.blocked_clients,
+                connected: info['connected_clients'],
+                blocked: info['blocked_clients'],
             },
             keyspace,
             latency,
@@ -214,10 +214,10 @@ export class RedisStatusService {
         metrics: ReturnType<typeof parseInfoSection>,
         threshold: number = 0.9,
     ): number {
-        const used: number = metrics.used_memory as number;
-        const max: number = metrics.maxmemory as number;
-        const evicted: number = metrics.evicted_keys as number;
-        const rejected: number = metrics.rejected_connections as number;
+        const used: number = metrics['used_memory'] as number;
+        const max: number = metrics['maxmemory'] as number;
+        const evicted: number = metrics['evicted_keys'] as number;
+        const rejected: number = metrics['rejected_connections'] as number;
 
         let score: number = 100;
 

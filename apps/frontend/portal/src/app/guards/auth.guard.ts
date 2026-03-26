@@ -1,17 +1,15 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { createAuthClient } from 'better-auth/client';
+import { UserService } from '../_services/auth/user.service';
 
 export const authGuard = async () => {
     const router = inject(Router);
-    const authClient = createAuthClient({
-        baseURL: typeof window !== 'undefined' && window.location.hostname === 'localhost'
-            ? 'http://localhost:3000'
-            : undefined,
-    });
+    const authClient = inject(UserService);
 
     try {
-        const session = await authClient.getSession();
+        const session = await authClient
+            .authClient
+            .getSession();
 
         if (!session.data?.session) {
             return router.createUrlTree(['/sign-in']);

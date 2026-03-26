@@ -8,6 +8,7 @@ export const parseInfoSection = (
     for (const line of lines) {
         if (!line.startsWith('#') && line.includes(':')) {
             const [key, val] = line.split(':');
+
             const parsed = Number.parseFloat(val);
             result[key] = Number.isNaN(parsed) ? val.trim() : parsed;
         }
