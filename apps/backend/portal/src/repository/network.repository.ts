@@ -182,6 +182,7 @@ export class NetworkRepository {
      * Converts a Prisma network entity to the internal network representation.
      */
     private convert(
+        network: NetworkWithUserNetworks,
     ): INetwork_S {
         return {
             id: network.id as TNetworkId_S,
