@@ -9,6 +9,12 @@ import type {
 import type { RedisStatusService } from './_services/redis-status.service';
 import type { TNetworkAgentCountAt, TNetworkChannelCountAt, TNetworkId_S } from '@flux/shared/types';
 
+interface IAgentJWTPayload extends jwt.JwtPayload {
+    user: {
+        allowAllChannels: boolean;
+    };
+}
+
 const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´
 
 // ****************************************************************************
@@ -76,7 +82,7 @@ export class LiveUpdates {
                         identification: string,
                     ): Promise<boolean> => {
 
-                        const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as jwt.JwtPayload;
+                        const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as IAgentJWTPayload;
 
                         console.log(`🔒 A client is attempting to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
 
