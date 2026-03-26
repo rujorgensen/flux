@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { ActiveChannelsTableComponent } from '../../components/tables/active-channels/active-channels-table.component';
+import { NetworksService } from '$lib/app/data/networks.service';
 
 interface UserSession {
     id?: string;
@@ -28,13 +29,15 @@ interface UserSession {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActiveChannelsPageComponent implements OnInit {
-    protected readonly networkId = signal<string>('rAnD0M-demo-network-id');
     protected readonly userSession = signal<UserSession | null>(null);
-    protected readonly activeNetworkName = signal<string>('Acme Inc');
+    protected readonly selectedNetwork$;
 
     constructor(
+        private readonly networksService: NetworksService,
         private readonly _userService: UserService,
-    ) { }
+    ) {
+        this.selectedNetwork$ = this.networksService.selectedNetwork$;
+    }
 
     async ngOnInit() {
         const session = await this._userService

@@ -9,7 +9,9 @@ import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-a
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAuthorityService: NetworkAuthorityRedisSortedSet = new NetworkAuthorityRedisSortedSet(meshRedisConnection.getClient());
 
-export const networkAuthorityRoutes = new Elysia({ prefix: '/api/networks/:networkId/authorities' })
+export const networkAuthorityRoutes = new Elysia({
+    prefix: '/api/networks/:networkId/authorities',
+})
     .use(networkIdValidatorPlugin)
 
     /**

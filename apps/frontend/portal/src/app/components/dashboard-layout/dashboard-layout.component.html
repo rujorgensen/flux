@@ -13,7 +13,9 @@
                 <div class="breadcrumbs text-sm">
                     <ul>
                         <li class="hidden md:block">
-                            <a href="#">{{ activeNetworkName() }}</a>
+                            @if (selectedNetwork$ | async; as network) {
+                                <a href="#">{{ network.alias }}</a>
+                            }
                         </li>
                         <li>Dashboard</li>
                     </ul>
@@ -28,12 +30,17 @@
         <aside class="min-h-screen w-64 bg-base-200 text-base-content">
             <!-- Sidebar header -->
             <div class="sticky top-0 z-20 bg-base-200 px-4 py-3">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 mb-3">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-6 w-6 stroke-current">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                     <span class="text-lg font-bold">Flux Portal</span>
                 </div>
+                <!-- Network Selector -->
+                <app-network-selector
+                    (createRequested)="openCreateModal()"
+                    (deleteRequested)="openDeleteModal($event)"
+                />
             </div>
             <!-- Sidebar content -->
             <nav class="menu p-4 w-100">
@@ -115,3 +122,94 @@
         </aside>
     </div>
 </div>
+
+<!-- Create Network Modal (rendered at layout level to span full page) -->
+@if (showCreateModal()) {
+    <div class="modal modal-open">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Create New Network</h3>
+            <p class="py-2 text-sm text-base-content/70">
+                You can create up to {{ MAX_NETWORKS }} networks.
+            </p>
+            <div class="form-control w-full">
+                <label class="label" for="network-alias-input">
+                    <span class="label-text">Network Name</span>
+                </label>
+                <input
+                    id="network-alias-input"
+                    type="text"
+                    class="input input-bordered w-full"
+                    placeholder="e.g. Acme Inc"
+                    [value]="newNetworkAlias()"
+                    (input)="onAliasChange($any($event.target).value)"
+                    (keyup.enter)="confirmCreate()"
+                    maxlength="100"
+                />
+            </div>
+            <div class="modal-action">
+                <button
+                    class="btn"
+                    (click)="closeCreateModal()"
+                    type="button"
+                >
+                    Cancel
+                </button>
+                <button
+                    class="btn btn-primary"
+                    [disabled]="!newNetworkAlias().trim()"
+                    (click)="confirmCreate()"
+                    type="button"
+                >
+                    Create
+                </button>
+            </div>
+        </div>
+        <div class="modal-backdrop" (click)="closeCreateModal()"></div>
+    </div>
+}
+
+<!-- Delete Network Modal (rendered at layout level to span full page) -->
+@if (pendingDeleteNetwork(); as network) {
+    <div class="modal modal-open">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-error">Delete Network</h3>
+            <p class="py-3">
+                This will permanently delete
+                <strong>{{ network.alias }}</strong> and cannot be undone.
+            </p>
+            <p class="pb-3 text-sm text-base-content/70">
+                To confirm, type
+                <span class="font-mono bg-base-300 px-1 rounded">delete {{ network.alias }}</span>
+                below:
+            </p>
+            <div class="form-control w-full">
+                <input
+                    type="text"
+                    class="input input-bordered w-full"
+                    [placeholder]="expectedDeletePhrase()"
+                    [value]="deleteConfirmText()"
+                    (input)="onDeleteConfirmChange($any($event.target).value)"
+                    (keyup.enter)="confirmDelete()"
+                />
+            </div>
+            <div class="modal-action">
+                <button
+                    class="btn"
+                    (click)="cancelDelete()"
+                    type="button"
+                >
+                    Cancel
+                </button>
+                <button
+                    class="btn btn-error"
+                    [disabled]="!deleteConfirmValid()"
+                    (click)="confirmDelete()"
+                    type="button"
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+        <div class="modal-backdrop" (click)="cancelDelete()"></div>
+    </div>
+}

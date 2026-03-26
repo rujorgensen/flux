@@ -5,12 +5,14 @@ import {
     OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { map } from 'rxjs';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import type { TNetworkId_S } from '@flux/shared/types';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { StatsComponent } from '../../components/stats/stats.component';
 import { DashboardComponent } from '../../components/dashboard/dashboard.component';
 import { ChartComponent } from '../../components/chart/chart.component';
+import { NetworksService } from '../../data/networks.service';
 
 interface UserSession {
     id?: string;
@@ -33,14 +35,21 @@ interface UserSession {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardHomePageComponent implements OnInit {
-    protected readonly networkId = signal<TNetworkId_S>('rAnD0M-demo-network-id' as TNetworkId_S);
-    protected readonly networkCode = signal<string>('code-to-access-network');
+    protected readonly networkCode = signal<string | null>(null);
     protected readonly userSession = signal<UserSession | null>(null);
-    protected readonly activeNetworkName = signal<string>('Acme Inc');
+    protected readonly networkId$;
+
 
     constructor(
+        private readonly networksService: NetworksService,
         private readonly _userService: UserService,
-    ) { }
+    ) {
+        this.networkId$ = this.networksService
+            .selectedNetwork$
+            .pipe(
+                map((n) => (n?.id as TNetworkId_S) ?? null),
+            );
+    }
 
     async ngOnInit() {
         const session = await this._userService
