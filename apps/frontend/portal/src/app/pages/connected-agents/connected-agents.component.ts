@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { ConnectedAgentsTableComponent } from '../../components/tables/connected-agents/connected-agents-table.component';
-import { NetworksService } from '../../data/networks.service';
+import { NetworksService } from '../../_services/networks.service';
 
 interface UserSession {
     id?: string;

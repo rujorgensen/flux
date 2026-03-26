@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { combineLatest, filter } from 'rxjs';
-import { NetworksService, INetwork, MAX_NETWORKS } from '../../data/networks.service';
+import { NetworksService, INetwork, MAX_NETWORKS } from '../../_services/networks.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 
 interface UserSession {
@@ -34,6 +34,7 @@ interface UserSession {
 })
 export class DashboardLayoutComponent {
     userSession = input<UserSession | null>();
+    pageTitle = input<string>('Dashboard');
 
     protected readonly MAX_NETWORKS = MAX_NETWORKS;
 

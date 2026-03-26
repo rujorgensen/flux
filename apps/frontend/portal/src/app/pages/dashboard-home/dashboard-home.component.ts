@@ -12,7 +12,7 @@ import { DashboardLayoutComponent } from '../../components/dashboard-layout/dash
 import { StatsComponent } from '../../components/stats/stats.component';
 import { DashboardComponent } from '../../components/dashboard/dashboard.component';
 import { ChartComponent } from '../../components/chart/chart.component';
-import { NetworksService } from '../../data/networks.service';
+import { NetworksService } from '../../_services/networks.service';
 
 interface UserSession {
     id?: string;

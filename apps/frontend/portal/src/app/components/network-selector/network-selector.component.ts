@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { combineLatest, map } from 'rxjs';
-import { NetworksService, INetwork } from '../../data/networks.service';
+import { NetworksService, INetwork } from '../../_services/networks.service';
 
 @Component({
     selector: 'app-network-selector',
