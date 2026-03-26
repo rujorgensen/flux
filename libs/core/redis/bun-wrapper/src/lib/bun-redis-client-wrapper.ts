@@ -13,6 +13,7 @@ export class BunRedisClient extends EventEmitter<{
     private client: RedisClient;
     private readonly handlers: Map<string, Set<MessageHandler>> = new Map();
     private reconnecting = false;
+    private disconnected = false;
 
     private reconnectAttempts = 0;
     private readonly maxReconnects: number | null = null;
@@ -85,6 +86,10 @@ export class BunRedisClient extends EventEmitter<{
             return;
         }
 
+        if (this.disconnected) {
+            return;
+        }
+
         try {
             await this.client.connect();
 
@@ -97,12 +102,18 @@ export class BunRedisClient extends EventEmitter<{
             this.reconnectAttempts = 0;
 
             this.client.onclose = (error) => {
+                if (this.disconnected) {
+                    return;
+                }
                 console.error('⬇️ Redis client disconnected:', error);
                 this.connected = false;
                 this.emit('end', void 0);
                 this.retryReconnect();
             };
         } catch (error) {
+            if (this.disconnected) {
+                return;
+            }
             console.error('Initial Redis connection failed:', error);
             this.connected = false;
             this.emit('error', error instanceof Error ? error : new Error('Unknown error'));
@@ -116,10 +127,10 @@ export class BunRedisClient extends EventEmitter<{
     private async retryReconnect(
 
     ) {
-        if (this.reconnecting) return;
+        if (this.reconnecting || this.disconnected) return;
         this.reconnecting = true;
 
-        while (!this.connected && (this.reconnectAttempts <= (this.maxReconnects ?? Number.POSITIVE_INFINITY))) {
+        while (!this.connected && !this.disconnected && (this.reconnectAttempts <= (this.maxReconnects ?? Number.POSITIVE_INFINITY))) {
             const delay: number = this.options.socket.reconnectStrategy(this.reconnectAttempts) ?? Math.min(this.baseDelay * 2 ** this.reconnectAttempts, this.maxDelay);
 
             this.emit('reconnecting', void 0);
@@ -150,7 +161,7 @@ export class BunRedisClient extends EventEmitter<{
             }
         }
 
-        if (!this.connected) {
+        if (!this.connected && !this.disconnected) {
             this.emit('error', new Error('Max reconnection attempts reached. Will not retry.'));
         }
 
@@ -163,8 +174,12 @@ export class BunRedisClient extends EventEmitter<{
     public disconnect(
 
     ) {
+        this.disconnected = true;
         this.handlers.clear();
         this.connected = false;
-        // this.client.close(); // This keeps randomly failing in CI, and is uncatchable
+        // Do not call this.client.close() — Bun's RedisClient fires ERR_REDIS_CONNECTION_CLOSED
+        // asynchronously (bypassing try/catch) when the connection is already closed.
+        // Setting disconnected = true is sufficient: the onclose callback and retryReconnect
+        // loop both check this flag and exit early, preventing any unhandled errors.
     }
 }

@@ -1,0 +1,219 @@
+<div class="drawer lg:drawer-open">
+    <input id="app-drawer" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col">
+        <!-- Page header -->
+        <header class="flex h-16 shrink-0 items-center gap-2 border-b border-base-300 bg-base-100 px-4 transition-[width,height] ease-linear lg:h-16">
+            <div class="flex items-center gap-2">
+                <label for="app-drawer" class="btn btn-ghost btn-circle drawer-button lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-5 w-5 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </label>
+                <!-- Breadcrumbs -->
+                <div class="breadcrumbs text-sm">
+                    <ul>
+                        <li class="hidden md:block">
+                            @if (selectedNetwork$ | async; as network) {
+                                <a href="#">{{ network.alias }}</a>
+                            }
+                        </li>
+                        <li>{{ pageTitle() }}</li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+        <!-- Page content -->
+        <ng-content></ng-content>
+    </div>
+    <div class="drawer-side">
+        <label for="app-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+        <aside class="min-h-screen w-64 bg-base-200 text-base-content">
+            <!-- Sidebar header -->
+            <div class="sticky top-0 z-20 bg-base-200 px-4 py-3">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-6 w-6 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span class="text-lg font-bold">Flux Portal</span>
+                </div>
+                <!-- Network Selector -->
+                <app-network-selector
+                    (createRequested)="openCreateModal()"
+                    (deleteRequested)="openDeleteModal($event)"
+                />
+            </div>
+            <!-- Sidebar content -->
+            <nav class="menu p-4 w-100">
+                <ul>
+                    <li>
+                        <a routerLink="/" class="active">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-5 w-5 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <details>
+                            <summary>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-5 w-5 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Dashboard Items
+                            </summary>
+                            <ul>
+                                <li><a routerLink="/dashboard/connected-authorities">Connected Authorities</a></li>
+                                <li><a routerLink="/dashboard/connected-agents">Connected Agents</a></li>
+                                <li><a routerLink="/dashboard/active-channels">Active Channels</a></li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <details>
+                            <summary>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-5 w-5 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                </svg>
+                                Documentation
+                            </summary>
+                            <ul>
+                                <li><a href="#">Introduction</a></li>
+                                <li><a href="#">Get Started</a></li>
+                                <li><a href="#">Tutorials</a></li>
+                                <li><a href="#">Changelog</a></li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <details>
+                            <summary>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-5 w-5 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Settings
+                            </summary>
+                            <ul>
+                                <li>
+                                    <a routerLink="/dashboard/settings/general">
+                                        General
+                                    </a>
+                                </li>
+                                <li><a href="#">Team</a></li>
+                                <li><a href="#">Billing</a></li>
+                                <li><a href="#">Limits</a></li>
+                            </ul>
+                        </details>
+                    </li>
+                </ul>
+            </nav>
+            <!-- Sidebar footer -->
+            @if (userSession()) {
+            <div class="sticky bottom-0 bg-base-200 p-4">
+                <div class="flex items-center gap-3">
+                    <div class="avatar placeholder">
+                        <div class="w-10 rounded-full bg-neutral text-neutral-content">
+                            <span>{{ userSession()?.name?.charAt(0) || userSession()?.email?.charAt(0) || 'U' }}</span>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-sm font-semibold">{{ userSession()?.name || 'User' }}</div>
+                        <div class="text-xs text-base-content/70">{{ userSession()?.email || '' }}</div>
+                    </div>
+                </div>
+            </div>
+            }
+        </aside>
+    </div>
+</div>
+
+<!-- Create Network Modal (rendered at layout level to span full page) -->
+@if (showCreateModal()) {
+    <div class="modal modal-open">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Create New Network</h3>
+            <p class="py-2 text-sm text-base-content/70">
+                You can create up to {{ MAX_NETWORKS }} networks.
+            </p>
+            <div class="form-control w-full">
+                <label class="label" for="network-alias-input">
+                    <span class="label-text">Network Name</span>
+                </label>
+                <input
+                    id="network-alias-input"
+                    type="text"
+                    class="input input-bordered w-full"
+                    placeholder="e.g. Acme Inc"
+                    [value]="newNetworkAlias()"
+                    (input)="onAliasChange($any($event.target).value)"
+                    (keyup.enter)="confirmCreate()"
+                    maxlength="100"
+                />
+            </div>
+            <div class="modal-action">
+                <button
+                    class="btn"
+                    (click)="closeCreateModal()"
+                    type="button"
+                >
+                    Cancel
+                </button>
+                <button
+                    class="btn btn-primary"
+                    [disabled]="!newNetworkAlias().trim()"
+                    (click)="confirmCreate()"
+                    type="button"
+                >
+                    Create
+                </button>
+            </div>
+        </div>
+        <div class="modal-backdrop" (click)="closeCreateModal()"></div>
+    </div>
+}
+
+<!-- Delete Network Modal (rendered at layout level to span full page) -->
+@if (pendingDeleteNetwork(); as network) {
+    <div class="modal modal-open">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-error">Delete Network</h3>
+            <p class="py-3">
+                This will permanently delete
+                <strong>{{ network.alias }}</strong> and cannot be undone.
+            </p>
+            <p class="pb-3 text-sm text-base-content/70">
+                To confirm, type
+                <span class="font-mono bg-base-300 px-1 rounded">delete {{ network.alias }}</span>
+                below:
+            </p>
+            <div class="form-control w-full">
+                <input
+                    type="text"
+                    class="input input-bordered w-full"
+                    [placeholder]="expectedDeletePhrase()"
+                    [value]="deleteConfirmText()"
+                    (input)="onDeleteConfirmChange($any($event.target).value)"
+                    (keyup.enter)="confirmDelete()"
+                />
+            </div>
+            <div class="modal-action">
+                <button
+                    class="btn"
+                    (click)="cancelDelete()"
+                    type="button"
+                >
+                    Cancel
+                </button>
+                <button
+                    class="btn btn-error"
+                    [disabled]="!deleteConfirmValid()"
+                    (click)="confirmDelete()"
+                    type="button"
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+        <div class="modal-backdrop" (click)="cancelDelete()"></div>
+    </div>
+}

@@ -13,7 +13,9 @@ import { networkIdValidatorPlugin } from './plugins';
 const redisConnection_: RedisConnection = getMeshRedisConnection();
 const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
 
-export const networkChannelRoutes = new Elysia({ prefix: '/api/networks/:networkId/channels' })
+export const networkChannelRoutes = new Elysia({
+    prefix: '/api/networks/:networkId/channels',
+})
     .use(networkIdValidatorPlugin)
 
     /**

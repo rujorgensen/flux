@@ -1,0 +1,9 @@
+<app-dashboard-layout [userSession]="userSession()" pageTitle="General Settings">
+    @if (selectedNetwork$ | async; as network) {
+        <div class="p-6 max-w-3xl space-y-8">
+            <section>
+                <app-network-tokens [networkId]="network.id" />
+            </section>
+        </div>
+    }
+</app-dashboard-layout>

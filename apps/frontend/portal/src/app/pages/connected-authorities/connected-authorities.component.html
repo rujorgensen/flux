@@ -1,0 +1,5 @@
+<app-dashboard-layout [userSession]="userSession()">
+    @if (selectedNetwork$ | async; as network) {
+        <app-connected-authorities-table [networkId]="network.id" />
+    }
+</app-dashboard-layout>

@@ -36,7 +36,7 @@ services:
       - portal-internal-network-2
 
   mesh-postgres-dev:
-    image: postgres:18.2-alpine
+    image: postgres:18.3-alpine
     restart: always
     container_name: mesh-postgres-dev
     environment:
@@ -56,9 +56,10 @@ services:
 networks:
   portal-internal-network-2:
     driver: bridge
-    # *******************************************************************************
-    # *** Volumes
-    # *******************************************************************************
+    
+# *******************************************************************************
+# *** Volumes
+# *******************************************************************************
 volumes:
   dragonflymeshdata:
   dragonflyportaldata:

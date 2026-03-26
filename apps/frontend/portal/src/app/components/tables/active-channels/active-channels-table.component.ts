@@ -1,0 +1,50 @@
+import { ChangeDetectionStrategy, Component, input, signal, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import type { INetworkChannel } from '@flux/shared/types';
+import { api } from '$lib/app/_services/api/api';
+
+@Component({
+    selector: 'app-active-channels-table',
+    imports: [
+        CommonModule,
+    ],
+    templateUrl: './active-channels-table.component.html',
+    styleUrls: ['./active-channels-table.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ActiveChannelsTableComponent {
+    public readonly networkId = input.required<string>();
+
+    protected readonly dataStore = signal<INetworkChannel[] | undefined>(undefined);
+
+    constructor() {
+        effect(() => {
+            const networkId = this.networkId();
+            if (networkId) {
+                this.fetchData(networkId);
+            }
+        });
+    }
+
+    private async fetchData(
+        networkId: string,
+    ): Promise<void> {
+        await api
+            .api
+            .networks({
+                networkId: networkId,
+            })
+            .channels
+            .get()
+            .then((response) => {
+
+                if (response.data) {
+                    this.dataStore.set(response.data);
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching active channels:', error);
+            })
+            ;
+    }
+}

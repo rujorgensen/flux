@@ -1,14 +1,3 @@
-# Astro Starter Kit: Blog
-
-Features:
-
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
-
 ## 🚀 Project Structure
 
 Inside of your Astro project, you'll see the following folders and files:
@@ -47,6 +36,9 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 
 ## Ports
 
+    Demo
+        4000    - UI
+        
     Mesh
         5100    - Default mesh server port
 
@@ -59,7 +51,7 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 
 ## Endpoints
 
-### Astro Server Health Check
+### Server Health Check
 - **GET /ping** - Returns 'pong' for server availability detection
-  - Endpoint: `http://localhost:3001/ping`
+  - Endpoint: `http://localhost:3000/ping`
   - Response: Plain text 'pong' with HTTP 200 status

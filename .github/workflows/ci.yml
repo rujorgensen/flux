@@ -48,7 +48,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
 
       -
         name: 💾 Cache Prisma types
@@ -59,7 +59,7 @@ jobs:
             @prisma-types
           key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
           restore-keys: |
-            ${{ runner.os }}-prisma-
+            ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
 
       -
         name: 💾 Install dependencies
@@ -97,7 +97,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
 
       - name: 💾 Restore Prisma types
         uses: actions/cache@v5
@@ -106,7 +106,7 @@ jobs:
             @prisma-types
           key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
           restore-keys: |
-            ${{ runner.os }}-prisma-
+            ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
 
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
@@ -123,7 +123,7 @@ jobs:
         run: bun nx affected -t bun-test test lint # --no-agents
 
   e2e-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     needs: [install-deps]
     steps:
@@ -148,7 +148,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
 
       - name: 💾 Restore Prisma types
         uses: actions/cache@v5
@@ -157,7 +157,7 @@ jobs:
             @prisma-types
           key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
           restore-keys: |
-            ${{ runner.os }}-prisma-
+            ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
 
       # This enables task distribution via Nx Cloud
       # Run this command as early as possible, before dependencies are installed
@@ -168,6 +168,9 @@ jobs:
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
       # - run: bun nx-cloud record -- echo Hello World
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
+
+      - name: 💾 Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
 
       - name: 🧪 Run E2E tests
         timeout-minutes: 2
@@ -199,7 +202,7 @@ jobs:
             node_modules
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
 
       - name: 💾 Restore Prisma types
         uses: actions/cache@v5
@@ -208,7 +211,7 @@ jobs:
             @prisma-types
           key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
           restore-keys: |
-            ${{ runner.os }}-prisma-
+            ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
 
       - name: 🛠️ Build
         timeout-minutes: 2
