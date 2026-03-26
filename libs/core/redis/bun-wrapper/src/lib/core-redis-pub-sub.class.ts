@@ -12,6 +12,10 @@ export class BunRedisPubSub {
     // Map to track callback wrappers for proper unsubscription
     private readonly callbackMap = new Map<MessageCallback, (message: string, channel: string) => void>();
 
+    // Track active subscriptions so we can cleanly unsubscribe on disconnect
+    private readonly _subscribedChannels = new Set<string>();
+    private _disconnected = false;
+
     constructor(
         private readonly _options: {
             name?: string, // Optional name for the client to tell them apart in the logs
@@ -37,6 +41,7 @@ export class BunRedisPubSub {
         };
 
         this.publisher.onclose = (error) => {
+            if (this._disconnected) return;
             if (error) {
                 console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub publisher error:`, error);
             }
@@ -57,6 +62,7 @@ export class BunRedisPubSub {
         };
 
         this.subscriber.onclose = (error) => {
+            if (this._disconnected) return;
             if (error) {
                 console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub subscriber error:`, error);
             }
@@ -101,11 +107,13 @@ export class BunRedisPubSub {
                 message: string,
                 channel: string,
             ) => {
+                if (this._disconnected) return;
                 callback(message, channel as TRedisEventChannel);
             };
 
             // Store the mapping for unsubscribe
             this.callbackMap.set(callback, wrappedCallback);
+            this._subscribedChannels.add(channelId);
 
             await this.subscriber.subscribe(channelId, wrappedCallback);
         } catch {
@@ -118,6 +126,8 @@ export class BunRedisPubSub {
         callback?: MessageCallback,
     ): Promise<void> {
         try {
+            this._subscribedChannels.delete(channelId);
+
             if (callback) {
                 // Get the wrapped callback we used in subscribe
                 const wrappedCallback = this.callbackMap.get(callback);
@@ -138,20 +148,33 @@ export class BunRedisPubSub {
     }
 
     /**
-     * Disconnects the Redis client and the subscriber.
-     * 
-     * Note: We intentionally do not call .close() on publisher/subscriber.
-     * Bun's RedisClient.close() fires ERR_REDIS_CONNECTION_CLOSED asynchronously
-     * (bypassing try/catch) when the connection is already closed at teardown time,
-     * causing "unhandled error between tests" in the test runner.
-     * With autoReconnect: false there is no reconnect loop to stop, so clearing
-     * the callback map is sufficient.
-     * 
-     * @returns { void }
+     * Disconnects the Redis pub/sub client.
+     *
+     * Unsubscribes from all active channels before clearing state. This
+     * cleanly terminates Bun's internal subscription read-loop so that when
+     * the underlying Redis server (e.g. a test container) is stopped
+     * afterwards, there is no longer an active subscription that would fire
+     * an unhandled `ERR_REDIS_CONNECTION_CLOSED` rejection.
+     *
+     * @returns { Promise<void> }
      */
-    public disconnect(
+    public async disconnect(
 
-    ) {
+    ): Promise<void> {
+        if (this._disconnected) return;
+        this._disconnected = true;
+
+        // Cleanly unsubscribe from every tracked channel so Bun's internal
+        // subscription loop terminates gracefully before the connection drops.
+        for (const channelId of this._subscribedChannels) {
+            try {
+                await this.subscriber.unsubscribe(channelId);
+            } catch {
+                // Ignore errors — connection may already be closing
+            }
+        }
+
+        this._subscribedChannels.clear();
         this.callbackMap.clear();
     }
 }
