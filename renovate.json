@@ -6,5 +6,8 @@
   ],
   "automerge": true,
   "automergeType": "pr",
-  "separateMajorMinor": true
+  "separateMajorMinor": true,
+  "schedule": ["on sunday"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2
 }
