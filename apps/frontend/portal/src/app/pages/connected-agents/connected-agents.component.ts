@@ -1,7 +1,11 @@
-import { ChangeDetectionStrategy, Component, signal, OnInit } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    signal,
+    OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { provideHttpClient, withFetch } from '@angular/common/http';
-import { createAuthClient } from 'better-auth/client';
+import { UserService } from '$lib/app/_services/auth/user.service';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { ConnectedAgentsTableComponent } from '../../components/tables/connected-agents/connected-agents-table.component';
 
@@ -28,16 +32,15 @@ export class ConnectedAgentsPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
     protected readonly activeNetworkName = signal<string>('Acme Inc');
 
-    private authClient = createAuthClient({
-        baseURL: typeof window !== 'undefined' && window.location.hostname === 'localhost'
-            ? 'http://localhost:3000'
-            : undefined,
-    });
-
-    static clientProviders = [provideHttpClient(withFetch())];
+    constructor(
+        private readonly _userService: UserService,
+    ) { }
 
     async ngOnInit() {
-        const session = await this.authClient.getSession();
+        const session = await this._userService
+            .authClient
+            .getSession();
+
         if (session.data) {
             this.userSession.set(session.data.user as UserSession);
         }

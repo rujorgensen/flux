@@ -20,6 +20,7 @@
         "better-auth": "catalog:",
         "chart.js": "catalog:",
         "daisyui": "catalog:",
+        "ngx-sonner": "catalog:",
         "open-props": "catalog:",
         "postcss": "catalog:",
         "rollup-plugin-visualizer": "catalog:",

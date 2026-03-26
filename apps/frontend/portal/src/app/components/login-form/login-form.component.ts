@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { createAuthClient } from 'better-auth/client';
+import { UserService } from '$lib/app/_services/auth/user.service';
 
 @Component({
     selector: 'app-login-form',
@@ -8,11 +8,10 @@ import { createAuthClient } from 'better-auth/client';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginFormComponent {
-    private authClient = createAuthClient({
-        baseURL: typeof window !== 'undefined' && window.location.hostname === 'localhost'
-            ? 'http://localhost:3000'
-            : undefined,
-    });
+
+    constructor(
+        private readonly _userService: UserService,
+    ) { }
 
     protected googleSignIn(
 
@@ -21,7 +20,8 @@ export class LoginFormComponent {
             ? 'http://localhost:3001'
             : '/';
 
-        this.authClient
+        this._userService
+            .authClient
             .signIn
             .social(
                 {

@@ -12,7 +12,7 @@ interface UserSession {
 @Component({
     selector: 'app-dashboard-layout',
     templateUrl: './dashboard-layout.component.html',
-    styleUrl: './dashboard-layout.component.css',
+    styleUrl: './dashboard-layout.component.scss',
     imports: [CommonModule, RouterModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
