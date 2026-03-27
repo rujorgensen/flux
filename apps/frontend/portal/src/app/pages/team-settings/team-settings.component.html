@@ -1,0 +1,254 @@
+<app-dashboard-layout [userSession]="userSession()" pageTitle="Team">
+    @if (orgMembers$ | async; as members) {
+        @if (networks$ | async; as allNetworks) {
+            <div class="p-6 max-w-5xl space-y-8">
+
+                <!-- Header -->
+                <section>
+                    <h2 class="text-2xl font-bold">{{ ORG_NAME }}</h2>
+                    <p class="mt-1 text-base-content/70">
+                        Everyone listed here is a member of your organisation.
+                        @if (isOrgAdmin(members)) {
+                            You're an admin, so you run the show here.
+                        } @else {
+                            Talk to an admin if you need to make changes.
+                        }
+                    </p>
+                </section>
+
+                <!-- Members table -->
+                <section>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold">Members</h3>
+                        @if (isOrgAdmin(members)) {
+                            <button
+                                class="btn btn-primary btn-sm"
+                                type="button"
+                                (click)="openInviteModal()"
+                            >
+                                + Invite member
+                            </button>
+                        }
+                    </div>
+
+                    <div class="overflow-x-auto rounded-box border border-base-300">
+                        <table class="table table-zebra w-full">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Networks</th>
+                                    @if (isOrgAdmin(members)) {
+                                        <th></th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (member of members; track member.userId) {
+                                    <tr>
+                                        <!-- Avatar -->
+                                        <td class="w-12">
+                                            <div class="avatar placeholder">
+                                                <div class="w-9 rounded-full bg-neutral text-neutral-content text-sm">
+                                                    <span>{{ (member.userId | userName: userInfoMap()).charAt(0).toUpperCase() }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <!-- Name resolved via UserNamePipe -->
+                                        <td>
+                                            <span class="font-medium text-sm">{{ member.userId | userName: userInfoMap() }}</span>
+                                        </td>
+                                        <!-- Email -->
+                                        <td>
+                                            <span class="text-sm text-base-content/50">{{ userInfoMap()[member.userId]?.email ?? '—' }}</span>
+                                        </td>
+                                        <!-- Role badge -->
+                                        <td>
+                                            <span [class]="getRoleBadgeClass(member.primaryRole)">
+                                                {{ member.primaryRole }}
+                                            </span>
+                                        </td>
+                                        <!-- Networks -->
+                                        <td>
+                                            <div class="flex flex-wrap gap-1">
+                                                @for (net of member.networks; track net.networkId) {
+                                                    <span class="badge badge-outline badge-sm">{{ net.alias }}</span>
+                                                } @empty {
+                                                    <span class="text-sm text-base-content/50">None</span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <!-- Actions -->
+                                        @if (isOrgAdmin(members)) {
+                                            <td>
+                                                <div class="flex items-center gap-2">
+                                                    <button
+                                                        class="btn btn-ghost btn-xs"
+                                                        type="button"
+                                                        title="Manage network access"
+                                                        (click)="openNetworkModal(member, allNetworks)"
+                                                    >
+                                                        Networks
+                                                    </button>
+                                                    @if (member.primaryRole !== 'owner') {
+                                                        <button
+                                                            class="btn btn-ghost btn-xs text-error"
+                                                            type="button"
+                                                            title="Remove member"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td [attr.colspan]="isOrgAdmin(members) ? 6 : 5" class="text-center text-base-content/50 py-8">
+                                            No members yet — looks like you're a lone wolf.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Add member by email (admins only) -->
+                @if (isOrgAdmin(members)) {
+                    <section>
+                        <h3 class="text-lg font-semibold mb-3">Add member by email</h3>
+                        <p class="text-sm text-base-content/70 mb-3">
+                            Already have an account? Enter their email to add them directly to <strong>{{ ORG_NAME }}</strong>.
+                        </p>
+                        <div class="flex gap-2 max-w-md">
+                            <input
+                                type="email"
+                                class="input input-bordered flex-1"
+                                placeholder="colleague@example.com"
+                                [(ngModel)]="addByEmailInput"
+                            />
+                            <button
+                                class="btn btn-primary"
+                                type="button"
+                                disabled
+                                title="Coming soon"
+                            >
+                                Add member
+                            </button>
+                        </div>
+                        <p class="text-xs text-base-content/50 mt-2">
+                            Direct member addition is coming soon. Use "Invite member" to send an email invitation in the meantime.
+                        </p>
+                    </section>
+                }
+
+                <!-- Coming soon notice -->
+                @if (isOrgAdmin(members)) {
+                    <section class="alert alert-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>
+                            Full team management (invites, role changes, removals) is coming soon.
+                            Sit tight — it's going to be great!
+                        </span>
+                    </section>
+                }
+
+            </div>
+
+            <!-- Manage Network Access Modal -->
+            @if (memberToManage(); as managed) {
+                <div class="modal modal-open">
+                    <div class="modal-box">
+                        <h3 class="font-bold text-lg">Manage Network Access</h3>
+                        <p class="py-2 text-sm text-base-content/70">
+                            Choose which networks <span class="font-semibold">{{ managed.userId | userName: userInfoMap() }}</span> can access.
+                        </p>
+                        <div class="space-y-2 py-2">
+                            @for (network of allNetworks; track network.id) {
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        class="checkbox checkbox-sm"
+                                        [checked]="networkToggleState()[network.id]"
+                                        (change)="toggleNetwork(network.id)"
+                                    />
+                                    <span class="text-sm">{{ network.alias }}</span>
+                                </label>
+                            }
+                        </div>
+                        <p class="text-xs text-base-content/50 mt-2">
+                            Saving network access changes is coming soon.
+                        </p>
+                        <div class="modal-action">
+                            <button
+                                class="btn"
+                                type="button"
+                                (click)="closeNetworkModal()"
+                            >
+                                Close
+                            </button>
+                            <button
+                                class="btn btn-primary"
+                                type="button"
+                                (click)="closeNetworkModal()"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-backdrop" (click)="closeNetworkModal()"></div>
+                </div>
+            }
+        }
+    }
+</app-dashboard-layout>
+
+<!-- Invite Modal -->
+@if (showInviteModal()) {
+    <div class="modal modal-open">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Invite a team member</h3>
+            <p class="py-2 text-sm text-base-content/70">
+                Enter their email address and we'll send them an invitation.
+                (Full invite flow coming soon!)
+            </p>
+            <div class="form-control w-full">
+                <label class="label" for="invite-email-input">
+                    <span class="label-text">Email address</span>
+                </label>
+                <input
+                    id="invite-email-input"
+                    type="email"
+                    class="input input-bordered w-full"
+                    placeholder="teammate@example.com"
+                    [value]="inviteEmail()"
+                    (input)="onInviteEmailChange($any($event.target).value)"
+                />
+            </div>
+            <div class="modal-action">
+                <button
+                    class="btn"
+                    type="button"
+                    (click)="closeInviteModal()"
+                >
+                    Cancel
+                </button>
+                <button
+                    class="btn btn-primary"
+                    type="button"
+                    [disabled]="!inviteEmail().trim()"
+                    (click)="closeInviteModal()"
+                >
+                    Send Invite
+                </button>
+            </div>
+        </div>
+        <div class="modal-backdrop" (click)="closeInviteModal()"></div>
+    </div>
+}
