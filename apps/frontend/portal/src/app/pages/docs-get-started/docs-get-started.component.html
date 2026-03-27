@@ -63,7 +63,7 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ meshSnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript" [innerHTML]="meshSnippet | syntaxHighlight: 'typescript'"></code></pre>
             </div>
 
             <h2>Step 2 — Register an Authority</h2>
@@ -110,7 +110,7 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ authoritySnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript" [innerHTML]="authoritySnippet | syntaxHighlight: 'typescript'"></code></pre>
             </div>
 
             <div class="not-prose alert alert-info my-6">
@@ -164,7 +164,7 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ agentSnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript" [innerHTML]="agentSnippet | syntaxHighlight: 'typescript'"></code></pre>
             </div>
 
             <h2>You're live! 🎉</h2>

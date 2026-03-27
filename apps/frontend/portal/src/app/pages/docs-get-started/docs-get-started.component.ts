@@ -1,5 +1,4 @@
 import {
-    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
     OnInit,
@@ -9,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
+import { SyntaxHighlightPipe } from '$lib/app/_pipes/syntax-highlight.pipe';
 
 interface UserSession {
     id?: string;
@@ -20,15 +20,19 @@ interface UserSession {
 @Component({
     selector: 'app-docs-get-started',
     imports: [
+        // * Modules
         CommonModule,
         RouterModule,
+        // * Pipes
+        SyntaxHighlightPipe,
+        // * Components
         DashboardLayoutComponent,
     ],
     templateUrl: './docs-get-started.component.html',
     styleUrls: ['./docs-get-started.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsGetStartedPageComponent implements OnInit, AfterViewInit {
+export class DocsGetStartedPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
     protected readonly copiedSnippet = signal<string | null>(null);
 
@@ -39,6 +43,7 @@ const server = new FluxMeshServer();
 server.onReady(() => {
     console.log('🚀 Mesh server running on port 5100');
 });`;
+
 
     protected readonly authoritySnippet = `import { FluxAuthority } from '@persistica/flux-authority';
 
@@ -91,7 +96,7 @@ channel.publish({ text: 'Hello, Flux!' });`;
 
     constructor(
         private readonly _userService: UserService,
-    ) {}
+    ) { }
 
     async ngOnInit(
 
@@ -99,14 +104,6 @@ channel.publish({ text: 'Hello, Flux!' });`;
         const session = await this._userService.authClient.getSession();
         if (session.data) {
             this.userSession.set(session.data.user as UserSession);
-        }
-    }
-
-    ngAfterViewInit(
-
-    ): void {
-        if (typeof window !== 'undefined' && (window as any).hljs) {
-            (window as any).hljs.highlightAll();
         }
     }
 
