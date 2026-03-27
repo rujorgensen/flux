@@ -2,9 +2,9 @@
     <div class="p-6 max-w-4xl">
         <article class="prose prose-lg max-w-none">
 
-            <div class="not-prose mb-8">
+            <div class="not-prose mb-10">
                 <div class="flex items-center gap-3 mb-2">
-                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 stroke-primary">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
@@ -17,68 +17,58 @@
             <p>
                 <strong>Flux</strong> is a lightweight, real-time pub/sub messaging framework for TypeScript.
                 It lets your services, agents, and clients talk to each other instantly — across networks, behind
-                firewalls, and without you having to wire up WebSockets yourself.
-            </p>
-
-            <p>
-                Think of it like a switchboard for your application: agents dial in, channels open up, and
-                messages flow freely — all in real time.
+                firewalls, without wiring up WebSockets yourself.
             </p>
 
             <h2>Core Concepts</h2>
 
-            <p>Flux is built around three moving parts that work together:</p>
-
-            <div class="not-prose grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+            <div class="not-prose grid grid-cols-1 md:grid-cols-3 gap-4 my-8">
                 <div class="card bg-base-200 border border-base-300">
-                    <div class="card-body">
-                        <h3 class="card-title text-base">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-primary">
+                    <div class="card-body gap-3">
+                        <h3 class="card-title text-base flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-primary shrink-0">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"></path>
                             </svg>
                             FluxMesh
                         </h3>
-                        <p class="text-sm text-base-content/70">
-                            The <strong>server</strong>. It runs the mesh network that all agents and authorities connect to.
-                            Think of it as the hub in a hub-and-spoke architecture.
+                        <p class="text-sm text-base-content/70 m-0">
+                            The <strong>server</strong>. Runs the mesh network that all agents and authorities connect to.
                         </p>
-                        <div class="card-actions mt-2">
+                        <div>
                             <span class="badge badge-outline badge-sm">&#64;persistica/flux-mesh</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="card bg-base-200 border border-base-300">
-                    <div class="card-body">
-                        <h3 class="card-title text-base">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-secondary">
+                    <div class="card-body gap-3">
+                        <h3 class="card-title text-base flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-secondary shrink-0">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                             FluxAgent
                         </h3>
-                        <p class="text-sm text-base-content/70">
-                            The <strong>client</strong>. Agents connect to a mesh network, join channels, and send or receive messages.
-                            Each agent needs a network code to gain entry.
+                        <p class="text-sm text-base-content/70 m-0">
+                            The <strong>client</strong>. Connects to a mesh network, joins channels, and sends or receives messages.
                         </p>
-                        <div class="card-actions mt-2">
+                        <div>
                             <span class="badge badge-outline badge-sm">&#64;persistica/flux-agent</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="card bg-base-200 border border-base-300">
-                    <div class="card-body">
-                        <h3 class="card-title text-base">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-accent">
+                    <div class="card-body gap-3">
+                        <h3 class="card-title text-base flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-accent shrink-0">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                             </svg>
                             FluxAuthority
                         </h3>
-                        <p class="text-sm text-base-content/70">
-                            The <strong>gatekeeper</strong>. Authorities decide who gets into your network and which channels
-                            they're allowed to subscribe to.
+                        <p class="text-sm text-base-content/70 m-0">
+                            The <strong>gatekeeper</strong>. Decides who gets into your network and which channels they're allowed to join.
                         </p>
-                        <div class="card-actions mt-2">
+                        <div>
                             <span class="badge badge-outline badge-sm">&#64;persistica/flux-authority</span>
                         </div>
                     </div>
@@ -87,15 +77,8 @@
 
             <h2>How it fits together</h2>
 
-            <p>
-                Here's the big picture. Your <strong>FluxMesh server</strong> is running somewhere in the cloud
-                (or locally). A <strong>FluxAuthority</strong> registers itself with the mesh and acts as a
-                bouncer — it validates agents before they can join. <strong>FluxAgents</strong> connect to the
-                mesh using a network code, get validated, then join channels to exchange messages in real time.
-            </p>
-
-            <div class="not-prose bg-base-200 rounded-xl p-4 my-6 font-mono text-sm">
-                <div class="flex flex-col gap-2">
+            <div class="not-prose bg-base-200 rounded-xl p-5 my-8 font-mono text-sm overflow-x-auto">
+                <div class="flex flex-col gap-3">
                     <div class="flex items-center gap-3">
                         <span class="badge badge-primary badge-sm">FluxAgent</span>
                         <span class="text-base-content/50">──connect(code)──▶</span>
@@ -118,42 +101,23 @@
 
             <ul>
                 <li>
-                    <strong>Zero boilerplate</strong> — no WebSocket plumbing, no broker config, no
-                    custom handshake logic. Just install and go.
+                    <strong>Zero boilerplate</strong> — no WebSocket plumbing, no broker config, no custom handshake logic.
                 </li>
                 <li>
-                    <strong>Auth baked in</strong> — the Authority pattern means you write <em>your</em> auth
-                    logic (JWT, API key, whatever), and Flux handles the rest.
+                    <strong>Auth baked in</strong> — the Authority pattern means you write <em>your</em> auth logic; Flux handles the rest.
                 </li>
                 <li>
                     <strong>TypeScript first</strong> — full type safety across your network boundary.
-                    If it compiles, it works.
                 </li>
                 <li>
-                    <strong>Channel-based pub/sub</strong> — agents can publish to named channels and
-                    subscribe to them independently. No topic trees to manage.
+                    <strong>Channel-based pub/sub</strong> — agents publish to named channels and subscribe independently.
                 </li>
                 <li>
-                    <strong>Portal included</strong> — this very dashboard lets you create networks,
-                    generate access tokens, and monitor connected agents and authorities in real time.
+                    <strong>Portal included</strong> — create networks, generate access tokens, and monitor connections in real time.
                 </li>
             </ul>
 
-            <h2>This Portal</h2>
-
-            <p>
-                The Flux Portal (which you're currently looking at 👋) is the management layer for your
-                networks. From here you can:
-            </p>
-
-            <ul>
-                <li>Create and manage multiple isolated <strong>networks</strong></li>
-                <li>Generate <strong>network tokens</strong> that agents use to authenticate</li>
-                <li>Monitor <strong>connected agents</strong> and <strong>authorities</strong> in real time</li>
-                <li>Inspect <strong>active channels</strong> across your network</li>
-            </ul>
-
-            <div class="not-prose mt-8 flex flex-wrap gap-3">
+            <div class="not-prose mt-10 flex flex-wrap gap-3">
                 <a routerLink="/docs/get-started" class="btn btn-primary">
                     Get Started
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current">

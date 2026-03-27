@@ -1,4 +1,5 @@
 import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
     OnInit,
@@ -37,7 +38,7 @@ interface ChangelogEntry {
     styleUrls: ['./docs-changelog.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsChangelogPageComponent implements OnInit {
+export class DocsChangelogPageComponent implements OnInit, AfterViewInit {
     protected readonly userSession = signal<UserSession | null>(null);
 
     protected readonly entries: ChangelogEntry[] = [
@@ -73,6 +74,14 @@ export class DocsChangelogPageComponent implements OnInit {
         const session = await this._userService.authClient.getSession();
         if (session.data) {
             this.userSession.set(session.data.user as UserSession);
+        }
+    }
+
+    ngAfterViewInit(
+
+    ): void {
+        if (typeof window !== 'undefined' && (window as any).hljs) {
+            (window as any).hljs.highlightAll();
         }
     }
 }

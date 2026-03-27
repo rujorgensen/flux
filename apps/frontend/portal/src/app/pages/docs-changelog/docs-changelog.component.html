@@ -2,9 +2,9 @@
     <div class="p-6 max-w-4xl">
         <article class="prose prose-lg max-w-none">
 
-            <div class="not-prose mb-8">
+            <div class="not-prose mb-10">
                 <div class="flex items-center gap-3 mb-2">
-                    <div class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 stroke-info">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
@@ -24,12 +24,13 @@
             <div class="not-prose space-y-8 mt-8">
                 @for (entry of entries; track entry.version) {
                     <div class="card bg-base-200 border border-base-300">
-                        <div class="card-body">
+                        <div class="card-body gap-4">
 
                             <!-- Version header -->
-                            <div class="flex flex-wrap items-center gap-3 mb-4">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <h2 class="text-xl font-bold font-mono m-0">v{{ entry.version }}</h2>
                                 <span class="text-base-content/50 text-sm">{{ entry.date }}</span>
+                                <div class="flex-1"></div>
                                 @if (entry.tag === 'major') {
                                     <span class="badge badge-error">Major</span>
                                 } @else if (entry.tag === 'minor') {
@@ -43,24 +44,24 @@
 
                             <!-- Highlights -->
                             @if (entry.highlights.length > 0) {
-                                <p class="text-base-content/70 mb-4 italic">
+                                <p class="text-base-content/70 m-0 italic">
                                     {{ entry.highlights[0] }}
                                 </p>
                             }
 
                             <!-- Added -->
                             @if (entry.added && entry.added.length > 0) {
-                                <div class="mb-4">
-                                    <h3 class="font-semibold text-success flex items-center gap-2 mb-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current">
+                                <div>
+                                    <h3 class="font-semibold text-success flex items-center gap-2 mb-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current shrink-0">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                         </svg>
                                         Added
                                     </h3>
-                                    <ul class="space-y-1">
+                                    <ul class="space-y-2">
                                         @for (item of entry.added; track item) {
-                                            <li class="flex items-start gap-2 text-sm">
-                                                <span class="text-success mt-1">▸</span>
+                                            <li class="flex items-center gap-2 text-sm leading-normal">
+                                                <span class="text-success shrink-0">▸</span>
                                                 <span>{{ item }}</span>
                                             </li>
                                         }
@@ -70,17 +71,17 @@
 
                             <!-- Changed -->
                             @if (entry.changed && entry.changed.length > 0) {
-                                <div class="mb-4">
-                                    <h3 class="font-semibold text-warning flex items-center gap-2 mb-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current">
+                                <div>
+                                    <h3 class="font-semibold text-warning flex items-center gap-2 mb-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current shrink-0">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                         </svg>
                                         Changed
                                     </h3>
-                                    <ul class="space-y-1">
+                                    <ul class="space-y-2">
                                         @for (item of entry.changed; track item) {
-                                            <li class="flex items-start gap-2 text-sm">
-                                                <span class="text-warning mt-1">▸</span>
+                                            <li class="flex items-center gap-2 text-sm leading-normal">
+                                                <span class="text-warning shrink-0">▸</span>
                                                 <span>{{ item }}</span>
                                             </li>
                                         }
@@ -90,18 +91,18 @@
 
                             <!-- Fixed -->
                             @if (entry.fixed && entry.fixed.length > 0) {
-                                <div class="mb-4">
-                                    <h3 class="font-semibold text-info flex items-center gap-2 mb-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current">
+                                <div>
+                                    <h3 class="font-semibold text-info flex items-center gap-2 mb-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current shrink-0">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
                                         Fixed
                                     </h3>
-                                    <ul class="space-y-1">
+                                    <ul class="space-y-2">
                                         @for (item of entry.fixed; track item) {
-                                            <li class="flex items-start gap-2 text-sm">
-                                                <span class="text-info mt-1">▸</span>
+                                            <li class="flex items-center gap-2 text-sm leading-normal">
+                                                <span class="text-info shrink-0">▸</span>
                                                 <span>{{ item }}</span>
                                             </li>
                                         }

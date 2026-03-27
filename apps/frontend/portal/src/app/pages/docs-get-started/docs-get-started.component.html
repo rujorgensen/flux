@@ -2,9 +2,9 @@
     <div class="p-6 max-w-4xl">
         <article class="prose prose-lg max-w-none">
 
-            <div class="not-prose mb-8">
+            <div class="not-prose mb-10">
                 <div class="flex items-center gap-3 mb-2">
-                    <div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 stroke-success">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"></path>
                         </svg>
@@ -17,18 +17,16 @@
             <h2>Prerequisites</h2>
 
             <p>
-                Flux packages are published on npm and work with Node.js or Bun.
-                You'll need <strong>Node.js 20+</strong> or <strong>Bun 1.x</strong>.
+                Flux packages work with <strong>Node.js 20+</strong> or <strong>Bun 1.x</strong>.
             </p>
 
             <h2>Step 1 — Start the Mesh server</h2>
 
             <p>
-                The mesh server is the backbone of your Flux network. Install it in your server project
-                and fire it up:
+                The mesh server routes connections and messages. Install it and fire it up:
             </p>
 
-            <div class="not-prose my-4">
+            <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
                     <span class="text-xs font-mono text-base-content/60">Install</span>
                     <button
@@ -45,10 +43,10 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code>bun add &#64;persistica/flux-mesh</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-bash">bun add &#64;persistica/flux-mesh</code></pre>
             </div>
 
-            <div class="not-prose my-4">
+            <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
                     <span class="text-xs font-mono text-base-content/60">server.ts</span>
                     <button
@@ -65,21 +63,17 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code>{{ meshSnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ meshSnippet }}</code></pre>
             </div>
-
-            <p>
-                That's it. Your mesh server is now listening for connections on port <code>5100</code>.
-            </p>
 
             <h2>Step 2 — Register an Authority</h2>
 
             <p>
-                An authority decides <em>who</em> is allowed onto your network and <em>which channels</em>
-                they can join. It's where your authentication logic lives.
+                An authority decides <em>who</em> can join your network and <em>which channels</em> they're
+                allowed to subscribe to. This is where your auth logic lives.
             </p>
 
-            <div class="not-prose my-4">
+            <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
                     <span class="text-xs font-mono text-base-content/60">Install</span>
                     <button
@@ -96,10 +90,10 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code>bun add &#64;persistica/flux-authority</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-bash">bun add &#64;persistica/flux-authority</code></pre>
             </div>
 
-            <div class="not-prose my-4">
+            <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
                     <span class="text-xs font-mono text-base-content/60">authority.ts</span>
                     <button
@@ -116,25 +110,24 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code>{{ authoritySnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ authoritySnippet }}</code></pre>
             </div>
 
-            <div class="not-prose alert alert-info my-4">
+            <div class="not-prose alert alert-info my-6">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-current shrink-0"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <span class="font-semibold">Where do I get the network ID and authorization key?</span>
-                    <p class="text-sm mt-1">Create a network in this Portal, then generate a token from the <strong>General Settings</strong> page. The network ID is visible in the network selector.</p>
+                    <p class="text-sm mt-1">Create a network in this Portal, then generate a token from the <strong>General Settings</strong> page. The network ID is shown in the network selector.</p>
                 </div>
             </div>
 
             <h2>Step 3 — Connect an Agent</h2>
 
             <p>
-                Now for the fun part — connecting a client. Agents can run anywhere: in a browser,
-                on a server, or in a background worker.
+                Agents can run anywhere: browser, server, or background worker.
             </p>
 
-            <div class="not-prose my-4">
+            <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
                     <span class="text-xs font-mono text-base-content/60">Install</span>
                     <button
@@ -151,10 +144,10 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code>bun add &#64;persistica/flux-agent</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-bash">bun add &#64;persistica/flux-agent</code></pre>
             </div>
 
-            <div class="not-prose my-4">
+            <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
                     <span class="text-xs font-mono text-base-content/60">agent.ts</span>
                     <button
@@ -171,17 +164,17 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code>{{ agentSnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ agentSnippet }}</code></pre>
             </div>
 
             <h2>You're live! 🎉</h2>
 
             <p>
-                At this point you have a mesh server running, an authority validating access, and an agent
+                You now have a mesh server running, an authority validating access, and an agent
                 publishing and subscribing to a channel. That's the full Flux loop.
             </p>
 
-            <div class="not-prose mt-8 flex flex-wrap gap-3">
+            <div class="not-prose mt-10 flex flex-wrap gap-3">
                 <a routerLink="/docs/tutorials" class="btn btn-primary">
                     See a full tutorial
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current">
