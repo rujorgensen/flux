@@ -78,7 +78,7 @@ Bob's browser    ──▶  FluxAgent  ──connect──▶  FluxMesh  ──v
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ chatMeshSnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript" [innerHTML]="chatMeshSnippet | syntaxHighlight: 'typescript'"></code></pre>
             </div>
 
             <h2>Step 2 — Set up the chat authority</h2>
@@ -104,7 +104,7 @@ Bob's browser    ──▶  FluxAgent  ──connect──▶  FluxMesh  ──v
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ chatAuthoritySnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript" [innerHTML]="chatAuthoritySnippet | syntaxHighlight: 'typescript'"></code></pre>
             </div>
 
             <h2>Step 3 — Connect a chat agent</h2>
@@ -131,7 +131,7 @@ Bob's browser    ──▶  FluxAgent  ──connect──▶  FluxMesh  ──v
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript">{{ chatAgentSnippet }}</code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript" [innerHTML]="chatAgentSnippet | syntaxHighlight: 'typescript'"></code></pre>
             </div>
 
             <h2>The full flow</h2>

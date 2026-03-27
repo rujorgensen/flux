@@ -35,6 +35,14 @@ interface UserSession {
 export class DocsGetStartedPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
     protected readonly copiedSnippet = signal<string | null>(null);
+    protected readonly selectedPm = signal<'bun' | 'npm' | 'pnpm' | 'yarn'>('bun');
+
+    protected readonly pmInstallCommands: Record<'bun' | 'npm' | 'pnpm' | 'yarn', (pkg: string) => string> = {
+        bun:  (pkg) => `bun add ${pkg}`,
+        npm:  (pkg) => `npm install ${pkg}`,
+        pnpm: (pkg) => `pnpm add ${pkg}`,
+        yarn: (pkg) => `yarn add ${pkg}`,
+    };
 
     protected readonly meshSnippet = `import { FluxMeshServer } from '@persistica/flux-mesh';
 

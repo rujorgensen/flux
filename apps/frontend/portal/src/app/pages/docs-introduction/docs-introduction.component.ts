@@ -1,5 +1,4 @@
 import {
-    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
     OnInit,
@@ -28,7 +27,7 @@ interface UserSession {
     styleUrls: ['./docs-introduction.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsIntroductionPageComponent implements OnInit, AfterViewInit {
+export class DocsIntroductionPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
 
     constructor(
@@ -41,14 +40,6 @@ export class DocsIntroductionPageComponent implements OnInit, AfterViewInit {
         const session = await this._userService.authClient.getSession();
         if (session.data) {
             this.userSession.set(session.data.user as UserSession);
-        }
-    }
-
-    ngAfterViewInit(
-
-    ): void {
-        if (typeof window !== 'undefined' && (window as any).hljs) {
-            (window as any).hljs.highlightAll();
         }
     }
 }
