@@ -42,11 +42,12 @@ export class GlobalRPCClient<TMethods> {
 
     /**
      * Calls a function on the other side.
-     *
-     * @param { TAddress } rpcServerClientAddress
-     * @param { TMethods } method
-     *
-     * @returns { Promise<any> }
+     * 
+     * @param { TAddress } rpcServerClientAddress - The address of the RPC server client
+     * @param { TMethods } method - The method name to call
+     * @param { any[] } params - The parameters to pass
+     * 
+     * @returns { Promise<any> } The result from the remote method
      */
     public call(
         rpcServerClientAddress: TAddress,
@@ -88,10 +89,8 @@ export class GlobalRPCClient<TMethods> {
 
     /**
      * Handles the response from the server.
-     *
-     * @param { RPCResponse }   response
-     *
-     * @returns { boolean }
+     * 
+     * @param { RPCResponse } response - The response from the RPC server
      */
     private handleResponseMessage(
         response: RPCResponse,
@@ -141,11 +140,11 @@ export class GlobalRPCClient2<TMethods> {
 
     /**
      * Calls a function on the other side.
-     *
-     * @param { TAddress } rpcServerClientAddress
-     * @param { TMethods } method
-     *
-     * @returns { Promise<any> }
+     * 
+     * @param { TMethods } method - The method name to call
+     * @param { any[] } params - The parameters to pass
+     * 
+     * @returns { Promise<any> } The result from the remote method
      */
     public call(
         method: TMethods,
@@ -187,10 +186,8 @@ export class GlobalRPCClient2<TMethods> {
 
     /**
      * Handles the response from the server.
-     *
-     * @param { RPCResponse }   response
-     *
-     * @returns { boolean }
+     * 
+     * @param { RPCResponse } response - The response from the RPC server
      */
     private handleResponseMessage(
         response: RPCResponse,

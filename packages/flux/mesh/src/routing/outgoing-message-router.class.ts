@@ -33,11 +33,10 @@ export class OutgoingMessageRouter {
     }
 
     /**
-     *
-     * @param address
-     * @param message
-     *
-     * @returns
+     * Routes a message to the correct destination.
+     * 
+     * @param { TAddress } address - The destination address
+     * @param { string } message - The message to route
      */
     public message(
         address: TAddress,

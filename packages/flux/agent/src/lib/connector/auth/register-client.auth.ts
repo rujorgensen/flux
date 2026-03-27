@@ -15,12 +15,13 @@ import {
  * 
  * This client -> flux server -> authority client -> flux server -> this client.
  * 
- * @param { string }        domain The domain of the authority server.
- * @param { unknown }       unknownIdentificationPayload The payload to send to the authority server.
- * @param { string }        [password]
- * @param { TAgentOwnUId }  [agentOwnUId]
+ * @param { TNetworkId_S } networkId - The network ID to connect to
+ * @param { string } domain - The domain of the authority server
+ * @param { unknown } unknownIdentificationPayload - The payload to send to the authority server
+ * @param { object } clientInfo - Optional client identification info
+ * @param { string } [password] - Optional password for encrypting the payload
  * 
- * @returns { Promise<TAuthenticationTicket> }
+ * @returns { Promise<TAuthenticationTicket> } The authentication ticket for connecting the websocket
  */
 export const authenticateAgentOrThrow = async (
     networkId: TNetworkId_S,

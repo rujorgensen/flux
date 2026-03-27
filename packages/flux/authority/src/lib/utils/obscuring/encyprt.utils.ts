@@ -4,11 +4,12 @@ const IV_LENGTH = 12;
 const SALT_LENGTH = 16;
 
 /**
- * Encrypts a JSON object using AES-256-GCM with password-derived key
+ * Encrypts a JSON object using AES-256-GCM with a password-derived key.
  * 
- * @param {Object} data - The data to encrypt
- * @param {string} password - The password
- * @returns {Promise<Object>} - Encrypted data (Base64 format)
+ * @param { string } data - The data string to encrypt
+ * @param { string } password - The password to derive the encryption key from
+ * 
+ * @returns { Promise<Object> } The encrypted data in Base64 format with iv and salt
  */
 export async function encrypt(
     data: string,

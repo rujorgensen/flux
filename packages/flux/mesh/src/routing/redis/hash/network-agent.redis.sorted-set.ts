@@ -19,8 +19,8 @@ export class NetworkAgentRedisSortedSet {
     /**
      * Registers a network agent in the sorted set.
      * 
-     * @param { TNetworkId_S } networkId
-     * @param { TClientId } socketId
+     * @param { TNetworkId_S } networkId - The network ID
+     * @param { TClientId } socketId - The socket/client ID
      * 
      * @returns { Promise<void> }
      */
@@ -40,10 +40,10 @@ export class NetworkAgentRedisSortedSet {
     /**
      * Unregisters a network agent from the sorted set.
      * 
-     * @param { TNetworkId_S } networkId
-     * @param { TClientId } socketId
+     * @param { TNetworkId_S } networkId - The network ID
+     * @param { TClientId } socketId - The socket/client ID
      * 
-     * @returns { Promise<number> }
+     * @returns { Promise<number> } The number of elements removed
      */
     public async unregisterAgent(
         networkId: TNetworkId_S,

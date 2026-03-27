@@ -14,7 +14,9 @@ import {
 /**
  * This route is used to authorize a network authority.
  * 
- * @returns { Promise<Response> }
+ * @param { Bun.BunRequest } request - The incoming HTTP request
+ * 
+ * @returns { Promise<Response> } The HTTP response with auth token or error
  */
 export const authorizeNetworkAuthority = async (
     request: Bun.BunRequest,

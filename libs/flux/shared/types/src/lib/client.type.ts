@@ -2,10 +2,6 @@ export type TAgentOwnUId = string & { __brand: 'AgentOwnUId'; };
 
 /**
  * Validates a clientUID or throws an error if it is invalid.
- * 
- * @param { unknown } clientOwnUID
- * 
- * @returns { boolean }
  */
 export const validateAgentUIDOrThrow = (
     clientOwnUID: unknown,

@@ -41,11 +41,6 @@ export class NetworkAuthorityRedisSortedSet {
 
     /**
      * Register a network authority.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TClientId }     clientId
-     * 
-     * @returns { Promise<void> }
      */
     public async registerNetworkAuthority(
         networkId: TNetworkId_S,
@@ -87,11 +82,6 @@ export class NetworkAuthorityRedisSortedSet {
 
     /**
      * Unregisters a network authority from the sorted set.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TClientId }     clientId
-     * 
-     * @returns { Promise<number> } 
      */
     public async unregister(
         networkId: TNetworkId_S,
@@ -118,11 +108,6 @@ export class NetworkAuthorityRedisSortedSet {
 
     /**
      * Unregisters a network authority from the sorted set, even if it wasnt added by this worker.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { TClientId }     socketId
-     * 
-     * @returns { Promise<number> } 
      */
     public async unregisterGlobal(
         networkId: TNetworkId_S,
@@ -152,10 +137,6 @@ export class NetworkAuthorityRedisSortedSet {
 
     /**
      * Returns all network authorities.
-     * 
-     * @param { TNetworkId_S }  networkId
-     *
-     * @returns { Promise<TNetworkAuthority> }
      */
     public async readNetworkAuthorities(
         networkId: TNetworkId_S,
@@ -187,10 +168,6 @@ export class NetworkAuthorityRedisSortedSet {
 
     /**
      * Reads the network authority address from the sorted set.
-     * 
-     * @param { TNetworkId_S }  networkId
-     *
-     * @returns { Promise<TAddress[]> }
      */
     public async resolveNetworkAuthorityAddressesOrThrow(
         networkId: TNetworkId_S,
@@ -212,10 +189,6 @@ export class NetworkAuthorityRedisSortedSet {
 
     /**
      * Reads the current number of connected authorities on the given network.
-     * 
-     * @param { TNetworkId_S }  networkId
-     *
-     * @returns { Promise<TNetworkAuthorityCountAt> }
      */
     public async readNetworkAuthorityCount(
         networkId: TNetworkId_S,

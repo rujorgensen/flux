@@ -49,10 +49,6 @@ afterAll(async () => {
 
 /**
  * Test if Redis is running at url.
- * 
- * @param { string } url
- * 
- * @returns { Promise<void> }
  */
 async function testRedisConnection(
     url: string,

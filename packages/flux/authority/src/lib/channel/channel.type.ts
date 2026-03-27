@@ -3,10 +3,10 @@ import type { TChannelName } from '@flux/shared/types';
 /**
  * Callback function to authorize a channel connection.
  * 
- * @param { TChannelName }  channelName - the topic to subscribe to
- * @param { unknown }       identification - whatever identification the authority requires
+ * @param { TChannelName } channelName - The channel name to authorize
+ * @param { T } identification - Whatever identification the authority requires
  * 
- * @returns { Promise<boolean> } - true if the channel connection is authorized, false otherwise
+ * @returns { Promise<boolean> } True if the channel connection is authorized, false otherwise
  */
 export type TChannnelAuthCallback<T> = (
     channelName: TChannelName,

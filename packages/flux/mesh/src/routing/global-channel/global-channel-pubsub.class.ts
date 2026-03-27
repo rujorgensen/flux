@@ -24,8 +24,6 @@ export class GlobalChannelPubsub {
 
     /**
      * Subscribes to the websocket channel event and publishes it on the local process.
-     * 
-     * @returns { void }
      */
     private subscribeWebsocketChannelEvent(
     ): void {
@@ -50,9 +48,9 @@ export class GlobalChannelPubsub {
     /**
      * Publishes a message to the given channel.
      * 
-     * @param { string }  channel
-     * @param { string }  message
-     * @param { TConnectedClientSocket }  [ws]
+     * @param { string } channel - The channel name to publish to
+     * @param { string } message - The message to publish
+     * @param { TConnectedClientSocket } [ws] - Optional websocket to skip when publishing locally
      * 
      * @returns { Promise<void> }
      */

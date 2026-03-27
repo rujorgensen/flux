@@ -1,7 +1,7 @@
 /**
  * Standard CORS response.
  * 
- * @returns { Response }
+ * @returns { Response } A 204 No Content response with CORS headers
  */
 export const OPTIONS_RESPONSE = () =>
     new Response(null, {

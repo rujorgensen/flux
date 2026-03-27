@@ -47,8 +47,6 @@ export class BunRedisClient extends EventEmitter<{
      * 
      * ! Please note that this may be re-instantiated on reconnections,
      * ! so make sure to request this continuously, if used.
-     * 
-     * @returns { RedisClient}
      */
     public getClient(
 
@@ -56,6 +54,9 @@ export class BunRedisClient extends EventEmitter<{
         return this.client;
     }
 
+    /**
+     * Creates a new independent instance of this client with the same options.
+     */
     public clone(
 
     ): BunRedisClient {
@@ -63,8 +64,7 @@ export class BunRedisClient extends EventEmitter<{
     }
 
     /**
-     * 
-     * @returns { Promise<void> }
+     * Connects to the Redis server.
      */
     public async connect(
 
@@ -77,8 +77,7 @@ export class BunRedisClient extends EventEmitter<{
     }
 
     /**
-     * 
-     * @returns { Promise<void> }
+     * Internal connection helper that handles the actual connection logic.
      */
     private async connect_(
 
@@ -122,6 +121,9 @@ export class BunRedisClient extends EventEmitter<{
         }
     }
 
+    /**
+     * Retries the connection with exponential backoff until the max reconnect attempts are reached.
+     */
     private async retryReconnect(
 
     ) {
@@ -167,7 +169,7 @@ export class BunRedisClient extends EventEmitter<{
     }
 
     /**
-     * 
+     * Disconnects the Redis client and clears all handlers.
      */
     public disconnect(
 

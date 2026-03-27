@@ -44,8 +44,6 @@ export class FluxAgentNetworkConnection {
 
     /**
      * Joins a channel on the network.
-     * 
-     * @param { string } channelName 
      */
     public async joinChannel(
         channelName: string,
@@ -67,11 +65,7 @@ export class FluxAgentNetworkConnection {
     }
 
     /**
-     * Listen to messages on this channel.
-     * 
-     * @param { string } channelName
-     * 
-     * @returns { Promise<void> }
+     * Leaves a channel on the network.
      */
     public async leaveChannel(
         channelName: string,
@@ -91,11 +85,7 @@ export class FluxAgentNetworkConnection {
     }
 
     /**
-     * Connects to a client.
-     * 
-     * @param clientId
-     * 
-     * @returns 
+     * Connects to a remote agent.
      */
     public connectToAgent(
         clientId: string,
@@ -112,6 +102,9 @@ export class FluxAgentNetworkConnection {
         // });
     }
 
+    /**
+     * Returns a list of channels the agent is currently subscribed to.
+     */
     public readConnectedChannels(
 
     ): string[] {

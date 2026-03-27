@@ -31,10 +31,7 @@ export class NetworkRepository {
     // *** Create
     // ****************************************************************************
     /**
-     * 
-     * @param param0
-     * 
-     * @returns 
+     * Creates a new network for the given user.
      */
     public createNetwork(
         {
@@ -75,10 +72,7 @@ export class NetworkRepository {
     // ****************************************************************************
 
     /**
-     * 
-     * @param param0
-     * 
-     * @returns 
+     * Returns all networks for the given user.
      */
     public readUserNetworks(
         userId: string,
@@ -105,6 +99,9 @@ export class NetworkRepository {
             ;
     }
 
+    /**
+     * Reads the secret key for a network by its network ID or throws if not found.
+     */
     public readNetworkKeyByNetworkIdOrThrow(
         networkId: TNetworkId_S,
     ): Promise<TNetworkKey_S> {
@@ -122,6 +119,33 @@ export class NetworkRepository {
             ;
     }
 
+    /**
+     * Reads a network by its secret key or throws if not found.
+     */
+    public readNetworkBySecretKeyOrThrow(
+        secretKey: TNetworkKey_S,
+    ): Promise<INetwork_S> {
+        return this._prismaClient
+            .network
+            .findUniqueOrThrow({
+                where: {
+                    secretKey,
+                },
+                include: {
+                    userNetworks: {
+                        include: {
+                            user: true,
+                        },
+                    },
+                },
+            })
+            .then((network: NetworkWithUserNetworks) => this.convert(network))
+            ;
+    }
+
+    /**
+     * Deletes a network if the user is an admin.
+     */
     public async deleteNetwork(
         {
             networkId,
@@ -154,27 +178,9 @@ export class NetworkRepository {
         });
     }
 
-    public readNetworkBySecretKeyOrThrow(
-        secretKey: TNetworkKey_S,
-    ): Promise<INetwork_S> {
-        return this._prismaClient
-            .network
-            .findUniqueOrThrow({
-                where: {
-                    secretKey,
-                },
-                include: {
-                    userNetworks: {
-                        include: {
-                            user: true,
-                        },
-                    },
-                },
-            })
-            .then((network: NetworkWithUserNetworks) => this.convert(network))
-            ;
-    }
-
+    /**
+     * Converts a Prisma network entity to the internal network representation.
+     */
     private convert(
         network: NetworkWithUserNetworks,
     ): INetwork_S {

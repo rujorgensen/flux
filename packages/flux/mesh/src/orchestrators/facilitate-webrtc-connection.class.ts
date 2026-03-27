@@ -3,6 +3,9 @@ import {
     WebRTCClient,
 } from '../_classes/web-rtc-client-interface.class';
 
+/**
+ * Orchestrates the WebRTC connection handshake between two clients.
+ */
 export const facilitateWebRTCConnection = async (
     initiator: WebRTCClient | GlobalWebRTCClient,
     remoteClient: GlobalWebRTCClient

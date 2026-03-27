@@ -2,10 +2,6 @@ export type TChannelName = string & { __brand: 'channel-name'; };
 
 /**
  * Validates a channel name and throws an error if it is invalid.
- * 
- * @param { string } channelName
- * 
- * @returns { boolean }
  */
 export const validateChannelNameOrThrow = (
     channelName: string,

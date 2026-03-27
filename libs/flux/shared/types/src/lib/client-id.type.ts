@@ -6,10 +6,6 @@ const NANOID_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqr
 
 /**
  * Validates if the given id is a valid nanoid.
- * 
- * @param { unknown } id
- * 
- * @returns { boolean }
  */
 export const isNanoId = (
     id: unknown,

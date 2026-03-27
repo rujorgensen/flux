@@ -9,10 +9,7 @@ export type TProcessAddress = `${TMachineAddress}/${TProcessId}`;
 export type TAddress = `${TProcessAddress}/${TClientId}`;
 
 /**
- * 
- * @param { TAddress } address
- * 
- * @returns { [TMachineAddress, TProcessId, TClientId] }
+ * Splits a full address into its machine, process, and client ID components.
  */
 export const splitAddressOrThrow = (
     address: TAddress,
@@ -43,10 +40,7 @@ export const splitAddressOrThrow = (
 };
 
 /**
- * 
- * @param { TAddress | TAddress } address
- * 
- * @returns { [TMachineAddress, TProcessId] }
+ * Splits a process address into its machine and process ID components.
  */
 export const splitProcessAddress = (
     address: TProcessAddress | TAddress,

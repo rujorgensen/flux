@@ -19,12 +19,13 @@ import {
 } from '@flux/shared/utils';
 
 /**
+ * This route is used to authorize a network agent.
  * 
- * @param { BunRequest }                    request
- * @param { NetworkAuthorityManager }       networkAuthorityManager
- * @param { GlobalRPCClient<'authorize'> }  globalRPCClient
+ * @param { BunRequest } request - The incoming HTTP request
+ * @param { NetworkAuthorityManager } networkAuthorityManager - The network authority manager
+ * @param { GlobalRPCClient<'authorize'> } globalRPCClient - The global RPC client
  * 
- * @returns { void }
+ * @returns { Promise<Response> } The HTTP response with auth token or error
  */
 export const authorizeNetworkAgent = async (
     request: BunRequest,

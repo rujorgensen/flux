@@ -70,6 +70,9 @@ export class BunRedisPubSub {
         };
     }
 
+    /**
+     * Connects both the publisher and subscriber clients.
+     */
     public async connect(
 
     ) {
@@ -80,11 +83,7 @@ export class BunRedisPubSub {
     }
 
     /**
-     * 
-     * @param address
-     * @param message
-     * 
-     * @returns { void }
+     * Publishes a message to the given address.
      */
     public async publish(
         address: string,
@@ -97,6 +96,9 @@ export class BunRedisPubSub {
         }
     }
 
+    /**
+     * Subscribes to messages on the given channel.
+     */
     public async subscribe(
         channelId: string,
         callback: MessageCallback,
@@ -121,6 +123,9 @@ export class BunRedisPubSub {
         }
     }
 
+    /**
+     * Unsubscribes from messages on the given channel.
+     */
     public async unsubscribe(
         channelId: string,
         callback?: MessageCallback,

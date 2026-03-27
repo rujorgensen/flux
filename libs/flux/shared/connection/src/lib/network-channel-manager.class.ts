@@ -26,11 +26,7 @@ export class NetworkChannelEventEmitter<T extends {
     }
 
     /**
-     * 
-     * @param event
-     * @param listener
-     * 
-     * @returns { this }
+     * Subscribes to channel creation and removal events on the network.
      */
     public override on<K extends keyof T>(
         event: K,

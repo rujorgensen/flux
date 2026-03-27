@@ -10,12 +10,20 @@ export class FluxRemoteClient {
         private readonly iceConnection: ICEConnection,
     ) { }
 
+    /**
+     * Calls a remote procedure on the connected client.
+     */
     public callProcedure(
 
     ): void {
 
     }
 
+    /**
+     * Sends a message to the connected client.
+     * 
+     * @param { string } message - The message to send to the connected client
+     */
     public send(
         message: string,
     ): void {

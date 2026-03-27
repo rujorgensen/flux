@@ -51,10 +51,10 @@ export class FluxAgent {
     /**
      * Connect to the network using provided identification.
      * 
-     * @param { unknown }   identification
-     * @param { string }    [clientUId]
-     *
-     * @returns { Promise<FluxAgentNetworkConnection> }
+     * @param { unknown } identification - The identification payload to authenticate with
+     * @param { string } [clientUId] - Optional client UID to use
+     * 
+     * @returns { Promise<FluxAgentNetworkConnection> } The network connection
      */
     public async connect(
         identification: unknown,
@@ -98,6 +98,9 @@ export class FluxAgent {
         return fluxNetworkConnection;
     }
 
+    /**
+     * Disconnects from the network.
+     */
     public disconnect(
 
     ): void {
@@ -105,21 +108,20 @@ export class FluxAgent {
     }
 
     /**
-     *
-     * @param fn
-     *
-     * @returns { void }
+     * Attaches a listener for WebRTC connection state changes.
      */
     public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener.bind(this.stateManager);
 
     /**
-     *
-     * @param fn
-     *
-     * @returns { void }
+     * Attaches a listener for network connection state changes.
      */
     public onNetworkState = this.stateManager.attachNetworkStateListener.bind(this.stateManager);
 
+    /**
+     * Registers a callback to be called when a message is received.
+     * 
+     * @param { TMessageCallback } cb - Callback to invoke when a message is received
+     */
     public onMessage(
         cb: TMessageCallback,
     ): void {

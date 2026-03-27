@@ -39,13 +39,7 @@ interface IOptions {
 }
 
 /**
- * @param { string } id
- * @param { string } ticket
- * @param { StateManager } stateManager
- * @param { () => void } onReconnectCallback
- * @param options 
- * 
- * @returns { FluxWebSocketConnection }
+ * Creates a WebSocket connection to the Flux platform.
  */
 export const createWSConnection = <T, M>(
     id: string,
@@ -109,11 +103,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Intercepts messages of a given package type.
-     * 
-     * @param { string }            packageType 
-     * @param { TMessageCallback }  fn
-     * 
-     * @returns { void } 
      */
     public interceptPackageTypeMessages(
         packageType: string,
@@ -130,11 +119,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Removes a package type interceptor.
-     * 
-     * @param { string }            packageType 
-     * @param { TMessageCallback }  fn
-     * 
-     * @returns { void } 
      */
     public removePackageTypeInterceptor(
         packageType: string,
@@ -156,8 +140,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Connect to the Flux platform.
-     * 
-     * @returns { Promise<FluxWebSocketClientConnection> }
      */
     public async connect(
 
@@ -217,6 +199,9 @@ export class FluxWebSocketConnection {
         });
     }
 
+    /**
+     * Disconnects from the Flux platform.
+     */
     public disconnect(
 
     ): void {
@@ -227,11 +212,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Registers an authority to the network.
-     * 
-     * @param { TAuthorizeCallback }        cb
-     * @param { TChannnelAuthCallback<M> }  authorizeNetworkChannel
-     * 
-     * @returns { Promise<void> }
      */
     public async registerAuthority<T, M>(
         cb: TAuthorizeCallback<T>,
@@ -259,8 +239,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Connects to a network.
-     * 
-     * @returns { Promise<FluxAgentNetworkConnection> }
      */
     public async connectToNetwork(
     ): Promise<FluxAgentNetworkConnection> {
@@ -275,10 +253,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Join a channel.
-     * 
-     * @param { TChannelName } channelName
-     * 
-     * @returns { Promise<FluxNetworkChannel> } 
      */
     public async joinChannel(
         channelName: TChannelName,
@@ -315,10 +289,7 @@ export class FluxWebSocketConnection {
     }
 
     /**
-     * 
-     * @param { TChannelName } channelName
-     * 
-     * @returns { Promise<void> } 
+     * Leaves a channel.
      */
     public async leaveChannel(
         channelName: TChannelName,
@@ -335,11 +306,7 @@ export class FluxWebSocketConnection {
     }
 
     /**
-     * 
-     * @param { TChannelName } channelName
-     * @param { string } message
-     * 
-     * @returns { void } 
+     * Publishes a message to a channel.
      */
     public publish<T>(
         channelName: TChannelName,
@@ -356,11 +323,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Adds a callback to the list of callbacks for a given channel topic.
-     * 
-     * @param { TChannelName } channelName
-     * @param { string } message
-     * 
-     * @returns { void } 
      */
     public onPublish(
         channelName: TChannelName,
@@ -377,10 +339,7 @@ export class FluxWebSocketConnection {
     }
 
     /**
-     * 
-     * @param { string } channelName
-     * 
-     * @returns { Promise<FluxNetworkChannel> } 
+     * Sends a connection request to another agent.
      */
     public async connectToAgent(
         destinationClientId: TAgentOwnUId,
@@ -394,10 +353,7 @@ export class FluxWebSocketConnection {
     }
 
     /**
-     * 
-     * @param { TMessageCallback } cb
-     * 
-     * @returns { void } 
+     * Registers a callback to be called when a message is received.
      */
     public onMessage(
         cb: TMessageCallback,
@@ -411,8 +367,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Subscribes to the channel changes.
-     * 
-     * @returns { void }
      */
     public subscribeToChannelChanges(
     ): void {
@@ -425,10 +379,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Disconnects an agent from the network.
-     * 
-     * @param { string } id
-     * 
-     * @returns { void }
      */
     public disconnectAgent(
         id: string,
@@ -450,10 +400,6 @@ export class FluxWebSocketConnection {
 
     /**
      * Handles incoming WebSocket messages.
-     * 
-     * @param { string } message_
-     * 
-     * @returns { void } 
      */
     private handleMessage(
         message_: string,

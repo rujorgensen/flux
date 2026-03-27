@@ -16,12 +16,6 @@ export class NetworkUsageRedisCacheService {
 
     /**
      * Returns the number of bytes used by the network.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * @param { number }        bytes
-     * @param { number }        packets
-     * 
-     * @returns { Promise<number> }
      */
     public async increaseNetworkUsage(
         networkId: TNetworkId_S,
@@ -34,6 +28,9 @@ export class NetworkUsageRedisCacheService {
         return await this._client.hincrby(key, 'bytes', bytes);
     }
 
+    /**
+     * Reads the current network usage in bytes.
+     */
     public async readNetworkUsageBytes(
         networkId: TNetworkId_S,
     ): Promise<number> {
@@ -49,11 +46,7 @@ export class NetworkUsageRedisCacheService {
     }
 
     /**
-     * Locks a network due to exessive usage.
-     * 
-     * @param { TNetworkId_S }  networkId
-     * 
-     * @returns { Promise<void> }
+     * Locks a network due to excessive usage.
      */
     private async lockNetworkUsage(
         networkId: TNetworkId_S,
