@@ -1,0 +1,106 @@
+<app-dashboard-layout [userSession]="userSession()" pageTitle="Billing">
+    @if (selectedNetwork$ | async; as network) {
+        <div class="p-6 max-w-5xl space-y-8">
+
+            <!-- Header -->
+            <section>
+                <h2 class="text-2xl font-bold">Billing & Plans ⚡</h2>
+                <p class="mt-1 text-base-content/70">
+                    Pick the plan that fits your organisation.
+                    Billing is tied to <span class="font-semibold">{{ network.alias }}</span>,
+                    so the whole team benefits.
+                </p>
+            </section>
+
+            <!-- Pricing cards -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                @for (tier of tiers; track tier.id) {
+                    <div
+                        class="card bg-base-200 shadow-md flex flex-col relative"
+                        [class.ring-2]="tier.highlight"
+                        [class.ring-primary]="tier.highlight"
+                        [class.bg-base-100]="tier.highlight"
+                    >
+                        @if (tier.highlight) {
+                            <div class="badge badge-primary absolute -top-3 left-1/2 -translate-x-1/2">
+                                Most popular
+                            </div>
+                        }
+                        <div class="card-body flex flex-col gap-4">
+                            <!-- Tier name & tagline -->
+                            <div>
+                                <h3 class="text-xl font-bold">{{ tier.name }}</h3>
+                                <p class="text-sm text-base-content/60 mt-1">{{ tier.tagline }}</p>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="flex items-end gap-1">
+                                <span class="text-4xl font-extrabold">{{ tier.price }}</span>
+                                @if (tier.pricePeriod) {
+                                    <span class="text-base-content/60 mb-1">{{ tier.pricePeriod }}</span>
+                                }
+                            </div>
+
+                            <!-- Features -->
+                            <ul class="space-y-2 flex-1">
+                                @for (feature of tier.features; track feature) {
+                                    <li class="flex items-center gap-2 text-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        {{ feature }}
+                                    </li>
+                                }
+                            </ul>
+
+                            <!-- CTA button -->
+                            <div class="card-actions mt-2">
+                                @if (tier.id === 'spark') {
+                                    <button
+                                        class="btn btn-outline btn-sm w-full"
+                                        type="button"
+                                        disabled
+                                    >
+                                        {{ tier.ctaLabel }}
+                                    </button>
+                                } @else if (tier.comingSoon) {
+                                    <button
+                                        class="btn w-full"
+                                        [class.btn-primary]="tier.highlight"
+                                        [class.btn-outline]="!tier.highlight"
+                                        type="button"
+                                        disabled
+                                    >
+                                        {{ tier.ctaLabel }}
+                                        <span class="badge badge-sm ml-1">Soon</span>
+                                    </button>
+                                } @else {
+                                    <button
+                                        class="btn w-full"
+                                        [class.btn-primary]="tier.highlight"
+                                        [class.btn-outline]="!tier.highlight"
+                                        type="button"
+                                    >
+                                        {{ tier.ctaLabel }}
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </section>
+
+            <!-- Coming soon notice -->
+            <section class="alert alert-info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>
+                    Paid plans are not yet available — we're working on it!
+                    You're currently on <strong>Spark (Free)</strong> and that's not going anywhere. 🙌
+                </span>
+            </section>
+
+        </div>
+    }
+</app-dashboard-layout>

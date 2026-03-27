@@ -38,6 +38,16 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./pages/general-settings/general-settings.component').then(m => m.GeneralSettingsPageComponent),
     },
     {
+        path: 'dashboard/settings/team',
+        canActivate: [authGuard, networkGuard],
+        loadComponent: () => import('./pages/team-settings/team-settings.component').then(m => m.TeamSettingsPageComponent),
+    },
+    {
+        path: 'dashboard/settings/billing',
+        canActivate: [authGuard, networkGuard],
+        loadComponent: () => import('./pages/billing-settings/billing-settings.component').then(m => m.BillingSettingsPageComponent),
+    },
+    {
         path: 'privacy-policy',
         loadComponent: () => import('./pages/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyPageComponent),
     },
