@@ -17,45 +17,72 @@ export const appRoutes: Route[] = [
         canActivate: [authGuard, networkGuard],
         loadComponent: () => import('./pages/dashboard-home/dashboard-home.component').then(m => m.DashboardHomePageComponent),
     },
+
     {
-        path: 'dashboard/connected-agents',
+        path: 'dashboard',
         canActivate: [authGuard, networkGuard],
-        loadComponent: () => import('./pages/connected-agents/connected-agents.component').then(m => m.ConnectedAgentsPageComponent),
+        children: [
+            {
+                path: 'connected-agents',
+                canActivate: [authGuard, networkGuard],
+                loadComponent: () => import('./pages/connected-agents/connected-agents.component').then(m => m.ConnectedAgentsPageComponent),
+            },
+            {
+                path: 'connected-authorities',
+                canActivate: [authGuard, networkGuard],
+                loadComponent: () => import('./pages/connected-authorities/connected-authorities.component').then(m => m.ConnectedAuthoritiesPageComponent),
+            },
+            {
+                path: 'active-channels',
+                canActivate: [authGuard, networkGuard],
+                loadComponent: () => import('./pages/active-channels/active-channels.component').then(m => m.ActiveChannelsPageComponent),
+            },
+        ],
     },
     {
-        path: 'dashboard/connected-authorities',
+        path: 'docs',
+        canActivate: [authGuard],
+        children: [
+            {
+                path: 'introduction',
+                loadComponent: () => import('./pages/docs-introduction/docs-introduction.component').then(m => m.DocsIntroductionPageComponent),
+            },
+            {
+                path: 'get-started',
+                canActivate: [authGuard],
+                loadComponent: () => import('./pages/docs-get-started/docs-get-started.component').then(m => m.DocsGetStartedPageComponent),
+            },
+            {
+                path: 'tutorials',
+                canActivate: [authGuard],
+                loadComponent: () => import('./pages/docs-tutorials/docs-tutorials.component').then(m => m.DocsTutorialsPageComponent),
+            },
+            {
+                path: 'changelog',
+                canActivate: [authGuard],
+                loadComponent: () => import('./pages/docs-changelog/docs-changelog.component').then(m => m.DocsChangelogPageComponent),
+            },
+        ],
+    },
+    {
+        path: 'settings',
         canActivate: [authGuard, networkGuard],
-        loadComponent: () => import('./pages/connected-authorities/connected-authorities.component').then(m => m.ConnectedAuthoritiesPageComponent),
-    },
-    {
-        path: 'dashboard/active-channels',
-        canActivate: [authGuard, networkGuard],
-        loadComponent: () => import('./pages/active-channels/active-channels.component').then(m => m.ActiveChannelsPageComponent),
-    },
-    {
-        path: 'dashboard/settings/general',
-        canActivate: [authGuard, networkGuard],
-        loadComponent: () => import('./pages/general-settings/general-settings.component').then(m => m.GeneralSettingsPageComponent),
-    },
-    {
-        path: 'docs/introduction',
-        canActivate: [authGuard],
-        loadComponent: () => import('./pages/docs-introduction/docs-introduction.component').then(m => m.DocsIntroductionPageComponent),
-    },
-    {
-        path: 'docs/get-started',
-        canActivate: [authGuard],
-        loadComponent: () => import('./pages/docs-get-started/docs-get-started.component').then(m => m.DocsGetStartedPageComponent),
-    },
-    {
-        path: 'docs/tutorials',
-        canActivate: [authGuard],
-        loadComponent: () => import('./pages/docs-tutorials/docs-tutorials.component').then(m => m.DocsTutorialsPageComponent),
-    },
-    {
-        path: 'docs/changelog',
-        canActivate: [authGuard],
-        loadComponent: () => import('./pages/docs-changelog/docs-changelog.component').then(m => m.DocsChangelogPageComponent),
+        children: [
+            {
+                path: 'general',
+                canActivate: [authGuard, networkGuard],
+                loadComponent: () => import('./pages/general-settings/general-settings.component').then(m => m.GeneralSettingsPageComponent),
+            },
+            {
+                path: 'team',
+                loadComponent: () => import('./pages/team-settings/team-settings.component').then(m => m.TeamSettingsPageComponent),
+            },
+            {
+                path: 'billing',
+                canActivate: [authGuard, networkGuard],
+                loadComponent: () => import('./pages/billing-settings/billing-settings.component').then(m => m.BillingSettingsPageComponent),
+            },
+        ],
     },
     {
         path: 'privacy-policy',
