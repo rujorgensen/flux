@@ -46,13 +46,7 @@ export class DashboardLayoutComponent {
 
     protected readonly selectedNetwork$;
 
-    private readonly currentUrl = toSignal(
-        this.router.events.pipe(
-            filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-            map((e) => e.urlAfterRedirects),
-            startWith(this.router.url),
-        ),
-    );
+    private readonly currentUrl;
 
     protected readonly isDashboardItemsOpen = computed(() =>
         [
@@ -79,6 +73,13 @@ export class DashboardLayoutComponent {
         private readonly router: Router,
     ) {
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
+
+        this.currentUrl = toSignal(
+            this.router.events.pipe(
+                filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+                map((e) => e.urlAfterRedirects),
+                startWith(this.router.url),
+            ));
 
         // Redirect to no-network when the last network is deleted
         combineLatest([this.networksService.isLoading$, this.networksService.selectedNetwork$]).pipe(
