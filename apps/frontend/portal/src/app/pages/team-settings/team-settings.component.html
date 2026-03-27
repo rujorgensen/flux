@@ -31,6 +31,7 @@
                         }
                     </div>
 
+                    @if (members.length > 0) {
                     <div class="overflow-x-auto rounded-box border border-base-300">
                         <table class="table table-zebra w-full">
                             <thead>
@@ -105,16 +106,11 @@
                                             </td>
                                         }
                                     </tr>
-                                } @empty {
-                                    <tr>
-                                        <td [attr.colspan]="isOrgAdmin(members) ? 6 : 5" class="text-center text-base-content/50 py-8">
-                                            No members yet — looks like you're a lone wolf.
-                                        </td>
-                                    </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
+                    }
                 </section>
 
                 <!-- Add member by email (admins only) -->

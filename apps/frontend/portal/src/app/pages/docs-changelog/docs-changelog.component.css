@@ -1,0 +1,10 @@
+/* Override global h1 purple colour */
+h1 {
+    color: var(--color-base-content);
+}
+
+/* Fix DaisyUI badge vertical alignment in flex rows */
+:host .badge {
+    vertical-align: middle;
+    line-height: 1;
+}

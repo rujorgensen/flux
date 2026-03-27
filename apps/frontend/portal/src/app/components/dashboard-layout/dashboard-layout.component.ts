@@ -46,19 +46,10 @@ export class DashboardLayoutComponent {
 
     protected readonly selectedNetwork$;
 
+    protected readonly isDashboardItemsOpen: ReturnType<typeof computed<boolean>>;
+    protected readonly isDocsOpen: ReturnType<typeof computed<boolean>>;
+    protected readonly isSettingsOpen: ReturnType<typeof computed<boolean>>;
     private readonly currentUrl;
-
-    protected readonly isDashboardItemsOpen = computed(() =>
-        [
-            '/dashboard/connected-authorities',
-            '/dashboard/connected-agents',
-            '/dashboard/active-channels',
-        ].some((path) => (this.currentUrl() ?? '').startsWith(path)),
-    );
-
-    protected readonly isSettingsOpen = computed(() =>
-        (this.currentUrl() ?? '').startsWith('/dashboard/settings/'),
-    );
 
     protected readonly expectedDeletePhrase = computed<string>(
         () => `delete ${this.pendingDeleteNetwork()?.alias ?? ''}`,
@@ -79,7 +70,25 @@ export class DashboardLayoutComponent {
                 filter((e): e is NavigationEnd => e instanceof NavigationEnd),
                 map((e) => e.urlAfterRedirects),
                 startWith(this.router.url),
-            ));
+            ),
+            { initialValue: this.router.url },
+        );
+
+        this.isDashboardItemsOpen = computed(() =>
+            [
+                '/dashboard/connected-authorities',
+                '/dashboard/connected-agents',
+                '/dashboard/active-channels',
+            ].some((path) => (this.currentUrl() ?? '').startsWith(path)),
+        );
+
+        this.isDocsOpen = computed(() =>
+            this.currentUrl().startsWith('/docs'),
+        );
+
+        this.isSettingsOpen = computed(() =>
+            this.currentUrl().startsWith('/settings'),
+        );
 
         // Redirect to no-network when the last network is deleted
         combineLatest([this.networksService.isLoading$, this.networksService.selectedNetwork$]).pipe(
