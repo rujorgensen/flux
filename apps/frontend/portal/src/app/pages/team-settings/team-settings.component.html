@@ -129,8 +129,7 @@
                                 type="email"
                                 class="input input-bordered flex-1"
                                 placeholder="colleague@example.com"
-                                [value]="addByEmailInput()"
-                                (input)="onAddByEmailChange(($event.target as HTMLInputElement).value)"
+                                [(ngModel)]="addByEmailInput"
                             />
                             <button
                                 class="btn btn-primary"

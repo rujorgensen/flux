@@ -6,6 +6,7 @@ import { DashboardLayoutComponent } from '../../components/dashboard-layout/dash
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { NetworksService, type INetwork } from '../../_services/networks.service';
 import { UserNamePipe, type IUserInfo } from '../../_pipes/user-name.pipe';
+import { FormsModule } from '@angular/forms';
 
 interface UserSession {
     id?: string;
@@ -38,6 +39,7 @@ export const ORG_NAME = 'Acme Labs';
 @Component({
     selector: 'app-team-settings',
     imports: [
+        FormsModule,
         CommonModule,
         DashboardLayoutComponent,
         UserNamePipe,
@@ -131,12 +133,6 @@ export class TeamSettingsPageComponent implements OnInit {
             case 'admin': return 'badge badge-secondary';
             default: return 'badge badge-ghost';
         }
-    }
-
-    protected onAddByEmailChange(
-        value: string,
-    ): void {
-        this.addByEmailInput.set(value);
     }
 
     protected openInviteModal(
