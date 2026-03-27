@@ -5,6 +5,7 @@ import type { Observable } from 'rxjs';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { NetworksService, type INetwork } from '../../_services/networks.service';
+import { UserNamePipe, type IUserInfo } from '../../_pipes/user-name.pipe';
 
 interface UserSession {
     id?: string;
@@ -39,6 +40,7 @@ export const ORG_NAME = 'Acme Labs';
     imports: [
         CommonModule,
         DashboardLayoutComponent,
+        UserNamePipe,
     ],
     templateUrl: './team-settings.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,8 +51,15 @@ export class TeamSettingsPageComponent implements OnInit {
     protected readonly networks$: Observable<INetwork[]>;
     protected readonly orgMembers$: Observable<IOrgMember[]>;
 
+    /**
+     * Map of known userId → IUserInfo, seeded from the current session.
+     * Grows as more user data becomes available (e.g., from a future users API).
+     */
+    protected readonly userInfoMap = signal<Record<string, IUserInfo>>({});
+
     protected readonly showInviteModal = signal<boolean>(false);
     protected readonly inviteEmail = signal<string>('');
+    protected readonly addByEmailInput = signal<string>('');
     protected readonly memberToManage = signal<IOrgMember | null>(null);
     protected readonly networkToggleState = signal<Record<string, boolean>>({});
 
@@ -91,7 +100,17 @@ export class TeamSettingsPageComponent implements OnInit {
     ) {
         const session = await this._userService.authClient.getSession();
         if (session.data) {
-            this.userSession.set(session.data.user as UserSession);
+            const user = session.data.user as UserSession;
+            this.userSession.set(user);
+            if (user.id) {
+                this.userInfoMap.set({
+                    [user.id]: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                    },
+                });
+            }
         }
     }
 
@@ -112,6 +131,12 @@ export class TeamSettingsPageComponent implements OnInit {
             case 'admin': return 'badge badge-secondary';
             default: return 'badge badge-ghost';
         }
+    }
+
+    protected onAddByEmailChange(
+        value: string,
+    ): void {
+        this.addByEmailInput.set(value);
     }
 
     protected openInviteModal(

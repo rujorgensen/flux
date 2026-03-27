@@ -52,17 +52,17 @@
                                         <td class="w-12">
                                             <div class="avatar placeholder">
                                                 <div class="w-9 rounded-full bg-neutral text-neutral-content text-sm">
-                                                    <span>{{ member.userId.charAt(0).toUpperCase() }}</span>
+                                                    <span>{{ (member.userId | userName: userInfoMap()).charAt(0).toUpperCase() }}</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <!-- Name (userId until backend provides it) -->
+                                        <!-- Name resolved via UserNamePipe -->
                                         <td>
-                                            <span class="font-medium text-sm">{{ member.userId }}</span>
+                                            <span class="font-medium text-sm">{{ member.userId | userName: userInfoMap() }}</span>
                                         </td>
-                                        <!-- Email (not available yet) -->
+                                        <!-- Email -->
                                         <td>
-                                            <span class="text-sm text-base-content/50">—</span>
+                                            <span class="text-sm text-base-content/50">{{ userInfoMap()[member.userId]?.email ?? '—' }}</span>
                                         </td>
                                         <!-- Role badge -->
                                         <td>
@@ -117,6 +117,36 @@
                     </div>
                 </section>
 
+                <!-- Add member by email (admins only) -->
+                @if (isOrgAdmin(members)) {
+                    <section>
+                        <h3 class="text-lg font-semibold mb-3">Add member by email</h3>
+                        <p class="text-sm text-base-content/70 mb-3">
+                            Already have an account? Enter their email to add them directly to <strong>{{ ORG_NAME }}</strong>.
+                        </p>
+                        <div class="flex gap-2 max-w-md">
+                            <input
+                                type="email"
+                                class="input input-bordered flex-1"
+                                placeholder="colleague@example.com"
+                                [value]="addByEmailInput()"
+                                (input)="onAddByEmailChange(($event.target as HTMLInputElement).value)"
+                            />
+                            <button
+                                class="btn btn-primary"
+                                type="button"
+                                disabled
+                                title="Coming soon"
+                            >
+                                Add member
+                            </button>
+                        </div>
+                        <p class="text-xs text-base-content/50 mt-2">
+                            Direct member addition is coming soon. Use "Invite member" to send an email invitation in the meantime.
+                        </p>
+                    </section>
+                }
+
                 <!-- Coming soon notice -->
                 @if (isOrgAdmin(members)) {
                     <section class="alert alert-info">
@@ -138,7 +168,7 @@
                     <div class="modal-box">
                         <h3 class="font-bold text-lg">Manage Network Access</h3>
                         <p class="py-2 text-sm text-base-content/70">
-                            Choose which networks <span class="font-semibold">{{ managed.userId }}</span> can access.
+                            Choose which networks <span class="font-semibold">{{ managed.userId | userName: userInfoMap() }}</span> can access.
                         </p>
                         <div class="space-y-2 py-2">
                             @for (network of allNetworks; track network.id) {
