@@ -1,26 +1,35 @@
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>UID</th>
-            <th>IP</th>
-            <th>address</th>
-            <th>bytes</th>
-            <th>Connected At</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (dataStore()) {
-            @for (row of dataStore(); track row.id) {
+@if (dataStore(); as data) {
+    @if (data.length > 0) {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>{{ row.id }}</td>
-                    <td>{{ row.uid }}</td>
-                    <td>{{ row.ip }}</td>
-                    <td>{{ row.address }}</td>
-                    <td>{{ row.bytes }}</td>
-                    <td>{{ row.connectedAt | date:'fullDate' }}</td>
+                    <th>ID</th>
+                    <th>UID</th>
+                    <th>IP</th>
+                    <th>address</th>
+                    <th>bytes</th>
+                    <th>Connected At</th>
                 </tr>
-            }
-        }
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                @for (row of data; track row.id) {
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.uid }}</td>
+                        <td>{{ row.ip }}</td>
+                        <td>{{ row.address }}</td>
+                        <td>{{ row.bytes }}</td>
+                        <td>{{ row.connectedAt | date:'fullDate' }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    } @else {
+        <div class="flex flex-col items-center justify-center py-16 text-base-content/50">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-12 h-12 stroke-current mb-3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span class="text-sm font-medium">No connected agents</span>
+        </div>
+    }
+}

@@ -1,24 +1,33 @@
-<table class="table">
-    <thead>
-        <tr>
-            <th>Channel Name</th>
-            <th>member distribution</th>
-            <th>Member Count</th>
-            <th>Data Usage [bytes]</th>
-            <th>Created At</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (dataStore()) {
-            @for (row of dataStore(); track row.channelName) {
+@if (dataStore(); as data) {
+    @if (data.length > 0) {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>{{ row.channelName }}</td>
-                    <td>{{ row.memberDistribution }}</td>
-                    <td class="text-right">{{ row.members }}</td>
-                    <td class="text-right">{{ row.bytes }}</td>
-                    <td>{{ row.createdAt | date:'fullDate' }}</td>
+                    <th>Channel Name</th>
+                    <th>member distribution</th>
+                    <th>Member Count</th>
+                    <th>Data Usage [bytes]</th>
+                    <th>Created At</th>
                 </tr>
-            }
-        }
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                @for (row of data; track row.channelName) {
+                    <tr>
+                        <td>{{ row.channelName }}</td>
+                        <td>{{ row.memberDistribution }}</td>
+                        <td class="text-right">{{ row.members }}</td>
+                        <td class="text-right">{{ row.bytes }}</td>
+                        <td>{{ row.createdAt | date:'fullDate' }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    } @else {
+        <div class="flex flex-col items-center justify-center py-16 text-base-content/50">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-12 h-12 stroke-current mb-3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+            </svg>
+            <span class="text-sm font-medium">No active channels</span>
+        </div>
+    }
+}

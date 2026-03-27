@@ -49,6 +49,7 @@ export class DashboardLayoutComponent {
     protected readonly isDashboardItemsOpen: ReturnType<typeof computed<boolean>>;
     protected readonly isDocsOpen: ReturnType<typeof computed<boolean>>;
     protected readonly isSettingsOpen: ReturnType<typeof computed<boolean>>;
+    private readonly currentUrl;
 
     protected readonly expectedDeletePhrase = computed<string>(
         () => `delete ${this.pendingDeleteNetwork()?.alias ?? ''}`,
@@ -64,7 +65,7 @@ export class DashboardLayoutComponent {
     ) {
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
 
-        const currentUrl = toSignal(
+        this.currentUrl = toSignal(
             this.router.events.pipe(
                 filter((e): e is NavigationEnd => e instanceof NavigationEnd),
                 map((e) => e.urlAfterRedirects),
@@ -74,16 +75,19 @@ export class DashboardLayoutComponent {
         );
 
         this.isDashboardItemsOpen = computed(() =>
-            currentUrl().startsWith('/dashboard/connected') ||
-            currentUrl().startsWith('/dashboard/active'),
+            [
+                '/dashboard/connected-authorities',
+                '/dashboard/connected-agents',
+                '/dashboard/active-channels',
+            ].some((path) => (this.currentUrl() ?? '').startsWith(path)),
         );
 
         this.isDocsOpen = computed(() =>
-            currentUrl().startsWith('/docs'),
+            this.currentUrl().startsWith('/docs'),
         );
 
         this.isSettingsOpen = computed(() =>
-            currentUrl().startsWith('/settings'),
+            this.currentUrl().startsWith('/settings'),
         );
 
         // Redirect to no-network when the last network is deleted
