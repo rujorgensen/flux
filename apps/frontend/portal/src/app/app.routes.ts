@@ -38,6 +38,26 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./pages/general-settings/general-settings.component').then(m => m.GeneralSettingsPageComponent),
     },
     {
+        path: 'docs/introduction',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/docs-introduction/docs-introduction.component').then(m => m.DocsIntroductionPageComponent),
+    },
+    {
+        path: 'docs/get-started',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/docs-get-started/docs-get-started.component').then(m => m.DocsGetStartedPageComponent),
+    },
+    {
+        path: 'docs/tutorials',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/docs-tutorials/docs-tutorials.component').then(m => m.DocsTutorialsPageComponent),
+    },
+    {
+        path: 'docs/changelog',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/docs-changelog/docs-changelog.component').then(m => m.DocsChangelogPageComponent),
+    },
+    {
         path: 'privacy-policy',
         loadComponent: () => import('./pages/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyPageComponent),
     },
