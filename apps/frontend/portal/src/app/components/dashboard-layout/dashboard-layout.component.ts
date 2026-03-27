@@ -1,15 +1,15 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     input,
     signal,
-    computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { combineLatest, filter } from 'rxjs';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { combineLatest, filter, map, startWith } from 'rxjs';
 import { NetworksService, INetwork, MAX_NETWORKS } from '../../_services/networks.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 
@@ -46,6 +46,10 @@ export class DashboardLayoutComponent {
 
     protected readonly selectedNetwork$;
 
+    protected readonly isDashboardItemsOpen: ReturnType<typeof computed<boolean>>;
+    protected readonly isDocsOpen: ReturnType<typeof computed<boolean>>;
+    protected readonly isSettingsOpen: ReturnType<typeof computed<boolean>>;
+
     protected readonly expectedDeletePhrase = computed<string>(
         () => `delete ${this.pendingDeleteNetwork()?.alias ?? ''}`,
     );
@@ -59,6 +63,28 @@ export class DashboardLayoutComponent {
         private readonly router: Router,
     ) {
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
+
+        const currentUrl = toSignal(
+            this.router.events.pipe(
+                filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+                map((e) => e.urlAfterRedirects),
+                startWith(this.router.url),
+            ),
+            { initialValue: this.router.url },
+        );
+
+        this.isDashboardItemsOpen = computed(() =>
+            currentUrl().startsWith('/dashboard/connected') ||
+            currentUrl().startsWith('/dashboard/active'),
+        );
+
+        this.isDocsOpen = computed(() =>
+            currentUrl().startsWith('/docs'),
+        );
+
+        this.isSettingsOpen = computed(() =>
+            currentUrl().startsWith('/settings'),
+        );
 
         // Redirect to no-network when the last network is deleted
         combineLatest([this.networksService.isLoading$, this.networksService.selectedNetwork$]).pipe(

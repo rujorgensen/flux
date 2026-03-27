@@ -77,24 +77,32 @@
 
             <h2>How it fits together</h2>
 
-            <div class="not-prose bg-base-200 rounded-xl p-5 my-8 font-mono text-sm overflow-x-auto">
-                <div class="flex flex-col gap-3">
-                    <div class="flex items-center gap-3">
-                        <span class="badge badge-primary badge-sm">FluxAgent</span>
-                        <span class="text-base-content/50">──connect(code)──▶</span>
-                        <span class="badge badge-ghost badge-sm">FluxMesh</span>
-                        <span class="text-base-content/50">──validate?──▶</span>
-                        <span class="badge badge-accent badge-sm">FluxAuthority</span>
+            <div class="not-prose my-8">
+                <div class="flex flex-col sm:flex-row items-center gap-2">
+                    <div class="flex-1 rounded-xl bg-primary/10 border border-primary/20 p-4 text-center">
+                        <div class="font-semibold text-primary text-sm">FluxAgent</div>
+                        <div class="text-xs text-base-content/60 mt-1">connects &amp; publishes</div>
                     </div>
-                    <div class="flex items-center gap-3 pl-20">
-                        <span class="text-base-content/50">◀──authorized──────────────────────────</span>
+                    <div class="text-xs text-base-content/40 shrink-0 px-1">
+                        <span class="hidden sm:block">→</span>
+                        <span class="sm:hidden">↓</span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="badge badge-primary badge-sm">FluxAgent</span>
-                        <span class="text-base-content/50">──joinChannel('chat')──▶</span>
-                        <span class="badge badge-ghost badge-sm">FluxMesh</span>
+                    <div class="flex-1 rounded-xl bg-base-200 border border-base-300 p-4 text-center">
+                        <div class="font-semibold text-sm">FluxMesh</div>
+                        <div class="text-xs text-base-content/60 mt-1">routes messages</div>
+                    </div>
+                    <div class="text-xs text-base-content/40 shrink-0 px-1">
+                        <span class="hidden sm:block">→</span>
+                        <span class="sm:hidden">↓</span>
+                    </div>
+                    <div class="flex-1 rounded-xl bg-accent/10 border border-accent/20 p-4 text-center">
+                        <div class="font-semibold text-accent text-sm">FluxAuthority</div>
+                        <div class="text-xs text-base-content/60 mt-1">authorizes access</div>
                     </div>
                 </div>
+                <p class="text-xs text-base-content/40 text-center mt-3">
+                    Agent connects → Mesh validates with Authority → Agent joins channels
+                </p>
             </div>
 
             <h2>Why Flux?</h2>
