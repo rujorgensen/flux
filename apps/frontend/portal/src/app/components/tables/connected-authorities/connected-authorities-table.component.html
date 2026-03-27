@@ -7,10 +7,21 @@
     </thead>
     <tbody>
         @if (dataStore()) {
-            @for (row of dataStore(); track row.id) {
+            @for (row of dataStore()!; track row.id) {
                 <tr>
                     <td>{{ row.id }}</td>
                     <td>{{ row.connectedAt | date:'fullDate' }}</td>
+                </tr>
+            } @empty {
+                <tr>
+                    <td colspan="2" class="py-12 text-center">
+                        <div class="flex flex-col items-center gap-3 text-base-content/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-12 h-12 stroke-current" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <span class="text-sm font-medium">No connected authorities</span>
+                        </div>
+                    </td>
                 </tr>
             }
         }
