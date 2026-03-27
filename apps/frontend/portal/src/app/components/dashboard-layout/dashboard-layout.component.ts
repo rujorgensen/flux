@@ -1,15 +1,15 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     input,
     signal,
-    computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { combineLatest, filter } from 'rxjs';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { combineLatest, filter, map, startWith } from 'rxjs';
 import { NetworksService, INetwork, MAX_NETWORKS } from '../../_services/networks.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 
@@ -45,6 +45,26 @@ export class DashboardLayoutComponent {
     protected readonly deleteConfirmText = signal<string>('');
 
     protected readonly selectedNetwork$;
+
+    private readonly currentUrl = toSignal(
+        this.router.events.pipe(
+            filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+            map((e) => e.urlAfterRedirects),
+            startWith(this.router.url),
+        ),
+    );
+
+    protected readonly isDashboardItemsOpen = computed(() =>
+        [
+            '/dashboard/connected-authorities',
+            '/dashboard/connected-agents',
+            '/dashboard/active-channels',
+        ].some((path) => (this.currentUrl() ?? '').startsWith(path)),
+    );
+
+    protected readonly isSettingsOpen = computed(() =>
+        (this.currentUrl() ?? '').startsWith('/dashboard/settings/'),
+    );
 
     protected readonly expectedDeletePhrase = computed<string>(
         () => `delete ${this.pendingDeleteNetwork()?.alias ?? ''}`,
