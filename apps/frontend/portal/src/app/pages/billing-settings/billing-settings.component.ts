@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { Observable } from 'rxjs';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
-import { NetworksService, type INetwork } from '../../_services/networks.service';
 
 interface UserSession {
     id?: string;
@@ -89,15 +87,11 @@ export const BILLING_TIERS: IBillingTier[] = [
 })
 export class BillingSettingsPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
-    protected readonly selectedNetwork$: Observable<INetwork | null>;
     protected readonly tiers = BILLING_TIERS;
 
     constructor(
-        private readonly networksService: NetworksService,
         private readonly _userService: UserService,
-    ) {
-        this.selectedNetwork$ = this.networksService.selectedNetwork$;
-    }
+    ) {}
 
     async ngOnInit(
     ) {
