@@ -12,29 +12,48 @@ type TSupportedLanguages = 'typescript' | 'bash';
 export class SyntaxHighlightPipe implements PipeTransform {
 
     private readonly languageMap: Set<TSupportedLanguages> = new Set();
+    private readonly languageMapIsLoading: Set<TSupportedLanguages> = new Set();
 
     public transform(
         snippet: string,
         language: TSupportedLanguages,
     ): string {
-        if (!this.languageMap.has(language)) {
+        if (!this.languageMap.has(language) && !this.languageMapIsLoading.has(language)) {
+            this.languageMapIsLoading.add(language);
             loadLanguage(language)
                 .then(() => {
                     console.log(`Language '${language}' loaded successfully.`);
-                });
+                    this.languageMapIsLoading.delete(language);
+                })
+
+                ;
             this.languageMap.add(language);
         }
 
-        return hljs.highlight(
-            snippet,
-            { language }
-        ).value;
+        return hljs.highlight(snippet, { language }).value;
     }
 }
 
 const loadLanguage = async (
     language: TSupportedLanguages,
 ) => {
-    const module = await import(`highlight.js/lib/languages/${language}`);
-    hljs.registerLanguage(language, module.default);
+    let module;
+    switch (language) {
+        case 'typescript': {
+            module = await import(`highlight.js/lib/languages/typescript`);
+            break;
+        }
+
+        case 'bash': {
+            module = await import(`highlight.js/lib/languages/bash`);
+            break;
+        }
+    }
+
+    if (module) {
+        hljs
+            .registerLanguage(language, module.default);
+    } else {
+        throw new Error(`Failed loading language: '${language}'`);
+    }
 };
