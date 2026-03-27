@@ -20,35 +20,30 @@
                 Flux packages work with <strong>Node.js 20+</strong> or <strong>Bun 1.x</strong>.
             </p>
 
-            <!-- Package manager selector -->
-            <div class="not-prose mb-2">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs text-base-content/50 font-mono mr-1">Package manager:</span>
-                    @for (pm of ['bun', 'npm', 'pnpm', 'yarn']; track pm) {
-                        <button
-                            type="button"
-                            class="btn btn-xs"
-                            [class.btn-primary]="selectedPm() === pm"
-                            [class.btn-ghost]="selectedPm() !== pm"
-                            (click)="selectedPm.set($any(pm))"
-                        >{{ pm }}</button>
-                    }
-                </div>
-            </div>
-
             <h2>Step 1 — Start the Mesh server</h2>
 
             <p>
                 The mesh server routes connections and messages. Install it and fire it up:
             </p>
 
+            <!-- Install: flux-mesh -->
             <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
-                    <span class="text-xs font-mono text-base-content/60">Install</span>
+                    <div class="flex items-center gap-1">
+                        @for (pm of packageManagers; track pm) {
+                            <button
+                                type="button"
+                                class="btn btn-xs"
+                                [class.btn-primary]="selectedPm() === pm"
+                                [class.btn-ghost]="selectedPm() !== pm"
+                                (click)="_packageManagerService.select(pm)"
+                            >{{ pm }}</button>
+                        }
+                    </div>
                     <button
                         class="btn btn-ghost btn-xs gap-1"
                         type="button"
-                        (click)="copyToClipboard('install-mesh', pmInstallCommands[selectedPm()]('@persistica/flux-mesh'))"
+                        (click)="copyToClipboard('install-mesh', _packageManagerService.installCommands[selectedPm()]('@persistica/flux-mesh'))"
                     >
                         @if (copiedSnippet() === 'install-mesh') {
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-success"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -59,7 +54,7 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-sh" [innerHTML]="pmInstallCommands[selectedPm()]('@persistica/flux-mesh') | syntaxHighlight: 'bash'"></code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-bash" [innerHTML]="_packageManagerService.installCommands[selectedPm()]('@persistica/flux-mesh') | syntaxHighlight: 'bash'"></code></pre>
             </div>
 
             <div class="not-prose my-6">
@@ -89,13 +84,24 @@
                 allowed to subscribe to. This is where your auth logic lives.
             </p>
 
+            <!-- Install: flux-authority -->
             <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
-                    <span class="text-xs font-mono text-base-content/60">Install</span>
+                    <div class="flex items-center gap-1">
+                        @for (pm of packageManagers; track pm) {
+                            <button
+                                type="button"
+                                class="btn btn-xs"
+                                [class.btn-primary]="selectedPm() === pm"
+                                [class.btn-ghost]="selectedPm() !== pm"
+                                (click)="_packageManagerService.select(pm)"
+                            >{{ pm }}</button>
+                        }
+                    </div>
                     <button
                         class="btn btn-ghost btn-xs gap-1"
                         type="button"
-                        (click)="copyToClipboard('install-authority', pmInstallCommands[selectedPm()]('@persistica/flux-authority'))"
+                        (click)="copyToClipboard('install-authority', _packageManagerService.installCommands[selectedPm()]('@persistica/flux-authority'))"
                     >
                         @if (copiedSnippet() === 'install-authority') {
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-success"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -106,7 +112,7 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-sh" [innerHTML]="pmInstallCommands[selectedPm()]('@persistica/flux-authority') | syntaxHighlight: 'bash'"></code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-bash" [innerHTML]="_packageManagerService.installCommands[selectedPm()]('@persistica/flux-authority') | syntaxHighlight: 'bash'"></code></pre>
             </div>
 
             <div class="not-prose my-6">
@@ -143,13 +149,24 @@
                 Agents can run anywhere: browser, server, or background worker.
             </p>
 
+            <!-- Install: flux-agent -->
             <div class="not-prose my-6">
                 <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
-                    <span class="text-xs font-mono text-base-content/60">Install</span>
+                    <div class="flex items-center gap-1">
+                        @for (pm of packageManagers; track pm) {
+                            <button
+                                type="button"
+                                class="btn btn-xs"
+                                [class.btn-primary]="selectedPm() === pm"
+                                [class.btn-ghost]="selectedPm() !== pm"
+                                (click)="_packageManagerService.select(pm)"
+                            >{{ pm }}</button>
+                        }
+                    </div>
                     <button
                         class="btn btn-ghost btn-xs gap-1"
                         type="button"
-                        (click)="copyToClipboard('install-agent', pmInstallCommands[selectedPm()]('@persistica/flux-agent'))"
+                        (click)="copyToClipboard('install-agent', _packageManagerService.installCommands[selectedPm()]('@persistica/flux-agent'))"
                     >
                         @if (copiedSnippet() === 'install-agent') {
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-success"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -160,7 +177,7 @@
                         }
                     </button>
                 </div>
-                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-sh" [innerHTML]="pmInstallCommands[selectedPm()]('@persistica/flux-agent') | syntaxHighlight: 'bash'"></code></pre>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-bash" [innerHTML]="_packageManagerService.installCommands[selectedPm()]('@persistica/flux-agent') | syntaxHighlight: 'bash'"></code></pre>
             </div>
 
             <div class="not-prose my-6">

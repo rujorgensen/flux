@@ -2,13 +2,16 @@ import {
     ChangeDetectionStrategy,
     Component,
     OnInit,
+    Signal,
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { SyntaxHighlightPipe } from '$lib/app/_pipes/syntax-highlight.pipe';
+import { PackageManagerService, TPackageManager } from '$lib/app/_services/package-manager/package-manager.service';
 
 interface UserSession {
     id?: string;
@@ -35,14 +38,8 @@ interface UserSession {
 export class DocsGetStartedPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
     protected readonly copiedSnippet = signal<string | null>(null);
-    protected readonly selectedPm = signal<'bun' | 'npm' | 'pnpm' | 'yarn'>('bun');
-
-    protected readonly pmInstallCommands: Record<'bun' | 'npm' | 'pnpm' | 'yarn', (pkg: string) => string> = {
-        bun:  (pkg) => `bun add ${pkg}`,
-        npm:  (pkg) => `npm install ${pkg}`,
-        pnpm: (pkg) => `pnpm add ${pkg}`,
-        yarn: (pkg) => `yarn add ${pkg}`,
-    };
+    protected readonly selectedPm: Signal<TPackageManager>;
+    protected readonly packageManagers: TPackageManager[] = ['bun', 'npm', 'pnpm', 'yarn'];
 
     protected readonly meshSnippet = `import { FluxMeshServer } from '@persistica/flux-mesh';
 
@@ -104,7 +101,10 @@ channel.publish({ text: 'Hello, Flux!' });`;
 
     constructor(
         private readonly _userService: UserService,
-    ) { }
+        protected readonly _packageManagerService: PackageManagerService,
+    ) {
+        this.selectedPm = toSignal(this._packageManagerService.selectedPm$, { initialValue: 'bun' });
+    }
 
     async ngOnInit(
 
