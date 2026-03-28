@@ -17,6 +17,7 @@ const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to registe
 const fluxAuthority: FluxAuthority = new FluxAuthority(
     DEMO_NETWORK_ID,
     {
+        domain: process.env['FLUX_URL'],
         // p2p encryption
         secretKey: '$Ap~yI,y^:Hsqca',
     },

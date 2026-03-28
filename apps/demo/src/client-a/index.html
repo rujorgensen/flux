@@ -8,12 +8,32 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script type="module" src="web-rtc.ts"></script>
+    <script type="module" src="main-settings.ts"></script>
     <script type="module" src="main-a.ts"></script>
     <script type="module" src="main-b.ts"></script>
     <script type="module" src="main-activity.ts"></script>
 </head>
 
 <body style="display:flex; flex-direction:column; gap:20px">
+
+    <div x-data="fluxUrlSettings()">
+        <div id="panel-container">
+            <h1>Settings</h1>
+            <div class="container">
+                <label for="flux-url">Flux URL:</label>
+                <input
+                    id="flux-url"
+                    type="url"
+                    x-model="fluxUrl"
+                    placeholder="http://localhost:5100"
+                    style="width: 300px;"
+                />
+                <button @click="applyUrl()">Apply &amp; Reload</button>
+                <span x-show="saved" style="color: green;">✅ Saved – reloading…</span>
+                <span x-show="error" x-text="error" style="color: red;"></span>
+            </div>
+        </div>
+    </div>
 
     <div x-data="webRTCApplication()">
         <template x-if="false">
