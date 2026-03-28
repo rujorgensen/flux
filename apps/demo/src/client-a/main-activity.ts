@@ -3,6 +3,7 @@ import { FluxAgent } from '@persistica/flux-agent';
 import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
 import { PicoLogger } from '@utils/pico-logger';
+import { getFluxUrl } from '../flux-url';
 
 Alpine.data('fluxActivityDemoApplication', () => ({
     agents: new Set<FluxAgent>(),
@@ -22,7 +23,12 @@ Alpine.data('fluxActivityDemoApplication', () => ({
             setTimeout(async () => {
                 this.log('⭕ Connecting flux agent...');
 
-                const fluxAgent: FluxAgent = new FluxAgent(DEMO_NETWORK_ID);
+                const fluxAgent: FluxAgent = new FluxAgent(
+                    DEMO_NETWORK_ID,
+                    {
+                        domain: getFluxUrl(),
+                    },
+                );
 
                 const fluxNetworkConnection: FluxAgentNetworkConnection = await fluxAgent.connect(
                     {

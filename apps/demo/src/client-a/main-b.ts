@@ -3,13 +3,14 @@ import { FluxAgent } from '@persistica/flux-agent';
 import type { FluxAgentNetworkConnection, FluxNetworkChannel } from '@flux/shared/connection';
 import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
 import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
+import { getFluxUrl } from '../flux-url';
 
 // Define observable component
 Alpine.data('fluxApplicationB', () => ({
     flux: new FluxAgent(
         DEMO_NETWORK_ID,
         {
-            //         domain?: string,
+            domain: getFluxUrl(),
             //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
             //         retries?: number; // Number of times to retry a failed message
         },
