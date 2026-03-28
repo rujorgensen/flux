@@ -107,6 +107,8 @@ export const app = new Elysia()
             await meshRedisStatusService.getRedisStatusOrThrow(),
             await portalRedisStatusService.getRedisStatusOrThrow(),
         ];
+    }, {
+        auth: true,
     })
 
     // return new Response(null, {
