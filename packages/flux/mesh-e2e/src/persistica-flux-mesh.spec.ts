@@ -18,7 +18,7 @@ import {
 import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
-import type { FluxAuthorityNetworkConnection, } from 'packages/flux/authority/src/lib/flux-authority-network.class';
+import type { FluxAuthorityNetworkConnection, } from '@persistica/flux-authority';
 import { connectToRedisAndFlush } from '@flux/mesh/test/setup/infrastructure';
 
 const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´

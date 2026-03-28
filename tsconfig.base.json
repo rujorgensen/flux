@@ -19,65 +19,65 @@
         "skipDefaultLibCheck": true,
         "paths": {
             "$lib/*": [
-                "apps/frontend/portal/src/*"
+                "./apps/frontend/portal/src/*"
             ],
             "@backend/portal/auth": [
-                "libs/portal/backend/auth/src/index.ts"
+                "./libs/portal/backend/auth/src/index.ts"
             ],
             "@core/redis/bun": [
-                "libs/core/redis/bun-wrapper/src/index.ts"
+                "./libs/core/redis/bun-wrapper/src/index.ts"
             ],
             "@flux/mesh": [
-                "packages/flux/mesh/src/index.ts"
+                "./packages/flux/mesh/src/index.ts"
             ],
             "@flux/mesh/core/redis": [
-                "libs/flux/mesh/core/redis/src/index.ts"
+                "./libs/flux/mesh/core/redis/src/index.ts"
             ],
             "@flux/mesh/store/redis/network-agent": [
-                "libs/flux/mesh/store/redis/network-agent/src/index.ts"
+                "./libs/flux/mesh/store/redis/network-agent/src/index.ts"
             ],
             "@flux/mesh/store/redis/network-authority": [
-                "libs/flux/mesh/store/redis/network-authority/src/index.ts"
+                "./libs/flux/mesh/store/redis/network-authority/src/index.ts"
             ],
             "@flux/mesh/store/redis/network-channel": [
-                "libs/flux/mesh/store/redis/network-channel/src/index.ts"
+                "./libs/flux/mesh/store/redis/network-channel/src/index.ts"
             ],
             "@flux/mesh/store/redis/network-usage": [
-                "libs/flux/mesh/store/redis/network-usage/src/index.ts"
+                "./libs/flux/mesh/store/redis/network-usage/src/index.ts"
             ],
             "@flux/mesh/test/setup/infrastructure": [
-                "libs/flux/mesh/test/setup/infrastructure/src/index.ts"
+                "./libs/flux/mesh/test/setup/infrastructure/src/index.ts"
             ],
             "@flux/portal/core/redis": [
-                "libs/flux/portal/core/redis/src/index.ts"
+                "./libs/flux/portal/core/redis/src/index.ts"
             ],
             "@flux/shared/connection": [
-                "libs/flux/shared/connection/src/index.ts"
+                "./libs/flux/shared/connection/src/index.ts"
             ],
             "@flux/shared/types": [
-                "libs/flux/shared/types/src/index.ts"
+                "./libs/flux/shared/types/src/index.ts"
             ],
             "@flux/shared/utils": [
-                "libs/flux/shared/utils/src/index.ts"
+                "./libs/flux/shared/utils/src/index.ts"
             ],
             "@flux/shared/ws": [
-                "libs/flux/shared/ws/src/index.ts"
+                "./libs/flux/shared/ws/src/index.ts"
             ],
             "@persistica/flux-agent": [
-                "packages/flux/agent/src/index.ts"
+                "./packages/flux/agent/src/index.ts"
             ],
             "@persistica/flux-authority": [
-                "packages/flux/authority/src/index.ts"
+                "./packages/flux/authority/src/index.ts"
             ],
             "@persistica/mesh": [
-                "packages/flux/mesh/src/index.ts"
+                "./packages/flux/mesh/src/index.ts"
             ],
             "@utils/pico-logger": [
-                "libs/utils/logger/src/index.ts"
+                "./libs/utils/logger/src/index.ts"
             ],
             "@prisma-types/flux": [
                 "@prisma-types/flux/client.ts"
-    ]
+            ]
         }
     },
     "exclude": [

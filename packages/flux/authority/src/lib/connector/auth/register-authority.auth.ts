@@ -2,7 +2,7 @@ import type {
     TNetworkId_S,
 } from '@flux/shared/types';
 import type { TFluxClientUID } from '@flux/shared/utils';
-import { validateMachineUID } from 'libs/flux/shared/utils/src/lib/machine-id.util';
+import { validateMachineUID } from '@flux/shared/utils';
 
 export class RetryableError extends Error { }
 export class ConnectionError extends RetryableError { }

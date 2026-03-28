@@ -11,7 +11,7 @@ import {
     beforeAll,
     expect,
 } from 'bun:test';
-import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
+import { isNanoId } from '@flux/shared/types';
 import { $ } from 'bun';
 import {
     waitUntilAvailable,

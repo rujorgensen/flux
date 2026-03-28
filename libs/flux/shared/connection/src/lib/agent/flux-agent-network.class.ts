@@ -12,7 +12,7 @@ import type {
 import {
     FluxRemoteClient,
 } from '../../../../../../../packages/flux/agent/src/lib/flux-remote-client.class';
-import { ICEConnection } from 'packages/flux/agent/src/lib/connector/low-level-com/web-rtc/ice-connection';
+import { ICEConnection } from '../../../../../../../packages/flux/agent/src/lib/connector/low-level-com/web-rtc/ice-connection';
 import type { TRTCState } from '@flux/shared/utils';
 import type {
     FluxWebSocketClientConnection,

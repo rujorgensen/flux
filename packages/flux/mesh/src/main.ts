@@ -72,7 +72,7 @@ import {
 } from './routing/redis/redis-connection.class';
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
 import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
-import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
+import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
 
