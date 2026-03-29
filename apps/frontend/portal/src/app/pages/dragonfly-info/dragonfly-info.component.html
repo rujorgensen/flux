@@ -50,12 +50,10 @@
                             } @else {
                                 <div class="badge badge-success badge-sm">Healthy</div>
                             }
+                            <div class="badge badge-ghost badge-sm font-mono ml-auto text-base-content/60">{{ status.url }}</div>
                         </h2>
                         <p class="text-xs text-base-content/50">
                             Updated: {{ status.updatedAt | date: 'medium' }}
-                        </p>
-                        <p class="text-xs text-base-content/60 font-mono">
-                            URL: {{ status.url }}
                         </p>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
