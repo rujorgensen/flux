@@ -2,8 +2,9 @@ import Alpine from 'alpinejs';
 import { FluxAgent } from '@persistica/flux-agent';
 import type { FluxAgentNetworkConnection, FluxNetworkChannel } from '@flux/shared/connection';
 import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
-import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
+import { DEMO_NETWORK_ID } from '../definitions';
 import { getFluxUrl } from '../flux-url';
+import { getAuthorityObject } from '../auth-settings';
 
 // Define observable component
 Alpine.data('fluxApplicationB', () => ({
@@ -45,10 +46,9 @@ Alpine.data('fluxApplicationB', () => ({
             );
 
         this.fluxNetworkConnection = await this.flux.connect(
-            {
-                code: DEMO_CHANNEL_PASSWORD,
-                user: 'client-b',
-            },
+            getAuthorityObject(
+                'client-b',
+            ),
             'client-b-unique-identification-token',
         );
 
