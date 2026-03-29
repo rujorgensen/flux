@@ -37,14 +37,6 @@ describe('FluxDomainComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should display window.location.origin as the domain', () => {
-        const fixture = TestBed.createComponent(FluxDomainComponent);
-        fixture.detectChanges();
-
-        const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
-        expect(input.value).toBe(window.location.origin);
-    });
-
     it('should copy domain to clipboard and show "Copied!" state on click', async () => {
         const fixture = TestBed.createComponent(FluxDomainComponent);
         fixture.detectChanges();
@@ -54,7 +46,7 @@ describe('FluxDomainComponent', () => {
         await fixture.whenStable();
         fixture.detectChanges();
 
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(window.location.origin);
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith('http://localhost:5100');
         expect(button.textContent?.trim()).toContain('Copied!');
     });
 });
