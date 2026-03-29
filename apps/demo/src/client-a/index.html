@@ -35,6 +35,32 @@
         </div>
     </div>
 
+    <div x-data="fluxAuthSettings()">
+        <div id="panel-container">
+            <h1>Auth Settings</h1>
+            <div class="container">
+                <label for="authority-password">Authority Password / Token:</label>
+                <input
+                    id="authority-password"
+                    type="text"
+                    x-model="authorityPassword"
+                    placeholder="code-to-access-network"
+                    style="width: 300px;"
+                />
+                <label for="authority-object" style="margin-top: 1rem; display: block;">Authority Object (JSON):</label>
+                <textarea
+                    id="authority-object"
+                    x-model="authorityObject"
+                    placeholder='{ "code": "code-to-access-network", "user": "client-a" }'
+                    style="width: 300px; height: 100px; font-family: monospace;"
+                ></textarea>
+                <button @click="apply()">Apply &amp; Reload</button>
+                <span x-show="saved" style="color: green;">✅ Saved – reloading…</span>
+                <span x-show="error" x-text="error" style="color: red;"></span>
+            </div>
+        </div>
+    </div>
+
     <div x-data="webRTCApplication()">
         <template x-if="false">
 
