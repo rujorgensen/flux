@@ -4,10 +4,11 @@ import {
     OnInit,
     signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
-import { api } from '../../_services/api/api';
+import { FluxNetworkChannel } from '@persistica/flux-agent';
+import { FluxStatusAgentService } from '$lib/app/_services/flux/flux-status.agent.service';
 
 interface UserSession {
     id?: string;
@@ -54,7 +55,11 @@ type TDragonflyStatus = {
 @Component({
     selector: 'app-dragonfly-info',
     imports: [
+        // * Modules
         CommonModule,
+        // * Pipes
+        DecimalPipe,
+        // * Components
         DashboardLayoutComponent,
     ],
     templateUrl: './dragonfly-info.component.html',
@@ -63,42 +68,67 @@ type TDragonflyStatus = {
 export class DragonflyInfoPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
     protected readonly statuses = signal<TDragonflyStatus[] | null>(null);
-    protected readonly isLoading = signal<boolean>(true);
     protected readonly error = signal<string | null>(null);
 
     protected readonly instanceLabels = ['Mesh DragonFly', 'Portal DragonFly'];
 
+    private portalRedisStatus: TDragonflyStatus | null = null;
+    private meshRedisStatus: TDragonflyStatus | null = null;
+
     constructor(
         private readonly _userService: UserService,
-    ) { }
+        private readonly _fluxStatusAgentService: FluxStatusAgentService,
+    ) {
+        this._fluxStatusAgentService
+            .connect()
+            .then(async (connection) => {
+                console.log('Connected to Flux network with agent ID:', connection);
 
-    async ngOnInit(): Promise<void> {
+                const portalRedisHealthChannel: FluxNetworkChannel = await connection
+                    .joinChannel('protected-portal-redis-status');
+
+                portalRedisHealthChannel
+                    .onPublish((message) => {
+                        this.portalRedisStatus = JSON.parse(message as string) as TDragonflyStatus;
+
+                        if (this.portalRedisStatus && this.meshRedisStatus) {
+                            this.statuses.set([
+                                this.meshRedisStatus,
+                                this.portalRedisStatus,
+                            ]);
+                        }
+                    });
+
+                const meshRedisHealthAlertChannel: FluxNetworkChannel = await connection
+                    .joinChannel('protected-mesh-redis-status');
+
+                meshRedisHealthAlertChannel
+                    .onPublish((message) => {
+                        this.meshRedisStatus = JSON.parse(message as string) as TDragonflyStatus;
+
+                        if (this.portalRedisStatus && this.meshRedisStatus) {
+                            this.statuses.set([
+                                this.meshRedisStatus,
+                                this.portalRedisStatus,
+                            ]);
+                        }
+                    });
+            })
+            .catch(error => {
+                console.error('Failed to connect to Flux network:', error);
+            })
+            ;
+    }
+
+    async ngOnInit(
+
+    ): Promise<void> {
         const session = await this._userService.authClient.getSession();
 
         if (session.data) {
             this.userSession.set(session.data.user as UserSession);
         }
 
-        await this.fetchStatus();
-    }
-
-    private async fetchStatus(): Promise<void> {
-        this.isLoading.set(true);
-        this.error.set(null);
-
-        const { data, error } = await api.api.status.get();
-
-        if (error) {
-            this.error.set('Failed to load DragonFly status. Please try again.');
-        } else {
-            this.statuses.set(data as TDragonflyStatus[]);
-        }
-
-        this.isLoading.set(false);
-    }
-
-    protected async refresh(): Promise<void> {
-        await this.fetchStatus();
     }
 
     protected formatBytes(
@@ -122,13 +152,4 @@ export class DragonflyInfoPageComponent implements OnInit {
         return `${value.toFixed(1)} ${units[unitIndex]}`;
     }
 
-    protected formatPercent(
-        ratio: number | null | undefined,
-    ): string {
-        if (ratio === null || ratio === undefined) {
-            return 'N/A';
-        }
-
-        return `${(ratio * 100).toFixed(1)}%`;
-    }
 }

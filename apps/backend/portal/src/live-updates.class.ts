@@ -28,181 +28,188 @@ export class LiveUpdates {
         private readonly meshRedisStatusService: RedisStatusService,
         private readonly FLUX_AUTHORITY_JWT_SECRET: string,
     ) {
-        const fluxMeshServer: FluxMeshServer = new FluxMeshServer({
+        new FluxMeshServer({
             port: this.localMestServerPort,
-        });
+        })
+            .onReady(async () => {
 
-        fluxMeshServer.onReady(async () => {
+                // ****************************************************************************
+                // * Setup Authority
+                // ****************************************************************************
 
-            // ****************************************************************************
-            // * Setup Authority
-            // ****************************************************************************
+                console.log('🔑 Registering authority');
 
-            console.log('🔑 Registering authority');
+                const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
+                const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
-            const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
-            const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
-
-            const fluxAuthority = new FluxAuthority(
-                NETWORK_ID,
-                {
-                    domain: `http://localhost:${this.localMestServerPort}`,
-                    //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
-                    //         retries?: number; // Number of times to retry a failed message
-                },
-            );
-
-            await fluxAuthority
-                .registerAuthority(
-                    NETWORK_AUTHORITY_KEY,
-                    (
-                        auth: unknown,
-                    ): Promise<string> => {
-                        console.log('🔑 A client is trying to access the network', auth);
-
-                        // Test the agents claim to access network
-                        if (
-                            (auth !== CODE_TO_ACCESS_NETWORK)
-                        ) {
-                            return Promise.reject(new Error('Not allowed, bad agent claim'));
-                        }
-
-                        // console.log('✅ Network access authorized');
-
-                        return Promise.resolve(jwt.sign({
-                            user: {
-                                allowAllChannels: true,
-                            },
-                        }, this.FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
+                const fluxAuthority = new FluxAuthority(
+                    NETWORK_ID,
+                    {
+                        domain: `http://localhost:${this.localMestServerPort}`,
+                        //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
+                        //         retries?: number; // Number of times to retry a failed message
                     },
+                );
 
-                    // * Authorize channel
-                    (
-                        channelTopic: string,
-                        identification: string,
-                    ): Promise<boolean> => {
+                await fluxAuthority
+                    .registerAuthority(
+                        NETWORK_AUTHORITY_KEY,
+                        (
+                            auth: unknown,
+                        ): Promise<string> => {
+                            console.log('🔑 A client is trying to access the network', auth);
 
-                        const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as IAgentJWTPayload;
-
-                        console.log(`🔒 A client is attempting to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
-
-                        // console.error(`✅ Client suscribed to channel with identification`);
-
-                        if (channelTopic.startsWith('protected')) {
-                            if (agentJWT.user.allowAllChannels) {
-                                console.log('✅ Agent is allowed on all channels');
-                                return Promise.resolve(true);
+                            // Test the agents claim to access network
+                            if (
+                                (auth !== CODE_TO_ACCESS_NETWORK)
+                            ) {
+                                return Promise.reject(new Error('Not allowed, bad agent claim'));
                             }
 
-                            console.log('TODO: chcek if this agent is allowed to access the channel');
-                            return Promise.resolve(false);
-                        }
+                            // console.log('✅ Network access authorized');
 
-                        return Promise.resolve(true);
+                            return Promise.resolve(jwt.sign({
+                                user: {
+                                    allowAllChannels: true,
+                                },
+                            }, this.FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
+                        },
+
+                        // * Authorize channel
+                        (
+                            channelTopic: string,
+                            identification: string,
+                        ): Promise<boolean> => {
+
+                            const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as IAgentJWTPayload;
+
+                            console.log(`🔒 A client is attempting to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
+
+                            // console.error(`✅ Client suscribed to channel with identification`);
+
+                            if (channelTopic.startsWith('protected')) {
+                                if (agentJWT.user.allowAllChannels) {
+                                    console.log('✅ Agent is allowed on all channels');
+                                    return Promise.resolve(true);
+                                }
+
+                                console.log('TODO: chcek if this agent is allowed to access the channel');
+                                return Promise.resolve(false);
+                            }
+
+                            return Promise.resolve(true);
+                        },
+                    );
+
+                // ****************************************************************************
+                // * Setup Agent
+                // ****************************************************************************
+
+                const fluxAgent = new FluxAgent(
+                    NETWORK_ID,
+                    {
+                        domain: `http://localhost:${this.localMestServerPort}`,
+                        //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
+                        //         retries?: number; // Number of times to retry a failed message
                     },
                 );
 
-            // ****************************************************************************
-            // * Setup Agent
-            // ****************************************************************************
+                const fluxNetworkConnection: FluxAgentNetworkConnection = await fluxAgent
+                    .connect(
+                        CODE_TO_ACCESS_NETWORK,
+                        'backend-agent',
+                    );
 
-            const fluxAgent = new FluxAgent(
-                NETWORK_ID,
-                {
-                    domain: `http://localhost:${this.localMestServerPort}`,
-                    //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
-                    //         retries?: number; // Number of times to retry a failed message
-                },
-            );
+                console.log(`✅ Agent connected to network ID: '${NETWORK_ID}'`);
 
-            const fluxNetworkConnection: FluxAgentNetworkConnection = await fluxAgent
-                .connect(
-                    CODE_TO_ACCESS_NETWORK,
-                    'backend-agent',
-                );
+                // * Emit connected agents
+                const fluxConnectedAgentNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
+                    .joinChannel('connected-agents');
 
-            console.log(`✅ Agent connected to network ID: '${NETWORK_ID}'`);
+                let num2: number = 0;
+                setInterval(() => {
+                    num2++;
+                    const networkAgentCountAt: TNetworkAgentCountAt = {
+                        count: num2,
+                        date: new Date(),
+                    };
 
-            // * Emit connected agents
-            const fluxConnectedAgentNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('connected-agents');
+                    fluxConnectedAgentNetworkChannel.publish(networkAgentCountAt);
+                }, 3_000);
 
-            let num2: number = 0;
-            setInterval(() => {
-                num2++;
-                const networkAgentCountAt: TNetworkAgentCountAt = {
-                    count: num2,
-                    date: new Date(),
-                };
+                // * Emit active channels
+                const fluxActiveChannels: FluxNetworkChannel = await fluxNetworkConnection
+                    .joinChannel('active-channels');
 
-                fluxConnectedAgentNetworkChannel.publish(networkAgentCountAt);
-            }, 3_000);
+                let num3: number = 0;
+                setInterval(() => {
+                    num3++;
+                    const fluxActiveChannelsAt: TNetworkChannelCountAt = {
+                        count: num3,
+                        date: new Date(),
+                    };
 
-            // * Emit active channels
-            const fluxActiveChannels: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('active-channels');
+                    fluxActiveChannels.publish(fluxActiveChannelsAt);
+                }, 3_000);
 
-            let num3: number = 0;
-            setInterval(() => {
-                num3++;
-                const fluxActiveChannelsAt: TNetworkChannelCountAt = {
-                    count: num3,
-                    date: new Date(),
-                };
+                // * Emit connected authorities
+                const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
+                    .joinChannel('connected-authorities');
 
-                fluxActiveChannels.publish(fluxActiveChannelsAt);
-            }, 3_000);
+                let num4: number = 0;
+                setInterval(() => {
+                    num4++;
+                    const fluxActiveChannelsAt: TNetworkChannelCountAt = {
+                        count: num4,
+                        date: new Date(),
+                    };
 
-            // * Emit connected authorities
-            const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('connected-authorities');
-
-            let num4: number = 0;
-            setInterval(() => {
-                num4++;
-                const fluxActiveChannelsAt: TNetworkChannelCountAt = {
-                    count: num4,
-                    date: new Date(),
-                };
-
-                fluxNetworkChannel.publish(fluxActiveChannelsAt);
-            }, 3_000);
+                    fluxNetworkChannel.publish(fluxActiveChannelsAt);
+                }, 3_000);
 
 
-            // * Emit data usage
-            const fluxDataUsageNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('data-usage');
+                // * Emit data usage
+                const fluxDataUsageNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
+                    .joinChannel('data-usage');
 
-            let num5: number = -100;
-            setInterval(() => {
-                num5++;
-                fluxDataUsageNetworkChannel.publish(num5);
-            }, 3_000);
+                let num5: number = -100;
+                setInterval(() => {
+                    num5++;
+                    fluxDataUsageNetworkChannel.publish(num5);
+                }, 3_000);
 
-            // * Listen to Redis health
-            const portalRedisHealthChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('protected-portal-redis-health-alerts');
+                // * Listen to Redis health
+                const portalRedisHealthChannel: FluxNetworkChannel = await fluxNetworkConnection
+                    .joinChannel('protected-portal-redis-health-alerts');
 
-            const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('protected-mesh-redis-health-alerts');
+                const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
+                    .joinChannel('protected-mesh-redis-health-alerts');
 
-            console.log(`✅ Agent connected to network channel topics: "${fluxNetworkConnection.readConnectedChannels().join('","')}"`);
+                console.log(`✅ Agent connected to network channel topics: "${fluxNetworkConnection.readConnectedChannels().join('","')}"`);
 
-            this.portalRedisStatusService
-                .onAlert((alerts: string[]) => {
-                    portalRedisHealthChannel.publish(JSON.stringify(alerts));
-                });
+                this.portalRedisStatusService
+                    .onAlert((alerts: string[]) => {
+                        portalRedisHealthChannel.publish(JSON.stringify(alerts));
+                    });
 
-            this.meshRedisStatusService
-                .onAlert((alerts: string[]) => {
-                    meshRedisHealthAlertChannel.publish(JSON.stringify(alerts));
-                });
-        });
-    }
+                this.meshRedisStatusService
+                    .onAlert((alerts: string[]) => {
+                        meshRedisHealthAlertChannel.publish(JSON.stringify(alerts));
+                    });
 
-    public subscribeToNetworkUpdates(
-        networkId: TNetworkId_S,
-    ): void {
+                // * Listen to status
+                const portalRedisStatusChannel: FluxNetworkChannel = await fluxNetworkConnection
+                    .joinChannel('protected-portal-redis-status');
+                const meshRedisStatusChannel: FluxNetworkChannel = await fluxNetworkConnection
+                    .joinChannel('protected-mesh-redis-status');
 
+                setInterval(async () => {
+                    const portalRedisStatus = await this.portalRedisStatusService.getRedisStatusOrThrow();
+                    portalRedisStatusChannel.publish(JSON.stringify(portalRedisStatus));
+
+                    const meshRedisStatus = await this.meshRedisStatusService.getRedisStatusOrThrow();
+                    meshRedisStatusChannel.publish(JSON.stringify(meshRedisStatus));
+                }, 100);
+            });
     }
 }
