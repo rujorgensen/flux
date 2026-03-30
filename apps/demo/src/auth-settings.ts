@@ -1,4 +1,5 @@
 export const DEFAULT_AUTHORITY_PASSWORD = 'code-to-access-network';
+export const DEFAULT_AUTHORITY_KEY = 'network-authority-key';
 
 export const DEFAULT_AUTHORITY_OBJECT = JSON.stringify(
     {
@@ -11,6 +12,7 @@ export const DEFAULT_AUTHORITY_OBJECT = JSON.stringify(
 
 const AUTHORITY_PASSWORD_KEY = 'flux_authority_password';
 const AUTHORITY_OBJECT_KEY = 'flux_authority_object';
+const AUTHORITY_KEY_STORAGE_KEY = 'flux_authority_key';
 
 export const getAuthorityPassword = (): string =>
     localStorage.getItem(AUTHORITY_PASSWORD_KEY) ?? DEFAULT_AUTHORITY_PASSWORD;
@@ -41,4 +43,13 @@ export const setAuthorityObject = (
 ): void => {
     JSON.parse(json); // validate JSON before storing
     localStorage.setItem(AUTHORITY_OBJECT_KEY, json);
+};
+
+export const getAuthorityKey = (): string =>
+    localStorage.getItem(AUTHORITY_KEY_STORAGE_KEY) ?? DEFAULT_AUTHORITY_KEY;
+
+export const setAuthorityKey = (
+    key: string,
+): void => {
+    localStorage.setItem(AUTHORITY_KEY_STORAGE_KEY, key.trim());
 };

@@ -81,15 +81,6 @@ const build = async () => {
         minify: false,
     });
 
-    await Bun.build({
-        entrypoints: [
-            './apps/demo/src/server-a/main.ts',
-        ],
-        sourcemap: 'inline',
-        outdir: './apps/demo/src/dist/server-a',
-        minify: false,
-    });
-
     console.log('🔨 Done building...');
 };
 
@@ -153,11 +144,5 @@ const serverConf = {
 
 await clearAndBuild();
 
-console.log('Restarting main...');
-try {
-    $`bun --watch ./apps/demo/src/server-a/main.ts`.then();
-} catch { }
-
 server = Bun.serve(serverConf);
-// $`bun --hot run ./apps/flux/agent/src/demo/dist/server-a/main.js`.then();
 console.log(`🚀 Demo server running on http://${server.hostname}:${serverConf.port}`);

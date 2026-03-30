@@ -9,6 +9,7 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script type="module" src="web-rtc.ts"></script>
     <script type="module" src="main-settings.ts"></script>
+    <script type="module" src="main-authority.ts"></script>
     <script type="module" src="main-a.ts"></script>
     <script type="module" src="main-b.ts"></script>
     <script type="module" src="main-activity.ts"></script>
@@ -47,7 +48,15 @@
         <div id="panel-container">
             <h1>Auth Settings</h1>
             <div class="container">
-                <label for="authority-password">Authority Password / Token:</label>
+                <label for="authority-key">Authority Key:</label>
+                <input
+                    id="authority-key"
+                    type="text"
+                    x-model="authorityKey"
+                    placeholder="network-authority-key"
+                    style="width: 300px;"
+                />
+                <label for="authority-password" style="margin-top: 1rem; display: block;">Authority Password / Token:</label>
                 <input
                     id="authority-password"
                     type="text"
@@ -106,6 +115,27 @@
         </template>
 
     </div>
+    <div x-data="fluxAuthority()">
+
+        <div id="panel-container">
+            <h1>Authority</h1>
+
+            <header class="statuses">
+                <label for="authority-network-state">network:</label>
+                <span></span>
+                <span id="authority-network-state" x-text="networkState"></span>
+                <span></span>
+            </header>
+            <div class="container">
+                <code style="min-height: 300px;">
+                    <template x-for="log in authorityLog">
+                        <p x-text="log"></p>
+                    </template>
+                </code>
+            </div>
+        </div>
+    </div>
+
     <div x-data="fluxApplicationA()">
 
         <div id="panel-container">
