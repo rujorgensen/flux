@@ -12,10 +12,10 @@ export const DEFAULT_AUTHORITY_OBJECT = JSON.stringify(
 const AUTHORITY_PASSWORD_KEY = 'flux_authority_password';
 const AUTHORITY_OBJECT_KEY = 'flux_authority_object';
 
-export const getAuthorityPassword = (): string =>
+export const getAuthorityKey = (): string =>
     localStorage.getItem(AUTHORITY_PASSWORD_KEY) ?? DEFAULT_AUTHORITY_PASSWORD;
 
-export const setAuthorityPassword = (
+export const setAuthorityKey = (
     password: string,
 ): void => {
     localStorage.setItem(AUTHORITY_PASSWORD_KEY, password);

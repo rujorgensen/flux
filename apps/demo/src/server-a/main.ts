@@ -4,6 +4,7 @@ import type { TChannelName } from '@flux/shared/types';
 import jwt from 'jsonwebtoken';
 import { DEMO_CHANNEL_PASSWORD } from '../definitions';
 import { getNetworkId } from '../network-id';
+import { getAuthorityKey } from '../auth-settings';
 
 const secret = 'your-very-secure-secret'; // keep this secret safe!
 
@@ -12,8 +13,6 @@ const secret = 'your-very-secure-secret'; // keep this secret safe!
 // ****************************************************************************
 
 console.log('🔑 Registering authority');
-
-const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
 const fluxAuthority: FluxAuthority = new FluxAuthority(
     getNetworkId(),
@@ -26,7 +25,7 @@ const fluxAuthority: FluxAuthority = new FluxAuthority(
 
 await fluxAuthority
     .registerAuthority(
-        NETWORK_AUTHORITY_KEY,
+        getAuthorityKey(),
         (
             auth: unknown,
         ): Promise<string> => {
