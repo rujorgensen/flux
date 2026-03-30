@@ -8,19 +8,29 @@ import {
     setAuthorityObject,
     setAuthorityPassword,
 } from '../auth-settings';
+import { DEFAULT_NETWORK_ID, getNetworkId, setNetworkId } from '../network-id';
 
 Alpine.data('fluxUrlSettings', () => ({
     fluxUrl: getFluxUrl(),
+    networkId: getNetworkId() as string,
     saved: false,
     error: '',
 
     applyUrl() {
         const url = (this.fluxUrl as string).trim() || DEFAULT_FLUX_URL;
+        const networkId = (this.networkId as string).trim() || DEFAULT_NETWORK_ID;
 
         try {
             setFluxUrl(url);
         } catch {
             this.error = 'Invalid URL – please enter a valid URL (e.g. http://localhost:5100)';
+            return;
+        }
+
+        try {
+            setNetworkId(networkId);
+        } catch {
+            this.error = 'Invalid Network ID – please enter a non-empty Network ID';
             return;
         }
 
