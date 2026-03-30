@@ -21,6 +21,9 @@
                 ],
                 "parallel": true
             },
+            "dependsOn": [
+                "backend-mesh:serve"
+            ],
             "continuous": true
         },
         "serve-static": {
