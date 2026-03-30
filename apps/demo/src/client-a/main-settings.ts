@@ -1,12 +1,13 @@
 import Alpine from 'alpinejs';
 import { DEFAULT_FLUX_URL, getFluxUrl, setFluxUrl } from '../flux-url';
 import {
+    DEFAULT_AUTHORITY_KEY,
     DEFAULT_AUTHORITY_OBJECT,
     DEFAULT_AUTHORITY_PASSWORD,
-    getAuthorityObject,
     getAuthorityKey,
-    setAuthorityObject,
+    getAuthorityObject,
     setAuthorityKey,
+    setAuthorityObject,
 } from '../auth-settings';
 import { DEFAULT_NETWORK_ID, getNetworkId, setNetworkId } from '../network-id';
 
@@ -53,13 +54,13 @@ Alpine.data('fluxAuthSettings', () => ({
 
     apply() {
         try {
-            const password = (this.authorityKey as string).trim() || DEFAULT_AUTHORITY_PASSWORD;
+            const key = (this.authorityKey as string).trim() || DEFAULT_AUTHORITY_KEY;
             const object = (this.authorityObject as string).trim() || DEFAULT_AUTHORITY_OBJECT;
 
             // Validate JSON before saving
             JSON.parse(object);
 
-            setAuthorityKey(password);
+            setAuthorityKey(key);
             setAuthorityObject(object);
         } catch {
             this.error = 'Invalid JSON - please enter a valid JSON object';
