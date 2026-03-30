@@ -28,6 +28,14 @@
                     placeholder="http://localhost:5100"
                     style="width: 300px;"
                 />
+                <label for="network-id" style="margin-top: 1rem; display: block;">Network ID:</label>
+                <input
+                    id="network-id"
+                    type="text"
+                    x-model="networkId"
+                    placeholder="demo-network-id"
+                    style="width: 300px;"
+                />
                 <button @click="applyUrl()">Apply &amp; Reload</button>
                 <span x-show="saved" style="color: green;">✅ Saved – reloading…</span>
                 <span x-show="error" x-text="error" style="color: red;"></span>

@@ -34,8 +34,8 @@
                 "tsConfig": "apps/frontend/portal/tsconfig.app.json",
                 "inlineStyleLanguage": "scss",
                 "assets": [{
-                        "glob": "**/*",
-                        "input": "apps/frontend/portal/public"
+                    "glob": "**/*",
+                    "input": "apps/frontend/portal/public"
                 }],
                 "styles": [
                     "apps/frontend/portal/src/styles.scss"
@@ -82,6 +82,7 @@
             "defaultConfiguration": "development",
             "dependsOn": [
                 "@flux/portal-api:serve",
+                "demo:serve",
                 "open"
             ]
         },

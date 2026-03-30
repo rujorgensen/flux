@@ -2,14 +2,14 @@ import Alpine from 'alpinejs';
 import { FluxAgent } from '@persistica/flux-agent';
 import type { FluxAgentNetworkConnection, FluxNetworkChannel } from '@flux/shared/connection';
 import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
-import { DEMO_NETWORK_ID } from '../definitions';
 import { getFluxUrl } from '../flux-url';
 import { getAuthorityObject } from '../auth-settings';
+import { getNetworkId } from '../network-id';
 
 // Define observable component
 Alpine.data('fluxApplicationB', () => ({
     flux: new FluxAgent(
-        DEMO_NETWORK_ID,
+        getNetworkId(),
         {
             domain: getFluxUrl(),
             //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
