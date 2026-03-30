@@ -3,8 +3,9 @@ import { FluxAuthority } from '@persistica/flux-authority';
 import type { TChannelName } from '@flux/shared/types';
 import type { TNetworkConnectionState } from '@flux/shared/utils';
 import { getFluxUrl } from '../flux-url';
-import { getAuthorityKey, getAuthorityPassword } from '../auth-settings';
+import { getAuthorityKey } from '../auth-settings';
 import { getNetworkId } from '../network-id';
+import { DEMO_CHANNEL_PASSWORD } from '../definitions';
 
 Alpine.data('fluxAuthority', () => ({
     flux: new FluxAuthority(
@@ -28,9 +29,7 @@ Alpine.data('fluxAuthority', () => ({
             getAuthorityKey(),
 
             (auth: unknown): Promise<string> => {
-                const authorityPassword = getAuthorityPassword();
-
-                if ((auth as any).code !== authorityPassword) {
+                if ((auth as any).code !== DEMO_CHANNEL_PASSWORD) {
                     this.authorityLog.unshift(`❌ Client rejected – wrong code`);
                     return Promise.reject(new Error('Not allowed'));
                 }
