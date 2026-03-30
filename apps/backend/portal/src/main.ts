@@ -102,14 +102,6 @@ export const app = new Elysia()
     .use(networkChannelRoutes)
     .use(networkRoutes)
     .use(networkTokenRoutes)
-    .get('/api/status', async () => {
-        return [
-            await meshRedisStatusService.getRedisStatusOrThrow(),
-            await portalRedisStatusService.getRedisStatusOrThrow(),
-        ];
-    }, {
-        auth: true,
-    })
 
     // return new Response(null, {
     //   status: 303,

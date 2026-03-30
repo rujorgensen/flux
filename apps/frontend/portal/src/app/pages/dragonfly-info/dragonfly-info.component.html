@@ -7,21 +7,6 @@
                     Internal status of the underlying DragonFly database connections.
                 </p>
             </div>
-            <button
-                class="btn btn-sm btn-outline"
-                [disabled]="isLoading()"
-                (click)="refresh()"
-                type="button"
-            >
-                @if (isLoading()) {
-                    <span class="loading loading-spinner loading-xs"></span>
-                } @else {
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-4 w-4 stroke-current">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                }
-                Refresh
-            </button>
         </div>
 
         @if (error()) {
@@ -33,7 +18,7 @@
             </div>
         }
 
-        @if (isLoading() && !statuses()) {
+        @if (!statuses()) {
             <div class="flex justify-center py-12">
                 <span class="loading loading-spinner loading-lg"></span>
             </div>
@@ -75,7 +60,7 @@
                                             class="font-mono"
                                             [class.text-error]="status.memory.overThreshold"
                                         >
-                                            {{ formatPercent(status.memory.usageRatio) }}
+                                            {{ status.memory.usageRatio | number: '1.1-1' }} %
                                         </span>
                                     </div>
                                 </div>
@@ -111,11 +96,11 @@
                                 <div class="space-y-1 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-base-content/60">Sys</span>
-                                        <span class="font-mono">{{ status.cpu.sys ?? 'N/A' }}</span>
+                                        <span class="font-mono">{{ status.cpu.sys | number: '1.2-2' }}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-base-content/60">User</span>
-                                        <span class="font-mono">{{ status.cpu.user ?? 'N/A' }}</span>
+                                        <span class="font-mono">{{ status.cpu.user | number: '1.2-2' }}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-base-content/60">Sys (children)</span>
