@@ -17,6 +17,7 @@ interface UserSession {
 }
 
 type TDragonflyStatus = {
+    url: string;
     memory: {
         used: number;
         max: number;
