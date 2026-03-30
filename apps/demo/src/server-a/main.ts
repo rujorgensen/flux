@@ -2,7 +2,8 @@
 import { FluxAuthority } from '@persistica/flux-authority';
 import type { TChannelName } from '@flux/shared/types';
 import jwt from 'jsonwebtoken';
-import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
+import { DEMO_CHANNEL_PASSWORD } from '../definitions';
+import { getNetworkId } from '../network-id';
 
 const secret = 'your-very-secure-secret'; // keep this secret safe!
 
@@ -15,7 +16,7 @@ console.log('🔑 Registering authority');
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 
 const fluxAuthority: FluxAuthority = new FluxAuthority(
-    DEMO_NETWORK_ID,
+    getNetworkId(),
     {
         domain: process.env['FLUX_URL'],
         // p2p encryption
