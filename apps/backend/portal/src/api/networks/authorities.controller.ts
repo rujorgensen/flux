@@ -9,7 +9,7 @@ import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-a
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAuthorityService: NetworkAuthorityRedisSortedSet = new NetworkAuthorityRedisSortedSet(meshRedisConnection.getClient());
 
-export const networkAuthorityRoutes = new Elysia({
+export const networkAuthorityController = new Elysia({
     prefix: '/api/networks/:networkId/authorities',
 })
     .use(networkIdValidatorPlugin)
@@ -37,12 +37,32 @@ export const networkAuthorityRoutes = new Elysia({
         })
 
     /**
-     * '/api/networks/:networkId/authorities/connected'
+     * '/api/networks/:networkId/authorities/connected?page={page}&pageSize={pageSize}'
      */
-    .get('/connected', ({ networkId }) => {
-        return networkAuthorityService
-            .readNetworkAuthorities(
-                networkId,
-            );
-    })
+    .get(
+        '/connected',
+        async ({
+            networkId,
+            query,
+        }) => {
+            const page = query.page ?? 1;
+            const pageSize = Math.min(query.pageSize ?? 25, 100);
+            const all = await networkAuthorityService.readNetworkAuthorities(networkId);
+            const total = all.length;
+            const start = (page - 1) * pageSize;
+
+            return {
+                data: all.slice(start, start + pageSize),
+                total,
+                page,
+                pageSize,
+            };
+        },
+        {
+            query: t.Object({
+                page: t.Optional(t.Number({ minimum: 1 })),
+                pageSize: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+            }),
+        },
+    )
     ;

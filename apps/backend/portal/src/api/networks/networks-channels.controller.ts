@@ -13,7 +13,7 @@ import { networkIdValidatorPlugin } from './plugins';
 const redisConnection_: RedisConnection = getMeshRedisConnection();
 const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
 
-export const networkChannelRoutes = new Elysia({
+export const networkChannelController = new Elysia({
     prefix: '/api/networks/:networkId/channels',
 })
     .use(networkIdValidatorPlugin)
@@ -41,12 +41,32 @@ export const networkChannelRoutes = new Elysia({
         })
 
     /**
-     * '/api/networks/:networkId/channels'
+     * '/api/networks/:networkId/channels?page={page}&pageSize={pageSize}'
      */
-    .get('', ({ networkId }): Promise<INetworkChannel[]> => {
-        return networkChannelRedisCacheService
-            .readNetworkChannels(
-                networkId,
-            );
-    })
+    .get(
+        '',
+        async ({
+            networkId,
+            query,
+        }) => {
+            const page = query.page ?? 1;
+            const pageSize = Math.min(query.pageSize ?? 25, 100);
+            const all = await networkChannelRedisCacheService.readNetworkChannels(networkId);
+            const total = all.length;
+            const start = (page - 1) * pageSize;
+
+            return {
+                data: all.slice(start, start + pageSize),
+                total,
+                page,
+                pageSize,
+            };
+        },
+        {
+            query: t.Object({
+                page: t.Optional(t.Number({ minimum: 1 })),
+                pageSize: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+            }),
+        },
+    )
     ;

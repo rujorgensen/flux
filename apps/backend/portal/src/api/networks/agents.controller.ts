@@ -7,7 +7,7 @@ import { networkIdValidatorPlugin } from './plugins';
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
 
-export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId/agents' })
+export const networkAgentController = new Elysia({ prefix: '/api/networks/:networkId/agents' })
     .use(networkIdValidatorPlugin)
 
     /**
@@ -33,12 +33,32 @@ export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId
         })
 
     /**
-     * '/api/networks/:networkId/agents/connected'
+     * '/api/networks/:networkId/agents/connected?page={page}&pageSize={pageSize}'
      */
-    .get('/connected', ({ networkId }) => {
-        return networkAgentRedisCacheService
-            .readNetworkAgents(
-                networkId,
-            );
-    })
+    .get(
+        '/connected',
+        async ({
+            networkId,
+            query,
+        }) => {
+            const page = query.page ?? 1;
+            const pageSize = Math.min(query.pageSize ?? 25, 100);
+            const all = await networkAgentRedisCacheService.readNetworkAgents(networkId);
+            const total = all.length;
+            const start = (page - 1) * pageSize;
+
+            return {
+                data: all.slice(start, start + pageSize),
+                total,
+                page,
+                pageSize,
+            };
+        },
+        {
+            query: t.Object({
+                page: t.Optional(t.Number({ minimum: 1 })),
+                pageSize: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+            }),
+        },
+    )
     ;
