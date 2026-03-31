@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
 import { App } from './app.component';
+import { version } from '../../package.json';
 
 describe('App', () => {
     beforeAll(() => {
@@ -29,5 +30,13 @@ describe('App', () => {
         const fixture = TestBed.createComponent(App);
         const app = fixture.componentInstance;
         expect(app).toBeTruthy();
+    });
+
+    it('should log the app version on init', () => {
+        const consoleSpy = vi.spyOn(console, 'log');
+        const fixture = TestBed.createComponent(App);
+        fixture.detectChanges();
+        expect(consoleSpy).toHaveBeenCalledWith(`Portal UI v${version}`);
+        consoleSpy.mockRestore();
     });
 });
