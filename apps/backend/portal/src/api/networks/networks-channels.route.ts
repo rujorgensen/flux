@@ -1,9 +1,10 @@
 import { Elysia, t } from 'elysia';
-import type {
-    TNetworkChannelCountAt,
-    INetworkChannel,
+import {
+    type INetworkChannel,
+    type TChannelName,
+    type TNetworkChannelCountAt,
+    validateChannelNameOrThrow,
 } from '@flux/shared/types';
-import { type TChannelName, validateChannelNameOrThrow } from '@flux/shared/types';
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import {
     type RedisConnection,
@@ -56,7 +57,11 @@ export const networkChannelRoutes = new Elysia({
      *
      * Closes (removes) an active channel from the network.
      */
-    .delete('/:channelName', ({ networkId, params: { channelName }, error }) => {
+    .delete('/:channelName', ({
+        networkId,
+        params: { channelName },
+        error,
+    }) => {
         try {
             validateChannelNameOrThrow(channelName);
         } catch {

@@ -48,7 +48,11 @@ export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId
      *
      * Kicks (removes) a connected agent from the network.
      */
-    .delete('/:agentId', ({ networkId, params: { agentId }, error }) => {
+    .delete('/:agentId', ({
+        networkId,
+        params: { agentId },
+        error,
+    }) => {
         if (!isNanoId(agentId)) {
             return error(400, { message: 'Invalid agent ID.' });
         }
