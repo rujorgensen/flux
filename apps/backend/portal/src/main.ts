@@ -10,7 +10,7 @@ import { getPortalRedisConnection } from '@flux/portal/core/redis';
 import { networkAuthorityController } from './api/networks/authorities.controller';
 import { networkAgentController } from './api/networks/agents.controller';
 import { betterAuth } from './_decorators/auth.decorator';
-import { networkController } from './api/networks/networks.controller';
+import { networksController } from './api/networks/networks.controller';
 import { version } from '../package.json';
 import { networkTokenController } from './api/networks/tokens/tokens.controller';
 
@@ -100,7 +100,7 @@ export const app = new Elysia()
     .use(networkAuthorityController)
     .use(networkAgentController)
     .use(networkChannelController)
-    .use(networkController)
+    .use(networksController)
     .use(networkTokenController)
 
     // return new Response(null, {

@@ -30,16 +30,12 @@ export class SidebarCountsService {
                 const networkId = network.id;
 
                 return from(
-                    Promise.all([
-                        api.api.networks({ networkId }).agents.connected.get(),
-                        api.api.networks({ networkId }).authorities.connected.get(),
-                        api.api.networks({ networkId }).channels.get(),
-                    ]),
+                    api.api.networks({ networkId })['connection-status'].get(),
                 ).pipe(
-                    map(([agents, authorities, channels]) => [
-                        agents.data?.length ?? null,
-                        authorities.data?.length ?? null,
-                        channels.data?.length ?? null,
+                    map((response) => [
+                        response.data?.agents ?? null,
+                        response.data?.authorities ?? null,
+                        response.data?.channels ?? null,
                     ] as const),
                     catchError((error: unknown) => {
                         console.error('Error fetching sidebar counts:', error);
