@@ -12,7 +12,7 @@ export const apiRoutes = new Elysia({ prefix: '/api/networks' })
     .use(betterAuth)
     ;
 
-export const networkRoutes = apiRoutes
+export const networkController = apiRoutes
     .use(networkService)
 
     /**

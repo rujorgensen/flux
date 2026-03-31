@@ -7,7 +7,7 @@ import { networkIdValidatorPlugin } from './plugins';
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
 
-export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId/agents' })
+export const networkAgentController = new Elysia({ prefix: '/api/networks/:networkId/agents' })
     .use(networkIdValidatorPlugin)
 
     /**

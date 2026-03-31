@@ -1,27 +1,31 @@
 import { Elysia, t } from 'elysia';
 import type {
-    TNetworkAuthorityCountAt,
+    TNetworkChannelCountAt,
+    INetworkChannel,
 } from '@flux/shared/types';
-import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
+import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
+import {
+    type RedisConnection,
+    getMeshRedisConnection,
+} from 'packages/flux/mesh/src/routing/redis/redis-connection.class';
 import { networkIdValidatorPlugin } from './plugins';
-import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 
-const meshRedisConnection = await getMeshBunRedisConnection();
-const networkAuthorityService: NetworkAuthorityRedisSortedSet = new NetworkAuthorityRedisSortedSet(meshRedisConnection.getClient());
+const redisConnection_: RedisConnection = getMeshRedisConnection();
+const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
 
-export const networkAuthorityRoutes = new Elysia({
-    prefix: '/api/networks/:networkId/authorities',
+export const networkChannelController = new Elysia({
+    prefix: '/api/networks/:networkId/channels',
 })
     .use(networkIdValidatorPlugin)
 
     /**
-     * '/api/networks/:networkId/authorities/count?when={'now'}'
-     * '/api/networks/:networkId/authorities/count?startDate={startDate}&endDate={endDate}'
+     * '/api/networks/:networkId/channels/count?when={'now'}'
+     * '/api/networks/:networkId/channels/count?startDate={startDate}&endDate={endDate}'
      */
-    .get('/count', ({ networkId, query }): Promise<TNetworkAuthorityCountAt> => {
+    .get('/count', ({ networkId, query }): Promise<TNetworkChannelCountAt> => {
         if (query.when === 'now') {
-            return networkAuthorityService
-                .readNetworkAuthorityCount(
+            return networkChannelRedisCacheService
+                .readNetworkChannelCount(
                     networkId,
                 );
         }
@@ -37,17 +41,17 @@ export const networkAuthorityRoutes = new Elysia({
         })
 
     /**
-     * '/api/networks/:networkId/authorities/connected?page={page}&pageSize={pageSize}'
+     * '/api/networks/:networkId/channels?page={page}&pageSize={pageSize}'
      */
     .get(
-        '/connected',
+        '',
         async ({
             networkId,
             query,
         }) => {
             const page = query.page ?? 1;
             const pageSize = Math.min(query.pageSize ?? 25, 100);
-            const all = await networkAuthorityService.readNetworkAuthorities(networkId);
+            const all = await networkChannelRedisCacheService.readNetworkChannels(networkId);
             const total = all.length;
             const start = (page - 1) * pageSize;
 

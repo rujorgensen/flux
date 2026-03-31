@@ -47,10 +47,13 @@ export class SidebarCountsService {
                     }),
                 );
             }),
-        ).subscribe(([agents, authorities, channels]) => {
-            this._agentCount$.next(agents);
-            this._authorityCount$.next(authorities);
-            this._channelCount$.next(channels);
-        });
+        )
+            .subscribe({
+                next: ([agents, authorities, channels]) => {
+                    this._agentCount$.next(agents);
+                    this._authorityCount$.next(authorities);
+                    this._channelCount$.next(channels);
+                },
+            });
     }
 }
