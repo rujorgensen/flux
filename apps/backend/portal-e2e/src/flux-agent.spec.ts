@@ -45,8 +45,9 @@ describe('persistica-flux-api-agents', () => {
 
         console.log(`⚗️ Starting portal server on port ${randomAPIPort}`);
 
-        //$`bun nx run @flux/portal-api:serve`.nothrow();
-        $`bun nx run @flux/portal-api:serve`.then().catch();
+        // Use bun run directly (not bun nx run) to avoid NX task deduplication
+        // when @flux/portal-api is already running as an NX infrastructure task.
+        $`bun run --watch apps/backend/portal/src/main.ts --tsconfig-override=apps/backend/portal/tsconfig.app.json`.then().catch();
 
         // 👉 Wait until the API is accepting connections
         await waitUntilAvailable(
