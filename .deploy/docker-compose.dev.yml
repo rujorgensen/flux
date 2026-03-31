@@ -39,12 +39,18 @@ services:
     image: postgres:18.3-alpine
     restart: always
     container_name: mesh-postgres-dev
+    ports:
+      - 5434:5432
     environment:
       POSTGRES_USER: dev-user
       POSTGRES_PASSWORD: dev-password
-      POSTGRES_DB: dev-db
-    ports:
-      - "5434:5432"
+      POSTGRES_DB: devdb
+    healthcheck:
+      # Fixing docker-compose - "FATAL: role "root" does not exist"
+      test: [ "CMD-SHELL", "pg_isready -d devdb -U dev-user" ]
+      interval: 5s
+      timeout: 5s
+
     volumes:
       - mesh-pgdata-dev:/var/lib/postgresql/data
     networks:
