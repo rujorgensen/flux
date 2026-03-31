@@ -12,6 +12,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, startWith } from 'rxjs';
 import { NetworksService, INetwork, MAX_NETWORKS } from '../../_services/networks.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
+import { version } from '../../../../package.json';
 
 interface UserSession {
     id?: string;
@@ -37,6 +38,7 @@ export class DashboardLayoutComponent {
     pageTitle = input<string>('Dashboard');
 
     protected readonly MAX_NETWORKS = MAX_NETWORKS;
+    protected readonly appVersion = version;
 
     // Modal state
     protected readonly showCreateModal = signal<boolean>(false);
