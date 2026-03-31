@@ -11,6 +11,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, startWith } from 'rxjs';
 import { NetworksService, INetwork, MAX_NETWORKS } from '../../_services/networks.service';
+import { SidebarCountsService } from '../../_services/sidebar-counts/sidebar-counts.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 import { version } from '../../../../package.json';
 
@@ -48,6 +49,10 @@ export class DashboardLayoutComponent {
 
     protected readonly selectedNetwork$;
 
+    protected readonly agentCount$;
+    protected readonly authorityCount$;
+    protected readonly channelCount$;
+
     protected readonly isDashboardItemsOpen: ReturnType<typeof computed<boolean>>;
     protected readonly isDocsOpen: ReturnType<typeof computed<boolean>>;
     protected readonly isSettingsOpen: ReturnType<typeof computed<boolean>>;
@@ -64,8 +69,12 @@ export class DashboardLayoutComponent {
     constructor(
         protected readonly networksService: NetworksService,
         private readonly router: Router,
+        private readonly sidebarCountsService: SidebarCountsService,
     ) {
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
+        this.agentCount$ = this.sidebarCountsService.agentCount$;
+        this.authorityCount$ = this.sidebarCountsService.authorityCount$;
+        this.channelCount$ = this.sidebarCountsService.channelCount$;
 
         this.currentUrl = toSignal(
             this.router.events.pipe(
@@ -76,13 +85,14 @@ export class DashboardLayoutComponent {
             { initialValue: this.router.url },
         );
 
-        this.isDashboardItemsOpen = computed(() =>
-            [
+        this.isDashboardItemsOpen = computed(() => {
+            const url = this.currentUrl() ?? '';
+            return url === '/' || [
                 '/dashboard/connected-authorities',
                 '/dashboard/connected-agents',
                 '/dashboard/active-channels',
-            ].some((path) => (this.currentUrl() ?? '').startsWith(path)),
-        );
+            ].some((path) => url.startsWith(path));
+        });
 
         this.isDocsOpen = computed(() =>
             this.currentUrl().startsWith('/docs'),
