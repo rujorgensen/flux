@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 import type {
     TNetworkAuthorityCountAt,
 } from '@flux/shared/types';
+import { type TClientId, isNanoId } from '@flux/shared/types';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { networkIdValidatorPlugin } from './plugins';
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
@@ -44,5 +45,28 @@ export const networkAuthorityRoutes = new Elysia({
             .readNetworkAuthorities(
                 networkId,
             );
+    })
+
+    /**
+     * 'DELETE /api/networks/:networkId/authorities/:authorityId'
+     *
+     * Kicks (removes) a connected authority from the network.
+     */
+    .delete('/:authorityId', ({ networkId, params: { authorityId }, error }) => {
+        if (!isNanoId(authorityId)) {
+            return error(400, { message: 'Invalid authority ID.' });
+        }
+
+        return networkAuthorityService
+            .unregister(
+                networkId,
+                authorityId as TClientId,
+            )
+            .then(() => ({ message: `Authority ${authorityId} kicked successfully.` }));
+    }, {
+        response: {
+            200: t.Object({ message: t.String() }),
+            400: t.Object({ message: t.String() }),
+        },
     })
     ;

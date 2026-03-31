@@ -9,6 +9,7 @@
                     <th>address</th>
                     <th>bytes</th>
                     <th>Connected At</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -20,6 +21,21 @@
                         <td>{{ row.address }}</td>
                         <td>{{ row.bytes }}</td>
                         <td>{{ row.connectedAt | date:'fullDate' }}</td>
+                        <td>
+                            <button
+                                class="btn btn-ghost btn-sm text-error"
+                                [disabled]="kickingAgentId() === row.id"
+                                (click)="onKickAgent(row)"
+                                [attr.aria-label]="'Kick agent ' + row.id"
+                                title="Kick agent"
+                            >
+                                @if (kickingAgentId() === row.id) {
+                                    <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                    Kick
+                                }
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>

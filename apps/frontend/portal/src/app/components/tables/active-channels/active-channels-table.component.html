@@ -8,6 +8,7 @@
                     <th>Member Count</th>
                     <th>Data Usage [bytes]</th>
                     <th>Created At</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -18,6 +19,21 @@
                         <td class="text-right">{{ row.members }}</td>
                         <td class="text-right">{{ row.bytes }}</td>
                         <td>{{ row.createdAt | date:'fullDate' }}</td>
+                        <td>
+                            <button
+                                class="btn btn-ghost btn-sm text-error"
+                                [disabled]="closingChannelName() === row.channelName"
+                                (click)="onCloseChannel(row)"
+                                [attr.aria-label]="'Close channel ' + row.channelName"
+                                title="Close channel"
+                            >
+                                @if (closingChannelName() === row.channelName) {
+                                    <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                    Close
+                                }
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>

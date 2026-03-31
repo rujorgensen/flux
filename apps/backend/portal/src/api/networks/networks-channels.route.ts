@@ -3,6 +3,7 @@ import type {
     TNetworkChannelCountAt,
     INetworkChannel,
 } from '@flux/shared/types';
+import { type TChannelName, validateChannelNameOrThrow } from '@flux/shared/types';
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import {
     type RedisConnection,
@@ -48,5 +49,30 @@ export const networkChannelRoutes = new Elysia({
             .readNetworkChannels(
                 networkId,
             );
+    })
+
+    /**
+     * 'DELETE /api/networks/:networkId/channels/:channelName'
+     *
+     * Closes (removes) an active channel from the network.
+     */
+    .delete('/:channelName', ({ networkId, params: { channelName }, error }) => {
+        try {
+            validateChannelNameOrThrow(channelName);
+        } catch {
+            return error(400, { message: 'Invalid channel name.' });
+        }
+
+        return networkChannelRedisCacheService
+            .deleteNetworkChannel(
+                networkId,
+                channelName as TChannelName,
+            )
+            .then(() => ({ message: `Channel "${channelName}" closed successfully.` }));
+    }, {
+        response: {
+            200: t.Object({ message: t.String() }),
+            400: t.Object({ message: t.String() }),
+        },
     })
     ;
