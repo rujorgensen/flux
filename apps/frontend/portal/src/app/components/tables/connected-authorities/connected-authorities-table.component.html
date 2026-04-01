@@ -5,6 +5,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Created At</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -12,6 +13,21 @@
                     <tr>
                         <td>{{ row.id }}</td>
                         <td>{{ row.connectedAt | date:'fullDate' }}</td>
+                        <td>
+                            <button
+                                class="btn btn-ghost btn-sm text-error"
+                                [disabled]="kickingAuthorityId() === row.id"
+                                (click)="onKickAuthority(row)"
+                                [attr.aria-label]="'Kick authority ' + row.id"
+                                title="Kick authority"
+                            >
+                                @if (kickingAuthorityId() === row.id) {
+                                    <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                    Kick
+                                }
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>

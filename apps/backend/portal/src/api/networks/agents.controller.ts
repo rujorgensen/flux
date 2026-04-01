@@ -2,12 +2,28 @@ import { Elysia, t } from 'elysia';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import type { TNetworkAgentCountAt } from 'libs/flux/shared/types/src/lib/agents/network-agent.type';
+import { type TClientId, isNanoId } from '@flux/shared/types';
 import { networkIdValidatorPlugin } from './plugins';
 
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
 
+class InvalidAgentIdError extends Error {
+    status = 400;
+
+    constructor(
+    ) {
+        super('Invalid agent ID');
+    }
+}
+
+
 export const networkAgentController = new Elysia({ prefix: '/api/networks/:networkId/agents' })
+
+    .error({
+        InvalidAgentIdError,
+    })
+
     .use(networkIdValidatorPlugin)
 
     /**
@@ -61,4 +77,27 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
             }),
         },
     )
+
+    /**
+     * 'DELETE /api/networks/:networkId/agents/:agentId'
+     *
+     * Kicks (removes) a connected agent from the network.
+     */
+    .delete('/:agentId', ({
+        networkId,
+        params: { agentId },
+    }) => {
+        if (!isNanoId(agentId)) {
+            throw new InvalidAgentIdError();
+        }
+
+        return networkAgentRedisCacheService
+            .unregisterNetworkAgent(
+                networkId,
+                agentId as TClientId,
+            )
+            .then(() => ({ message: `Agent ${agentId} kicked successfully.` }));
+    }, {
+
+    })
     ;
