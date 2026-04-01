@@ -8,7 +8,22 @@ import { networkIdValidatorPlugin } from './plugins';
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
 
-export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId/agents' })
+class InvalidAgentIdError extends Error {
+    status = 400;
+
+    constructor(
+    ) {
+        super('Invalid agent ID');
+    }
+}
+
+
+export const networkAgentController = new Elysia({ prefix: '/api/networks/:networkId/agents' })
+
+    .error({
+        InvalidAgentIdError,
+    })
+
     .use(networkIdValidatorPlugin)
 
     /**
@@ -34,14 +49,34 @@ export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId
         })
 
     /**
-     * '/api/networks/:networkId/agents/connected'
+     * '/api/networks/:networkId/agents/connected?page={page}&pageSize={pageSize}'
      */
-    .get('/connected', ({ networkId }) => {
-        return networkAgentRedisCacheService
-            .readNetworkAgents(
-                networkId,
-            );
-    })
+    .get(
+        '/connected',
+        async ({
+            networkId,
+            query,
+        }) => {
+            const page = query.page ?? 1;
+            const pageSize = Math.min(query.pageSize ?? 25, 100);
+            const all = await networkAgentRedisCacheService.readNetworkAgents(networkId);
+            const total = all.length;
+            const start = (page - 1) * pageSize;
+
+            return {
+                data: all.slice(start, start + pageSize),
+                total,
+                page,
+                pageSize,
+            };
+        },
+        {
+            query: t.Object({
+                page: t.Optional(t.Number({ minimum: 1 })),
+                pageSize: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+            }),
+        },
+    )
 
     /**
      * 'DELETE /api/networks/:networkId/agents/:agentId'
@@ -51,10 +86,9 @@ export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId
     .delete('/:agentId', ({
         networkId,
         params: { agentId },
-        error,
     }) => {
         if (!isNanoId(agentId)) {
-            return error(400, { message: 'Invalid agent ID.' });
+            throw new InvalidAgentIdError();
         }
 
         return networkAgentRedisCacheService
@@ -64,9 +98,6 @@ export const networkAgentRoutes = new Elysia({ prefix: '/api/networks/:networkId
             )
             .then(() => ({ message: `Agent ${agentId} kicked successfully.` }));
     }, {
-        response: {
-            200: t.Object({ message: t.String() }),
-            400: t.Object({ message: t.String() }),
-        },
+
     })
     ;

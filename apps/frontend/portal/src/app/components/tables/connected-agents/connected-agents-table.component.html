@@ -40,6 +40,24 @@
                 }
             </tbody>
         </table>
+        <div class="flex items-center justify-between mt-4">
+            <div class="flex items-center gap-2 text-sm">
+                <span>Rows per page:</span>
+                <select class="select select-sm" (change)="onPageSizeChange($event)">
+                    <option value="10" [selected]="pageSize() === 10">10</option>
+                    <option value="25" [selected]="pageSize() === 25">25</option>
+                    <option value="50" [selected]="pageSize() === 50">50</option>
+                    <option value="100" [selected]="pageSize() === 100">100</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+                <span>Page {{ page() }} of {{ totalPages() }}</span>
+                <div class="join">
+                    <button class="join-item btn btn-sm" (click)="prevPage()" [disabled]="page() === 1">«</button>
+                    <button class="join-item btn btn-sm" (click)="nextPage()" [disabled]="page() >= totalPages()">»</button>
+                </div>
+            </div>
+        </div>
     } @else {
         <div class="flex flex-col items-center justify-center py-16 text-base-content/50">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-12 h-12 stroke-current mb-3" aria-hidden="true">

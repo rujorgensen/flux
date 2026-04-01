@@ -30,4 +30,5 @@ This is a TypeScript based repository using Bun and Elysia.
 1. Maintain existing code structure and organization
 2. Use dependency injection patterns where appropriate
 3. Write unit tests for new functionality.
-5. Document public APIs and complex logic. Suggest changes to the `docs/` folder when appropriate.
+4. Document public APIs and complex logic. Suggest changes to the `docs/` folder when appropriate.
+5. You'll find more specific instructions under the folders `.github/.instructions` and `.llm-docs`

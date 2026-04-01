@@ -1,5 +1,7 @@
 import { Elysia, t } from 'elysia';
-import { networkService } from '../../_decorators/network-service.decorator';
+import {
+    networkDecorator,
+} from '../../_decorators/network-service.decorator';
 import { betterAuth } from '../../_decorators/auth.decorator';
 import type { INetwork_S } from '../../repository/network.repository';
 import type { TNetworkId_S } from '@flux/shared/types';
@@ -12,8 +14,9 @@ export const apiRoutes = new Elysia({ prefix: '/api/networks' })
     .use(betterAuth)
     ;
 
-export const networkRoutes = apiRoutes
-    .use(networkService)
+export const networksController = apiRoutes
+    // .use(networkIdValidatorPlugin)
+    .use(networkDecorator)
 
     /**
      * Creates a new network.
@@ -24,12 +27,12 @@ export const networkRoutes = apiRoutes
         '',
         ({
             body,
-            networkService,
+            serviceProviders,
             user,
         }): Promise<INetwork_S> => {
             console.log('Creating network with body:', body);
 
-            return networkService
+            return serviceProviders
                 .networkRepository
                 .createNetwork(
                     {
@@ -53,15 +56,42 @@ export const networkRoutes = apiRoutes
     .get(
         '',
         async ({
-            networkService,
+            serviceProviders,
             user,
         }) => {
             console.log('Reading networks for user:', user.id);
 
-            return await networkService
+            return await serviceProviders
                 .networkRepository
                 .readUserNetworks(
                     user.id,
+                );
+        },
+
+        // Validate body
+        {
+            auth: true,
+        })
+
+
+    /**
+    * Reads network connection status
+    * 
+    * '/api/networks/:networkId/connection-status'
+    */
+    .get(
+        ':networkId/connection-status',
+        async ({
+            params,
+            serviceProviders,
+            user,
+        }) => {
+            console.log('Reading network connection status for user:', user.id);
+
+            return await serviceProviders
+                .networkService
+                .readConnectionStatus(
+                    params.networkId as TNetworkId_S,
                 );
         },
 
@@ -80,12 +110,12 @@ export const networkRoutes = apiRoutes
         ':networkId',
         async ({
             params,
-            networkService,
+            serviceProviders,
             user,
         }): Promise<void> => {
             console.log('Deleting network:', params.networkId, 'for user:', user.id);
 
-            return networkService
+            return serviceProviders
                 .networkRepository
                 .deleteNetwork(
                     {
