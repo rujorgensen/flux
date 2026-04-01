@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, switchMap, catchError, of } from 'rxjs';
+import { BehaviorSubject, from, switchMap, map, catchError, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { api } from '../api/api';
@@ -8,12 +8,6 @@ import { NetworksService } from '../networks.service';
 export interface IHistoryDataPoint {
     label: string;
     value: number;
-}
-
-export interface IChartConfig {
-    labels: string[];
-    values: number[];
-    currentValue: number;
 }
 
 /** Percentage of the current count used as the starting baseline for synthetic history. */
@@ -82,37 +76,27 @@ export class DashboardHistoryService {
                     return of(null);
                 }
 
-                const networkId = network.id;
-
                 return from(
-                    Promise.all([
-                        api.api.networks({ networkId }).agents.connected.get(),
-                        api.api.networks({ networkId }).authorities.connected.get(),
-                        api.api.networks({ networkId }).channels.get(),
-                    ]),
+                    api.api.networks({ networkId: network.id })['connection-status'].get(),
                 ).pipe(
+                    map((response) => response.data ?? null),
                     catchError((error: unknown) => {
                         console.error('Error fetching dashboard history data:', error);
                         return of(null);
                     }),
                 );
             }),
-        ).subscribe((result) => {
-            if (!result) {
+        ).subscribe((status) => {
+            if (!status) {
                 this._agentHistory$.next([]);
                 this._authorityHistory$.next([]);
                 this._channelHistory$.next([]);
                 return;
             }
 
-            const [agents, authorities, channels] = result;
-            const agentCount = agents.data?.length ?? 0;
-            const authorityCount = authorities.data?.length ?? 0;
-            const channelCount = channels.data?.length ?? 0;
-
-            this._agentHistory$.next(generateHistory(agentCount));
-            this._authorityHistory$.next(generateHistory(authorityCount));
-            this._channelHistory$.next(generateHistory(channelCount));
+            this._agentHistory$.next(generateHistory(status.agents));
+            this._authorityHistory$.next(generateHistory(status.authorities));
+            this._channelHistory$.next(generateHistory(status.channels));
         });
     }
 }
