@@ -108,6 +108,8 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
                                     size: 12,
                                 },
                                 color: "gray",
+                                precision: 0,
+                                stepSize: 1,
                             },
                             grid: {
                                 display: true,
