@@ -4,9 +4,18 @@ import {
     ElementRef,
     AfterViewInit,
     OnDestroy,
+    OnChanges,
     ChangeDetectionStrategy,
+    Input,
 } from '@angular/core';
 import Chart from 'chart.js/auto';
+
+export interface IChartDataset {
+    label: string;
+    data: number[];
+    borderColor: string;
+    backgroundColor?: string;
+}
 
 @Component({
     selector: 'app-chart',
@@ -14,15 +23,32 @@ import Chart from 'chart.js/auto';
     styleUrls: ['./chart.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChartComponent implements AfterViewInit, OnDestroy {
+export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     @ViewChild('canvas', { static: false }) canvas!: ElementRef<HTMLCanvasElement>;
-    private chart?: Chart;
 
-    private readonly data = [20, 100, 50, 12, 20, 130, 45];
-    private readonly labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    @Input() labels: string[] = [];
+    @Input() datasets: IChartDataset[] = [];
+
+    private chart?: Chart;
 
     ngAfterViewInit() {
         this.initChart();
+    }
+
+    ngOnChanges(): void {
+        if (this.chart) {
+            this.chart.data.labels = this.labels;
+            this.chart.data.datasets = this.datasets.map((ds) => ({
+                label: ds.label,
+                data: ds.data,
+                borderColor: ds.borderColor,
+                backgroundColor: ds.backgroundColor,
+                tension: 0.4,
+                fill: ds.backgroundColor !== undefined,
+            }));
+            // Skip animation on incremental data updates to avoid janky re-renders.
+            this.chart.update('none');
+        }
     }
 
     ngOnDestroy() {
@@ -32,14 +58,13 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
     }
 
     private initChart() {
-        const lineColor = "#111";
-
         const ctx = this.canvas.nativeElement.getContext("2d");
         if (!ctx) return;
 
         this.chart = new Chart(
             ctx,
             {
+                type: "line",
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -49,7 +74,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
                         axis: "x",
                     },
                     animation: {
-                        duration: 0,
+                        duration: 300,
                     },
                     plugins: {
                         tooltip: {
@@ -63,48 +88,50 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
                         x: {
                             display: true,
                             ticks: {
+                                maxTicksLimit: 8,
                                 font: {
                                     family: "Atkinson",
-                                    size: 14,
+                                    size: 12,
                                 },
                                 color: "gray",
                             },
                             grid: {
-                                display: true,
+                                display: false,
                             },
                         },
                         y: {
                             display: true,
+                            beginAtZero: true,
                             ticks: {
                                 font: {
                                     family: "Atkinson",
-                                    size: 14,
+                                    size: 12,
                                 },
                                 color: "gray",
                             },
                             grid: {
                                 display: true,
+                                color: "rgba(128, 128, 128, 0.15)",
                             },
                         },
                     },
                     elements: {
                         point: {
-                            radius: 0,
+                            radius: 2,
+                            hoverRadius: 5,
                         },
                     },
                 },
-                type: "line",
                 data: {
                     labels: this.labels,
-                    datasets: [
-                        {
-                            label: "Unit Sales",
-                            data: this.data,
-                            tension: 0.4,
-                            borderColor: lineColor,
-                            fill: false,
-                        },
-                    ],
+                    datasets: this.datasets.map((ds) => ({
+                        label: ds.label,
+                        data: ds.data,
+                        borderColor: ds.borderColor,
+                        backgroundColor: ds.backgroundColor,
+                        tension: 0.4,
+                        fill: ds.backgroundColor !== undefined,
+                    })),
                 },
             },
         );
