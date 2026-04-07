@@ -29,7 +29,7 @@ import { FluxAgentNetworkConnection } from './agent/flux-agent-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
 import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
-import { isNanoId } from 'libs/flux/shared/types/src/lib/client-id.type';
+import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 
 interface IOptions {

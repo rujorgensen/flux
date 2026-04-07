@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
-import type { TNetworkAgentCountAt } from 'libs/flux/shared/types/src/lib/agents/network-agent.type';
+import type { TNetworkAgentCountAt } from '@flux/shared/types';
 import { type TClientId, isNanoId } from '@flux/shared/types';
 import { networkIdValidatorPlugin } from './plugins';
 

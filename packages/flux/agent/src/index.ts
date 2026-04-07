@@ -9,3 +9,7 @@ export {
 export {
     FluxNetworkChannel,
 } from '@flux/shared/connection';
+
+export {
+    FluxRemoteClient,
+} from './lib/flux-remote-client.class';

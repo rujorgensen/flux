@@ -9,7 +9,7 @@ import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import {
     type RedisConnection,
     getMeshRedisConnection,
-} from 'packages/flux/mesh/src/routing/redis/redis-connection.class';
+} from '@flux/mesh';
 import { networkIdValidatorPlugin } from './plugins';
 
 const redisConnection_: RedisConnection = getMeshRedisConnection();
