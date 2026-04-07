@@ -63,12 +63,8 @@ export {
     type TNetworkKey_S,
     validateNetworkIdOrThrow,
 } from './lib/network.type';
-export type {
-    TClientId,
-} from './lib/client-id.type';
-export { isNanoId } from './lib/client-id.type';
-
 export {
+    type TClientId,
     isNanoId,
 } from './lib/client-id.type';
 
