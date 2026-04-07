@@ -3,13 +3,14 @@ import { FluxAgent } from '@persistica/flux-agent';
 import type { FluxRemoteClient } from '@persistica/flux-agent';
 import type { TNetworkConnectionState, TRTCState } from '@flux/shared/utils';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
-import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
 import { getFluxUrl } from '../flux-url';
+import { getAuthorityObject } from '../auth-settings';
+import { getNetworkId } from '../network-id';
 
 // Define observable component
 Alpine.data('fluxApplicationA', () => ({
     flux: new FluxAgent(
-        DEMO_NETWORK_ID,
+        getNetworkId(),
         {
             domain: getFluxUrl(),
             //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -55,10 +56,9 @@ Alpine.data('fluxApplicationA', () => ({
             });
 
         this.fluxNetworkConnection = await this.flux.connect(
-            {
-                code: DEMO_CHANNEL_PASSWORD,
-                user: 'client-a',
-            },
+            getAuthorityObject(
+                'client-a',
+            ),
             'client-a-unique-identification-token',
         );
 

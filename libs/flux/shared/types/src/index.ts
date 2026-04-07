@@ -66,6 +66,7 @@ export {
 export type {
     TClientId,
 } from './lib/client-id.type';
+export { isNanoId } from './lib/client-id.type';
 
 export {
     isNanoId,

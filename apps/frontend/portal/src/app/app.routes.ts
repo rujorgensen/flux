@@ -85,6 +85,16 @@ export const appRoutes: Route[] = [
         ],
     },
     {
+        path: 'admin',
+        canActivate: [authGuard],
+        children: [
+            {
+                path: 'dragonfly',
+                loadComponent: () => import('./pages/dragonfly-info/dragonfly-info.component').then(m => m.DragonflyInfoPageComponent),
+            },
+        ],
+    },
+    {
         path: 'privacy-policy',
         loadComponent: () => import('./pages/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyPageComponent),
     },

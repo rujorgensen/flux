@@ -7,6 +7,6 @@
         </svg>
     </div>
     <div class="stat-title">Connected Agents</div>
-    <div class="stat-value text-secondary">{{ activeAgentCount() }}M</div>
-    <div class="stat-desc">21% more than last month</div>
+    <div class="stat-value text-secondary">{{ activeAgentCount().count }}</div>
+    <div class="stat-desc">As of {{ activeAgentCount().date | date:'short' }}</div>
 </div>

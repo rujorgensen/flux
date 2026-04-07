@@ -10,6 +10,7 @@ import type {
 } from 'bun';
 
 type TRedisStatus = {
+    url: string;
     memory: {
         used: number;
         max: number;
@@ -165,6 +166,7 @@ export class RedisStatusService {
         const max = info['maxmemory'] as number;
 
         return {
+            url: this._redisClient.getUrl(),
             memory: {
                 used,
                 max,

@@ -4,15 +4,15 @@ import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
 import { LiveUpdates } from './live-updates.class';
-import { networkChannelRoutes } from './api/networks/networks-channels.route';
+import { networkChannelController } from './api/networks/networks-channels.controller';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
-import { networkAuthorityRoutes } from './api/networks/authorities.route';
-import { networkAgentRoutes } from './api/networks/agents.route';
+import { networkAuthorityController } from './api/networks/authorities.controller';
+import { networkAgentController } from './api/networks/agents.controller';
 import { betterAuth } from './_decorators/auth.decorator';
-import { networkRoutes } from './api/networks/networks.route';
+import { networksController } from './api/networks/networks.controller';
 import { version } from '../package.json';
-import { networkTokenRoutes } from './api/networks/tokens/tokens.route';
+import { networkTokenController } from './api/networks/tokens/tokens.controller';
 
 // ****************************************************************************
 // * Env
@@ -97,17 +97,11 @@ export const app = new Elysia()
     })
 
     .get('/api/ping', () => 'pong')
-    .use(networkAuthorityRoutes)
-    .use(networkAgentRoutes)
-    .use(networkChannelRoutes)
-    .use(networkRoutes)
-    .use(networkTokenRoutes)
-    .get('/api/status', async () => {
-        return [
-            await meshRedisStatusService.getRedisStatusOrThrow(),
-            await portalRedisStatusService.getRedisStatusOrThrow(),
-        ];
-    })
+    .use(networkAuthorityController)
+    .use(networkAgentController)
+    .use(networkChannelController)
+    .use(networksController)
+    .use(networkTokenController)
 
     // return new Response(null, {
     //   status: 303,

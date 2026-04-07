@@ -132,7 +132,8 @@ describe('persistica-flux-api-agents', () => {
 
         const res = await fetch(`${portalDomain}/api/networks/${NETWORK_ID}/agents/connected`);
 
-        const data = await res.json();
+        const { data, total } = await res.json();
+        expect(total).toBe(3);
         expect(data).toHaveLength(3);
         expect(isNanoId(data.at(0)?.id)).toBeTruthy();
         expect(data.at(0)?.ip).toBeDefined();

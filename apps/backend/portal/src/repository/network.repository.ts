@@ -32,8 +32,10 @@ export class NetworkRepository {
     // ****************************************************************************
     /**
      * Creates a new network for the given user.
+     * The network ID is derived from the alias (slugified). If the slug is
+     * already taken, a short random suffix is appended.
      */
-    public createNetwork(
+    public async createNetwork(
         {
             userId,
             alias,
@@ -42,10 +44,13 @@ export class NetworkRepository {
             alias: string,
         }
     ): Promise<INetwork_S> {
+        const id = await this._generateNetworkId(alias);
+
         return this._prismaClient
             .network
             .create({
                 data: {
+                    id,
                     alias,
                     secretKey: nanoid(32),
                     userNetworks: {
@@ -65,6 +70,38 @@ export class NetworkRepository {
             })
             .then((network: NetworkWithUserNetworks) => this.convert(network))
             ;
+    }
+
+    /**
+     * Generates a unique network ID derived from the given alias.
+     * The alias is slugified (lowercase alphanumeric and dashes). If the
+     * resulting slug is already taken, a short random suffix is appended.
+     */
+    private async _generateNetworkId(
+        alias: string,
+    ): Promise<string> {
+        /** Maximum total length for a network ID slug. */
+        const MAX_ID_LENGTH = 50;
+        /** Characters reserved for the separator and the random suffix (e.g. `-a3x7k9`). */
+        const SUFFIX_LENGTH = 7;
+
+        const slug = alias
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, MAX_ID_LENGTH)
+            || nanoid(10);
+
+        const existing = await this._prismaClient.network.findUnique({
+            where: { id: slug },
+            select: { id: true },
+        });
+
+        if (!existing) {
+            return slug;
+        }
+
+        return `${slug.slice(0, MAX_ID_LENGTH - SUFFIX_LENGTH)}-${nanoid(6)}`;
     }
 
     // ****************************************************************************

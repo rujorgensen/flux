@@ -64,6 +64,25 @@ export class BunRedisClient extends EventEmitter<{
     }
 
     /**
+     * Returns the connection URL with the password masked for safe display.
+     */
+    public getUrl(
+
+    ): string {
+        try {
+            const parsed = new URL(this.options.url);
+
+            if (parsed.password) {
+                parsed.password = '***';
+            }
+
+            return parsed.toString();
+        } catch {
+            return this.options.url;
+        }
+    }
+
+    /**
      * Connects to the Redis server.
      */
     public async connect(

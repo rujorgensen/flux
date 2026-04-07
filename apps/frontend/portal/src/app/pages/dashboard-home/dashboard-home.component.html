@@ -2,9 +2,85 @@
     <app-stats [networkId]="networkId$ | async" [networkCode]="networkCode()" />
 
     <app-dashboard>
-        <div class="panel bg-muted/50 max-h-[50vh] flex-1 rounded-xl md:min-h-min">
-            <h2>Agents</h2>
-            <app-chart />
+        @let agentConfig = agentChartConfig$ | async;
+        @let authorityConfig = authorityChartConfig$ | async;
+        @let channelConfig = channelChartConfig$ | async;
+
+        <div class="charts-grid">
+            <!-- Connected Agents Chart -->
+            <div class="chart-panel agents-panel">
+                <div class="chart-header">
+                    <div class="chart-title-group">
+                        <span class="chart-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-5 w-5 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </span>
+                        <h2 class="chart-title">Connected Agents</h2>
+                    </div>
+                    @if (agentConfig) {
+                        <span class="chart-badge agents-badge">{{ agentConfig.currentValue }} now</span>
+                    }
+                </div>
+                <p class="chart-subtitle">Last 24 hours</p>
+                @if (agentConfig && agentConfig.labels.length > 0) {
+                    <app-chart [labels]="agentConfig.labels" [datasets]="agentConfig.datasets" />
+                } @else {
+                    <div class="chart-empty">
+                        <span>Waiting for data…</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Connected Authorities Chart -->
+            <div class="chart-panel authorities-panel">
+                <div class="chart-header">
+                    <div class="chart-title-group">
+                        <span class="chart-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-5 w-5 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </span>
+                        <h2 class="chart-title">Connected Authorities</h2>
+                    </div>
+                    @if (authorityConfig) {
+                        <span class="chart-badge authorities-badge">{{ authorityConfig.currentValue }} now</span>
+                    }
+                </div>
+                <p class="chart-subtitle">Last 24 hours</p>
+                @if (authorityConfig && authorityConfig.labels.length > 0) {
+                    <app-chart [labels]="authorityConfig.labels" [datasets]="authorityConfig.datasets" />
+                } @else {
+                    <div class="chart-empty">
+                        <span>Waiting for data…</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Active Channels Chart -->
+            <div class="chart-panel channels-panel">
+                <div class="chart-header">
+                    <div class="chart-title-group">
+                        <span class="chart-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-5 w-5 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </span>
+                        <h2 class="chart-title">Active Channels</h2>
+                    </div>
+                    @if (channelConfig) {
+                        <span class="chart-badge channels-badge">{{ channelConfig.currentValue }} now</span>
+                    }
+                </div>
+                <p class="chart-subtitle">Last 24 hours</p>
+                @if (channelConfig && channelConfig.labels.length > 0) {
+                    <app-chart [labels]="channelConfig.labels" [datasets]="channelConfig.datasets" />
+                } @else {
+                    <div class="chart-empty">
+                        <span>Waiting for data…</span>
+                    </div>
+                }
+            </div>
         </div>
     </app-dashboard>
 </app-dashboard-layout>

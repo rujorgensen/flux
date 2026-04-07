@@ -1,9 +1,10 @@
 import Alpine from 'alpinejs';
 import { FluxAgent } from '@persistica/flux-agent';
-import { DEMO_CHANNEL_PASSWORD, DEMO_NETWORK_ID } from '../definitions';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
 import { PicoLogger } from '@utils/pico-logger';
 import { getFluxUrl } from '../flux-url';
+import { getAuthorityObject } from '../auth-settings';
+import { getNetworkId } from '../network-id';
 
 Alpine.data('fluxActivityDemoApplication', () => ({
     agents: new Set<FluxAgent>(),
@@ -24,17 +25,16 @@ Alpine.data('fluxActivityDemoApplication', () => ({
                 this.log('⭕ Connecting flux agent...');
 
                 const fluxAgent: FluxAgent = new FluxAgent(
-                    DEMO_NETWORK_ID,
+                    getNetworkId(),
                     {
                         domain: getFluxUrl(),
                     },
                 );
 
                 const fluxNetworkConnection: FluxAgentNetworkConnection = await fluxAgent.connect(
-                    {
-                        code: DEMO_CHANNEL_PASSWORD,
-                        user: 'client-a',
-                    },
+                    getAuthorityObject(
+                        'client-a',
+                    ),
                     `client-${fluxAgent.id.replaceAll('_', '-')}-uid-token`,
                 );
                 this.log(`🧠 Flux agent connected ${fluxAgent.id}`);

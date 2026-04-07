@@ -78,7 +78,7 @@ class MaximumTokensReachedError extends Error {
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 
-export const networkTokenRoutes = new Elysia({
+export const networkTokenController = new Elysia({
     prefix: '/api/networks/:networkId/tokens',
 })
     .use(betterAuth)
