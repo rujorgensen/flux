@@ -84,6 +84,75 @@ export const networkChannelController = new Elysia({
     )
 
     /**
+     * 'GET /api/networks/:networkId/channels/:channelName'
+     *
+     * Opens a Server-Sent Events stream that forwards every data packet
+     * published on the given channel to the connected client in real time.
+     */
+    .get('/:channelName', ({
+        networkId,
+        params,
+        request,
+    }) => {
+        const { channelName } = params;
+
+        try {
+            validateChannelNameOrThrow(channelName);
+        } catch {
+            throw new InvalidChannelNameError();
+        }
+
+        const { signal } = request;
+
+        return new Response(
+            new ReadableStream({
+                start(
+                    controller: ReadableStreamDefaultController<string>,
+                ): void {
+                    // Send a connected confirmation packet immediately
+                    controller.enqueue(
+                        `data: ${JSON.stringify({ type: 'connected', channelName, timestamp: new Date().toISOString() })}\n\n`,
+                    );
+
+                    const packetCallback = (
+                        data: string,
+                    ): void => {
+                        if (signal.aborted) return;
+
+                        controller.enqueue(
+                            `data: ${JSON.stringify({ type: 'packet', data, timestamp: new Date().toISOString() })}\n\n`,
+                        );
+                    };
+
+                    redisConnection_.subscribeToNetworkChannel(
+                        networkId,
+                        channelName as TChannelName,
+                        packetCallback,
+                    );
+
+                    signal.addEventListener('abort', () => {
+                        redisConnection_.unsubscribeFromNetworkChannel(
+                            networkId,
+                            channelName as TChannelName,
+                            packetCallback,
+                        );
+
+                        controller.close();
+                    });
+                },
+            }),
+            {
+                headers: {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                    'X-Accel-Buffering': 'no',
+                },
+            },
+        );
+    })
+
+    /**
      * 'DELETE /api/networks/:networkId/channels/:channelName'
      *
      * Closes (removes) an active channel from the network.

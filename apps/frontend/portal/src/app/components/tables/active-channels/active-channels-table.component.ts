@@ -1,8 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { INetworkChannel } from '@flux/shared/types';
 import { api } from '$lib/app/_services/api/api';
+import { apiBaseUrl } from '$lib/app/_services/api/api-base';
 import { toast } from 'ngx-sonner';
+
+const MAX_SNIFF_PACKETS = 50;
+
+export interface ISniffPacket {
+    timestamp: string;
+    data: string;
+    formattedData: string;
+}
 
 @Component({
     selector: 'app-active-channels-table',
@@ -10,10 +19,10 @@ import { toast } from 'ngx-sonner';
         CommonModule,
     ],
     templateUrl: './active-channels-table.component.html',
-    styleUrls: ['./active-channels-table.component.css'],
+    styleUrls: ['./active-channels-table.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ActiveChannelsTableComponent {
+export class ActiveChannelsTableComponent implements OnDestroy {
     public readonly networkId = input.required<string>();
 
     protected readonly dataStore = signal<INetworkChannel[] | undefined>(undefined);
@@ -23,6 +32,17 @@ export class ActiveChannelsTableComponent {
     protected readonly total = signal<number>(0);
     protected readonly totalPages = computed(() => Math.ceil(this.total() / this.pageSize()) || 1);
 
+    /** Set of channel names currently being sniffed. */
+    protected readonly sniffingChannels = signal<Set<string>>(new Set());
+
+    /** Map of channelName → received packets. */
+    protected readonly sniffPackets = signal<Map<string, ISniffPacket[]>>(new Map());
+
+    /** Active EventSource instances, keyed by channel name. */
+    private readonly eventSources = new Map<string, EventSource>();
+
+    private readonly apiBase: string = apiBaseUrl;
+
     constructor() {
         effect(() => {
             const networkId = this.networkId();
@@ -31,6 +51,50 @@ export class ActiveChannelsTableComponent {
             if (networkId) {
                 this.fetchData(networkId, page, pageSize);
             }
+        });
+    }
+
+    public ngOnDestroy(
+
+    ): void {
+        // Close all active EventSource connections when the component is destroyed
+        for (const [, es] of this.eventSources) {
+            es.close();
+        }
+
+        this.eventSources.clear();
+    }
+
+    protected isSniffing(
+        channelName: string,
+    ): boolean {
+        return this.sniffingChannels().has(channelName);
+    }
+
+    protected packetsFor(
+        channelName: string,
+    ): ISniffPacket[] {
+        return this.sniffPackets().get(channelName) ?? [];
+    }
+
+    protected toggleSniff(
+        channelName: string,
+    ): void {
+        if (this.isSniffing(channelName)) {
+            this.stopSniffing(channelName);
+        } else {
+            this.startSniffing(channelName);
+        }
+    }
+
+    protected clearPackets(
+        channelName: string,
+    ): void {
+        this.sniffPackets.update((m) => {
+            const next = new Map(m);
+            next.set(channelName, []);
+
+            return next;
         });
     }
 
@@ -52,6 +116,7 @@ export class ActiveChannelsTableComponent {
             })
             .delete()
             .then(() => {
+                this.stopSniffing(channel.channelName);
                 this.dataStore.update((data) => data?.filter((c) => c.channelName !== channel.channelName));
                 toast.success(`Channel "${channel.channelName}" closed successfully.`);
             })
@@ -75,6 +140,80 @@ export class ActiveChannelsTableComponent {
     protected onPageSizeChange(event: Event): void {
         this.pageSize.set(Number((event.target as HTMLSelectElement).value));
         this.page.set(1);
+    }
+
+    private startSniffing(
+        channelName: string,
+    ): void {
+        const networkId = this.networkId();
+        if (!networkId) return;
+
+        const url = `${this.apiBase}/api/networks/${encodeURIComponent(networkId)}/channels/${encodeURIComponent(channelName)}`;
+        const es = new EventSource(url);
+
+        es.onmessage = (event: MessageEvent) => {
+            try {
+                const parsed = JSON.parse(event.data as string) as { type: string; data?: string; timestamp: string; };
+
+                if (parsed.type !== 'packet' || parsed.data === undefined) return;
+
+                const formattedData = this.tryFormatJson(parsed.data);
+
+                const packet: ISniffPacket = {
+                    timestamp: parsed.timestamp,
+                    data: parsed.data,
+                    formattedData,
+                };
+
+                this.sniffPackets.update((m) => {
+                    const next = new Map(m);
+                    const existing = next.get(channelName) ?? [];
+
+                    next.set(channelName, [...existing, packet].slice(-MAX_SNIFF_PACKETS));
+
+                    return next;
+                });
+            } catch {
+                // ignore malformed events
+            }
+        };
+
+        es.onerror = () => {
+            // If connection drops, update sniffing state
+            this.stopSniffing(channelName);
+        };
+
+        this.eventSources.set(channelName, es);
+
+        this.sniffingChannels.update((s) => new Set([...s, channelName]));
+    }
+
+    private stopSniffing(
+        channelName: string,
+    ): void {
+        const es = this.eventSources.get(channelName);
+
+        if (es) {
+            es.close();
+            this.eventSources.delete(channelName);
+        }
+
+        this.sniffingChannels.update((s) => {
+            const next = new Set(s);
+            next.delete(channelName);
+
+            return next;
+        });
+    }
+
+    private tryFormatJson(
+        data: string,
+    ): string {
+        try {
+            return JSON.stringify(JSON.parse(data), null, 2);
+        } catch {
+            return data;
+        }
     }
 
     private async fetchData(
