@@ -41,6 +41,20 @@ const revealResponseSchema = t.Object({
 
 const networkTokenMap = new Map<string, IStoredToken[]>();
 
+// ─── Token validation (consumed by other controllers) ────────────────────────
+
+/**
+ * Returns `true` if the given plain-text token value is valid for the network.
+ */
+export function validateNetworkToken(
+    networkId: string,
+    tokenValue: string,
+): boolean {
+    const tokens = networkTokenMap.get(networkId) ?? [];
+
+    return tokens.some((t) => t.value === tokenValue);
+}
+
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
 function toMetadata(

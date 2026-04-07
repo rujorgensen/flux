@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import type { INetworkChannel } from '@flux/shared/types';
 import { api } from '$lib/app/_services/api/api';
 import { apiBaseUrl } from '$lib/app/_services/api/api-base';
+import { NetworkTokensService } from '$lib/app/_services/network-tokens/network-tokens.service';
 import { toast } from 'ngx-sonner';
 
 const MAX_SNIFF_PACKETS = 50;
@@ -12,6 +13,30 @@ export interface ISniffPacket {
     data: string;
     formattedData: string;
 }
+
+/**
+ * Shape of each SSE event yielded by the channel sniff endpoint.
+ * Eden Treaty parses the `data:` SSE line as JSON into this structure.
+ */
+interface IChannelSSEEvent {
+    data?: {
+        type: 'connected' | 'packet';
+        /** Raw payload string — only present for 'packet' events. */
+        data?: string;
+        channelName?: string;
+        timestamp?: string;
+    };
+}
+
+/**
+ * Eden Treaty does not yet auto-generate typings for SSE (generator) endpoints, so we
+ * wrap the `.get()` call in a helper with an explicit signature.  The runtime behaviour is
+ * correct: Treaty detects Content-Type text/event-stream and returns an AsyncGenerator.
+ */
+type TChannelSniffFn = (opts: {
+    query: { token: string };
+    fetch: RequestInit;
+}) => Promise<{ data: AsyncIterable<IChannelSSEEvent> | null }>;
 
 @Component({
     selector: 'app-active-channels-table',
@@ -38,12 +63,15 @@ export class ActiveChannelsTableComponent implements OnDestroy {
     /** Map of channelName → received packets. */
     protected readonly sniffPackets = signal<Map<string, ISniffPacket[]>>(new Map());
 
-    /** Active EventSource instances, keyed by channel name. */
-    private readonly eventSources = new Map<string, EventSource>();
+    /** Map of channelName → authenticated SSE URL (includes token). */
+    protected readonly sniffUrls = signal<Map<string, string>>(new Map());
 
-    private readonly apiBase: string = apiBaseUrl;
+    /** Active AbortControllers, keyed by channel name. */
+    private readonly abortControllers = new Map<string, AbortController>();
 
-    constructor() {
+    constructor(
+        private readonly _networkTokensService: NetworkTokensService,
+    ) {
         effect(() => {
             const networkId = this.networkId();
             const page = this.page();
@@ -57,12 +85,11 @@ export class ActiveChannelsTableComponent implements OnDestroy {
     public ngOnDestroy(
 
     ): void {
-        // Close all active EventSource connections when the component is destroyed
-        for (const [, es] of this.eventSources) {
-            es.close();
+        for (const [, controller] of this.abortControllers) {
+            controller.abort();
         }
 
-        this.eventSources.clear();
+        this.abortControllers.clear();
     }
 
     protected isSniffing(
@@ -75,6 +102,12 @@ export class ActiveChannelsTableComponent implements OnDestroy {
         channelName: string,
     ): ISniffPacket[] {
         return this.sniffPackets().get(channelName) ?? [];
+    }
+
+    protected sniffUrlFor(
+        channelName: string,
+    ): string | undefined {
+        return this.sniffUrls().get(channelName);
     }
 
     protected toggleSniff(
@@ -148,58 +181,97 @@ export class ActiveChannelsTableComponent implements OnDestroy {
         const networkId = this.networkId();
         if (!networkId) return;
 
-        const url = `${this.apiBase}/api/networks/${encodeURIComponent(networkId)}/channels/${encodeURIComponent(channelName)}`;
-        const es = new EventSource(url);
-
-        es.onmessage = (event: MessageEvent) => {
-            try {
-                const parsed = JSON.parse(event.data as string) as { type: string; data?: string; timestamp: string; };
-
-                if (parsed.type !== 'packet' || parsed.data === undefined) return;
-
-                const formattedData = this.tryFormatJson(parsed.data);
-
-                const packet: ISniffPacket = {
-                    timestamp: parsed.timestamp,
-                    data: parsed.data,
-                    formattedData,
-                };
-
-                this.sniffPackets.update((m) => {
-                    const next = new Map(m);
-                    const existing = next.get(channelName) ?? [];
-
-                    next.set(channelName, [...existing, packet].slice(-MAX_SNIFF_PACKETS));
-
-                    return next;
-                });
-            } catch {
-                // ignore malformed events
-            }
-        };
-
-        es.onerror = () => {
-            // If connection drops, update sniffing state
-            this.stopSniffing(channelName);
-        };
-
-        this.eventSources.set(channelName, es);
-
+        // Mark as sniffing immediately for instant UI feedback
         this.sniffingChannels.update((s) => new Set([...s, channelName]));
+
+        const abortController = new AbortController();
+        this.abortControllers.set(channelName, abortController);
+
+        // Reveal the primary network token then start the SSE stream
+        this._networkTokensService
+            .revealToken$(networkId, 0)
+            .subscribe({
+                next: (tokenValue) => {
+                    const sseUrl = `${apiBaseUrl}/api/networks/${encodeURIComponent(networkId)}/channels/${encodeURIComponent(channelName)}?token=${encodeURIComponent(tokenValue)}`;
+
+                    this.sniffUrls.update((m) => new Map(m).set(channelName, sseUrl));
+                    this.consumeSSE(channelName, networkId, tokenValue, abortController);
+                },
+                error: () => {
+                    this.stopSniffing(channelName);
+                    toast.error('Failed to retrieve network token. Generate one in Network Settings.');
+                },
+            });
+    }
+
+    private consumeSSE(
+        channelName: string,
+        networkId: string,
+        tokenValue: string,
+        abortController: AbortController,
+    ): void {
+        (async () => {
+            try {
+                const sniffGet = api.api
+                    .networks({ networkId })
+                    .channels({ channelName })
+                    .get as unknown as TChannelSniffFn;
+
+                const response = await sniffGet({
+                    query: { token: tokenValue },
+                    fetch: { signal: abortController.signal },
+                });
+
+                if (!response.data) return;
+
+                for await (const event of response.data) {
+                    if (abortController.signal.aborted) break;
+
+                    const payload = event.data;
+                    if (!payload || payload.type !== 'packet' || payload.data === undefined) continue;
+
+                    const packet: ISniffPacket = {
+                        timestamp: payload.timestamp ?? new Date().toISOString(),
+                        data: payload.data,
+                        formattedData: this.tryFormatJson(payload.data),
+                    };
+
+                    this.sniffPackets.update((m) => {
+                        const next = new Map(m);
+                        const existing = next.get(channelName) ?? [];
+
+                        next.set(channelName, [...existing, packet].slice(-MAX_SNIFF_PACKETS));
+
+                        return next;
+                    });
+                }
+            } catch {
+                if (!abortController.signal.aborted) {
+                    this.stopSniffing(channelName);
+                }
+            }
+        })();
     }
 
     private stopSniffing(
         channelName: string,
     ): void {
-        const es = this.eventSources.get(channelName);
+        const controller = this.abortControllers.get(channelName);
 
-        if (es) {
-            es.close();
-            this.eventSources.delete(channelName);
+        if (controller) {
+            controller.abort();
+            this.abortControllers.delete(channelName);
         }
 
         this.sniffingChannels.update((s) => {
             const next = new Set(s);
+            next.delete(channelName);
+
+            return next;
+        });
+
+        this.sniffUrls.update((m) => {
+            const next = new Map(m);
             next.delete(channelName);
 
             return next;
