@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { timer } from 'rxjs';
 import { toast } from 'ngx-sonner';
 import { NetworkTokensService, type ITokenMetadata } from '$lib/app/_services/network-tokens/network-tokens.service';
 
@@ -152,7 +153,9 @@ export class NetworkTokensComponent {
             .writeText(value)
             .then(() => {
                 this.copiedTokenId.set(tokenId);
-                setTimeout(() => this.copiedTokenId.set(null), 2_000);
+                timer(2_000)
+                    .pipe(takeUntilDestroyed(this.destroyRef))
+                    .subscribe(() => this.copiedTokenId.set(null));
             })
             .catch((err: unknown) => {
                 console.error('Failed to copy token to clipboard', err);
