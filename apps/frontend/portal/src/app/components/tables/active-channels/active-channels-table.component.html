@@ -4,7 +4,7 @@
             <thead>
                 <tr>
                     <th>Channel Name</th>
-                    <th>member distribution</th>
+                    <th>Member distribution</th>
                     <th>Member Count</th>
                     <th>Data Usage [bytes]</th>
                     <th>Created At</th>
@@ -20,21 +20,96 @@
                         <td class="text-right">{{ row.bytes }}</td>
                         <td>{{ row.createdAt | date:'fullDate' }}</td>
                         <td>
-                            <button
-                                class="btn btn-ghost btn-sm text-error"
-                                [disabled]="closingChannelName() === row.channelName"
-                                (click)="onCloseChannel(row)"
-                                [attr.aria-label]="'Close channel ' + row.channelName"
-                                title="Close channel"
-                            >
-                                @if (closingChannelName() === row.channelName) {
-                                    <span class="loading loading-spinner loading-xs"></span>
-                                } @else {
-                                    Close
-                                }
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    class="btn btn-ghost btn-sm"
+                                    [class.text-success]="isSniffing(row.channelName)"
+                                    [class.text-base-content]="!isSniffing(row.channelName)"
+                                    (click)="toggleSniff(row.channelName)"
+                                    [attr.aria-label]="(isSniffing(row.channelName) ? 'Stop sniffing ' : 'Sniff ') + row.channelName"
+                                    [attr.title]="isSniffing(row.channelName) ? 'Stop sniffing' : 'Sniff data packets'"
+                                >
+                                    @if (isSniffing(row.channelName)) {
+                                        <span class="loading loading-ring loading-xs"></span>
+                                    } @else {
+                                        <!-- antenna / signal icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" />
+                                        </svg>
+                                    }
+                                    {{ isSniffing(row.channelName) ? 'Sniffing' : 'Sniff' }}
+                                </button>
+                                <button
+                                    class="btn btn-ghost btn-sm text-error"
+                                    [disabled]="closingChannelName() === row.channelName"
+                                    (click)="onCloseChannel(row)"
+                                    [attr.aria-label]="'Close channel ' + row.channelName"
+                                    title="Close channel"
+                                >
+                                    @if (closingChannelName() === row.channelName) {
+                                        <span class="loading loading-spinner loading-xs"></span>
+                                    } @else {
+                                        Close
+                                    }
+                                </button>
+                            </div>
                         </td>
                     </tr>
+                    @if (isSniffing(row.channelName)) {
+                        <tr class="bg-base-200">
+                            <td colspan="6" class="p-0">
+                                <div class="sniffer-panel">
+                                    <div class="sniffer-panel__header">
+                                        <div class="flex items-center gap-2">
+                                            <span class="loading loading-ring loading-xs text-success"></span>
+                                            <span class="font-mono text-sm font-semibold">Sniffing <span class="text-success">{{ row.channelName }}</span></span>
+                                            <span class="badge badge-sm badge-outline">{{ packetsFor(row.channelName).length }} packets</span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            @if (sniffUrlFor(row.channelName); as sseUrl) {
+                                                <a
+                                                    [href]="sseUrl"
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                    class="btn btn-ghost btn-xs"
+                                                    title="Open raw SSE stream in a new tab"
+                                                    aria-label="Open SSE stream"
+                                                >
+                                                    <!-- external link icon -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                    </svg>
+                                                    Raw stream
+                                                </a>
+                                            }
+                                            <button
+                                                class="btn btn-ghost btn-xs"
+                                                (click)="clearPackets(row.channelName)"
+                                                title="Clear packets"
+                                                aria-label="Clear captured packets"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="sniffer-panel__body">
+                                        @if (packetsFor(row.channelName).length === 0) {
+                                            <p class="text-base-content/40 text-xs italic text-center py-4">
+                                                Waiting for data packets…
+                                            </p>
+                                        } @else {
+                                            @for (packet of packetsFor(row.channelName); track $index) {
+                                                <div class="sniffer-packet">
+                                                    <span class="sniffer-packet__time">{{ packet.timestamp | date:'HH:mm:ss.SSS' }}</span>
+                                                    <pre class="sniffer-packet__data">{{ packet.formattedData }}</pre>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>

@@ -16,6 +16,7 @@ import {
     type TNetworkId_S,
     validateAgentUIDOrThrow,
     validateNetworkIdOrThrow,
+    NetworkAuthorityNotFoundError,
 } from '@flux/shared/types';
 import type { TMessageCallback } from '@flux/shared/ws';
 import type { FluxAgentNetworkConnection } from '@flux/shared/connection';
@@ -26,7 +27,7 @@ import {
 import { nanoid } from 'nanoid';
 import { authenticateAgentOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
-import { getMachineUID, StateManager } from '@flux/shared/utils';
+import { getMachineUID, retry, StateManager } from '@flux/shared/utils';
 
 export class FluxAgent {
     public readonly id: string = nanoid();
@@ -66,13 +67,27 @@ export class FluxAgent {
             throw new Error('Will never be thrown');
         }
 
-        const ticket = await authenticateAgentOrThrow(
-            this.networkId as TNetworkId_S,
-            this.options?.domain ?? 'http://localhost:5100',
-            identification,
+        const ticket = await retry(
+            async () => {
+                return authenticateAgentOrThrow(
+                    this.networkId as TNetworkId_S,
+                    this.options?.domain ?? 'http://localhost:5100',
+                    identification,
+                    {
+                        clientUId: clientUId as TAgentOwnUId,
+                        machineUID: (await getMachineUID()) ?? undefined,
+                    },
+                );
+            },
+
+            // Retry if no authority was found yet
+            (error: unknown) => {
+                return error instanceof NetworkAuthorityNotFoundError;
+            },
+
             {
-                clientUId: clientUId as TAgentOwnUId,
-                machineUID: (await getMachineUID()) ?? undefined,
+                retries: 100,
+                delayMs: 500,
             },
         );
 

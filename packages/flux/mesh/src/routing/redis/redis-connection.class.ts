@@ -237,6 +237,55 @@ export class RedisConnection {
     }
 
     /**
+     * Subscribes to data packets published on a specific network channel.
+     * Invokes the callback with the raw data string from each packet.
+     */
+    public subscribeToNetworkChannel(
+        networkId: string,
+        channelName: string,
+        callback: (data: string) => void,
+    ): void {
+        try {
+            const redisKey = `~networks/${networkId}/channels/${channelName}`;
+
+            this.pubSub.subscribe(redisKey, (message: string) => {
+                // message format: {processAddress}:nc-on-pub:{channelName}:{data}
+                const firstColon = message.indexOf(':');
+                const withoutProcess = firstColon !== -1 ? message.slice(firstColon + 1) : message;
+
+                // withoutProcess: nc-on-pub:{channelName}:{data}
+                const secondColon = withoutProcess.indexOf(':');
+                const withoutCommand = secondColon !== -1 ? withoutProcess.slice(secondColon + 1) : withoutProcess;
+
+                // withoutCommand: {channelName}:{data}
+                const thirdColon = withoutCommand.indexOf(':');
+                const data = thirdColon !== -1 ? withoutCommand.slice(thirdColon + 1) : withoutCommand;
+
+                callback(data);
+            });
+        } catch (error) {
+            console.error(`Failed to subscribe to network channel '${networkId}/${channelName}':`, error);
+        }
+    }
+
+    /**
+     * Unsubscribes a callback from data packets on a specific network channel.
+     */
+    public unsubscribeFromNetworkChannel(
+        networkId: string,
+        channelName: string,
+        callback: (data: string) => void,
+    ): void {
+        try {
+            const redisKey = `~networks/${networkId}/channels/${channelName}`;
+
+            this.pubSub.unsubscribe(redisKey, callback as MessageCallback);
+        } catch (error) {
+            console.error(`Failed to unsubscribe from network channel '${networkId}/${channelName}':`, error);
+        }
+    }
+
+    /**
      * Marks the given address as connected in Redis.
      */
     public async setConnected(

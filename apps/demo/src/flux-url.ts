@@ -4,8 +4,7 @@ const STORAGE_KEY = 'flux_url';
 
 export const getFluxUrl = (
 
-): string =>
-    localStorage.getItem(STORAGE_KEY) ?? DEFAULT_FLUX_URL;
+): string => localStorage.getItem(STORAGE_KEY) ?? DEFAULT_FLUX_URL;
 
 export const setFluxUrl = (
     url: string,

@@ -3,6 +3,7 @@ import {
     type TAgentOwnUId,
     type TNetworkId_S,
     checkAuthTicketShape,
+    NetworkAuthorityNotFoundError,
 } from '@flux/shared/types';
 import { encrypt } from '../../utils/obscuring/encyprt.utils';
 import {
@@ -68,6 +69,7 @@ export const authenticateAgentOrThrow = async (
     if (clientInfo.clientUId) {
         url.searchParams.set('requestedAgentUid', clientInfo.clientUId);
     }
+
     if (clientInfo.machineUID && validateMachineUID(clientInfo.machineUID)) {
         url.searchParams.set('machineUID', clientInfo.machineUID);
     }
@@ -85,6 +87,13 @@ export const authenticateAgentOrThrow = async (
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            const textResponse = await response.text();
+            if (textResponse.startsWith(NetworkAuthorityNotFoundError.message)) {
+                throw new NetworkAuthorityNotFoundError(networkId);
+            }
+        }
+
         throw new Error(`Auth failed: ${response.status}`);
     }
 

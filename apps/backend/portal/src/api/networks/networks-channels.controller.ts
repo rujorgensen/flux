@@ -1,4 +1,4 @@
-import { Elysia, t } from 'elysia';
+import { Elysia, t, sse } from 'elysia';
 import {
     type INetworkChannel,
     type TChannelName,
@@ -11,6 +11,7 @@ import {
     getMeshRedisConnection,
 } from '@flux/mesh';
 import { networkIdValidatorPlugin } from './plugins';
+import { validateNetworkToken } from './tokens/tokens.controller';
 
 const redisConnection_: RedisConnection = getMeshRedisConnection();
 const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
@@ -24,12 +25,77 @@ class InvalidChannelNameError extends Error {
     }
 }
 
+class UnauthorizedError extends Error {
+    status = 401;
+
+    constructor(
+    ) {
+        super('Unauthorized: invalid network token');
+    }
+}
+
+/**
+ * Bridges a Redis pub/sub channel to an async generator that yields SSE-formatted
+ * data strings. Cleans up the Redis subscription when the client disconnects.
+ */
+async function* createChannelEventStream(
+    networkId: string,
+    channelName: TChannelName,
+    signal: AbortSignal,
+): AsyncGenerator<ReturnType<typeof sse>> {
+    const queue: string[] = [];
+    let wakeup: (() => void) | null = null;
+
+    const onPacket = (data: string): void => {
+        queue.push(data);
+
+        if (wakeup) {
+            wakeup();
+            wakeup = null;
+        }
+    };
+
+    redisConnection_.subscribeToNetworkChannel(networkId, channelName, onPacket);
+
+    try {
+        yield sse(JSON.stringify({ type: 'connected', channelName, timestamp: new Date().toISOString() }));
+
+        while (!signal.aborted) {
+            if (queue.length > 0) {
+                const data = queue.shift();
+
+                if (data === undefined) continue;
+
+                yield sse(JSON.stringify({
+                    type: 'packet',
+                    data,
+                    timestamp: new Date().toISOString(),
+                }));
+            } else {
+                await new Promise<void>((resolve) => {
+                    if (signal.aborted) {
+                        resolve();
+
+                        return;
+                    }
+
+                    wakeup = resolve;
+                    signal.addEventListener('abort', () => resolve(), { once: true });
+                });
+            }
+        }
+    } finally {
+        redisConnection_.unsubscribeFromNetworkChannel(networkId, channelName, onPacket);
+    }
+}
+
 
 export const networkChannelController = new Elysia({
     prefix: '/api/networks/:networkId/channels',
 })
     .error({
         InvalidChannelNameError,
+        UnauthorizedError,
     })
     .use(networkIdValidatorPlugin)
 
@@ -82,6 +148,41 @@ export const networkChannelController = new Elysia({
             }),
         },
     )
+
+    /**
+     * 'GET /api/networks/:networkId/channels/:channelName?token=<networkToken>'
+     *
+     * Opens a Server-Sent Events stream that forwards every data packet
+     * published on the given channel to the connected client in real time.
+     * Requires the network access token as a query parameter.
+     */
+    .get('/:channelName', async function*({ networkId, params, request }) {
+        yield* createChannelEventStream(
+            networkId,
+            params.channelName as TChannelName,
+            request.signal,
+        );
+    }, {
+        query: t.Object({ token: t.String() }),
+        beforeHandle({ networkId, params, query, set }) {
+            try {
+                validateChannelNameOrThrow(params.channelName);
+            } catch {
+                set.status = 400;
+
+                return { message: 'Invalid channel name' };
+            }
+
+            if (!validateNetworkToken(networkId, query.token)) {
+                set.status = 401;
+
+                return { message: 'Unauthorized: invalid network token' };
+            }
+
+            // Explicit return required by Elysia's beforeHandle type signature.
+            return;
+        },
+    })
 
     /**
      * 'DELETE /api/networks/:networkId/channels/:channelName'

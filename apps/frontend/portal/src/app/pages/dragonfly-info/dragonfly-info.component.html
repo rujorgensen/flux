@@ -29,7 +29,7 @@
                 <div class="card bg-base-200 shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title text-lg">
-                            {{ instanceLabels[$index] ?? 'Instance ' + ($index + 1) }}
+                            {{ instanceLabels[$index] ?? ('Instance ' + ($index + 1)) }}
                             @if (status.memory.overThreshold) {
                                 <div class="badge badge-error badge-sm">High Memory</div>
                             } @else {
@@ -69,7 +69,7 @@
                                         class="progress w-full"
                                         [class.progress-error]="status.memory.overThreshold"
                                         [class.progress-success]="!status.memory.overThreshold"
-                                        [value]="(status.memory.usageRatio ?? 0) * 100"
+                                        [value]="status.memory.usageRatio * 100"
                                         max="100"
                                     ></progress>
                                 }
