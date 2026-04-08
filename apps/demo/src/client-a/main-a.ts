@@ -42,7 +42,6 @@ Alpine.data('fluxApplicationA', () => ({
                 if (webRTCConncetionState === 'connected') {
                     // Start sending messages
                     setInterval(() => {
-
                         this.sendRTCMessage('WEB RTC IS WORKING 🥳🎉🎊');
                     }, 200);
                 }
@@ -55,12 +54,13 @@ Alpine.data('fluxApplicationA', () => ({
                 this.networkState = networkState;
             });
 
-        this.fluxNetworkConnection = await this.flux.connect(
-            getAuthorityObject(
-                'client-a',
-            ),
-            'client-a-unique-identification-token',
-        );
+        this.fluxNetworkConnection = await this.flux
+            .connect(
+                getAuthorityObject(
+                    'client-a',
+                ),
+                'client-a-unique-identification-token',
+            );
 
         console.log('✅ Client A connected to network', this.flux.id);
     },
