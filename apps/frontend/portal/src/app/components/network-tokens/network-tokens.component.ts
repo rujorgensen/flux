@@ -40,6 +40,7 @@ export class NetworkTokensComponent {
     /** Map of token id → revealed token string. */
     protected readonly revealedTokens = signal<Map<string, string>>(new Map());
     protected readonly revealingTokenId = signal<string | null>(null);
+    protected readonly copiedTokenId = signal<string | null>(null);
 
     private readonly destroyRef = inject(DestroyRef);
 
@@ -139,6 +140,23 @@ export class NetworkTokensComponent {
             updated.delete(tokenId);
             return updated;
         });
+    }
+
+    protected onCopyToken(
+        tokenId: string,
+    ): void {
+        const value = this.revealedTokens().get(tokenId);
+        if (!value) return;
+
+        navigator.clipboard
+            .writeText(value)
+            .then(() => {
+                this.copiedTokenId.set(tokenId);
+                setTimeout(() => this.copiedTokenId.set(null), 2_000);
+            })
+            .catch((err: unknown) => {
+                console.error('Failed to copy token to clipboard', err);
+            });
     }
 
     protected onRemoveToken(

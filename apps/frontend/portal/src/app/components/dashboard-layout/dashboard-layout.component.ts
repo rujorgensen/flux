@@ -1,9 +1,13 @@
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
+    ElementRef,
+    Injector,
     input,
     signal,
+    ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -38,6 +42,8 @@ export class DashboardLayoutComponent {
     userSession = input<UserSession | null>();
     pageTitle = input<string>('Dashboard');
 
+    @ViewChild('networkAliasInput') networkAliasInput?: ElementRef<HTMLInputElement>;
+
     protected readonly MAX_NETWORKS = MAX_NETWORKS;
     protected readonly appVersion = version;
 
@@ -70,6 +76,7 @@ export class DashboardLayoutComponent {
         protected readonly networksService: NetworksService,
         private readonly router: Router,
         private readonly sidebarCountsService: SidebarCountsService,
+        private readonly injector: Injector,
     ) {
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
         this.agentCount$ = this.sidebarCountsService.agentCount$;
@@ -118,6 +125,10 @@ export class DashboardLayoutComponent {
     ): void {
         this.newNetworkAlias.set('');
         this.showCreateModal.set(true);
+        afterNextRender(
+            () => this.networkAliasInput?.nativeElement.focus(),
+            { injector: this.injector },
+        );
     }
 
     protected closeCreateModal(

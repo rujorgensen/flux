@@ -15,6 +15,7 @@ import { ChartComponent } from '../../components/chart/chart.component';
 import type { IChartDataset } from '../../components/chart/chart.component';
 import { NetworksService } from '../../_services/networks.service';
 import { DashboardHistoryService } from '../../_services/dashboard-history/dashboard-history.service';
+import { NetworkIdComponent } from '../../components/network-id/network-id.component';
 
 interface UserSession {
     id?: string;
@@ -31,6 +32,7 @@ interface UserSession {
         StatsComponent,
         DashboardComponent,
         ChartComponent,
+        NetworkIdComponent,
     ],
     templateUrl: './dashboard-home.component.html',
     styleUrls: ['./dashboard-home.component.css'],
