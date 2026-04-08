@@ -240,7 +240,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
                         const next = new Map(m);
                         const existing = next.get(channelName) ?? [];
 
-                        next.set(channelName, [...existing, packet].slice(-MAX_SNIFF_PACKETS));
+                        next.set(channelName, [packet, ...existing].slice(0, MAX_SNIFF_PACKETS));
 
                         return next;
                     });
