@@ -1,9 +1,5 @@
 import type { TNetworkId_S } from './network.type';
 
-// export interface ISocketPackage {
-//     type: 'MESSAGE' | 'ERROR';
-// }
-
 // ****************************************************************************
 // *** Network Layer Messager (before being connected to network)
 // ****************************************************************************

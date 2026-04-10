@@ -156,31 +156,4 @@ export class NetworkAgentManager {
 
         return address;
     }
-
-    // public register(
-    //     networkId: TNetworkId_S,
-    //     socketId: TClientId,
-    // ): void {
-    //     this.redisConnection
-    //         .networkAuthoritySet
-    //         .registerNetworkAuthority(
-    //             networkId,
-    //             socketId,
-    //         );
-    // }
-
-    // public unregister(
-    //     networkId: TNetworkId_S,
-    //     socketId: TClientId,
-    // ): void {
-    //     this.cache.delete(networkId);
-
-    //     this.redisConnection
-    //         .networkAuthoritySet
-    //         .unregister(
-    //             networkId,
-    //             socketId,
-    //         );
-    // }
-
 }

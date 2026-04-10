@@ -6,6 +6,7 @@ import {
     type TChannelName,
     type TAgentOwnUId,
     type TAuthorizeCallback,
+    type TAddress,
     CONNECT_TO_CLIENT,
     SUBSCRIBE_NETWORK_CHANNEL_NAME,
     RPC_REQUEST,
@@ -381,7 +382,7 @@ export class FluxWebSocketConnection {
      * Disconnects an agent from the network.
      */
     public disconnectAgent(
-        id: string,
+        id: TAddress,
     ): void {
         if (!isNanoId(id)) {
             throw new Error(`Invalid agent id: '${id}'`);

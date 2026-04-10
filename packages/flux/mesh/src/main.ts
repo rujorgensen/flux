@@ -8,13 +8,6 @@ globalThis.meshLoadCount++;
 
 console.log(`[flux-mesh] Reloaded ${globalThis.meshLoadCount} time(s)`);
 
-// import { Elysia } from 'elysia';
-// import { swagger } from '@elysiajs/swagger';
-
-// if (!process.env['FLUX_MESH_JWT_KEY']) {
-//     throw new Error('Missing FLUX_MESH_JWT_KEY in .env');
-// }
-
 import {
     type TAddress,
     type TChannelName,
@@ -40,7 +33,8 @@ import {
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
 import { OutgoingMessageRouter } from './routing/outgoing-message-router.class';
-import { NetworkAuthorityManager } from './register/register-network-authority.class';
+import { NetworkAuthorityManager } from './register/network-authority-manager.class';
+import { NetworkAgentManager } from './register/network-agent-manager.class';
 import {
     type TTokenPayload,
     verifyTokenOrThrow,
@@ -57,7 +51,6 @@ import {
     readProcessAddress,
     readProcessId,
 } from './routing/addressing.utils';
-import { NetworkAgentManager } from './register/network-client-manager.class';
 import { OPTIONS_RESPONSE } from './_routes/options.route';
 import { authorizeNetworkAuthority } from './_routes/auth/network-authority.post.route';
 import { authorizeNetworkAgent } from './_routes/auth/network-client.post.route';
@@ -128,8 +121,7 @@ export class FluxMeshServer {
                 clientId: TClientId,
                 message: string,
             ) => {
-                const client: TConnectedClientSocket | undefined =
-                    clientMap.get(clientId);
+                const client: TConnectedClientSocket | undefined = clientMap.get(clientId);
 
                 if (!client) {
                     throw new UnknownClientError(clientId, processAddress);
@@ -143,6 +135,19 @@ export class FluxMeshServer {
         const globalRPCClient: GlobalRPCClient<
             'authorize' | 'authorizeNetworkChannel'
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
+
+        processMessageRouter
+            .onKickLocalClient((
+                clientId: TClientId,
+            ) => {
+                const client: TConnectedClientSocket | undefined = clientMap.get(clientId);
+
+                if (!client) {
+                    throw new UnknownClientError(clientId, processAddress);
+                }
+
+                client.close(1002, 'Kicked by process');
+            });
 
         this.bunServer = Bun.serve({
             port,
@@ -313,7 +318,7 @@ export class FluxMeshServer {
                                 return;
                             }
 
-                            const agentClientId: string = message_.substring(message_.indexOf(':') + 1);
+                            const agentClientId: TAddress = message_.substring(message_.indexOf(':') + 1) as TAddress;
 
                             if (!isNanoId(agentClientId)) {
                                 ws.send(`${ERROR}:Invalid agent ID`);
@@ -323,8 +328,12 @@ export class FluxMeshServer {
                             // Attempt to get the client
                             const connectedClientSocket: TConnectedClientSocket | undefined = clientMap.get(agentClientId);
 
+                            if (!connectedClientSocket) {
+                                processMessageRouter.kickClient(agentClientId);
+                                return;
+                            }
+
                             if (
-                                !connectedClientSocket ||
                                 (connectedClientSocket.data.networkId !== ws.data.networkId) ||
                                 (connectedClientSocket.data.isAuthority)
                             ) {
