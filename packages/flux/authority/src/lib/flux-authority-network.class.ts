@@ -6,6 +6,7 @@ import {
     NetworkChannelEventEmitter,
 } from '@flux/shared/connection';
 import type {
+    TAddress,
     TChannelName,
 } from '@flux/shared/types';
 
@@ -27,10 +28,10 @@ export class FluxAuthorityNetworkConnection {
     /**
      * Removes an agent from the network.
      * 
-     * @param { string } id - The ID of the agent to disconnect
+     * @param { TAddress } id - The ID of the agent to disconnect
      */
     public disconnectAgent(
-        id: string,
+        id: TAddress,
     ): void {
         this._fluxWebSocketConnection
             .disconnectAgent(id);
