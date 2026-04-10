@@ -55,20 +55,15 @@ export class NetworkAuthorityRedisSortedSet {
         await this._client.expire(key, 500);
 
         // Add to authority
-        await this._client.hmset(
+        await this._client.hset(
             `networks/${networkId}/authorities/${clientId}`,
-            [
-                ...(machineUID ? [
-                    'machineUID',
-                    typeof machineUID === 'string' ? machineUID : '',
-                ] : []),
-
-                'address',
-                address,
-
-                'connectedAt',
-                new Date().toISOString(),
-            ],
+            {
+                ...(machineUID ? {
+                    'machineUID': typeof machineUID === 'string' ? machineUID : '',
+                } : {}),
+                'address': address,
+                'connectedAt': new Date().toISOString(),
+            },
         );
 
         // Update the refresh interval cache

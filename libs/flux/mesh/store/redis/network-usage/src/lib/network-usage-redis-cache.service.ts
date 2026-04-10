@@ -54,7 +54,7 @@ export class NetworkUsageRedisCacheService {
         const key: string = `networks/${networkId}/data`;
 
         // Set the lock
-        await this._client.hmset(key, ['locked', '1']);
+        await this._client.hset(key, { 'locked': '1' });
 
         // Auto-expire the lock
         await this._client.send('HEXPIRE', [key, '60', 'FIELDS', '1', 'locked',]);

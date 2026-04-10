@@ -110,7 +110,7 @@ export class FluxMeshServer {
 
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly onReadyListeners: Set<() => void> = new Set();
-    private readonly bunServer: Bun.Server<TWebSocketData>; // Bun.Server<TWebsocketData>;
+    private readonly bunServer: Bun.Server<TWebSocketData>;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
 
@@ -226,6 +226,8 @@ export class FluxMeshServer {
             },
 
             websocket: {
+                // Specify the type of ws.data
+                data: {} as TConnectedClientSocket,
                 perMessageDeflate: true,
                 maxPayloadLength: 1024 * 1024, // 1 MB
                 // publishToSelf: true,

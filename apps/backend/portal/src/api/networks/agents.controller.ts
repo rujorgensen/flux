@@ -17,7 +17,6 @@ class InvalidAgentIdError extends Error {
     }
 }
 
-
 export const networkAgentController = new Elysia({ prefix: '/api/networks/:networkId/agents' })
 
     .error({

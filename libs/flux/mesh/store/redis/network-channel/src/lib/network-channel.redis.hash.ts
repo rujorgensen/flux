@@ -43,14 +43,13 @@ export class NetworkChannelHash {
         if (wasAdded === 1) {
             const defaultMemberDistribution: TMemberDistribution = 'same-process';
 
-            await this._redisConnection.hash.hmset(`networks/${networkId}/channels/${channelName}`, [
-                'createdAt',
-                new Date().toISOString(),
-                'memberDistribution',
-                defaultMemberDistribution,
-                'usage',
-                '0',
-            ]);
+            await this._redisConnection.hash.hset(
+                `networks/${networkId}/channels/${channelName}`,
+                {
+                    'createdAt': new Date().toISOString(),
+                    'memberDistribution': defaultMemberDistribution,
+                    'usage': '0',
+                });
         }
 
         return wasAdded === 1;
@@ -261,9 +260,11 @@ export class NetworkChannelHash {
 
         const memberDistribution: TMemberDistribution = checkMemberDistribution(memberAddresses);
 
-        await this._redisConnection.hash.hmset(`networks/${networkId}/channels/${channelName}`, [
-            'memberDistribution',
-            memberDistribution,
-        ]);
+        await this._redisConnection.hash.hset(
+            `networks/${networkId}/channels/${channelName}`,
+            {
+                'memberDistribution': memberDistribution,
+            },
+        );
     }
 }
