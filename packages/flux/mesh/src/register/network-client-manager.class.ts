@@ -100,6 +100,8 @@ export class NetworkAgentManager {
      * @param { TNetworkId_S } networkId - The network ID
      * @param { TClientId } clientId - The client socket ID
      * @param { TAgentOwnUId } [clientOwnUId] - Optional agent UID
+     * 
+     * @returns { void }
      */
     public unregisterNetworkAgent(
         networkId: TNetworkId_S,
@@ -119,6 +121,7 @@ export class NetworkAgentManager {
 
         // Cancel the timer
         clearInterval(this.timers.get(clientId));
+        this.timers.delete(clientId);
     }
 
     /**

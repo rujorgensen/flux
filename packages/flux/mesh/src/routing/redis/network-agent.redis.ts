@@ -41,19 +41,12 @@ export class NetworkAgentRedis {
     ): Promise<void> {
         const key: string = `networks/${networkId}/agents/${socketId}`;
 
-        await this.client.hmset(key, [
-            'data-usage',
-            '0',
-
-            'clientId',
-            clientId,
-
-            'name',
-            uid,
-
-            'registerAt',
-            new Date().toISOString(),
-        ]);
+        await this.client.hset(key, {
+            'data-usage': '0',
+            'clientId': clientId,
+            'name': uid,
+            'registerAt': new Date().toISOString(),
+        });
 
         await this.client.expire(key, 500);
 
@@ -78,10 +71,12 @@ export class NetworkAgentRedis {
     ): Promise<number> {
         const key: string = `networks/${networkId}/agents/${socketId}`;
 
-        await this.client.hmset(key, [
-            'unregisteredAt',
-            new Date().toISOString(),
-        ]);
+        await this.client.hset(
+            key,
+            {
+                'unregisteredAt': new Date().toISOString(),
+            },
+        );
 
         return await this.networkAgentRedisSortedSet
             .unregisterAgent(

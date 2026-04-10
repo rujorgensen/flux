@@ -126,7 +126,7 @@ export class RedisConnection {
 
         this.hash = {
             sadd: hashClient.sadd.bind(hashClient),
-            hmset: hashClient.hmset.bind(hashClient),
+            hset: hashClient.hset.bind(hashClient),
             smembers: hashClient.smembers.bind(hashClient),
             srem: hashClient.srem.bind(hashClient),
             scard: hashClient.scard.bind(hashClient),
@@ -291,10 +291,13 @@ export class RedisConnection {
     public async setConnected(
         address: string,
     ): Promise<void> {
-        await this.hash.hmset(`machines/processes/${address}`, [
-            'status', 'connected',
-            'updatedAt', new Date().toISOString(),
-        ]);
+        await this.hash.hset(
+            `machines/processes/${address}`,
+            {
+                'status': 'connected',
+                'updatedAt': new Date().toISOString(),
+            },
+        );
 
         await this.hash.expire(`machines/processes/${address}`, 5);
     }

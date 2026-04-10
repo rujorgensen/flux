@@ -1,4 +1,9 @@
-import { splitAddressOrThrow, type TAddress, type TClientId, type TNetworkId_S } from '@flux/shared/types';
+import {
+    type TAddress,
+    type TClientId,
+    type TNetworkId_S,
+    splitAddressOrThrow,
+} from '@flux/shared/types';
 import {
     type RedisConnection,
     getMeshRedisConnection,
@@ -38,6 +43,8 @@ export class NetworkAuthorityManager {
      * 
      * @param { TNetworkId_S } networkId - The network ID
      * @param { TAddress } networkAuthorityAddress - The address of the authority to unregister
+     * 
+     * @returns { void }
      */
     public unregister(
         networkId: TNetworkId_S,
@@ -61,6 +68,8 @@ export class NetworkAuthorityManager {
      * 
      * @param { TNetworkId_S } networkId - The network ID
      * @param { TAddress } networkAuthorityAddress - The address of the authority to unregister globally
+     * 
+     * @returns { void }
      */
     public unregisterGlobal(
         networkId: TNetworkId_S,

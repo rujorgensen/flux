@@ -38,10 +38,9 @@ export class NetworkAgentRedisService {
         if (uid) {
             const key_: string = `networks/${networkId}/agent-uids`;
 
-            await this._client.hmset(key_, [
-                uid,
-                clientId,
-            ]);
+            await this._client.hset(key_, {
+                [uid]: clientId,
+            });
 
             await this._client.expire(key_, 500);
         }
@@ -50,30 +49,24 @@ export class NetworkAgentRedisService {
         await this._client.sadd(`networks/${networkId}/agents`, clientId);
 
         // Add to agent
-        await this._client.hmset(
+        await this._client.hset(
             `networks/${networkId}/agents/${clientId}`,
-            [
-                ...(ip ? [
-                    'ip',
-                    typeof ip === 'string' ? ip : '',
-                ] : []),
+            {
+                ...(ip ? {
+                    'ip': typeof ip === 'string' ? ip : '',
+                } : {}),
 
-                ...(uid ? [
-                    'name',
-                    typeof uid === 'string' ? uid : '',
-                ] : []),
+                ...(uid ? {
+                    'name': typeof uid === 'string' ? uid : '',
+                } : {}),
 
-                ...(machineUID ? [
-                    'machineUID',
-                    typeof machineUID === 'string' ? machineUID : '',
-                ] : []),
+                ...(machineUID ? {
+                    'machineUID': typeof machineUID === 'string' ? machineUID : '',
+                } : {}),
 
-                'address',
-                address,
-
-                'connectedAt',
-                new Date().toISOString(),
-            ],
+                'address': address,
+                'connectedAt': new Date().toISOString(),
+            },
         );
     }
 
@@ -90,12 +83,10 @@ export class NetworkAgentRedisService {
 
         // Consider if this should only be emitted via sockets, and not stored. Increase the total network 
         // usage though.
-        await this._client.hmset(key, [
-            'bytes',
-            `${bytes}`,
-            'packets',
-            `${packets}`,
-        ]);
+        await this._client.hset(key, {
+            'bytes': `${bytes}`,
+            'packets': `${packets}`,
+        });
 
     }
 
