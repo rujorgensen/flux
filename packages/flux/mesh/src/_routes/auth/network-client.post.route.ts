@@ -11,7 +11,7 @@ import {
 } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
-import type { NetworkAuthorityManager } from '../../register/register-network-authority.class';
+import type { NetworkAuthorityManager } from '../../register/network-authority-manager.class';
 import { retry } from '@flux/shared/utils';
 import {
     type TFluxClientUID,
