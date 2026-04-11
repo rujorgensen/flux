@@ -32,17 +32,17 @@
                 }
             </tbody>
         </table>
-        <div class="flex items-center justify-between mt-4">
+        <div class="flex items-center justify-end mt-4">
             <div class="flex items-center gap-2 text-sm">
-                <span>Rows per page:</span>
-                <select class="select select-sm" (change)="onPageSizeChange($event)">
-                    <option value="10" [selected]="pageSize() === 10">10</option>
-                    <option value="25" [selected]="pageSize() === 25">25</option>
-                    <option value="50" [selected]="pageSize() === 50">50</option>
-                    <option value="100" [selected]="pageSize() === 100">100</option>
-                </select>
-            </div>
-            <div class="flex items-center gap-2 text-sm">
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="whitespace-nowrap">Rows per page:</span>
+                    <select class="select select-sm" (change)="onPageSizeChange($event)">
+                        <option value="10" [selected]="pageSize() === 10">10</option>
+                        <option value="25" [selected]="pageSize() === 25">25</option>
+                        <option value="50" [selected]="pageSize() === 50">50</option>
+                        <option value="100" [selected]="pageSize() === 100">100</option>
+                    </select>
+                </div>
                 <span>Page {{ page() }} of {{ totalPages() }}</span>
                 <div class="join">
                     <button class="join-item btn btn-sm" (click)="prevPage()" [disabled]="page() === 1">«</button>

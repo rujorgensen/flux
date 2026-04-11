@@ -67,7 +67,7 @@
                                         routerLinkActive="active"
                                         [routerLinkActiveOptions]="{ exact: true }"
                                     >
-                                        Connected Authorities
+                                        Authorities
                                         @let authorityCount = authorityCount$ | async;
                                         @if (authorityCount !== null) {
                                             <span class="badge badge-sm">{{ authorityCount }}</span>
@@ -80,7 +80,7 @@
                                         routerLinkActive="active"
                                         [routerLinkActiveOptions]="{ exact: true }"
                                     >
-                                        Connected Agents
+                                        Agents
                                         @let agentCount = agentCount$ | async;
                                         @if (agentCount !== null) {
                                             <span class="badge badge-sm">{{ agentCount }}</span>
@@ -165,10 +165,18 @@
             <div class="sticky bottom-0 bg-base-200 p-4">
                 @if (userSession()) {
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="avatar placeholder">
-                        <div class="w-10 rounded-full bg-neutral text-neutral-content">
-                            <span>{{ userSession()?.name?.charAt(0) || userSession()?.email?.charAt(0) || 'U' }}</span>
-                        </div>
+                    <div class="avatar">
+                        @if (userSession()?.image) {
+                            <div class="w-10 rounded-full">
+                                <img [src]="userSession()!.image" [alt]="userSession()?.name || 'User avatar'" referrerpolicy="no-referrer" />
+                            </div>
+                        } @else {
+                            <div class="avatar placeholder">
+                                <div class="w-10 rounded-full bg-neutral text-neutral-content">
+                                    <span>{{ userSession()?.name?.charAt(0) || userSession()?.email?.charAt(0) || 'U' }}</span>
+                                </div>
+                            </div>
+                        }
                     </div>
                     <div class="flex-1">
                         <div class="text-sm font-semibold">{{ userSession()?.name || 'User' }}</div>
