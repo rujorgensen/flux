@@ -15,7 +15,22 @@
                 @for (row of data; track row.channelName) {
                     <tr>
                         <td>{{ row.channelName }}</td>
-                        <td>{{ row.memberDistribution }}</td>
+                        <td>
+                            @switch (row.memberDistribution) {
+                                @case ('same-process') {
+                                    <span class="badge badge-success badge-sm">same-process</span>
+                                }
+                                @case ('same-machine') {
+                                    <span class="badge badge-warning badge-sm">same-machine</span>
+                                }
+                                @case ('distributed') {
+                                    <span class="badge badge-info badge-sm">distributed</span>
+                                }
+                                @default {
+                                    <span class="badge badge-ghost badge-sm">{{ row.memberDistribution }}</span>
+                                }
+                            }
+                        </td>
                         <td class="text-right">{{ row.members }}</td>
                         <td class="text-right">{{ row.bytes }}</td>
                         <td>{{ row.createdAt | date:'fullDate' }}</td>

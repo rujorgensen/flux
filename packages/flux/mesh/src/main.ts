@@ -193,25 +193,29 @@ export class FluxMeshServer {
 
                     const socketId: TClientId = nanoid() as TClientId;
 
-                    if (
-                        server.upgrade(request, {
-                            data: {
-                                ip: server.requestIP(request),
-                                id: socketId,
-                                networkId: decodedToken.networkId,
-                                isAuthority: decodedToken.isAuthority,
-                                address: `${machineAddress}/${processId}/${socketId}`,
-                                claim: decodedToken.claim,
-                                uid: decodedToken.agentUID,
-                                machineUID: decodedToken.machineUID,
-                                channelNames: new Set(),
-                                throughput: {
-                                    bytes: 0,
-                                    packets: 0,
+                    const upgraded = server
+                        .upgrade(
+                            request,
+                            {
+                                data: {
+                                    ip: server.requestIP(request),
+                                    id: socketId,
+                                    networkId: decodedToken.networkId,
+                                    isAuthority: decodedToken.isAuthority,
+                                    address: `${machineAddress}/${processId}/${socketId}`,
+                                    claim: decodedToken.claim,
+                                    uid: decodedToken.agentUID,
+                                    machineUID: decodedToken.machineUID,
+                                    channelNames: new Set(),
+                                    throughput: {
+                                        bytes: 0,
+                                        packets: 0,
+                                    },
                                 },
                             },
-                        })
-                    ) {
+                        );
+
+                    if (!upgraded) {
                         return new Response('Request upgrade failed', {
                             status: 500,
                             headers: {
