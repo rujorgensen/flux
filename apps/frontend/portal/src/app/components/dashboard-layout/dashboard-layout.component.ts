@@ -18,12 +18,14 @@ import { NetworksService, INetwork, MAX_NETWORKS } from '../../_services/network
 import { SidebarCountsService } from '../../_services/sidebar-counts/sidebar-counts.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 import { version } from '../../../../package.json';
+import { toast } from 'ngx-sonner';
 
 interface UserSession {
     id?: string;
     name?: string;
     email?: string;
     image?: string;
+    isFluxAdmin?: boolean;
 }
 
 @Component({
@@ -41,6 +43,8 @@ interface UserSession {
 export class DashboardLayoutComponent {
     userSession = input<UserSession | null>();
     pageTitle = input<string>('Dashboard');
+
+    protected readonly isFluxAdmin = computed(() => this.userSession()?.isFluxAdmin ?? false);
 
     @ViewChild('networkAliasInput') networkAliasInput?: ElementRef<HTMLInputElement>;
 
@@ -62,6 +66,7 @@ export class DashboardLayoutComponent {
     protected readonly isDashboardItemsOpen: ReturnType<typeof computed<boolean>>;
     protected readonly isDocsOpen: ReturnType<typeof computed<boolean>>;
     protected readonly isSettingsOpen: ReturnType<typeof computed<boolean>>;
+    protected readonly isAdminOpen: ReturnType<typeof computed<boolean>>;
     private readonly currentUrl;
 
     protected readonly expectedDeletePhrase = computed<string>(
@@ -107,6 +112,10 @@ export class DashboardLayoutComponent {
 
         this.isSettingsOpen = computed(() =>
             this.currentUrl().startsWith('/settings'),
+        );
+
+        this.isAdminOpen = computed(() =>
+            this.currentUrl().startsWith('/admin'),
         );
 
         // Redirect to no-network when the last network is deleted
@@ -159,14 +168,15 @@ export class DashboardLayoutComponent {
         this.deleteConfirmText.set('');
     }
 
-    protected confirmDelete(
+    protected async confirmDelete(
 
-    ): void {
+    ): Promise<void> {
         const network = this.pendingDeleteNetwork();
         if (network && this.deleteConfirmValid()) {
-            this.networksService.deleteNetwork(network.id);
             this.pendingDeleteNetwork.set(null);
             this.deleteConfirmText.set('');
+            await this.networksService.deleteNetwork(network.id);
+            toast.success(`Network "${network.alias}" has been deleted.`);
         }
     }
 
@@ -180,5 +190,12 @@ export class DashboardLayoutComponent {
         value: string,
     ): void {
         this.deleteConfirmText.set(value);
+    }
+
+    protected copyDeletePhrase(
+    ): void {
+        navigator.clipboard.writeText(this.expectedDeletePhrase()).catch((err: unknown) => {
+            console.error('Failed to copy delete phrase to clipboard', err);
+        });
     }
 }
