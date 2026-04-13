@@ -30,6 +30,16 @@ export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: 'postgresql',
     }),
+    user: {
+        additionalFields: {
+            isFluxAdmin: {
+                type: 'boolean',
+                required: false,
+                defaultValue: false,
+                input: false,
+            },
+        },
+    },
     trustedOrigins: [
         'http://localhost:3001',
         'http://localhost:9000',

@@ -143,7 +143,8 @@ export class FluxMeshServer {
                 const client: TConnectedClientSocket | undefined = clientMap.get(clientId);
 
                 if (!client) {
-                    throw new UnknownClientError(clientId, processAddress);
+                    PicoLogger.error(`Attempted to kick unknown client '${clientId}'`, 'routing');
+                    return;
                 }
 
                 client.close(1002, 'Kicked by process');
