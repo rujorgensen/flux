@@ -18,7 +18,7 @@ import type {
     TFluxClientUID,
 } from '@flux/shared/utils';
 
-export class NetworkAgentManager {
+export class NetworkAgentRedisCache {
     public readonly networkAgentRedisService: NetworkAgentRedisService;
     public readonly networkUsageRedisCacheService: NetworkUsageRedisCacheService;
 

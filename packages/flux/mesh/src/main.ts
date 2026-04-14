@@ -33,8 +33,8 @@ import {
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
 import { OutgoingMessageRouter } from './routing/outgoing-message-router.class';
-import { NetworkAuthorityManager } from './register/network-authority-manager.class';
-import { NetworkAgentManager } from './register/network-agent-manager.class';
+import { NetworkAuthorityRedisCache } from './register/network-authority-redis-cache.class';
+import { NetworkAgentRedisCache } from './register/network-agent-redis-cache.class';
 import {
     type TTokenPayload,
     verifyTokenOrThrow,
@@ -112,8 +112,8 @@ export class FluxMeshServer {
     ) {
         const port: number = typeof this.optionsOrPort === 'number' ? this.optionsOrPort : (this.optionsOrPort?.port ?? 5_100);
 
-        const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
-        const networkAgentManager: NetworkAgentManager = new NetworkAgentManager();
+        const networkAuthorityRedisCache: NetworkAuthorityRedisCache = new NetworkAuthorityRedisCache();
+        const networkAgentRedisCache: NetworkAgentRedisCache = new NetworkAgentRedisCache();
 
         const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
             // passToLocalClient:
@@ -170,7 +170,7 @@ export class FluxMeshServer {
                     POST: (request: Bun.BunRequest) =>
                         authorizeNetworkAgent(
                             request,
-                            networkAuthorityManager,
+                            networkAuthorityRedisCache,
                             globalRPCClient,
                         ),
                 },
@@ -251,7 +251,7 @@ export class FluxMeshServer {
                     if (_ws.data.isAuthority) {
                         PicoLogger.log(`👮 Authority connected at address: '${_ws.data.address}'`, 'ws-connection');
 
-                        await networkAuthorityManager
+                        await networkAuthorityRedisCache
                             .register(
                                 _ws.data.networkId,
                                 _ws.data.id,
@@ -266,7 +266,7 @@ export class FluxMeshServer {
 
                     PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
 
-                    await networkAgentManager
+                    await networkAgentRedisCache
                         .registerAgent(
                             _ws.data.networkId,
                             _ws.data.id,
@@ -415,7 +415,7 @@ export class FluxMeshServer {
                             }
 
                             try {
-                                const networkAuthorityAddress: TAddress = await networkAuthorityManager
+                                const networkAuthorityAddress: TAddress = await networkAuthorityRedisCache
                                     .resolveNetworkAuthorityAddressOrThrow(
                                         ws.data.networkId,
                                     );
@@ -547,7 +547,7 @@ export class FluxMeshServer {
                                 message_.indexOf(':') + 1
                             ) as TAgentOwnUId;
                             const networkClientAddress: TAddress =
-                                await networkAgentManager.resolveNetworkClientAddressByUid(
+                                await networkAgentRedisCache.resolveNetworkClientAddressByUid(
                                     ws.data.networkId,
                                     clientOwnUId
                                 );
@@ -589,7 +589,7 @@ export class FluxMeshServer {
                     if (ws.data.isAuthority) {
                         PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
 
-                        networkAuthorityManager.unregister(
+                        networkAuthorityRedisCache.unregister(
                             ws.data.networkId,
                             ws.data.address,
                         );
@@ -613,7 +613,7 @@ export class FluxMeshServer {
                                 );
                         }
 
-                        networkAgentManager.unregisterNetworkAgent(
+                        networkAgentRedisCache.unregisterNetworkAgent(
                             ws.data.networkId,
                             ws.data.id,
                             ws.data.uid,
