@@ -1,9 +1,10 @@
 import { Elysia, t } from 'elysia';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
-import type { TNetworkAgentCountAt } from '@flux/shared/types';
-import { type TClientId, isNanoId } from '@flux/shared/types';
+import type { TAddress, TClientId, TNetworkAgentCountAt } from '@flux/shared/types';
+import { isNanoId } from '@flux/shared/types';
 import { networkIdValidatorPlugin } from './plugins';
+import { kickSocket } from './kick-socket.util';
 
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
@@ -78,11 +79,29 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
     )
 
     /**
+     * 'DELETE /api/networks/:networkId/agents'
+     *
+     * Kicks (removes) all connected agents from the network and closes their sockets.
+     */
+    .delete('', async ({
+        networkId,
+    }) => {
+        const agents = await networkAgentRedisCacheService
+            .readNetworkAgents(networkId);
+
+        await Promise.all(
+            agents.map((agent) => kickSocket(agent.address as TAddress)),
+        );
+
+        return { message: `${agents.length} agent(s) kicked successfully.`, count: agents.length };
+    })
+
+    /**
      * 'DELETE /api/networks/:networkId/agents/:agentId'
      *
      * Kicks (removes) a connected agent from the network.
      */
-    .delete('/:agentId', ({
+    .delete('/:agentId', async ({
         networkId,
         params: { agentId },
     }) => {
@@ -90,12 +109,17 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
             throw new InvalidAgentIdError();
         }
 
-        return networkAgentRedisCacheService
-            .unregisterNetworkAgent(
+        const agent = await networkAgentRedisCacheService
+            .readNetworkAgentByClientId(
                 networkId,
                 agentId as TClientId,
-            )
-            .then(() => ({ message: `Agent ${agentId} kicked successfully.` }));
+        );
+
+        if (agent?.address) {
+            await kickSocket(agent.address as TAddress);
+        }
+
+        return { message: `Agent ${agentId} kicked successfully.` };
     }, {
 
     })
