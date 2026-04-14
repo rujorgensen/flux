@@ -140,25 +140,20 @@ export class NetworkAuthorityRedisSortedSet {
         const networkAgents = await this._client.smembers(`networks/${networkId}/agents`);
 
         // Add to agent
-        const authorityData: TNetworkAuthority[] = [];
+        const authorities: TNetworkAuthority[] = [];
 
         for (const id of networkAgents) {
-            const key: string = `networks/${networkId}/agents/${id}`;
+            const networkAuthority: TNetworkAuthority | null = await this.readNetworkAuthorityByClientId(
+                networkId,
+                id as TClientId,
+            );
 
-            const [address, connectedAt] = await this._client.hmget(key, [
-                'address',
-                'connectedAt',
-            ]);
-
-            if (address) {
-                authorityData.push({
-                    id: id as TClientId,
-                    connectedAt: new Date(connectedAt as unknown as Date),
-                });
+            if (networkAuthority) {
+                authorities.push(networkAuthority);
             }
         }
 
-        return authorityData;
+        return authorities;
     }
 
     /**
@@ -192,6 +187,27 @@ export class NetworkAuthorityRedisSortedSet {
             count: await this._client.scard(`networks/${networkId}/authorities`) ?? 0,
             date: new Date(),
         };
+    }
+
+    public async readNetworkAuthorityByClientId(
+        networkId: TNetworkId_S,
+        clientId: TClientId,
+    ): Promise<TNetworkAuthority | null> {
+        const key: string = `networks/${networkId}/agents/${clientId}`;
+
+        const [address, connectedAt] = await this._client.hmget(key, [
+            'address',
+            'connectedAt',
+        ]);
+
+        if (address) {
+            return {
+                id: clientId,
+                connectedAt: new Date(connectedAt as unknown as Date),
+            };
+        }
+
+        return null;
     }
 
     // ****************************************************************************
