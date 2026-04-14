@@ -39,7 +39,7 @@
             }
         },
         "docker-dev": {
-            "command": "docker compose -p flux-dev -f '.deploy/docker-compose.dev.yml' up -d --build"
+            "command": "sh -c \"docker compose -p flux-dev -f .deploy/docker-compose.dev.yml up -d --build || true\""
         },
         "docker-build": {
             "command": "docker build -f apps/backend/portal/Dockerfile . -t flux-portal-backend"
