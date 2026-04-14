@@ -95,7 +95,7 @@ export class NetworkAgentRedisService {
     // ****************************************************************************
 
     /**
-     * Returns all network agents.
+     * Returns all agents on a network.
      */
     public async readNetworkAgents(
         networkId: TNetworkId_S,
@@ -107,27 +107,13 @@ export class NetworkAgentRedisService {
         const agentData: TNetworkAgent[] = [];
 
         for (const id of networkAgents) {
-            const key: string = `networks/${networkId}/agents/${id}`;
+            const networkAgent: TNetworkAgent | null = await this.readNetworkAgentByClientId(
+                networkId,
+                id as TClientId,
+            );
 
-            const [name, ip, address, bytes, packets, connectedAt] = await this._client.hmget(key, [
-                'name',
-                'ip',
-                'address',
-                'bytes',
-                'packets',
-                'connectedAt',
-            ]);
-
-            if (ip || address || bytes || packets) {
-                agentData.push({
-                    id: id as TClientId,
-                    uid: name ? (name as TAgentOwnUId) : undefined,
-                    ip: ip || null,
-                    address: address as string,
-                    bytes: Number.parseInt(bytes || '0', 10),
-                    packets: Number.parseInt(packets || '0', 10),
-                    connectedAt: new Date(connectedAt as unknown as Date),
-                });
+            if (networkAgent) {
+                agentData.push(networkAgent);
             }
         }
 
@@ -162,6 +148,37 @@ export class NetworkAgentRedisService {
         return clientAddress as TAddress;
     }
 
+    public async readNetworkAgentByClientId(
+        networkId: TNetworkId_S,
+        clientId: TClientId,
+    ): Promise<TNetworkAgent | null> {
+
+        const [name, ip, address, bytes, packets, connectedAt] = await this._client.hmget(
+            `networks/${networkId}/agents/${clientId}`,
+            [
+                'name',
+                'ip',
+                'address',
+                'bytes',
+                'packets',
+                'connectedAt',
+            ]);
+
+        if (ip || address || bytes || packets) {
+            return {
+                id: clientId,
+                uid: name ? (name as TAgentOwnUId) : undefined,
+                ip: ip || null,
+                address: address as string,
+                bytes: Number.parseInt(bytes || '0', 10),
+                packets: Number.parseInt(packets || '0', 10),
+                connectedAt: new Date(connectedAt as unknown as Date),
+            };
+        }
+
+        return null;
+    }
+
     // ****************************************************************************
     // * Delete
     // ****************************************************************************
@@ -179,5 +196,4 @@ export class NetworkAgentRedisService {
         }
         await this._client.srem(`networks/${networkId}/agents`, clientId);
     }
-
 }
