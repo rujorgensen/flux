@@ -11,7 +11,7 @@ import {
 } from '@flux/shared/types';
 import { generateToken } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
-import type { NetworkAuthorityManager } from '../../register/network-authority-manager.class';
+import type { NetworkAuthorityRedisCache } from '../../register/network-authority-redis-cache.class';
 import { retry } from '@flux/shared/utils';
 import {
     type TFluxClientUID,
@@ -22,14 +22,14 @@ import {
  * This route is used to authorize a network agent.
  * 
  * @param { BunRequest } request - The incoming HTTP request
- * @param { NetworkAuthorityManager } networkAuthorityManager - The network authority manager
+ * @param { NetworkAuthorityRedisCache } networkAuthorityManager - The network authority manager
  * @param { GlobalRPCClient<'authorize'> } globalRPCClient - The global RPC client
  * 
  * @returns { Promise<Response> } The HTTP response with auth token or error
  */
 export const authorizeNetworkAgent = async (
     request: BunRequest,
-    networkAuthorityManager: NetworkAuthorityManager,
+    networkAuthorityManager: NetworkAuthorityRedisCache,
     globalRPCClient: GlobalRPCClient<'authorize'>,
 ) => {
     const urlWithParsedQuery: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);

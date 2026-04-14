@@ -12,7 +12,7 @@ import type {
     TFluxClientUID,
 } from '@flux/shared/utils';
 
-export class NetworkAuthorityManager {
+export class NetworkAuthorityRedisCache {
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly cache: Map<TNetworkId_S, Set<TAddress>> = new Map();
 

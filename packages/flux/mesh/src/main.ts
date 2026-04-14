@@ -33,8 +33,8 @@ import {
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
 import { OutgoingMessageRouter } from './routing/outgoing-message-router.class';
-import { NetworkAuthorityManager } from './register/network-authority-manager.class';
-import { NetworkAgentManager } from './register/network-agent-manager.class';
+import { NetworkAuthorityRedisCache } from './register/network-authority-redis-cache.class';
+import { NetworkAgentRedisCache } from './register/network-agent-redis-cache.class';
 import {
     type TTokenPayload,
     verifyTokenOrThrow,
@@ -68,6 +68,8 @@ import { NetworkChannelManager } from './business-logic/channels/channel-manager
 import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
+import { AuthorityManager } from './_managers/authority.manager';
+import { AgentManager } from './_managers/agent.manager';
 
 PicoLogger.configure({
     allowScopes: '*',
@@ -106,14 +108,15 @@ export class FluxMeshServer {
     private readonly bunServer: Bun.Server<TWebSocketData>;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
+    private readonly agentManager: AgentManager;
 
     constructor(
         private readonly optionsOrPort?: TOptions | number,
     ) {
         const port: number = typeof this.optionsOrPort === 'number' ? this.optionsOrPort : (this.optionsOrPort?.port ?? 5_100);
 
-        const networkAuthorityManager: NetworkAuthorityManager = new NetworkAuthorityManager();
-        const networkAgentManager: NetworkAgentManager = new NetworkAgentManager();
+        const networkAuthorityRedisCache: NetworkAuthorityRedisCache = new NetworkAuthorityRedisCache();
+        const networkAgentRedisCache: NetworkAgentRedisCache = new NetworkAgentRedisCache();
 
         const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
             // passToLocalClient:
@@ -136,19 +139,11 @@ export class FluxMeshServer {
             'authorize' | 'authorizeNetworkChannel'
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
-        processMessageRouter
-            .onKickLocalClient((
-                clientId: TClientId,
-            ) => {
-                const client: TConnectedClientSocket | undefined = clientMap.get(clientId);
-
-                if (!client) {
-                    PicoLogger.error(`Attempted to kick unknown client '${clientId}'`, 'routing');
-                    return;
-                }
-
-                client.close(1002, 'Kicked by process');
-            });
+        this.agentManager = new AgentManager(
+            this.redisConnection,
+            clientMap,
+            networkAgentRedisCache,
+        );
 
         this.bunServer = Bun.serve({
             port,
@@ -170,7 +165,7 @@ export class FluxMeshServer {
                     POST: (request: Bun.BunRequest) =>
                         authorizeNetworkAgent(
                             request,
-                            networkAuthorityManager,
+                            networkAuthorityRedisCache,
                             globalRPCClient,
                         ),
                 },
@@ -251,7 +246,7 @@ export class FluxMeshServer {
                     if (_ws.data.isAuthority) {
                         PicoLogger.log(`👮 Authority connected at address: '${_ws.data.address}'`, 'ws-connection');
 
-                        await networkAuthorityManager
+                        await networkAuthorityRedisCache
                             .register(
                                 _ws.data.networkId,
                                 _ws.data.id,
@@ -266,7 +261,7 @@ export class FluxMeshServer {
 
                     PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
 
-                    await networkAgentManager
+                    await networkAgentRedisCache
                         .registerAgent(
                             _ws.data.networkId,
                             _ws.data.id,
@@ -323,30 +318,14 @@ export class FluxMeshServer {
                                 return;
                             }
 
-                            const agentClientId: TAddress = message_.substring(message_.indexOf(':') + 1) as TAddress;
+                            const agentAddress: TAddress = message_.substring(message_.indexOf(':') + 1) as TAddress;
 
-                            if (!isNanoId(agentClientId)) {
+                            if (!isNanoId(agentAddress)) {
                                 ws.send(`${ERROR}:Invalid agent ID`);
                                 return;
                             }
 
-                            // Attempt to get the client
-                            const connectedClientSocket: TConnectedClientSocket | undefined = clientMap.get(agentClientId);
-
-                            if (!connectedClientSocket) {
-                                processMessageRouter.kickClient(agentClientId);
-                                return;
-                            }
-
-                            if (
-                                (connectedClientSocket.data.networkId !== ws.data.networkId) ||
-                                (connectedClientSocket.data.isAuthority)
-                            ) {
-                                ws.send(`${ERROR}:Cannot kick agent`);
-                                return;
-                            }
-
-                            connectedClientSocket.close(1002, 'Kicked by authority');
+                            this.agentManager.kick(agentAddress);
 
                             break;
                         }
@@ -415,7 +394,7 @@ export class FluxMeshServer {
                             }
 
                             try {
-                                const networkAuthorityAddress: TAddress = await networkAuthorityManager
+                                const networkAuthorityAddress: TAddress = await networkAuthorityRedisCache
                                     .resolveNetworkAuthorityAddressOrThrow(
                                         ws.data.networkId,
                                     );
@@ -547,7 +526,7 @@ export class FluxMeshServer {
                                 message_.indexOf(':') + 1
                             ) as TAgentOwnUId;
                             const networkClientAddress: TAddress =
-                                await networkAgentManager.resolveNetworkClientAddressByUid(
+                                await networkAgentRedisCache.resolveNetworkClientAddressByUid(
                                     ws.data.networkId,
                                     clientOwnUId
                                 );
@@ -589,7 +568,7 @@ export class FluxMeshServer {
                     if (ws.data.isAuthority) {
                         PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
 
-                        networkAuthorityManager.unregister(
+                        networkAuthorityRedisCache.unregister(
                             ws.data.networkId,
                             ws.data.address,
                         );
@@ -613,7 +592,7 @@ export class FluxMeshServer {
                                 );
                         }
 
-                        networkAgentManager.unregisterNetworkAgent(
+                        networkAgentRedisCache.unregisterNetworkAgent(
                             ws.data.networkId,
                             ws.data.id,
                             ws.data.uid,
