@@ -189,6 +189,34 @@ export class RedisConnection {
     }
 
     // ****************************************************************************
+    // *** Publish Directly to Address - Custom messages
+    // ****************************************************************************
+    public async publishCustom(
+        subChannel: 'kick-client',
+        destinationProcessAddress: TProcessAddress,
+        message: string,
+    ): Promise<void> {
+        try {
+            await this.pubSub.publish(`~${subChannel}/${destinationProcessAddress}`, message);
+        } catch {
+            console.error(`Publish failed on global channel event: '${destinationProcessAddress}'`);
+        }
+    }
+
+    public subscribeToCustom(
+        subChannel: 'kick-client',
+        destinationProcessAddress: TProcessAddress,
+        callback: (data: string) => void,
+    ): void {
+
+        this.pubSub
+            .subscribe(
+                `~${subChannel}/${destinationProcessAddress}`,
+                callback,
+            );
+    }
+
+    // ****************************************************************************
     // *** Publish Directly to Address
     // ****************************************************************************
 

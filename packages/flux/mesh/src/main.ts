@@ -68,6 +68,8 @@ import { NetworkChannelManager } from './business-logic/channels/channel-manager
 import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
+import { AuthorityManager } from './_managers/authority.manager';
+import { AgentManager } from './_managers/agent.manager';
 
 PicoLogger.configure({
     allowScopes: '*',
@@ -106,6 +108,7 @@ export class FluxMeshServer {
     private readonly bunServer: Bun.Server<TWebSocketData>;
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
+    private readonly agentManager: AgentManager;
 
     constructor(
         private readonly optionsOrPort?: TOptions | number,
@@ -136,19 +139,11 @@ export class FluxMeshServer {
             'authorize' | 'authorizeNetworkChannel'
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
-        processMessageRouter
-            .onKickLocalClient((
-                clientId: TClientId,
-            ) => {
-                const client: TConnectedClientSocket | undefined = clientMap.get(clientId);
-
-                if (!client) {
-                    PicoLogger.error(`Attempted to kick unknown client '${clientId}'`, 'routing');
-                    return;
-                }
-
-                client.close(1002, 'Kicked by process');
-            });
+        this.agentManager = new AgentManager(
+            this.redisConnection,
+            clientMap,
+            networkAgentRedisCache,
+        );
 
         this.bunServer = Bun.serve({
             port,
@@ -323,30 +318,14 @@ export class FluxMeshServer {
                                 return;
                             }
 
-                            const agentClientId: TAddress = message_.substring(message_.indexOf(':') + 1) as TAddress;
+                            const agentAddress: TAddress = message_.substring(message_.indexOf(':') + 1) as TAddress;
 
-                            if (!isNanoId(agentClientId)) {
+                            if (!isNanoId(agentAddress)) {
                                 ws.send(`${ERROR}:Invalid agent ID`);
                                 return;
                             }
 
-                            // Attempt to get the client
-                            const connectedClientSocket: TConnectedClientSocket | undefined = clientMap.get(agentClientId);
-
-                            if (!connectedClientSocket) {
-                                processMessageRouter.kickClient(agentClientId);
-                                return;
-                            }
-
-                            if (
-                                (connectedClientSocket.data.networkId !== ws.data.networkId) ||
-                                (connectedClientSocket.data.isAuthority)
-                            ) {
-                                ws.send(`${ERROR}:Cannot kick agent`);
-                                return;
-                            }
-
-                            connectedClientSocket.close(1002, 'Kicked by authority');
+                            this.agentManager.kick(agentAddress);
 
                             break;
                         }
