@@ -193,7 +193,7 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
         clientId: TClientId,
     ): Promise<TNetworkAuthority | null> {
-        const key: string = `networks/${networkId}/agents/${clientId}`;
+        const key: string = `networks/${networkId}/authorities/${clientId}`;
 
         const [address, connectedAt] = await this._client.hmget(key, [
             'address',
@@ -204,6 +204,7 @@ export class NetworkAuthorityRedisSortedSet {
             return {
                 id: clientId,
                 connectedAt: new Date(connectedAt as unknown as Date),
+                address: address as TAddress,
             };
         }
 

@@ -1,8 +1,9 @@
 import { Elysia, t } from 'elysia';
-import { type TClientId, type TNetworkAuthorityCountAt, isNanoId } from '@flux/shared/types';
+import { type TClientId, type TNetworkAuthorityCountAt, type TNetworkId_S, isNanoId } from '@flux/shared/types';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { networkIdValidatorPlugin } from './plugins';
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
+import { kickSocket } from './kick-socket.util';
 
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkAuthorityService: NetworkAuthorityRedisSortedSet = new NetworkAuthorityRedisSortedSet(meshRedisConnection.getClient());
@@ -16,6 +17,27 @@ class InvalidAuthorityIdError extends Error {
     }
 }
 
+/**
+ * Reads the full address for a connected authority from Redis, then sends a
+ * kick message to the mesh process that owns the socket so it is closed.
+ * The mesh server's `GlobalClientManager.onKickClient` listener picks this up.
+ */
+async function kickAuthoritySocket(
+    networkId: TNetworkId_S,
+    authorityId: TClientId,
+): Promise<void> {
+    const authority = await networkAuthorityService
+        .readNetworkAuthorityByClientId(
+            networkId,
+            authorityId,
+        );
+
+    if (!authority) {
+        return;
+    }
+
+    await kickSocket(authority.address);
+}
 
 export const networkAuthorityController = new Elysia({
     prefix: '/api/networks/:networkId/authorities',
@@ -77,11 +99,32 @@ export const networkAuthorityController = new Elysia({
     )
 
     /**
+     * 'DELETE /api/networks/:networkId/authorities'
+     *
+     * Kicks (removes) all connected authorities from the network and closes their sockets.
+     */
+    .delete('', async ({
+        networkId,
+    }) => {
+        const authorities = await networkAuthorityService
+            .readNetworkAuthorities(networkId);
+
+        await Promise.all(
+            authorities.map((authority) => kickAuthoritySocket(
+                networkId,
+                authority.id,
+            )),
+        );
+
+        return { message: `${authorities.length} authority(ies) kicked successfully.`, count: authorities.length };
+    })
+
+    /**
      * 'DELETE /api/networks/:networkId/authorities/:authorityId'
      *
      * Kicks (removes) a connected authority from the network.
      */
-    .delete('/:authorityId', ({
+    .delete('/:authorityId', async ({
         networkId,
         params: { authorityId },
     }) => {
@@ -89,12 +132,12 @@ export const networkAuthorityController = new Elysia({
             throw new InvalidAuthorityIdError();
         }
 
-        return networkAuthorityService
-            .unregister(
-                networkId,
-                authorityId as TClientId,
-            )
-            .then(() => ({ message: `Authority ${authorityId} kicked successfully.` }));
+        await kickAuthoritySocket(
+            networkId,
+            authorityId,
+        );
+
+        return { message: `Authority ${authorityId} kicked successfully.` };
     }, {
 
     })
