@@ -27,23 +27,23 @@ export class NetworkAgentRedis {
      * Registers a network agent in the sorted set.
      * 
      * @param { TNetworkId_S } networkId - The network ID
-     * @param { TAddress } clientId - The client address
-     * @param { TClientId } socketId - The socket ID
+     * @param { TAddress } address - The client address
+     * @param { TClientId } clientId - The socket ID
      * @param { TAgentOwnUId } uid - The agent UID
      * 
      * @returns { Promise<void> }
      */
     public async registerNetworkAgent(
         networkId: TNetworkId_S,
-        clientId: TAddress,
-        socketId: TClientId,
+        address: TAddress,
+        clientId: TClientId,
         uid: TAgentOwnUId,
     ): Promise<void> {
-        const key: string = `networks/${networkId}/agents/${socketId}`;
+        const key: string = `networks/${networkId}/agents/${clientId}`;
 
         await this.client.hset(key, {
             'data-usage': '0',
-            'clientId': clientId,
+            'address': address,
             'name': uid,
             'registerAt': new Date().toISOString(),
         });
@@ -53,7 +53,7 @@ export class NetworkAgentRedis {
         await this.networkAgentRedisSortedSet
             .registerAgent(
                 networkId,
-                socketId,
+                clientId,
             );
     }
 
@@ -61,15 +61,15 @@ export class NetworkAgentRedis {
      * Unregisters a network agent from the sorted set.
      * 
      * @param { TNetworkId_S } networkId - The network ID
-     * @param { TClientId } socketId - The socket ID
+     * @param { TClientId } clientId - The socket ID
      * 
      * @returns { Promise<number> } The number of elements removed
      */
     public async unregisterNetworkAgent(
         networkId: TNetworkId_S,
-        socketId: TClientId,
+        clientId: TClientId,
     ): Promise<number> {
-        const key: string = `networks/${networkId}/agents/${socketId}`;
+        const key: string = `networks/${networkId}/agents/${clientId}`;
 
         await this.client.hset(
             key,
@@ -81,7 +81,7 @@ export class NetworkAgentRedis {
         return await this.networkAgentRedisSortedSet
             .unregisterAgent(
                 networkId,
-                socketId,
+                clientId,
             );
     }
 
@@ -89,17 +89,17 @@ export class NetworkAgentRedis {
      * Caches the data usage for a network agent to be pushed periodically.
      * 
      * @param { TNetworkId_S } networkId - The network ID
-     * @param { TClientId } socketId - The socket ID
+     * @param { TClientId } clientId - The socket ID
      * @param { number } usage - The data usage in bytes
      */
     public registerDataUsage(
         networkId: TNetworkId_S,
-        socketId: TClientId,
+        clientId: TClientId,
         usage: number,
     ): void {
-        const key: string = `networks/${networkId}/agents/${socketId}`;
+        const key: string = `networks/${networkId}/agents/${clientId}`;
 
-        const cashedDataUsage: number | undefined = this.cashedDataUsage.get(socketId);
+        const cashedDataUsage: number | undefined = this.cashedDataUsage.get(clientId);
 
         if (cashedDataUsage === undefined) {
             this.cashedDataUsage.set(key, usage);
