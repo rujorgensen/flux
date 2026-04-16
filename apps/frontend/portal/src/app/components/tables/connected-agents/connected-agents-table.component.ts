@@ -16,6 +16,7 @@ export class ConnectedAgentsTableComponent {
 
     protected readonly dataStore = signal<TNetworkAgent[] | undefined>(undefined);
     protected readonly kickingAgentId = signal<string | null>(null);
+    protected readonly kickingAll = signal<boolean>(false);
     protected readonly page = signal<number>(1);
     protected readonly pageSize = signal<number>(25);
     protected readonly total = signal<number>(0);
@@ -30,6 +31,35 @@ export class ConnectedAgentsTableComponent {
                 this.fetchData(networkId, page, pageSize);
             }
         });
+    }
+
+    protected async onKickAllAgents(
+
+    ): Promise<void> {
+        const networkId = this.networkId();
+        if (!networkId) return;
+
+        this.kickingAll.set(true);
+
+        await api
+            .api
+            .networks({
+                networkId,
+            })
+            .agents
+            .delete()
+            .then((response) => {
+                const count = (response.data as { count: number } | null)?.count ?? 0;
+                this.dataStore.set([]);
+                toast.success(`${count} agent(s) kicked successfully.`);
+            })
+            .catch((error: unknown) => {
+                console.error('Error kicking all agents:', error);
+                toast.error('Failed to kick all agents. Please try again.');
+            })
+            .finally(() => {
+                this.kickingAll.set(false);
+            });
     }
 
     protected async onKickAgent(
