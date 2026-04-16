@@ -74,7 +74,7 @@
                         <tr class="bg-base-200">
                             <td colspan="6" class="p-0">
                                 <div class="sniffer-panel">
-                                    <div class="sniffer-panel__header">
+                                    <div class="sniffer-header">
                                         <div class="flex items-center gap-2">
                                             <span class="loading loading-ring loading-xs text-success"></span>
                                             <span class="font-mono text-sm font-semibold">Sniffing <span class="text-success">{{ row.channelName }}</span></span>
@@ -107,7 +107,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="sniffer-panel__body">
+                                    <div class="sniffer-body">
                                         @if (packetsFor(row.channelName).length === 0) {
                                             <p class="text-base-content/40 text-xs italic text-center py-4">
                                                 Waiting for data packets…
@@ -115,8 +115,8 @@
                                         } @else {
                                             @for (packet of packetsFor(row.channelName); track $index) {
                                                 <div class="sniffer-packet">
-                                                    <span class="sniffer-packet__time">{{ packet.timestamp | date:'HH:mm:ss.SSS' }}</span>
-                                                    <pre class="sniffer-packet__data">{{ packet.formattedData }}</pre>
+                                                    <span class="sniffer-time">{{ packet.timestamp | date:'HH:mm:ss.SSS' }}</span>
+                                                    <pre class="sniffer-data">{{ packet.formattedData }}</pre>
                                                 </div>
                                             }
                                         }

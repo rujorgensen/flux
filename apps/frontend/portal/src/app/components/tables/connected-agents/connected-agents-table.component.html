@@ -1,5 +1,18 @@
 @if (dataStore(); as data) {
     @if (data.length > 0) {
+        <div class="flex justify-end mb-2">
+            <button
+                class="btn btn-sm btn-error btn-outline"
+                [disabled]="kickingAll()"
+                (click)="onKickAllAgents()"
+                title="Kick all agents"
+            >
+                @if (kickingAll()) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                }
+                Kick All
+            </button>
+        </div>
         <table class="table">
             <thead>
                 <tr>

@@ -16,6 +16,7 @@ export class ConnectedAuthoritiesTableComponent {
 
     protected readonly dataStore = signal<TNetworkAuthority[] | undefined>(undefined);
     protected readonly kickingAuthorityId = signal<string | null>(null);
+    protected readonly kickingAll = signal<boolean>(false);
     protected readonly page = signal<number>(1);
     protected readonly pageSize = signal<number>(25);
     protected readonly total = signal<number>(0);
@@ -30,6 +31,35 @@ export class ConnectedAuthoritiesTableComponent {
                 this.fetchData(networkId, page, pageSize);
             }
         });
+    }
+
+    protected async onKickAllAuthorities(
+
+    ): Promise<void> {
+        const networkId = this.networkId();
+        if (!networkId) return;
+
+        this.kickingAll.set(true);
+
+        await api
+            .api
+            .networks({
+                networkId,
+            })
+            .authorities
+            .delete()
+            .then((response) => {
+                const count = (response.data as { count: number } | null)?.count ?? 0;
+                this.dataStore.set([]);
+                toast.success(`${count} authority(ies) kicked successfully.`);
+            })
+            .catch((error: unknown) => {
+                console.error('Error kicking all authorities:', error);
+                toast.error('Failed to kick all authorities. Please try again.');
+            })
+            .finally(() => {
+                this.kickingAll.set(false);
+            });
     }
 
     protected async onKickAuthority(

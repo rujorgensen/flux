@@ -3,6 +3,31 @@
 ## Angular Coding standard
 - **Formatting:** Use Angular's [`decimal`](https://angular.io/api/common/DecimalPipe) pipe for numbers rather than manual formatting with `toFixed` etc.
 
+### CSS / Component Styles
+
+Do **not** use BEM (Block__Element--Modifier) naming in Angular component stylesheets.
+
+```scss
+// ✅ Do
+:host {
+    .sniffer-panel { 
+        .header { ... }
+        .body { ... }
+    }
+
+    .sniffer-packet { 
+        .time { ... }
+    }
+}
+
+// ❌ Avoid — BEM double-underscore in Angular components
+.sniffer-panel__header { ... }
+.sniffer-panel__body { ... }
+.sniffer-packet__time { ... }
+```
+
+Use Tailwind / DaisyUI utility classes in templates wherever possible. Reserve component SCSS for styles that cannot be expressed with utilities (e.g. scroll-behaviour, complex selectors).
+
 ## General Coding standards
 
 ### Function Formatting
