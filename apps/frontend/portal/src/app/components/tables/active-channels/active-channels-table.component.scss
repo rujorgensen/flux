@@ -50,6 +50,13 @@
         min-width: 8rem;
     }
 
+    .sniffer-agent {
+        font-size: 0.65rem;
+        color: oklch(var(--bc) / 0.6);
+        white-space: nowrap;
+        padding-top: 0.15rem;
+    }
+
     .sniffer-data {
         font-size: 0.75rem;
         white-space: pre-wrap;

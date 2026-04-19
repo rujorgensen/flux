@@ -65,7 +65,7 @@ export class GlobalChannelPubsub {
             message,
         );
 
-        // Publish globally to clients connected to other processes
+        // Publish globally to clients connected to other processes.
         await this.redisConnection.publishWebsocketChannelEvent(
             this.processAddress, // The event is already sent to the local process
             channel as TGlobalChannel,

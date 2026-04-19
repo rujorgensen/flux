@@ -12,6 +12,7 @@ export interface ISniffPacket {
     timestamp: string;
     data: string;
     formattedData: string;
+    agentId: string;
 }
 
 /**
@@ -23,6 +24,8 @@ interface IChannelSSEEvent {
         type: 'connected' | 'packet';
         /** Raw payload string — only present for 'packet' events. */
         data?: string;
+        /** Sender agent ID */
+        agentId: string;
         channelName?: string;
         timestamp?: string;
     };
@@ -234,6 +237,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
                         timestamp: payload.timestamp ?? new Date().toISOString(),
                         data: payload.data,
                         formattedData: this.tryFormatJson(payload.data),
+                        agentId: payload.agentId,
                     };
 
                     this.sniffPackets.update((m) => {

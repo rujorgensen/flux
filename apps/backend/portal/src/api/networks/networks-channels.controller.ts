@@ -1,7 +1,7 @@
 import { Elysia, t, sse } from 'elysia';
 import {
-    type INetworkChannel,
     type TChannelName,
+    type TClientId,
     type TNetworkChannelCountAt,
     validateChannelNameOrThrow,
 } from '@flux/shared/types';
@@ -43,11 +43,17 @@ async function* createChannelEventStream(
     channelName: TChannelName,
     signal: AbortSignal,
 ): AsyncGenerator<ReturnType<typeof sse>> {
-    const queue: string[] = [];
+    const queue: { data: string; clientId: TClientId; }[] = [];
     let wakeup: (() => void) | null = null;
 
-    const onPacket = (data: string): void => {
-        queue.push(data);
+    const onPacket = (
+        clientId: TClientId,
+        data: string,
+    ): void => {
+        queue.push({
+            data,
+            clientId: clientId,
+        });
 
         if (wakeup) {
             wakeup();
@@ -62,13 +68,16 @@ async function* createChannelEventStream(
 
         while (!signal.aborted) {
             if (queue.length > 0) {
-                const data = queue.shift();
+                const item = queue.shift();
 
-                if (data === undefined) continue;
+                if (item === undefined) {
+                    continue;
+                }
 
                 yield sse(JSON.stringify({
                     type: 'packet',
-                    data,
+                    data: item.data,
+                    clientId: item.clientId,
                     timestamp: new Date().toISOString(),
                 }));
             } else {
@@ -156,7 +165,7 @@ export const networkChannelController = new Elysia({
      * published on the given channel to the connected client in real time.
      * Requires the network access token as a query parameter.
      */
-    .get('/:channelName', async function*({ networkId, params, request }) {
+    .get('/:channelName', async function* ({ networkId, params, request }) {
         yield* createChannelEventStream(
             networkId,
             params.channelName as TChannelName,

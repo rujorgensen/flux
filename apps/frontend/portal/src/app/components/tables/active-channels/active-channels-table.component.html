@@ -116,6 +116,9 @@
                                             @for (packet of packetsFor(row.channelName); track $index) {
                                                 <div class="sniffer-packet">
                                                     <span class="sniffer-time">{{ packet.timestamp | date:'HH:mm:ss.SSS' }}</span>
+                                                    @if (packet.agentId) {
+                                                        <span class="sniffer-agent badge badge-xs badge-outline font-mono">{{ packet.agentId }}</span>
+                                                    }
                                                     <pre class="sniffer-data">{{ packet.formattedData }}</pre>
                                                 </div>
                                             }
