@@ -427,16 +427,18 @@ export class FluxWebSocketConnection {
 
             case ON_NETWORK_CHANNEL_PUBLISH: {
 
+                // Message format: nc-on-pub:{agentId}:{channelName}:{data}
                 const firstColon = message_.indexOf(':');
                 const secondColon = message_.indexOf(':', firstColon + 1);
+                const thirdColon = message_.indexOf(':', secondColon + 1);
 
-                const channelName: string = message_.slice(firstColon + 1, secondColon);
+                const channelName: string = message_.slice(secondColon + 1, thirdColon);
 
                 if (validateChannelNameOrThrow(channelName)) {
 
                     const topicCallbacks: Set<TMessageCallback> | undefined = this.channelCallbacks.get(channelName);
                     if (topicCallbacks) {
-                        let data: string = message_.slice(secondColon + 1);
+                        let data: string = message_.slice(thirdColon + 1);
 
                         if (data.startsWith('o:')) {
                             try {

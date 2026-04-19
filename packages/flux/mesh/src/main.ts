@@ -358,7 +358,7 @@ export class FluxMeshServer {
                                     // Don't publish to self
                                     this.globalChannelPubsub.publish(
                                         `networks/${ws.data.networkId}/channels/${channelName}`,
-                                        `${ON_NETWORK_CHANNEL_PUBLISH}:${channelName}:${data}`,
+                                        `${ON_NETWORK_CHANNEL_PUBLISH}:${ws.data.id}:${channelName}:${data}`,
                                         ws,
                                     );
 

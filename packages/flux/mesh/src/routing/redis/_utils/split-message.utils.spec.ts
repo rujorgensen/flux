@@ -6,7 +6,7 @@ describe('splitMessage', () => {
         const rawMessage = 'process123:nc-on-pub:agent456:channel789:Hello, World!';
         const result = splitOrThrowMessage(rawMessage as any);
         expect(result).toEqual({
-            agentId: 'agent456' as any,
+            clientId: 'agent456' as any,
             channelName: 'channel789' as any,
             data: 'Hello, World!',
         });
@@ -16,7 +16,7 @@ describe('splitMessage', () => {
         const rawMessage = 'process123:nc-on-pub:agent456:channel789:Hello: World: with: colons';
         const result = splitOrThrowMessage(rawMessage as any);
         expect(result).toEqual({
-            agentId: 'agent456' as any,
+            clientId: 'agent456' as any,
             channelName: 'channel789' as any,
             data: 'Hello: World: with: colons',
         });

@@ -32,7 +32,6 @@ export class NetworkAgentRedis {
      * @param { TAgentOwnUId } uid - The agent UID
      * 
      * @returns { Promise<void> }
-     */
     public async registerNetworkAgent(
         networkId: TNetworkId_S,
         address: TAddress,
@@ -56,6 +55,7 @@ export class NetworkAgentRedis {
                 clientId,
             );
     }
+     */
 
     /**
      * Unregisters a network agent from the sorted set.

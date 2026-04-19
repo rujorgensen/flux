@@ -1,18 +1,20 @@
-import { TChannelName } from '@flux/shared/types';
+import type {
+    TClientId,
+    TChannelName,
+    TProcessAddress,
+} from '@flux/shared/types';
 
-// {processAddress}:nc-on-pub:{agentId}:{channelName}:{data}
-type TProcessAddress = string & { __brand: 'TProcessAddress'; };
-type TAgentId = string & { __brand: 'TAgentId'; };
-export type TMessageConstruct = `${TProcessAddress}:nc-on-pub:${TAgentId}:${TChannelName}:${string}`;
+// {TProcessAddress}:nc-on-pub:{clientId}:{channelName}:{data}
+export type TMessageConstruct = `${TProcessAddress}:nc-on-pub:${TClientId}:${TChannelName}:${string}`;
 
 export interface ISplitMessageResult {
-    agentId: TAgentId;
+    clientId: TClientId;
     channelName: TChannelName;
     data: string;
 }
 
 /**
- * Splits a raw message string into its components: agentId, channelName, and data.
+ * Splits a raw message string into its components: clientId, channelName, and data.
  */
 export const splitOrThrowMessage = (
     rawMessage: TMessageConstruct,
@@ -32,7 +34,7 @@ export const splitOrThrowMessage = (
     parts.shift();
 
     return {
-        agentId: parts.shift() as TAgentId,
+        clientId: parts.shift() as TClientId,
         channelName: parts.shift() as TChannelName,
         data: parts.join(':'), // Rejoin the message in case it contained colons
     };
