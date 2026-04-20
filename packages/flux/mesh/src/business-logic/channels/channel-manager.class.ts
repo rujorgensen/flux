@@ -13,7 +13,11 @@ import {
 import type { GlobalChannelPubsub } from '../../routing/global-channel/global-channel-pubsub.class';
 
 // ! TODO Hardcoded for now, take from network config in the future
-const MAX_CHANNEL_MEMBERS = 25;
+export const MAX_CHANNEL_MEMBERS = 1_000_000;
+
+export const canChannelHaveMoreMembers = (
+    memberCount: number,
+): boolean => memberCount < MAX_CHANNEL_MEMBERS;
 
 interface IUsageCache {
     networkId: TNetworkId_S;
@@ -60,7 +64,7 @@ export class NetworkChannelManager {
             channelName,
         );
 
-        return Promise.resolve(count < MAX_CHANNEL_MEMBERS);
+        return Promise.resolve(canChannelHaveMoreMembers(count));
     }
 
     /**
