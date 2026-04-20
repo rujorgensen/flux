@@ -6,6 +6,7 @@
                     <th>Channel Name</th>
                     <th>Member distribution</th>
                     <th>Member Count</th>
+                    <th>Capacity</th>
                     <th>Data Usage [bytes]</th>
                     <th>Created At</th>
                     <th></th>
@@ -32,6 +33,19 @@
                             }
                         </td>
                         <td class="text-right">{{ row.members }}</td>
+                        <td>
+                            @let fillPercent = deriveChannelFillPercent(row.members);
+                            <div class="flex items-center gap-2 min-w-44">
+                                <progress
+                                    class="progress progress-primary w-24"
+                                    [value]="fillPercent"
+                                    max="100"
+                                ></progress>
+                                <span class="text-xs tabular-nums" [attr.title]="row.members + ' / ' + maxChannelMembers + ' members'">
+                                    {{ fillPercent | number:'1.0-2' }}%
+                                </span>
+                            </div>
+                        </td>
                         <td class="text-right">{{ row.bytes }}</td>
                         <td>{{ row.createdAt | date:'fullDate' }}</td>
                         <td>
@@ -72,7 +86,7 @@
                     </tr>
                     @if (isSniffing(row.channelName)) {
                         <tr class="bg-base-200">
-                            <td colspan="6" class="p-0">
+                            <td colspan="7" class="p-0">
                                 <div class="sniffer-panel">
                                     <div class="sniffer-header">
                                         <div class="flex items-center gap-2">

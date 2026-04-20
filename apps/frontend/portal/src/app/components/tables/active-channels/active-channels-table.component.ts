@@ -5,6 +5,10 @@ import { api } from '$lib/app/_services/api/api';
 import { apiBaseUrl } from '$lib/app/_services/api/api-base';
 import { NetworkTokensService } from '$lib/app/_services/network-tokens/network-tokens.service';
 import { toast } from 'ngx-sonner';
+import {
+    deriveChannelFillPercent,
+    MAX_CHANNEL_MEMBERS,
+} from './channel-capacity.utils';
 
 const MAX_SNIFF_PACKETS = 50;
 
@@ -59,6 +63,8 @@ export class ActiveChannelsTableComponent implements OnDestroy {
     protected readonly pageSize = signal<number>(25);
     protected readonly total = signal<number>(0);
     protected readonly totalPages = computed(() => Math.ceil(this.total() / this.pageSize()) || 1);
+    protected readonly deriveChannelFillPercent = deriveChannelFillPercent;
+    protected readonly maxChannelMembers = MAX_CHANNEL_MEMBERS;
 
     /** Set of channel names currently being sniffed. */
     protected readonly sniffingChannels = signal<Set<string>>(new Set());

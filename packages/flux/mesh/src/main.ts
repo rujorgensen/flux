@@ -406,6 +406,7 @@ export class FluxMeshServer {
 
                                 if (!canHaveMembers) {
                                     ws.send(`${ERROR}:Channel limit is reached`);
+                                    return;
                                 }
 
                                 try {
