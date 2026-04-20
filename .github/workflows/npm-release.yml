@@ -56,6 +56,7 @@ jobs:
         run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Validate tag version
+        id: version-check
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#${{ matrix.tag_prefix }}}"
           PACKAGE_VERSION=$(bun -e "const pkg = await Bun.file('./${{ matrix.package_dir }}/package.json').json(); console.log(pkg.version)")
@@ -65,10 +66,13 @@ jobs:
             exit 1
           fi
 
+          echo "tag_version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          echo "package_version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Determine npm tag
         id: npm-tag
         run: |
-          if [[ "${{ github.ref_name }}" == *"-alpha"* ]] || [[ "${{ github.ref_name }}" == *"-beta"* ]] || [[ "${{ github.ref_name }}" == *"-rc"* ]]; then
+          if [[ "${{ steps.version-check.outputs.package_version }}" == *"-alpha"* ]] || [[ "${{ steps.version-check.outputs.package_version }}" == *"-beta"* ]] || [[ "${{ steps.version-check.outputs.package_version }}" == *"-rc"* ]]; then
             echo "tag=beta" >> "$GITHUB_OUTPUT"
           else
             echo "tag=latest" >> "$GITHUB_OUTPUT"
@@ -91,5 +95,6 @@ jobs:
             echo
             echo "- **Package:** ${{ matrix.package_name }}"
             echo "- **Version tag:** ${{ github.ref_name }}"
+            echo "- **Version:** ${{ steps.version-check.outputs.package_version }}"
             echo "- **npm tag:** ${{ steps.npm-tag.outputs.tag }}"
           } >> "$GITHUB_STEP_SUMMARY"
