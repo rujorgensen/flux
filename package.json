@@ -114,24 +114,24 @@
             "apps/**"
         ],
         "catalog": {
-            "@tailwindcss/vite": "4.2.2",
-            "@tailwindcss/postcss": "4.2.2",
+            "@tailwindcss/vite": "4.2.4",
+            "@tailwindcss/postcss": "4.2.4",
             "@types/alpinejs": "3.13.11",
-            "better-auth": "1.5.6",
+            "better-auth": "1.6.9",
             "bits-ui": "2.15.5",
             "chart.js": "4.5.1",
             "daisyui": "5.5.19",
             "highlight.js": "11.11.1",
-            "nanoid": "5.1.7",
+            "nanoid": "5.1.9",
             "ngx-sonner": "3.1.0",
             "tailwind-merge": "3.5.0",
             "tailwind-variants": "3.2.2",
             "tw-animate-css": "1.4.0",
-            "tailwindcss": "4.2.2",
-            "postcss": "8.5.8",
+            "tailwindcss": "4.2.4",
+            "postcss": "8.5.12",
             "jsonwebtoken": "9.0.3",
             "open-props": "1.7.23",
-            "rollup-plugin-visualizer": "6.0.5",
+            "rollup-plugin-visualizer": "7.0.1",
             "webpack-bundle-analyzer": "5.0.1",
             "vite-tsconfig-paths": "6.1.1",
             "vite": "7.3.1",
@@ -140,27 +140,27 @@
         },
         "catalogs": {
             "prisma": {
-                "@prisma/client": "7.5.0",
-                "@prisma/adapter-pg": "7.5.0",
-                "prisma": "7.5.0"
+                "@prisma/client": "7.8.0",
+                "@prisma/adapter-pg": "7.8.0",
+                "prisma": "7.8.0"
             },
             "elysia": {
-                "@elysiajs/cors": "1.4.1",
-                "@elysiajs/eden": "1.4.8",
+                "@elysiajs/cors": "1.4.2",
+                "@elysiajs/eden": "1.4.9",
                 "@elysiajs/swagger": "1.3.1",
                 "elysia": "1.4.28"
             },
             "angular": {
-                "@angular/animations": "21.2.6",
-                "@angular/build": "21.2.4",
-                "@angular/common": "21.2.6",
-                "@angular/compiler": "21.2.6",
-                "@angular/compiler-cli": "21.2.6",
-                "@angular/core": "21.2.6",
-                "@angular/forms": "21.2.6",
-                "@angular/language-service": "21.2.6",
-                "@angular/platform-browser": "21.2.6",
-                "@angular/platform-server": "21.2.6"
+                "@angular/animations": "21.2.10",
+                "@angular/build": "21.2.8",
+                "@angular/common": "21.2.10",
+                "@angular/compiler": "21.2.10",
+                "@angular/compiler-cli": "21.2.10",
+                "@angular/core": "21.2.10",
+                "@angular/forms": "21.2.10",
+                "@angular/language-service": "21.2.10",
+                "@angular/platform-browser": "21.2.10",
+                "@angular/platform-server": "21.2.10"
             }
         }
     }
