@@ -37,12 +37,13 @@ model User {
 }
 
 model Network {
-    id           String        @id @default(nanoid())
-    alias        String
-    secretKey    String        @unique
-    updatedAt    DateTime      @default(now())
-    createdAt    DateTime      @default(now())
-    userNetworks UserNetwork[]
+    id               String            @id @default(nanoid())
+    alias            String
+    secretKey        String            @unique
+    subscriptionType ESubscriptionType @default(FREE)
+    updatedAt        DateTime          @default(now())
+    createdAt        DateTime          @default(now())
+    userNetworks     UserNetwork[]
 }
 
 model UserNetwork {
@@ -89,6 +90,12 @@ model ChannelsHistory {
 enum EUserNetworkRole {
     USER
     ADMIN
+}
+
+enum ESubscriptionType {
+    FREE
+    MEDIUM
+    HIGH
 }
 
 model Session {

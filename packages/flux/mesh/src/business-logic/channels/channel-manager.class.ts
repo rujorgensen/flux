@@ -2,6 +2,7 @@ import {
     type TAddress,
     type TChannelName,
     type TNetworkId_S,
+    type TSubscription_S,
     AUTHORITY_ON_CREATE_CHANNEL,
     AUTHORITY_ON_EMPTY_CHANNEL,
 } from '@flux/shared/types';
@@ -12,12 +13,128 @@ import {
 } from '../../routing/redis/redis-connection.class';
 import type { GlobalChannelPubsub } from '../../routing/global-channel/global-channel-pubsub.class';
 
-// ! TODO Hardcoded for now, take from network config in the future
-export const MAX_CHANNEL_MEMBERS = 1_000_000;
+export const MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE: {
+    [key in TSubscription_S]: number
+} = {
+    free: 25,
+    medium: 500,
+    high: 100_000,
+} as const;
+
+export const MAX_CHANNEL_MEMBERS = MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE.high;
+
+export const normalizeSubscriptionType = (
+    subscriptionType?: string,
+): TSubscription_S | undefined => {
+    const normalizedSubscriptionType = subscriptionType?.toLowerCase();
+
+    if ((normalizedSubscriptionType === 'lowest') ||
+        (normalizedSubscriptionType === 'free')) {
+        return 'free';
+    }
+
+    if ((normalizedSubscriptionType === 'medium') ||
+        (normalizedSubscriptionType === 'high')) {
+        return normalizedSubscriptionType;
+    }
+
+    return undefined;
+};
+
+export const resolveSubscriptionTypeOrDefault = (
+    subscriptionType?: string,
+): TSubscription_S => {
+    return normalizeSubscriptionType(subscriptionType) ?? 'free';
+};
+
+export const readMaxChannelMembers = (
+    subscriptionType?: string,
+): number => MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE[resolveSubscriptionTypeOrDefault(subscriptionType)];
+
+export const readSubscriptionTypeFromClaim = (
+    claim?: string,
+): TSubscription_S | undefined => {
+    if (!claim) {
+        return undefined;
+    }
+
+    const normalizedClaim = normalizeSubscriptionType(claim);
+    if (normalizedClaim) {
+        return normalizedClaim;
+    }
+
+    const readSubscriptionTypeFromPayload = (
+        payload: unknown,
+    ): TSubscription_S | undefined => {
+        if (!payload || typeof payload !== 'object') {
+            return undefined;
+        }
+
+        const payloadRecord = payload as Record<string, unknown>;
+        const userCandidate = payloadRecord['user'];
+        const nestedUser = userCandidate && typeof userCandidate === 'object'
+            ? userCandidate as Record<string, unknown>
+            : undefined;
+
+        const candidates: unknown[] = [
+            payloadRecord['subscriptionType'],
+            payloadRecord['subscription'],
+            payloadRecord['tier'],
+            payloadRecord['plan'],
+            nestedUser?.['subscriptionType'],
+            nestedUser?.['subscription'],
+            nestedUser?.['tier'],
+            nestedUser?.['plan'],
+        ];
+
+        for (const candidate of candidates) {
+            if (typeof candidate !== 'string') {
+                continue;
+            }
+
+            const normalizedCandidate = normalizeSubscriptionType(candidate);
+            if (normalizedCandidate) {
+                return normalizedCandidate;
+            }
+        }
+
+        return undefined;
+    };
+
+    try {
+        const parsedClaim = JSON.parse(claim);
+        const subscriptionTypeFromJson = readSubscriptionTypeFromPayload(parsedClaim);
+
+        if (subscriptionTypeFromJson) {
+            return subscriptionTypeFromJson;
+        }
+    } catch {
+        // ignore non-json claim
+    }
+
+    const jwtParts = claim.split('.');
+    if (jwtParts.length < 2) {
+        return undefined;
+    }
+
+    try {
+        const payloadBuffer = Buffer.from(
+            jwtParts[1],
+            'base64url',
+        );
+        const payloadRaw = payloadBuffer.toString('utf8');
+        const payload = JSON.parse(payloadRaw);
+
+        return readSubscriptionTypeFromPayload(payload);
+    } catch {
+        return undefined;
+    }
+};
 
 export const canChannelHaveMoreMembers = (
     memberCount: number,
-): boolean => memberCount < MAX_CHANNEL_MEMBERS;
+    subscriptionType?: TSubscription_S,
+): boolean => memberCount < readMaxChannelMembers(subscriptionType);
 
 interface IUsageCache {
     networkId: TNetworkId_S;
@@ -58,13 +175,17 @@ export class NetworkChannelManager {
     public async canHaveMembers(
         networkId: TNetworkId_S,
         channelName: TChannelName,
+        subscriptionType?: TSubscription_S,
     ): Promise<boolean> {
         const count: number = await this.networkChannelHash.readNetworkMemberCount(
             networkId,
             channelName,
         );
 
-        return Promise.resolve(canChannelHaveMoreMembers(count));
+        return Promise.resolve(canChannelHaveMoreMembers(
+            count,
+            subscriptionType,
+        ));
     }
 
     /**

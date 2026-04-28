@@ -1,4 +1,4 @@
-export const MAX_CHANNEL_MEMBERS = 1_000_000;
+export const MAX_CHANNEL_MEMBERS = 100_000;
 
 /**
  * Calculates the current channel capacity fill as a percentage.

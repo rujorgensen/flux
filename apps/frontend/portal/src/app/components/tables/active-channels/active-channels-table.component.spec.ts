@@ -10,8 +10,8 @@ describe('deriveChannelFillPercent', () => {
     });
 
     it('should calculate percentage for partially full channels', () => {
-        expect(deriveChannelFillPercent(500_000)).toBe(50);
-        expect(deriveChannelFillPercent(250_000)).toBe(25);
+        expect(deriveChannelFillPercent(50_000)).toBe(50);
+        expect(deriveChannelFillPercent(25_000)).toBe(25);
     });
 
     it('should clamp to 100 for full and overfull channels', () => {

@@ -64,7 +64,10 @@ import {
     getMeshRedisConnection,
 } from './routing/redis/redis-connection.class';
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
-import { NetworkChannelManager } from './business-logic/channels/channel-manager.class';
+import {
+    NetworkChannelManager,
+    readSubscriptionTypeFromClaim,
+} from './business-logic/channels/channel-manager.class';
 import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
@@ -402,6 +405,7 @@ export class FluxMeshServer {
                                 const canHaveMembers = await this.channelManager.canHaveMembers(
                                     ws.data.networkId,
                                     channelName,
+                                    readSubscriptionTypeFromClaim(ws.data.claim),
                                 );
 
                                 if (!canHaveMembers) {
