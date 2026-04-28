@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'bun:test';
 import {
+    MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE,
     MAX_CHANNEL_MEMBERS,
     canChannelHaveMoreMembers,
+    readSubscriptionTypeFromClaim,
+    resolveSubscriptionTypeOrDefault,
 } from './business-logic/channels/channel-manager.class';
 
 const ONE_MILLION_MESSAGES = 1_000_000;
@@ -60,11 +63,61 @@ const assertRoundRobinDistribution = (
 };
 
 describe('channel member limit', () => {
-    it('should allow up to one million members, but not above', () => {
-        expect(MAX_CHANNEL_MEMBERS).toBe(1_000_000);
-        expect(canChannelHaveMoreMembers(MAX_CHANNEL_MEMBERS - 1)).toBe(true);
-        expect(canChannelHaveMoreMembers(MAX_CHANNEL_MEMBERS)).toBe(false);
-        expect(canChannelHaveMoreMembers(MAX_CHANNEL_MEMBERS + 1)).toBe(false);
+    it('should allow up to the high plan limit, but not above', () => {
+        expect(MAX_CHANNEL_MEMBERS).toBe(100_000);
+        expect(canChannelHaveMoreMembers(MAX_CHANNEL_MEMBERS - 1, 'high')).toBe(true);
+        expect(canChannelHaveMoreMembers(MAX_CHANNEL_MEMBERS, 'high')).toBe(false);
+        expect(canChannelHaveMoreMembers(MAX_CHANNEL_MEMBERS + 1, 'high')).toBe(false);
+    });
+
+    it('should apply channel member limits by subscription type', () => {
+        expect(MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE).toEqual({
+            free: 25,
+            medium: 500,
+            high: 100_000,
+        });
+
+        expect(canChannelHaveMoreMembers(24, 'free')).toBe(true);
+        expect(canChannelHaveMoreMembers(25, 'free')).toBe(false);
+
+        expect(canChannelHaveMoreMembers(499, 'medium')).toBe(true);
+        expect(canChannelHaveMoreMembers(500, 'medium')).toBe(false);
+
+        expect(canChannelHaveMoreMembers(99_999, 'high')).toBe(true);
+        expect(canChannelHaveMoreMembers(100_000, 'high')).toBe(false);
+    });
+
+    it('should default to the free limit for missing and unknown subscriptions', () => {
+        expect(canChannelHaveMoreMembers(24)).toBe(true);
+        expect(canChannelHaveMoreMembers(25)).toBe(false);
+
+        expect(resolveSubscriptionTypeOrDefault('unknown-tier')).toBe('free');
+    });
+
+    it('should parse subscription type from claim payloads', () => {
+        expect(readSubscriptionTypeFromClaim('lowest')).toBe('free');
+        expect(readSubscriptionTypeFromClaim('LOWEST')).toBe('free');
+        expect(readSubscriptionTypeFromClaim('medium')).toBe('medium');
+        expect(readSubscriptionTypeFromClaim('MeDiUm')).toBe('medium');
+
+        expect(readSubscriptionTypeFromClaim(JSON.stringify({
+            subscriptionType: 'high',
+        }))).toBe('high');
+        expect(readSubscriptionTypeFromClaim(JSON.stringify({
+            user: {
+                tier: 'medium',
+            },
+        }))).toBe('medium');
+
+        const jwtWithTier = `header.${Buffer.from(JSON.stringify({
+            plan: 'high',
+        })).toString('base64url')}.sig`;
+        expect(readSubscriptionTypeFromClaim(jwtWithTier)).toBe('high');
+
+        expect(readSubscriptionTypeFromClaim('invalid.jwt.payload')).toBeUndefined();
+        expect(readSubscriptionTypeFromClaim(JSON.stringify({
+            subscriptionType: 'custom',
+        }))).toBeUndefined();
     });
 });
 

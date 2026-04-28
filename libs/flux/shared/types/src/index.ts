@@ -61,6 +61,7 @@ export {
 export {
     type TNetworkId_S,
     type TNetworkKey_S,
+    type TSubscription_S,
     validateNetworkIdOrThrow,
 } from './lib/network.type';
 export {

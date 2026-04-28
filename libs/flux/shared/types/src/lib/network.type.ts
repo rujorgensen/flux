@@ -1,5 +1,12 @@
 export type TNetworkId_S = string & { __brand: 'NetworkId'; };
 export type TNetworkKey_S = string & { __brand: 'NetworkKey'; };
+/**
+ * Subscription tiers used by runtime channel-limit logic.
+ * Keep this union aligned with Prisma enum `ESubscriptionType`.
+ * Runtime values are lowercase (`free|medium|high`) while Prisma stores uppercase
+ * enum values (`FREE|MEDIUM|HIGH`) for database persistence.
+ */
+export type TSubscription_S = 'free' | 'medium' | 'high';
 
 /**
  * Validates a network ID.
