@@ -31,7 +31,7 @@ model User {
     updatedAt     DateTime
     sessions      Session[]
     accounts      Account[]
-    isFluxAdmin   Boolean?      @unique @default(false)
+    isFluxAdmin   Boolean       @default(false)
 
     @@map("user")
 }
