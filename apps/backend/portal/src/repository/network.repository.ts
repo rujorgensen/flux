@@ -21,6 +21,12 @@ export interface INetwork_S {
         role: string;
     }[];
 }
+
+interface IConnectionHistoryPoint {
+    count: number;
+    timeslotAt: Date;
+}
+
 export class NetworkRepository {
 
     constructor(
@@ -134,6 +140,75 @@ export class NetworkRepository {
             })
             .then((networks: NetworkWithUserNetworks[]) => networks.map(this.convert.bind(this)))
             ;
+    }
+
+    public async readConnectionHistory(
+        networkId: TNetworkId_S,
+        dateInterval: {
+            from: Date;
+            to: Date;
+        },
+    ): Promise<{
+        agents: IConnectionHistoryPoint[];
+        authorities: IConnectionHistoryPoint[];
+        channels: IConnectionHistoryPoint[];
+    }> {
+        const [agents, authorities, channels] = await Promise.all([
+            this._prismaClient.connectedAgentsHistory.findMany({
+                where: {
+                    networkId,
+                    timeslotAt: {
+                        gte: dateInterval.from,
+                        lte: dateInterval.to,
+                    },
+                },
+                orderBy: {
+                    timeslotAt: 'asc',
+                },
+                select: {
+                    count: true,
+                    timeslotAt: true,
+                },
+            }),
+            this._prismaClient.connectedAuthoritiesHistory.findMany({
+                where: {
+                    networkId,
+                    timeslotAt: {
+                        gte: dateInterval.from,
+                        lte: dateInterval.to,
+                    },
+                },
+                orderBy: {
+                    timeslotAt: 'asc',
+                },
+                select: {
+                    count: true,
+                    timeslotAt: true,
+                },
+            }),
+            this._prismaClient.channelsHistory.findMany({
+                where: {
+                    networkId,
+                    timeslotAt: {
+                        gte: dateInterval.from,
+                        lte: dateInterval.to,
+                    },
+                },
+                orderBy: {
+                    timeslotAt: 'asc',
+                },
+                select: {
+                    count: true,
+                    timeslotAt: true,
+                },
+            }),
+        ]);
+
+        return {
+            agents,
+            authorities,
+            channels,
+        };
     }
 
     /**

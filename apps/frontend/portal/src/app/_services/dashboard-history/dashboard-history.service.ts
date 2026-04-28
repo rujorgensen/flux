@@ -10,48 +10,25 @@ export interface IHistoryDataPoint {
     value: number;
 }
 
-/** Percentage of the current count used as the starting baseline for synthetic history. */
-const BASELINE_RATIO = 0.6;
+interface IApiHistoryDataPoint {
+    count: number;
+    timeslotAt: Date;
+}
 
-/** Percentage of headroom added progressively as the trend approaches the current count. */
-const GROWTH_RATIO = 0.4;
-
-/** Maximum random variance applied per data point, as a fraction of the current count. */
-const VARIANCE_RATIO = 0.08;
-
-/**
- * Generates a synthetic 24-hour trend of data points that converge to `currentCount`.
- * This is simulated data intended for demonstration purposes only.
- * Real historical data would require a backend persistence layer.
- */
-function generateHistory(currentCount: number, points = 24): IHistoryDataPoint[] {
-    const now = new Date();
-    const history: IHistoryDataPoint[] = [];
-
-    for (let i = points - 1; i >= 0; i--) {
-        const time = new Date(now.getTime() - i * 60 * 60 * 1000);
-        const label = time.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-        });
-        const progress = (points - i) / points;
-        const base = Math.round(currentCount * (BASELINE_RATIO + GROWTH_RATIO * progress));
-        const maxVariance = Math.max(1, Math.round(currentCount * VARIANCE_RATIO));
-        const variance = Math.round(Math.random() * maxVariance);
-        const value = Math.max(0, base + (Math.random() > 0.5 ? variance : -variance));
-        history.push({
-            label,
-            value,
-        });
-    }
-
-    history[history.length - 1] = {
-        label: 'Now',
-        value: currentCount,
-    };
-
-    return history;
+function mapHistoryDataPoints(
+    points: IApiHistoryDataPoint[],
+): IHistoryDataPoint[] {
+    return points.map((point, index) => ({
+        label: index === points.length - 1 ?
+            'Now'
+            :
+            new Date(point.timeslotAt).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            }),
+        value: point.count,
+    }));
 }
 
 @Injectable({
@@ -77,7 +54,7 @@ export class DashboardHistoryService {
                 }
 
                 return from(
-                    api.api.networks({ networkId: network.id })['connection-status'].get(),
+                    api.api.networks({ networkId: network.id })['connection-history'].get(),
                 ).pipe(
                     map((response) => response.data ?? null),
                     catchError((error: unknown) => {
@@ -94,9 +71,9 @@ export class DashboardHistoryService {
                 return;
             }
 
-            this._agentHistory$.next(generateHistory(status.agents));
-            this._authorityHistory$.next(generateHistory(status.authorities));
-            this._channelHistory$.next(generateHistory(status.channels));
+            this._agentHistory$.next(mapHistoryDataPoints(status.agents));
+            this._authorityHistory$.next(mapHistoryDataPoints(status.authorities));
+            this._channelHistory$.next(mapHistoryDataPoints(status.channels));
         });
     }
 }
