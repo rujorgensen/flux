@@ -31,7 +31,7 @@ model User {
     updatedAt     DateTime
     sessions      Session[]
     accounts      Account[]
-    isFluxAdmin   Boolean?      @unique @default(false)
+    isFluxAdmin   Boolean       @default(false)
 
     @@map("user")
 }
@@ -61,30 +61,38 @@ model UserNetwork {
 
 model UsageHistory {
     id         String   @id @default(nanoid())
-    networkId  String   @unique
+    networkId  String
     usageKb    Int
     timeslotAt DateTime @default(now())
+
+    @@index([networkId, timeslotAt])
 }
 
 model ConnectedAuthoritiesHistory {
     id         String   @id @default(nanoid())
-    networkId  String   @unique
+    networkId  String
     count      Int
     timeslotAt DateTime @default(now())
+
+    @@index([networkId, timeslotAt])
 }
 
 model ConnectedAgentsHistory {
     id         String   @id @default(nanoid())
-    networkId  String   @unique
+    networkId  String
     count      Int
     timeslotAt DateTime @default(now())
+
+    @@index([networkId, timeslotAt])
 }
 
 model ChannelsHistory {
     id         String   @id @default(nanoid())
-    networkId  String   @unique
+    networkId  String
     count      Int
     timeslotAt DateTime @default(now())
+
+    @@index([networkId, timeslotAt])
 }
 
 enum EUserNetworkRole {

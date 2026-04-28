@@ -68,7 +68,7 @@ export const networksController = apiRoutes
                 );
         },
 
-        // Validate body
+        // Auth required
         {
             auth: true,
         })
@@ -101,7 +101,40 @@ export const networksController = apiRoutes
         })
 
     /**
-     * Deletes a network by ID.
+    * Reads network connection history for the last 24 hours.
+    * 
+    * '/api/networks/:networkId/connection-history'
+    */
+    .get(
+        ':networkId/connection-history',
+        async ({
+            params,
+            serviceProviders,
+            user,
+        }) => {
+            console.log('Reading network connection history for user:', user.id);
+
+            const to = new Date();
+            const from = new Date(to.getTime() - 24 * 60 * 60 * 1000);
+
+            return await serviceProviders
+                .networkRepository
+                .readConnectionHistory(
+                    params.networkId as TNetworkId_S,
+                    {
+                        from,
+                        to,
+                    },
+                );
+        },
+
+        // Validate body
+        {
+            auth: true,
+        })
+
+    /**
+      * Deletes a network by ID.
      * Only the network admin can delete the network.
      * 
      * '/api/networks/:networkId'

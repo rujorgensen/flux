@@ -18,6 +18,7 @@
         "prisma:migrate:dev:portal": "bunx --bun prisma migrate dev --config=./prisma/prisma.config.ts --name=add-network-subscription-type",
         "prisma:deploy": "bunx --bun prisma migrate deploy --config=./prisma/prisma.config.ts",
         "prisma:studio": "bunx --bun prisma studio --config=./prisma/prisma.config.ts",
+        "prisma:seed:portal": "bunx --bun prisma db seed --config=./prisma/prisma.config.ts",
         "//-03a": "// ****************************************************************************",
         "//-03b": "// *** Update                                                                ",
         "//-03c": "// ****************************************************************************",
