@@ -17,29 +17,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
-    if: github.repository == 'rujorgensen/flux' && startsWith(github.ref_name, matrix.tag_prefix)
+  release:
+    if: github.repository == 'rujorgensen/flux'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - project: persistica-flux-agent
-            package_dir: packages/flux/agent
-            package_name: '@persistica/flux-agent'
-            publish_script: publish:agent
-            tag_prefix: persistica-flux-agent@
-          - project: persistica-flux-authority
-            package_dir: packages/flux/authority
-            package_name: '@persistica/flux-authority'
-            publish_script: publish:authority
-            tag_prefix: persistica-flux-authority@
-          - project: persistica-flux-mesh
-            package_dir: packages/flux/mesh
-            package_name: '@persistica/flux-mesh'
-            publish_script: publish:mesh
-            tag_prefix: persistica-flux-mesh@
 
     steps:
       - name: Checkout code
@@ -55,34 +36,61 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
-      - name: Validate tag version
-        id: version-check
+      - name: Resolve release package
+        id: package
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#${{ matrix.tag_prefix }}}"
-          PACKAGE_VERSION=$(bun -e "const pkg = await Bun.file('./${{ matrix.package_dir }}/package.json').json(); console.log(pkg.version)")
+          case "${GITHUB_REF_NAME}" in
+            persistica-flux-agent@*)
+              echo "project=persistica-flux-agent" >> "$GITHUB_OUTPUT"
+              echo "package_name=@persistica/flux-agent" >> "$GITHUB_OUTPUT"
+              echo "package_file=packages/flux/agent/package.json" >> "$GITHUB_OUTPUT"
+              echo "publish_script=publish:agent" >> "$GITHUB_OUTPUT"
+              ;;
+            persistica-flux-authority@*)
+              echo "project=persistica-flux-authority" >> "$GITHUB_OUTPUT"
+              echo "package_name=@persistica/flux-authority" >> "$GITHUB_OUTPUT"
+              echo "package_file=packages/flux/authority/package.json" >> "$GITHUB_OUTPUT"
+              echo "publish_script=publish:authority" >> "$GITHUB_OUTPUT"
+              ;;
+            persistica-flux-mesh@*)
+              echo "project=persistica-flux-mesh" >> "$GITHUB_OUTPUT"
+              echo "package_name=@persistica/flux-mesh" >> "$GITHUB_OUTPUT"
+              echo "package_file=packages/flux/mesh/package.json" >> "$GITHUB_OUTPUT"
+              echo "publish_script=publish:mesh" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported tag: ${GITHUB_REF_NAME}"
+              exit 1
+              ;;
+          esac
+
+      - name: Validate tag version
+        id: version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#*@}"
+          PACKAGE_VERSION=$(bun -e "const pkg = await Bun.file('./${{ steps.package.outputs.package_file }}').json(); console.log(pkg.version)")
 
           if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
-            echo "Tag version '$TAG_VERSION' does not match ${{ matrix.package_name }} package version '$PACKAGE_VERSION'"
+            echo "Tag version '$TAG_VERSION' does not match ${{ steps.package.outputs.package_name }} package version '$PACKAGE_VERSION'"
             exit 1
           fi
 
-          echo "tag_version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
-          echo "package_version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Determine npm tag
         id: npm-tag
         run: |
-          if [[ "${{ steps.version-check.outputs.package_version }}" == *"-alpha"* ]] || [[ "${{ steps.version-check.outputs.package_version }}" == *"-beta"* ]] || [[ "${{ steps.version-check.outputs.package_version }}" == *"-rc"* ]]; then
+          if [[ "${{ steps.version.outputs.version }}" == *"-alpha"* ]] || [[ "${{ steps.version.outputs.version }}" == *"-beta"* ]] || [[ "${{ steps.version.outputs.version }}" == *"-rc"* ]]; then
             echo "tag=beta" >> "$GITHUB_OUTPUT"
           else
             echo "tag=latest" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build package
-        run: bunx nx run ${{ matrix.project }}:build
+        run: bunx nx run ${{ steps.package.outputs.project }}:build
 
-      - name: Publish package
-        run: bun run ${{ matrix.publish_script }}
+      - name: Publish to npm
+        run: bun run ${{ steps.package.outputs.publish_script }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: 'true'
@@ -91,10 +99,10 @@ jobs:
       - name: Summary
         run: |
           {
-            echo "## npm release complete 🚀"
+            echo "## Release complete 🚀"
             echo
-            echo "- **Package:** ${{ matrix.package_name }}"
-            echo "- **Version tag:** ${{ github.ref_name }}"
-            echo "- **Version:** ${{ steps.version-check.outputs.package_version }}"
+            echo "- **Package:** ${{ steps.package.outputs.package_name }}"
+            echo "- **Version:** ${{ steps.version.outputs.version }}"
+            echo "- **Tag:** ${{ github.ref_name }}"
             echo "- **npm tag:** ${{ steps.npm-tag.outputs.tag }}"
           } >> "$GITHUB_STEP_SUMMARY"
