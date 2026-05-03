@@ -44,19 +44,19 @@ jobs:
               echo "project=persistica-flux-agent" >> "$GITHUB_OUTPUT"
               echo "package_name=@persistica/flux-agent" >> "$GITHUB_OUTPUT"
               echo "package_file=packages/flux/agent/package.json" >> "$GITHUB_OUTPUT"
-              echo "publish_script=publish:agent" >> "$GITHUB_OUTPUT"
+              echo "dist_dir=dist/packages/flux/agent" >> "$GITHUB_OUTPUT"
               ;;
             persistica-flux-authority@*)
               echo "project=persistica-flux-authority" >> "$GITHUB_OUTPUT"
               echo "package_name=@persistica/flux-authority" >> "$GITHUB_OUTPUT"
               echo "package_file=packages/flux/authority/package.json" >> "$GITHUB_OUTPUT"
-              echo "publish_script=publish:authority" >> "$GITHUB_OUTPUT"
+              echo "dist_dir=dist/packages/flux/authority" >> "$GITHUB_OUTPUT"
               ;;
             persistica-flux-mesh@*)
               echo "project=persistica-flux-mesh" >> "$GITHUB_OUTPUT"
               echo "package_name=@persistica/flux-mesh" >> "$GITHUB_OUTPUT"
               echo "package_file=packages/flux/mesh/package.json" >> "$GITHUB_OUTPUT"
-              echo "publish_script=publish:mesh" >> "$GITHUB_OUTPUT"
+              echo "dist_dir=dist/packages/flux/mesh" >> "$GITHUB_OUTPUT"
               ;;
             *)
               echo "Unsupported tag: ${GITHUB_REF_NAME}"
@@ -90,11 +90,10 @@ jobs:
         run: bunx nx run ${{ steps.package.outputs.project }}:build
 
       - name: Publish to npm
-        run: bun run ${{ steps.package.outputs.publish_script }}
+        working-directory: ${{ steps.package.outputs.dist_dir }}
+        run: npm publish --provenance --access public --tag ${{ steps.npm-tag.outputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: 'true'
-          NPM_CONFIG_TAG: ${{ steps.npm-tag.outputs.tag }}
 
       - name: Summary
         run: |
