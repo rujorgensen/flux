@@ -23,6 +23,9 @@
             "@backend/portal/auth": [
                 "./libs/portal/backend/auth/src/index.ts"
             ],
+            "@backend/core/prisma": [
+                "./libs/backend/core/prisma/src/index.ts"
+            ],
             "@core/redis/bun": [
                 "./libs/core/redis/bun-wrapper/src/index.ts"
             ],
