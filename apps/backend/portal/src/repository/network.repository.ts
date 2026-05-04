@@ -3,7 +3,7 @@ import type {
     Network,
 } from '@prisma-types/flux';
 import { nanoid } from 'nanoid';
-import type { TNetworkId_S, TNetworkKey_S } from '@flux/shared/types';
+import type { TNetworkId_S } from '@flux/shared/types';
 
 type NetworkWithUserNetworks = Network & {
     userNetworks: {
@@ -31,7 +31,7 @@ export class NetworkRepository {
 
     constructor(
         private readonly _prismaClient: PrismaClient,
-    ) { }
+    ) {}
 
     // ****************************************************************************
     // *** Create
@@ -209,50 +209,6 @@ export class NetworkRepository {
             authorities,
             channels,
         };
-    }
-
-    /**
-     * Reads the secret key for a network by its network ID or throws if not found.
-     */
-    public readNetworkKeyByNetworkIdOrThrow(
-        networkId: TNetworkId_S,
-    ): Promise<TNetworkKey_S> {
-        return this._prismaClient
-            .network
-            .findUniqueOrThrow({
-                where: {
-                    id: networkId,
-                },
-                select: {
-                    secretKey: true,
-                },
-            })
-            .then((response: { secretKey: string; }) => response.secretKey as TNetworkKey_S)
-            ;
-    }
-
-    /**
-     * Reads a network by its secret key or throws if not found.
-     */
-    public readNetworkBySecretKeyOrThrow(
-        secretKey: TNetworkKey_S,
-    ): Promise<INetwork_S> {
-        return this._prismaClient
-            .network
-            .findUniqueOrThrow({
-                where: {
-                    secretKey,
-                },
-                include: {
-                    userNetworks: {
-                        include: {
-                            user: true,
-                        },
-                    },
-                },
-            })
-            .then((network: NetworkWithUserNetworks) => this.convert(network))
-            ;
     }
 
     /**

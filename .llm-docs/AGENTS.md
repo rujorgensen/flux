@@ -30,6 +30,26 @@ Use Tailwind / DaisyUI utility classes in templates wherever possible. Reserve c
 
 ## General Coding standards
 
+### Comments - Section Headers
+
+Use the following "star box" style for large section separators within files:
+
+```typescript
+// ****************************************************************************
+// *** Section Name
+// ****************************************************************************
+```
+
+For smaller subsections use 
+```typescript
+// * Section Name
+```
+
+For normal comments use a regular comment
+```typescript
+// Comment
+```
+
 ### Function Formatting
 ```typescript
 // ✅ Do

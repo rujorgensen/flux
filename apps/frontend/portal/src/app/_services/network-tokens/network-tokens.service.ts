@@ -1,27 +1,16 @@
 import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { api } from '../api/api';
-
-export interface ITokenMetadata {
-    id: string;
-    index: number;
-    isPrimary: boolean;
-    entityCount: number;
-    createdAt: string;
-    createdBy: string;
-    rotatedOutAt: string | null;
-}
+import type { ITokenMetaData_S } from '@flux/shared/types';
 
 @Injectable({
     providedIn: 'root',
 })
 export class NetworkTokensService {
 
-    constructor() { }
-
     public readTokens$(
         networkId: string,
-    ): Observable<ITokenMetadata[]> {
+    ): Observable<ITokenMetaData_S[]> {
         return from(
             api
                 .api
@@ -42,7 +31,7 @@ export class NetworkTokensService {
 
     public createToken$(
         networkId: string,
-    ): Observable<ITokenMetadata> {
+    ): Observable<ITokenMetaData_S> {
         return from(
             api
                 .api

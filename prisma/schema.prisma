@@ -21,17 +21,18 @@ datasource db {
 // ****************************************************************************
 
 model User {
-    id            String        @id @default(nanoid())
-    email         String        @unique
-    userNetworks  UserNetwork[]
-    name          String
-    emailVerified Boolean
-    image         String?
-    createdAt     DateTime
-    updatedAt     DateTime
-    sessions      Session[]
-    accounts      Account[]
-    isFluxAdmin   Boolean       @default(false)
+    id                   String         @id @default(nanoid())
+    email                String         @unique
+    userNetworks         UserNetwork[]
+    name                 String
+    emailVerified        Boolean
+    image                String?
+    createdAt            DateTime
+    updatedAt            DateTime
+    sessions             Session[]
+    accounts             Account[]
+    createdNetworkTokens NetworkToken[]
+    isFluxAdmin          Boolean        @default(false)
 
     @@map("user")
 }
@@ -39,11 +40,24 @@ model User {
 model Network {
     id               String            @id @default(nanoid())
     alias            String
-    secretKey        String            @unique
     subscriptionType ESubscriptionType @default(FREE)
     updatedAt        DateTime          @default(now())
     createdAt        DateTime          @default(now())
     userNetworks     UserNetwork[]
+    tokens           NetworkToken[]
+}
+
+model NetworkToken {
+    id              String    @id @default(nanoid())
+    networkId       String
+    network         Network   @relation(fields: [networkId], references: [id], onDelete: Cascade)
+    token           String    @unique
+    createdAt       DateTime  @default(now())
+    createdByUserId String
+    createdByUser   User      @relation(fields: [createdByUserId], references: [id])
+    rotatedOutAt    DateTime?
+
+    @@index([networkId])
 }
 
 model UserNetwork {
