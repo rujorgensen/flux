@@ -22,7 +22,7 @@ Alpine.data('fluxActivityDemoApplication', () => ({
         // Simulate agent connection every 200 ms
         for (let i = 0; i < 20; i++) {
             setTimeout(async () => {
-                this.log('⭕ Connecting flux agent...');
+                this.log(`⭕ Connecting flux agent #${i}...`);
 
                 const fluxAgent: FluxAgent = new FluxAgent(
                     getNetworkId(),

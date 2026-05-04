@@ -81,13 +81,13 @@ export class FluxAgent {
             },
 
             // Retry if no authority was found yet
-            (error: unknown) => {
-                return error instanceof NetworkAuthorityNotFoundError;
-            },
+            (error: unknown) => (error instanceof NetworkAuthorityNotFoundError),
 
             {
                 retries: 100,
                 delayMs: 500,
+                // Backoff until 3 seconds
+                onRetry: (attempt) => Math.min(3_000, 500 + (attempt * 200)),
             },
         );
 

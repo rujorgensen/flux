@@ -1,5 +1,5 @@
 export type TNetworkId_S = string & { __brand: 'NetworkId'; };
-export type TNetworkKey_S = string & { __brand: 'NetworkKey'; };
+export type TNetworkToken_S = string & { __brand: 'NetworkToken'; };
 /**
  * Subscription tiers used by runtime channel-limit logic.
  * Keep this union aligned with Prisma enum `ESubscriptionType`.
@@ -44,3 +44,13 @@ export const validateNetworkIdOrThrow = (
 
     return true;
 };
+
+export interface ITokenMetaData_S {
+    id: string;
+    index: number;
+    isPrimary: boolean;
+    entityCount: number;
+    createdAt: string;
+    createdBy: string;
+    rotatedOutAt: string | null;
+}

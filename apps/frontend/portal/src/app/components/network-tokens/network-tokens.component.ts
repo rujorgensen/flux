@@ -11,7 +11,8 @@ import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
 import { toast } from 'ngx-sonner';
-import { NetworkTokensService, type ITokenMetadata } from '$lib/app/_services/network-tokens/network-tokens.service';
+import { NetworkTokensService } from '$lib/app/_services/network-tokens/network-tokens.service';
+import type { ITokenMetaData_S } from '@flux/shared/types';
 
 export interface INetworkToken {
     id: string;
@@ -77,7 +78,7 @@ export class NetworkTokensComponent {
             )
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
-                next: (newToken: ITokenMetadata) => {
+                next: (newToken: ITokenMetaData_S) => {
                     const token: INetworkToken = {
                         ...newToken,
                         createdAt: new Date(newToken.createdAt),
@@ -219,7 +220,7 @@ export class NetworkTokensComponent {
             )
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
-                next: (data: ITokenMetadata[]) => {
+                next: (data: ITokenMetaData_S[]) => {
                     const mapped: INetworkToken[] = data.map((t) => ({
                         ...t,
                         createdAt: new Date(t.createdAt),

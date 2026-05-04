@@ -3,22 +3,24 @@
  */
 export const retry = async <T>(
     fn: () => Promise<T>,
-    shouldRetry: (err: unknown) => boolean,
+    shouldRetry: (err: unknown) => boolean | number,
     options: {
         retries: number,
         delayMs: number,
         onRetry?: (
             attempt: number,
             retries: number,
-        ) => void;
+        ) => void | number;
     },
 ): Promise<T> => {
     let attempt = 0;
+    let overrideDelay: number | undefined;
+
     while (true) {
         try {
             if (attempt > 0) {
                 if (options.onRetry) {
-                    options.onRetry(attempt, options.retries);
+                    overrideDelay = options.onRetry(attempt, options.retries) ?? undefined;
                 }
             }
 
@@ -29,8 +31,13 @@ export const retry = async <T>(
                 throw err;
             }
 
-            if (options.delayMs > 0) {
-                await new Promise(res => setTimeout(res, options.delayMs));
+            if ((options.delayMs > 0) || (overrideDelay && (overrideDelay > 0))) {
+                let delay: number = overrideDelay ?? options.delayMs;
+
+                await new Promise(res => setTimeout(
+                    res,
+                    delay,
+                ));
             }
         }
     }

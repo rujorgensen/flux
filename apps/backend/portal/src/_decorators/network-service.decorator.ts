@@ -1,6 +1,6 @@
 import Elysia from 'elysia';
 import { NetworkRepository } from '../repository/network.repository';
-import { getPortalPgRepository } from '../repository/prisma';
+import { getPortalPgRepository } from '@backend/core/prisma';
 import { getMeshRedisConnection, RedisConnection } from '@flux/mesh';
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import { NetworkService } from '../_services/network.service';

@@ -3,7 +3,7 @@ import {
     BunRedisClient,
     BunRedisPubSub,
 } from '@core/redis/bun';
-import type { TAddress, TClientId, TProcessAddress } from '@flux/shared/types';
+import type { TAddress, TClientId, TNetworkId_S, TNetworkToken_S, TProcessAddress } from '@flux/shared/types';
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
@@ -187,6 +187,53 @@ export class RedisConnection {
         } catch {
             console.log('Error caught while subscribing to websocket channel event globally');
         }
+    }
+
+    // ****************************************************************************
+    // *** Network Token Events
+    // ****************************************************************************
+
+    /**
+     * Publishes the current set of valid token values for a network.
+     * Called by the portal whenever tokens are created, rotated, or deleted.
+     */
+    public async publishNetworkTokenEvent(
+        networkId: TNetworkId_S,
+        tokens: TNetworkToken_S[],
+    ): Promise<void> {
+        try {
+            await this.pubSub
+                .publish(
+                    `:flux:network-tokens`,
+                    JSON.stringify({ networkId, tokens }),
+                );
+        } catch (error) {
+            console.error(`Failed to publish token event for network '${networkId}':`, error);
+        }
+    }
+
+    /**
+     * Subscribes to network token update events.
+     * The mesh calls this to keep its local token cache in sync.
+     */
+    public subscribeToNetworkTokenEvents(
+        callback: (
+            networkId: TNetworkId_S,
+            tokens: TNetworkToken_S[],
+        ) => void,
+    ): void {
+        this.pubSub
+            .subscribe(
+                `:flux:network-tokens`,
+                (message: string) => {
+                    try {
+                        const parsed = JSON.parse(message) as { networkId: TNetworkId_S; tokens: TNetworkToken_S[]; };
+                        callback(parsed.networkId, parsed.tokens);
+                    } catch (error) {
+                        console.error('Failed to parse network token event:', message, error);
+                    }
+                },
+            );
     }
 
     // ****************************************************************************
