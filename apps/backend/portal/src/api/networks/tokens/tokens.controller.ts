@@ -1,27 +1,14 @@
 import { Elysia, t } from 'elysia';
-import { nanoid } from 'nanoid';
 import { networkIdValidatorPlugin } from '../plugins';
 import { betterAuth } from '../../../_decorators/auth.decorator';
+import { networkDecorator } from '../../../_decorators/network-service.decorator';
+import { TNetworkToken_S } from '@flux/shared/types';
+import { ITokenMetaData_S } from '../../../../../../../libs/flux/shared/types/src/lib/network.type';
+import { NetworkTokenWithUser } from '../../../../../../../libs/backend/features/network/src/lib/tokens/network-token.repository';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface IStoredToken {
-    readonly id: string;
-    /** The actual token value — never returned by the list endpoint. */
-    readonly value: string;
-    /** Simulated count of entities still using this token. */
-    entityCount: number;
-    readonly createdAt: string;
-    /** Login/identifier of the user who generated this token. */
-    readonly createdBy: string;
-    /**
-     * ISO timestamp of when this token was demoted from primary.
-     * Null while the token is still primary.
-     */
-    rotatedOutAt: string | null;
-}
-
-// ─── Elysia response schemas ─────────────────────────────────────────────────
+// ****************************************************************************
+// *** Elysia response schemas
+// ****************************************************************************
 
 const tokenMetadataSchema = t.Object({
     id: t.String(),
@@ -37,46 +24,28 @@ const revealResponseSchema = t.Object({
     value: t.String(),
 });
 
-// ─── In-memory store (replace with DB later) ─────────────────────────────────
+// ****************************************************************************
+// *** Helpers
+// ****************************************************************************
 
-const networkTokenMap = new Map<string, IStoredToken[]>();
-
-// ─── Token validation (consumed by other controllers) ────────────────────────
-
-/**
- * Returns `true` if the given plain-text token value is valid for the network.
- */
-export function validateNetworkToken(
-    networkId: string,
-    tokenValue: string,
-): boolean {
-    const tokens = networkTokenMap.get(networkId) ?? [];
-
-    return tokens.some((t) => t.value === tokenValue);
-}
-
-// ─── Helper ──────────────────────────────────────────────────────────────────
-
-function toMetadata(
-    token: IStoredToken,
+const toMetadata = (
+    token: NetworkTokenWithUser,
     index: number,
-) {
-    return {
-        id: token.id,
-        index,
-        isPrimary: index === 0,
-        entityCount: token.entityCount,
-        createdAt: token.createdAt,
-        createdBy: token.createdBy,
-        rotatedOutAt: token.rotatedOutAt,
-    };
-}
+): ITokenMetaData_S => ({
+    id: token.id,
+    index,
+    isPrimary: index === 0,
+    entityCount: -1, // TODO
+    createdAt: token.createdAt.toISOString(),
+    createdBy: token.createdByUserName,
+    rotatedOutAt: token.rotatedOutAt?.toISOString() ?? null,
+});
 
 class TokenNotFoundError extends Error {
     status = 404;
 
     constructor(
-        private tokenIndex: number,
+        tokenIndex: number,
     ) {
         super(`Token at index ${tokenIndex} not found.`);
     }
@@ -85,12 +54,15 @@ class TokenNotFoundError extends Error {
 class MaximumTokensReachedError extends Error {
     status = 400;
 
-    constructor() {
-        super('Maximum of 3 tokens already reached.');
+    constructor(
+    ) {
+        super('Maximum of 3 tokens already reached. Please delete an existing token before creating a new one.');
     }
 }
 
-// ─── Routes ──────────────────────────────────────────────────────────────────
+// ****************************************************************************
+// *** Network Token Controller
+// ****************************************************************************
 
 export const networkTokenController = new Elysia({
     prefix: '/api/networks/:networkId/tokens',
@@ -98,6 +70,7 @@ export const networkTokenController = new Elysia({
     .use(betterAuth)
 
     .use(networkIdValidatorPlugin)
+    .use(networkDecorator)
 
     .error({
         TokenNotFoundError,
@@ -111,8 +84,13 @@ export const networkTokenController = new Elysia({
      */
     .get(
         '',
-        ({ networkId }) => {
-            const tokens = networkTokenMap.get(networkId) ?? [];
+        async ({
+            networkId,
+            serviceProviders,
+        }): Promise<ITokenMetaData_S[]> => {
+            const tokens = await serviceProviders
+                .networkTokenService
+                .readByNetworkId(networkId);
 
             return tokens.map(toMetadata);
         },
@@ -129,37 +107,38 @@ export const networkTokenController = new Elysia({
      */
     .post(
         '',
-        ({
+        async ({
             networkId,
             user,
-        }) => {
+            serviceProviders,
+        }): Promise<ITokenMetaData_S> => {
             console.log(`Generating token for network ${networkId}`);
 
-            const tokens = networkTokenMap.get(networkId) ?? [];
+            const existingCount = await serviceProviders
+                .networkTokenService
+                .countByNetworkId(networkId);
 
-            if (tokens.length >= 3) {
+            if (existingCount >= 3) {
                 throw new MaximumTokensReachedError();
             }
 
-            const now = new Date().toISOString();
+            const now = new Date();
 
-            // Demote all existing tokens: record when they stopped being primary
-            const demoted = tokens.map((t) => ({
-                ...t,
-                rotatedOutAt: t.rotatedOutAt ?? now,
-            }));
+            const newToken = await serviceProviders
+                .networkTokenService
+                .createToken(
+                    networkId,
+                    user.name || user.id,
+                );
 
-            const newToken: IStoredToken = {
-                id: nanoid(),
-                value: `flx_${nanoid(32)}`,
-                entityCount: 0,
-                createdAt: now,
-                createdBy: user.name || user.id,
-                rotatedOutAt: null,
-            };
-
-            // Prepend so the new token is index 0 (primary)
-            networkTokenMap.set(networkId, [newToken, ...demoted]);
+            // Demote all older tokens
+            await serviceProviders
+                .networkTokenService
+                .rotateOutAllExcept(
+                    networkId,
+                    newToken.token as TNetworkToken_S,
+                    now,
+                );
 
             return toMetadata(newToken, 0);
         },
@@ -180,16 +159,26 @@ export const networkTokenController = new Elysia({
      */
     .get(
         'reveal',
-        ({ networkId, query }) => {
+        async ({
+            networkId,
+            query,
+            serviceProviders,
+        }) => {
             const { tokenIndex } = query;
-            const tokens = networkTokenMap.get(networkId) ?? [];
-            const token = tokens[tokenIndex];
+
+            const tokens = await serviceProviders
+                .networkTokenService
+                .readByNetworkId(networkId);
+
+            const token = tokens.at(tokenIndex);
 
             if (!token) {
                 throw new TokenNotFoundError(tokenIndex);
             }
 
-            return { value: token.value };
+            return {
+                value: token.token,
+            };
         },
         {
             query: t.Object({
@@ -209,18 +198,30 @@ export const networkTokenController = new Elysia({
      */
     .delete(
         '',
-        ({ networkId, query }) => {
+        async ({
+            networkId,
+            query,
+            serviceProviders,
+        }) => {
             const { tokenIndex } = query;
-            const tokens = networkTokenMap.get(networkId) ?? [];
+            const tokens = await serviceProviders
+                .networkTokenService
+                .readByNetworkId(
+                    networkId,
+                );
+            const token = tokens.at(tokenIndex);
 
-            if (tokenIndex < 0 || tokenIndex >= tokens.length) {
+            if ((tokenIndex < 0) || !token) {
                 throw new TokenNotFoundError(tokenIndex);
             }
 
-            networkTokenMap.set(
-                networkId,
-                tokens.filter((_, i) => i !== tokenIndex),
-            );
+
+            await serviceProviders
+                .networkTokenService
+                .deleteNetworkToken(
+                    networkId,
+                    token.token as TNetworkToken_S,
+                );
 
             return { message: `Token at index ${tokenIndex} deleted.` };
         },
@@ -235,3 +236,4 @@ export const networkTokenController = new Elysia({
         },
     )
     ;
+

@@ -6,6 +6,7 @@ import { validateMachineUID } from '@flux/shared/utils';
 
 export class RetryableError extends Error { }
 export class ConnectionError extends RetryableError { }
+export class AuthenticationError extends Error { }
 
 /**
  * Authenticates with the server and returns a ticket for connecting the websocket.
@@ -43,6 +44,10 @@ export const authenticateNetworkAuthorityOrThrow = async (
             body: authorityKey,
         });
 
+        if (response.status === 401) {
+            throw new AuthenticationError('Unauthorized: invalid network access token');
+        }
+
         if (!response.ok) {
             throw new Error(`Auth failed: ${response.status}`);
         }
@@ -54,6 +59,10 @@ export const authenticateNetworkAuthorityOrThrow = async (
 
         return result;
     } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error;
+        }
+
         throw new ConnectionError((error as any).code);
     }
 };

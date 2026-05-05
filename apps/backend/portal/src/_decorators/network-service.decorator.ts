@@ -7,6 +7,7 @@ import { NetworkService } from '../_services/network.service';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
+import { getNetworkTokenServiceInstance } from '@backend/features/network';
 
 const networkRepository: NetworkRepository = new NetworkRepository(
     getPortalPgRepository(),
@@ -27,5 +28,6 @@ export const networkDecorator = new Elysia()
     .decorate('serviceProviders', {
         networkRepository,
         networkService,
+        networkTokenService: getNetworkTokenServiceInstance(),
     })
     ;
