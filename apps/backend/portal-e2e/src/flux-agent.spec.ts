@@ -23,6 +23,7 @@ import {
 const NETWORK_ID: string = 'agent-api-testing-network-id'; // Key to register a network, known to flux´
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
+const LIVE_UPDATES_NETWORK_ID: string = 'rAnD0M-network-id';
 
 describe('persistica-flux-api-agents', () => {
     let portalDomain: string = '';
@@ -48,6 +49,14 @@ describe('persistica-flux-api-agents', () => {
 
         fluxDomain = `http://localhost:${randomMeshPort}`;
 
+        // * Clear the container
+        await connectToRedisAndFlush(redisURL);
+
+        // Seed every authority token needed during portal boot before the server starts,
+        // so the mesh cache can bootstrap on cold start without racing app startup.
+        await seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_AUTHORITY_KEY]);
+        await seedNetworkTokens(redisURL, LIVE_UPDATES_NETWORK_ID, [NETWORK_AUTHORITY_KEY]);
+
         console.log(`⚗️ Starting portal server on port ${randomAPIPort}`);
 
         // Use bun run directly (not bun nx run) to avoid NX task deduplication
@@ -62,12 +71,6 @@ describe('persistica-flux-api-agents', () => {
         );
 
         console.log(`⚗️ 🚀 Portal server is ready at port ${randomAPIPort}. Connecting FluxAuthority to Mesh server at '${fluxDomain}'`);
-
-        // * Clear the container
-        await connectToRedisAndFlush(redisURL);
-
-        // Seed the test authority token so the mesh cache can bootstrap on cold start
-        await seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_AUTHORITY_KEY]);
 
         if (!fluxDomain) {
             throw new Error('Flux domain is not defined');

@@ -19,7 +19,11 @@ import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
 import type { FluxAuthorityNetworkConnection, } from '@persistica/flux-authority';
-import { connectToRedisAndFlush, seedNetworkTokens } from '@flux/mesh/test/setup/infrastructure';
+import {
+    connectToRedisAndFlush,
+    seedNetworkTokens,
+    generateRandomSafePort,
+} from '@flux/mesh/test/setup/infrastructure';
 
 const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
@@ -27,8 +31,8 @@ const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to conne
 
 describe('persistica-flux-mesh', () => {
     let fluxMeshServer: FluxMeshServer;
-    let fluxServerPort: number = 5_100;
-    let fluxDomain: string = `localhost:${fluxServerPort}`;
+    let fluxServerPort: number = generateRandomSafePort();
+    let fluxDomain: string = `http://localhost:${fluxServerPort}`;
 
     beforeAll(async () => {
         const redisURL: string = globalThis['infrastructureRedisURL'];
