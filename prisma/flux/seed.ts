@@ -92,7 +92,6 @@ async function seed() {
         create: {
             id: MAIN_NETWORK_ID,
             alias: 'Development Network',
-            secretKey: `dev-network-${nanoid(24)}`,
         },
     });
 
@@ -106,7 +105,6 @@ async function seed() {
         create: {
             id: EMPTY_NETWORK_ID,
             alias: 'Empty Network',
-            secretKey: `empty-network-${nanoid(22)}`,
         },
     });
 

@@ -23,7 +23,7 @@ import {
 const NETWORK_ID: string = 'agent-api-testing-network-id'; // Key to register a network, known to flux´
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
-const LIVE_UPDATES_NETWORK_ID: string = 'rAnD0M-network-id';
+const LIVE_UPDATES_NETWORK_ID: string = 'rAnD0M-network-id'; // Portal bootstraps its own status authority on this network
 
 describe('persistica-flux-api-agents', () => {
     let portalDomain: string = '';
@@ -52,10 +52,13 @@ describe('persistica-flux-api-agents', () => {
         // * Clear the container
         await connectToRedisAndFlush(redisURL);
 
-        // Seed every authority token needed during portal boot before the server starts,
-        // so the mesh cache can bootstrap on cold start without racing app startup.
-        await seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_AUTHORITY_KEY]);
-        await seedNetworkTokens(redisURL, LIVE_UPDATES_NETWORK_ID, [NETWORK_AUTHORITY_KEY]);
+        // The portal starts its own live-updates mesh authority during boot, so
+        // Redis must be clean and both required network tokens must exist before
+        // the process starts.
+        await Promise.all([
+            seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_AUTHORITY_KEY]),
+            seedNetworkTokens(redisURL, LIVE_UPDATES_NETWORK_ID, [NETWORK_AUTHORITY_KEY]),
+        ]);
 
         console.log(`⚗️ Starting portal server on port ${randomAPIPort}`);
 
