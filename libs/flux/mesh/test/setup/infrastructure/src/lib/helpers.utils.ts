@@ -26,6 +26,38 @@ export const connectToRedisAndFlush = async (
 };
 
 /**
+ * Seeds valid network access token values into the persistent Redis Set that
+ * the mesh's {@link NetworkTokenCache} falls back to on cold start.
+ *
+ * Call this in test `beforeAll` **after** any Redis flush, and **before** the
+ * authority tries to register, so the cache can bootstrap itself.
+ *
+ * The key written matches `:flux:network-tokens/{networkId}/values`.
+ */
+export const seedNetworkTokens = async (
+    url: string,
+    networkId: string,
+    tokenValues: string[],
+): Promise<void> => {
+    const client = new RedisClient(url);
+    await client.connect();
+
+    if (!client.connected) {
+        throw new Error(`Failed to connect to Redis at '${url}' for seeding network tokens`);
+    }
+
+    const key = `:flux:network-tokens/${networkId}/values`;
+
+    await client.send('DEL', [key]);
+
+    if (tokenValues.length > 0) {
+        await client.send('SADD', [key, ...tokenValues]);
+    }
+
+    client.close();
+};
+
+/**
  * Polls a URL until it responds with a successful status code or the timeout is reached.
  */
 export const waitUntilAvailable = async (

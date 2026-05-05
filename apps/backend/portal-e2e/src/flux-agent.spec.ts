@@ -16,6 +16,7 @@ import { $ } from 'bun';
 import {
     waitUntilAvailable,
     connectToRedisAndFlush,
+    seedNetworkTokens,
     generateRandomSafePort,
 } from '@flux/mesh/test/setup/infrastructure';
 
@@ -29,6 +30,10 @@ describe('persistica-flux-api-agents', () => {
 
     beforeAll(async () => {
         const redisURL = globalThis['infrastructureRedisURL'];
+
+        if (!redisURL) {
+            throw new Error('Redis URL is not defined globally');
+        }
 
         // Generate random port to avoid conflicts with other tests running in parallel
         const randomAPIPort = generateRandomSafePort();
@@ -60,6 +65,9 @@ describe('persistica-flux-api-agents', () => {
 
         // * Clear the container
         await connectToRedisAndFlush(redisURL);
+
+        // Seed the test authority token so the mesh cache can bootstrap on cold start
+        await seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_AUTHORITY_KEY]);
 
         if (!fluxDomain) {
             throw new Error('Flux domain is not defined');

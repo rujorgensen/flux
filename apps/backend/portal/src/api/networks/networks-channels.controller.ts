@@ -3,18 +3,23 @@ import {
     type TChannelName,
     type TClientId,
     type TNetworkChannelCountAt,
+    TNetworkToken_S,
     validateChannelNameOrThrow,
 } from '@flux/shared/types';
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
+import { getNetworkTokenServiceInstance, NetworkTokenCache } from '@backend/features/network';
 import {
     type RedisConnection,
     getMeshRedisConnection,
 } from '@flux/mesh';
 import { networkIdValidatorPlugin } from './plugins';
-import { validateNetworkToken } from './tokens/tokens.controller';
 
 const redisConnection_: RedisConnection = getMeshRedisConnection();
 const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
+const networkTokenCache: NetworkTokenCache = new NetworkTokenCache(
+    getMeshRedisConnection(),
+    getNetworkTokenServiceInstance(),
+);
 
 class InvalidChannelNameError extends Error {
     status = 400;
@@ -173,7 +178,7 @@ export const networkChannelController = new Elysia({
         );
     }, {
         query: t.Object({ token: t.String() }),
-        beforeHandle({ networkId, params, query, set }) {
+        beforeHandle: async ({ networkId, params, query, set }) => {
             try {
                 validateChannelNameOrThrow(params.channelName);
             } catch {
@@ -182,7 +187,10 @@ export const networkChannelController = new Elysia({
                 return { message: 'Invalid channel name' };
             }
 
-            if (!validateNetworkToken(networkId, query.token)) {
+            if (!await networkTokenCache.isValidToken(
+                networkId,
+                query.token as TNetworkToken_S,
+            )) {
                 set.status = 401;
 
                 return { message: 'Unauthorized: invalid network token' };

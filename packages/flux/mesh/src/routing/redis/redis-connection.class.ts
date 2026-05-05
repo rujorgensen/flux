@@ -236,6 +236,44 @@ export class RedisConnection {
             );
     }
 
+    /**
+     * Persists the current set of valid token values for a network into a
+     * Redis Set so that mesh processes can bootstrap their local caches after
+     * a cold start (i.e. before any pub/sub event has been received).
+     *
+     * The key format is: `:flux:network-tokens/{networkId}/values`.
+     *
+     * Called by the portal on every token mutation alongside
+     * {@link publishNetworkTokenEvent}.
+     */
+    public async setNetworkTokenValues(
+        networkId: TNetworkId_S,
+        tokens: TNetworkToken_S[],
+    ): Promise<void> {
+        const key = `:flux:network-tokens/${networkId}/values`;
+
+        await this.hash.del(key);
+
+        if (tokens.length > 0) {
+            await this.hash.sadd(key, ...tokens);
+        }
+    }
+
+    /**
+     * Reads the set of valid token values for a network from the persistent
+     * Redis Set written by the portal.
+     *
+     * Used by {@link NetworkTokenCache} for cold-start bootstrapping.
+     */
+    public async getNetworkTokenValues(
+        networkId: TNetworkId_S,
+    ): Promise<TNetworkToken_S[]> {
+        const key = `:flux:network-tokens/${networkId}/values`;
+        const members = await this.hash.smembers(key);
+
+        return members as TNetworkToken_S[];
+    }
+
     // ****************************************************************************
     // *** Publish Directly to Address - Custom messages
     // ****************************************************************************

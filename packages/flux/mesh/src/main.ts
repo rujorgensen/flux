@@ -71,7 +71,6 @@ import {
 import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
-import { AuthorityManager } from './_managers/authority.manager';
 import { AgentManager } from './_managers/agent.manager';
 
 PicoLogger.configure({
