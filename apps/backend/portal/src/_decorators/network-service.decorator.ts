@@ -9,7 +9,7 @@ import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 import { getNetworkTokenServiceInstance } from '@backend/features/network';
 
-const networkRepository: NetworkRepository = new NetworkRepository(
+export const networkRepository: NetworkRepository = new NetworkRepository(
     getPortalPgRepository(),
 );
 
@@ -18,7 +18,7 @@ const meshRedisConnection = await getMeshBunRedisConnection();
 const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
 const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
 
-const networkService: NetworkService = new NetworkService(
+export const networkService: NetworkService = new NetworkService(
     networkAgentRedisCacheService,
     networkChannelRedisCacheService,
     new NetworkAuthorityRedisSortedSet(meshRedisConnection.getClient()),

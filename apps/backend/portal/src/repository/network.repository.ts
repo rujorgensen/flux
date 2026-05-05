@@ -115,6 +115,18 @@ export class NetworkRepository {
     // ****************************************************************************
 
     /**
+     * Returns all network IDs stored in the database.
+     */
+    public async readAllNetworkIds(
+    ): Promise<TNetworkId_S[]> {
+        const networks = await this._prismaClient.network.findMany({
+            select: { id: true },
+        });
+
+        return networks.map((n) => n.id as TNetworkId_S);
+    }
+
+    /**
      * Returns all networks for the given user.
      */
     public readUserNetworks(

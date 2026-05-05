@@ -21,9 +21,9 @@ import {
 } from '@flux/mesh/test/setup/infrastructure';
 
 const NETWORK_ID: string = 'agent-api-testing-network-id'; // Key to register a network, known to flux´
-const LIVE_UPDATES_NETWORK_ID: string = 'rAnD0M-network-id'; // Portal bootstraps its own status authority on this network
 const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
+const LIVE_UPDATES_NETWORK_ID: string = 'rAnD0M-network-id'; // Portal bootstraps its own status authority on this network
 
 describe('persistica-flux-api-agents', () => {
     let portalDomain: string = '';
@@ -49,10 +49,12 @@ describe('persistica-flux-api-agents', () => {
 
         fluxDomain = `http://localhost:${randomMeshPort}`;
 
+        // * Clear the container
+        await connectToRedisAndFlush(redisURL);
+
         // The portal starts its own live-updates mesh authority during boot, so
         // Redis must be clean and both required network tokens must exist before
         // the process starts.
-        await connectToRedisAndFlush(redisURL);
         await Promise.all([
             seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_AUTHORITY_KEY]),
             seedNetworkTokens(redisURL, LIVE_UPDATES_NETWORK_ID, [NETWORK_AUTHORITY_KEY]),
