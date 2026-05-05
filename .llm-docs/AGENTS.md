@@ -60,6 +60,22 @@ function example(
 
 // ❌ Avoid
 function example(arg1: string, arg2: number) { ... }
+```
+
+The closing parenthesis of any function or method signature must always be on its own line, even when the argument list is empty or the signature is short:
+
+```typescript
+// ✅ Do
+public async takeSnapshot(
+): Promise<void> {
+  // ...
+}
+
+// ❌ Avoid
+public async takeSnapshot(): Promise<void> {
+  // ...
+}
+```
 
 # Frameworks
 
