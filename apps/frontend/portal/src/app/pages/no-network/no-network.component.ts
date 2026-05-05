@@ -43,7 +43,7 @@ export class NoNetworkPageComponent implements OnInit, OnDestroy {
     constructor(
         private readonly networksService: NetworksService,
         private readonly router: Router,
-    ) { }
+    ) {}
 
     public async ngOnInit(
 

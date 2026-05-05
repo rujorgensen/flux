@@ -4,11 +4,12 @@ import { TNetworkId_S } from "@flux/shared/types";
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 
 export class NetworkService {
+
     constructor(
         private readonly _networkAgentRedisCacheService: NetworkAgentRedisService,
         private readonly _networkChannelRedisCacheService: NetworkChannelHash,
         private readonly _networkAuthorityService: NetworkAuthorityRedisSortedSet,
-    ) { }
+    ) {}
 
     public async readConnectionStatus(
         networkId: TNetworkId_S,

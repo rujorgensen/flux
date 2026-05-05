@@ -1,5 +1,4 @@
 import { Elysia } from 'elysia';
-// import { $ } from 'bun';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
@@ -13,6 +12,9 @@ import { betterAuth } from './_decorators/auth.decorator';
 import { networksController } from './api/networks/networks.controller';
 import { version } from '../package.json';
 import { networkTokenController } from './api/networks/tokens/tokens.controller';
+import { networkRepository, networkService } from './_decorators/network-service.decorator';
+import { ConnectionHistorySnapshotService } from './_services/connection-history-snapshot.service';
+import { getPortalPgRepository } from '@backend/core/prisma';
 
 // ****************************************************************************
 // * Env
@@ -49,6 +51,24 @@ new LiveUpdates(
     meshRedisStatusService,
     FLUX_AUTHORITY_JWT_SECRET,
 );
+
+// ****************************************************************************
+// * Connection History Snapshot (cron job)
+// ****************************************************************************
+const connectionHistorySnapshotService = new ConnectionHistorySnapshotService(
+    networkRepository,
+    networkService,
+    getPortalPgRepository(),
+);
+
+// Schedule an hourly snapshot to keep the dashboard history up to date
+Bun.cron('@hourly', async () => {
+    await connectionHistorySnapshotService
+        .takeSnapshot()
+        .catch((error: unknown) => {
+            console.error('❌ Scheduled connection history snapshot failed:', error);
+        });
+});
 
 // * Host the frontend and static resources 
 // try {
