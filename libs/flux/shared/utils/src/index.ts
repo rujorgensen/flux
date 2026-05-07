@@ -1,6 +1,6 @@
 export * from './lib/state-manager.util';
 export {
-    retry,
+    retryOrThrow,
 } from './lib/promises.utils';
 export {
     EventEmitter,

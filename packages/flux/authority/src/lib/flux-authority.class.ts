@@ -25,7 +25,7 @@ import {
 import {
     type TFluxClientUID,
     getMachineUID,
-    retry,
+    retryOrThrow,
     StateManager,
 } from '@flux/shared/utils';
 import {
@@ -73,52 +73,57 @@ export class FluxAuthority {
 
         const machineUID: TFluxClientUID | undefined = await getMachineUID() ?? undefined;
 
-        const ticket: string = await retry<any>(
-            () => authenticateNetworkAuthorityOrThrow(
-                this.networkId as TNetworkId_S,
-                this.options?.domain ?? 'http://localhost:5100',
-                authorityKey,
-                {
-                    machineUID,
-                },
-            ),
-            (err: unknown) => err instanceof RetryableError,
-            {
-                retries: 10_000,
-                delayMs: 500,
-                onRetry: (
-                    attempt: number,
-                    retries: number,
-                ) => {
-                    console.log(`[RegisterAuthority] Retrying... (attempt: ${attempt} of ${retries})`);
-                },
-            },
-        );
-
-        this.fluxWebSocketConnection = createWSConnection(
-            this.id,
-            ticket,
-            this.stateManager,
-            async () => {
-                this.registerAuthority(
+        try {
+            const ticket: string = await retryOrThrow<any>(
+                () => authenticateNetworkAuthorityOrThrow(
+                    this.networkId as TNetworkId_S,
+                    this.options?.domain ?? 'http://localhost:5100',
                     authorityKey,
+                    {
+                        machineUID,
+                    },
+                ),
+                (err: unknown) => err instanceof RetryableError,
+                {
+                    retries: 10_000,
+                    delayMs: 500,
+                    onRetry: (
+                        attempt: number,
+                        retries: number,
+                    ) => {
+                        console.log(`[RegisterAuthority] Retrying... (attempt: ${attempt} of ${retries})`);
+                    },
+                },
+            );
+
+            this.fluxWebSocketConnection = createWSConnection(
+                this.id,
+                ticket,
+                this.stateManager,
+                async () => {
+                    // For reconnection logic
+                    this.registerAuthority(
+                        authorityKey,
+                        authorizeNetworkAgent,
+                        authorizeNetworkChannel,
+                    );
+                },
+                this.options,
+            );
+
+            this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
+
+            await this
+                .fluxWebSocketConnection
+                .registerAuthority(
                     authorizeNetworkAgent,
                     authorizeNetworkChannel,
                 );
-            },
-            this.options,
-        );
 
-        this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
-
-        await this
-            .fluxWebSocketConnection
-            .registerAuthority(
-                authorizeNetworkAgent,
-                authorizeNetworkChannel,
-            );
-
-        return Promise.resolve(new FluxAuthorityNetworkConnection(this.fluxWebSocketConnection));
+            return Promise.resolve(new FluxAuthorityNetworkConnection(this.fluxWebSocketConnection));
+        } catch (error) {
+            return Promise.reject(error);
+        }
     }
 
     /**

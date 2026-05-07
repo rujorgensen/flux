@@ -4,9 +4,9 @@ import type {
 import type { TFluxClientUID } from '@flux/shared/utils';
 import { validateMachineUID } from '@flux/shared/utils';
 
-export class RetryableError extends Error { }
-export class ConnectionError extends RetryableError { }
-export class AuthenticationError extends Error { }
+export class RetryableError extends Error {}
+export class ConnectionError extends RetryableError {}
+export class AuthenticationError extends Error {}
 
 /**
  * Authenticates with the server and returns a ticket for connecting the websocket.
@@ -38,7 +38,7 @@ export const authenticateNetworkAuthorityOrThrow = async (
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Content-Type': 'text/plain', //  'application/json', // text/plain
+                'Content-Type': 'text/plain', //  'application/json',
                 'Accept': 'text/plain',
             },
             body: authorityKey,

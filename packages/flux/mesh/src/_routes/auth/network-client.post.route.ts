@@ -12,7 +12,7 @@ import {
 import { generateToken } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
 import type { NetworkAuthorityRedisCache } from '../../register/network-authority-redis-cache.class';
-import { retry } from '@flux/shared/utils';
+import { retryOrThrow } from '@flux/shared/utils';
 import {
     type TFluxClientUID,
     validateMachineUID,
@@ -67,7 +67,7 @@ export const authorizeNetworkAgent = async (
     try {
         let networkAuthorityAddress: TAddress;
 
-        const authorizedJWT: string = await retry<string>(
+        const authorizedJWT: string = await retryOrThrow<string>(
             async () => {
                 networkAuthorityAddress = await networkAuthorityManager
                     .resolveNetworkAuthorityAddressOrThrow(

@@ -99,7 +99,11 @@ export class LiveUpdates {
 
                             return Promise.resolve(true);
                         },
-                    );
+                    )
+                    .catch((error) => {
+                        console.error(`❌ Failed to register authority: ${error instanceof Error ? error.message : String(error)}`);
+                    })
+                    ;
 
                 // ****************************************************************************
                 // * Setup Agent

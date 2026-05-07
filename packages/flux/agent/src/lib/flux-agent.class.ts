@@ -27,7 +27,7 @@ import {
 import { nanoid } from 'nanoid';
 import { authenticateAgentOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
-import { getMachineUID, retry, StateManager } from '@flux/shared/utils';
+import { getMachineUID, retryOrThrow, StateManager } from '@flux/shared/utils';
 
 export class FluxAgent {
     public readonly id: string = nanoid();
@@ -67,50 +67,54 @@ export class FluxAgent {
             throw new Error('Will never be thrown');
         }
 
-        const ticket = await retry(
-            async () => {
-                return authenticateAgentOrThrow(
-                    this.networkId as TNetworkId_S,
-                    this.options?.domain ?? 'http://localhost:5100',
-                    identification,
-                    {
-                        clientUId: clientUId as TAgentOwnUId,
-                        machineUID: (await getMachineUID()) ?? undefined,
-                    },
-                );
-            },
+        try {
+            const ticket = await retryOrThrow(
+                async () => {
+                    return authenticateAgentOrThrow(
+                        this.networkId as TNetworkId_S,
+                        this.options?.domain ?? 'http://localhost:5100',
+                        identification,
+                        {
+                            clientUId: clientUId as TAgentOwnUId,
+                            machineUID: (await getMachineUID()) ?? undefined,
+                        },
+                    );
+                },
 
-            // Retry if no authority was found yet
-            (error: unknown) => (error instanceof NetworkAuthorityNotFoundError),
+                // Retry if no authority was found yet
+                (error: unknown) => (error instanceof NetworkAuthorityNotFoundError),
 
-            {
-                retries: 100,
-                delayMs: 500,
-                // Backoff until 3 seconds
-                onRetry: (attempt) => Math.min(3_000, 500 + (attempt * 200)),
-            },
-        );
+                {
+                    retries: 100,
+                    delayMs: 500,
+                    // Backoff until 3 seconds
+                    onRetry: (attempt) => Math.min(3_000, 500 + (attempt * 200)),
+                },
+            );
 
-        this.fluxWebSocketConnection = createWSConnection(
-            this.id,
-            ticket,
-            this.stateManager,
-            async () => {
-                await this.connect(
-                    identification,
-                    clientUId,
-                );
-            },
-            this.options,
-        );
+            this.fluxWebSocketConnection = createWSConnection(
+                this.id,
+                ticket,
+                this.stateManager,
+                async () => {
+                    await this.connect(
+                        identification,
+                        clientUId,
+                    );
+                },
+                this.options,
+            );
 
-        this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
+            this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
 
-        const fluxNetworkConnection: FluxAgentNetworkConnection = await this
-            .fluxWebSocketConnection
-            .connectToNetwork();
+            const fluxNetworkConnection: FluxAgentNetworkConnection = await this
+                .fluxWebSocketConnection
+                .connectToNetwork();
 
-        return fluxNetworkConnection;
+            return fluxNetworkConnection;
+        } catch (error) {
+            return Promise.reject(error);
+        }
     }
 
     /**

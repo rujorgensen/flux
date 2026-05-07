@@ -1,7 +1,7 @@
 /**
- * Retries a function until it succeeds or the retry limit is reached.
+ * Retries a function until it succeeds or the retry limit is reached, then throws.
  */
-export const retry = async <T>(
+export const retryOrThrow = async <T>(
     fn: () => Promise<T>,
     shouldRetry: (err: unknown) => boolean | number,
     options: {
