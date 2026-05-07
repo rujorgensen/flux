@@ -25,14 +25,14 @@ export const networksController = apiRoutes
      */
     .post(
         '',
-        ({
+        async ({
             body,
             serviceProviders,
             user,
         }): Promise<INetwork_S> => {
             console.log('Creating network with body:', body);
 
-            return serviceProviders
+            const createdNetwork: INetwork_S = await serviceProviders
                 .networkRepository
                 .createNetwork(
                     {
@@ -40,6 +40,16 @@ export const networksController = apiRoutes
                         alias: body.alias,
                     },
                 );
+
+            // Create initial token for the network
+            serviceProviders
+                .networkTokenService
+                .createToken(
+                    createdNetwork.id as TNetworkId_S,
+                    user.id,
+                );
+
+            return createdNetwork;
         },
 
         // Validate body

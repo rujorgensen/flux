@@ -58,7 +58,6 @@ export class NetworkRepository {
                 data: {
                     id,
                     alias,
-                    secretKey: nanoid(32),
                     userNetworks: {
                         create: {
                             userId,
