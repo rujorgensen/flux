@@ -7,7 +7,7 @@ import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
 import type { RedisStatusService } from './_services/redis-status.service';
-import type { TNetworkAgentCountAt, TNetworkChannelCountAt, TNetworkId_S } from '@flux/shared/types';
+import type { TNetworkAgentCountAt, TNetworkChannelCountAt } from '@flux/shared/types';
 
 interface IAgentJWTPayload extends jwt.JwtPayload {
     user: {
@@ -15,7 +15,7 @@ interface IAgentJWTPayload extends jwt.JwtPayload {
     };
 }
 
-const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´
+const NETWORK_ID: string = 'cobalia'; // Key to register a network, known to flux
 
 // ****************************************************************************
 // * Setup Mesh Server

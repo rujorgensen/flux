@@ -46,7 +46,7 @@
                                 </span>
                             </div>
                         </td>
-                        <td class="text-right">{{ row.bytes }}</td>
+                        <td class="text-right">{{ row.bytes | number:'1.0-0' }}</td>
                         <td>{{ row.createdAt | date:'fullDate' }}</td>
                         <td>
                             <div class="flex items-center gap-2">

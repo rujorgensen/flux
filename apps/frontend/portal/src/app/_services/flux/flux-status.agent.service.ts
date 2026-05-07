@@ -10,6 +10,8 @@ export class FluxStatusAgentService extends FluxAgent {
     constructor(
 
     ) {
+        // ! TODO This is an internally used live connection for getting 
+        // ! Redis status data. Validate the user (check if they're flux admins) to check access rights.
         super(
             'rAnD0M-network-id',
             {
