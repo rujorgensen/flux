@@ -36,9 +36,7 @@ FROM base AS build
 COPY --from=install ./src/node_modules node_modules
 COPY . .
 
-# ENV NODE_ENV=production
-WORKDIR /src/apps/frontend/portal
-RUN bunx astro build
+RUN bunx nx run @flux/portal-ui:build:production --verbose --skip-nx-cache
 
 # ******************************************************************************
 # *** DEPLOY STAGE
