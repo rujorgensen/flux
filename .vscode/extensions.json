@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-azuretools.vscode-docker",
+        "aaron-bond.better-comments",
+        "pomdtr.excalidraw-editor",
+        "vunguyentuan.vscode-css-variables",
+        "ms-playwright.playwright"
+    ],
+    "unwantedRecommendations": ["esbenp.prettier-vscode"]
+}

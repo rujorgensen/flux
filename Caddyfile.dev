@@ -1,0 +1,15 @@
+# Portal PROD Caddyfile
+{
+	email user@email.com
+	debug
+}
+
+# Optional local dev / health-check port (no TLS)
+http://:9000 {
+	reverse_proxy /api* portal-api-prod:3000
+	reverse_proxy * portal-ui-prod:3001
+
+	handle /cddy {
+		respond "Caddytime!"
+	}
+}

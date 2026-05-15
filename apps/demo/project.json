@@ -1,0 +1,22 @@
+{
+    "name": "demo",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "application",
+    "sourceRoot": "apps/demo/src",
+    "tags": [
+        "type:demo",
+        "scope:all"
+    ],
+    "targets": {
+        "serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "bun --watch run ./apps/demo/src/http.server.ts",
+                    "bunx open-cli http://localhost:4000"
+                ]
+            },
+            "continuous": true
+        }
+    }
+}

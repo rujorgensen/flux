@@ -1,0 +1,56 @@
+services:
+
+  mesh-dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    container_name: mesh-dragonfly-selfhosted # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ulimits:
+      memlock: -1
+    # Don't use all threads, occasionally fails with "There are 20 threads, so 5.00GiB are required. Exiting..."
+    command: dragonfly --proactor_threads=3
+    ports:
+      - "6381:6379"
+    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
+    # `host` mode is NOT currently supported in Swarm Mode.
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+    # network_mode: "host"
+    volumes:
+      - dragonflymeshdata:/data
+
+  mesh-postgres:
+    image: postgres:18.3-alpine
+    restart: always
+    container_name: mesh-postgres-selfhosted
+    environment:
+      POSTGRES_USER: ${MESH_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${MESH_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${MESH_POSTGRES_DB}
+    # ports:
+    #   - "5434:5432"
+    volumes:
+      - pg-data-mesh:/var/lib/postgresql
+    networks:
+      - private-mesh-network
+
+  mesh-server:
+    image: rujorgensen/persistica-mesh:latest
+    container_name: mesh-server-selfhosted
+    ports:
+      - "6350:6379"
+    networks:
+      - private-mesh-network
+
+  portal:
+    image: rujorgensen/persistica-portal:latest
+    container_name: portal-server-selfhosted
+    ports:
+      - "6350:6379"
+    networks:
+      - private-mesh-network
+
+networks:
+  private-mesh-network:
+    driver: bridge
+
+volumes:
+  dragonflymeshdata:
+  pg-data-mesh:

@@ -1,0 +1,68 @@
+{
+    "name": "persistica-flux-agent",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/flux/agent/src",
+    "projectType": "library",
+    "tags": [
+        "type:npm-package",
+        "scope:any"
+    ],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/packages/flux/agent",
+                "main": "packages/flux/agent/src/index.ts",
+                "tsConfig": "packages/flux/agent/tsconfig.lib.json",
+                "assets": [
+                    "{projectRoot}/README.md"
+                ],
+                "format": [
+                    "esm"
+                ]
+            }
+        },
+        "bun-serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun --watch run ./apps/flux/agent/src/lib/flux.ts"
+            }
+        },
+        "madge-graph": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npx madge --image graph.svg --extensions ts,tsx ./apps/flux/agent/src"
+            }
+        },
+        "link": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd ./dist/{projectRoot} && bun link"
+            },
+            "dependsOn": [
+                "build"
+            ]
+        },
+        "nx-release-publish": {
+            "options": {
+                "packageRoot": "dist/{projectRoot}"
+            },
+            "dependsOn": [
+                "build"
+            ]
+        }
+    },
+    "release": {
+        "version": {
+            "currentVersionResolver": "git-tag",
+            "fallbackCurrentVersionResolver": "disk",
+            "preserveLocalDependencyProtocols": false,
+            "manifestRootsToUpdate": [
+                "dist/{projectRoot}"
+            ]
+        }
+    }
+}

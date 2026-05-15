@@ -1,0 +1,21 @@
+# Portal PROD Caddyfile
+{
+	email user@email.com
+	debug
+}
+
+# Force HTTP to HTTPS for main domains
+http://persistica.io, http://portal.persistica.io {
+	redir https://{host}{uri} permanent
+}
+
+portal.persistica.io,
+persistica.io {
+	encode gzip
+	reverse_proxy /api* portal-api-prod:3000
+	reverse_proxy * portal-ui-prod:3001
+
+	handle /cddy {
+		respond "Caddytime!"
+	}
+}

@@ -1,0 +1,57 @@
+{
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/backend/src",
+    "projectType": "application",
+    "targets": {
+        "build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun run {projectRoot}/build.js",
+                "args": [
+                    "--projectRoot={projectRoot}"
+                ]
+            }
+        },
+        "serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "bun run --watch {projectRoot}/src/main.ts --tsconfig-override=tsconfig.app.json",
+                    "bunx open-cli http://localhost:9000/api/docs"
+                ],
+                "parallel": true
+            },
+            "dependsOn": [
+                "backend-mesh:serve"
+            ],
+            "continuous": true
+        },
+        "serve-static": {
+            "executor": "nx:run-script",
+            "options": {
+                "script": "bunx run ../../../dist/apps/frontend/portal/server/entry.mjs"
+            }
+        },
+        "bun-test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun test {projectRoot}/ --env-file=.env.test"
+            }
+        },
+        "docker-dev": {
+            "command": "sh -c \"docker compose -p flux-dev -f .deploy/docker-compose.dev.yml up -d --build || true\""
+        },
+        "docker-build": {
+            "command": "docker build -f apps/backend/portal/Dockerfile . -t flux-portal-backend"
+        },
+        "docker-build-and-run": {
+            "dependsOn": [
+                "docker-build"
+            ],
+            "command": "docker run -d --name flux-dev -p 3000:3000 flux-portal-backend"
+        }
+    },
+    "tags": [
+        "scope:portal"
+    ]
+}

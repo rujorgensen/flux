@@ -1,0 +1,76 @@
+services:
+  portal-ui-prod:
+    image: persitica-portal-ui:latest
+    container_name: portal-ui-prod
+    environment:
+      FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    build:
+      context: .
+      dockerfile: ./apps/frontend/portal/Dockerfile
+      target: deploy
+    networks:
+      - portal-public-network
+      - portal-internal-network-2
+
+  portal-api-prod:
+    image: persitica-portal-api:latest
+    container_name: portal-api-prod
+    environment:
+      FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
+      FLUX_MESH_REDIS_URL: ${FLUX_MESH_REDIS_URL}
+      FLUX_PORTAL_REDIS_URL: ${FLUX_PORTAL_REDIS_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    build:
+      context: .
+      dockerfile: ./apps/backend/portal/Dockerfile
+      target: deploy
+      args:
+        FLUX_DATABASE_URL: ${FLUX_DATABASE_URL}
+    networks:
+      - portal-public-network
+      - portal-internal-network-2
+
+  # ******************************************************************************
+  # *** Proxy
+  # ******************************************************************************
+  caddy:
+    image: caddy:2.11.2
+    container_name: portal-caddy-proxy-prod
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    #    - "80:80"
+    #    - "443:443"
+    #    - "443:443/udp"
+
+    depends_on:
+      portal-api-prod:
+        condition: service_started
+      portal-ui-prod:
+        condition: service_started
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - portal-public-network
+
+# *******************************************************************************
+# *** Networks
+# *******************************************************************************
+networks:
+  portal-public-network:
+    driver: bridge
+
+  portal-internal-network-2:
+    driver: bridge
+
+# *******************************************************************************
+# *** Volumes
+# *******************************************************************************
+volumes:
+  caddy_data:
+  caddy_config:

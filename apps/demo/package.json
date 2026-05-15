@@ -1,0 +1,26 @@
+{
+    "name": "@persistica/flux-demo",
+    "version": "0.0.1",
+    "description": "Persistica Flux Agent",
+    "type": "module",
+    "keywords": [],
+    "publishConfig": {
+        "access": "public"
+    },
+    "main": "./index.cjs",
+    "types": "./index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rujorgensen/persistica.git"
+    },
+    "bugs": {
+        "url": "https://github.com/rujorgensen/persistica/issues"
+    },
+    "homepage": "https://github.com/rujorgensen/persistica#readme",
+    "dependencies": {
+        "alpinejs": "3.15.12"
+    },
+    "devDependencies": {
+        "@types/alpinejs": "catalog:"
+    }
+}

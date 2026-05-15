@@ -1,0 +1,21 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../../../dist/out-tsc",
+        "declaration": true,
+        "types": [
+            "node"
+        ],
+        "target": "ESNext",
+        "module": "preserve",
+        "moduleResolution": "bundler"
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "vite.config.ts",
+        "src/**/*.spec.ts",
+        "src/**/*.test.ts"
+        ]
+}

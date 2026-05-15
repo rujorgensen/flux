@@ -1,0 +1,25 @@
+{
+    "name": "flux-shared-ws",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/flux/shared/ws/src",
+    "projectType": "library",
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/libs/flux/shared/ws",
+                "main": "libs/flux/shared/ws/src/index.ts",
+                "tsConfig": "libs/flux/shared/ws/tsconfig.lib.json",
+                "assets": [],
+                "deleteOutputPath": false
+            }
+        }
+    },
+    "tags": [
+        "type:ws",
+        "scope:shared"
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "name": "flux-shared-connection",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/flux/shared/connection/src",
+    "projectType": "library",
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/libs/flux/shared/connection",
+                "main": "libs/flux/shared/connection/src/index.ts",
+                "tsConfig": "libs/flux/shared/connection/tsconfig.lib.json",
+                "assets": []
+            }
+        }
+    },
+    "tags": [
+        "type:connection",
+        "scope:shared"
+    ]
+}

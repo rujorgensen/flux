@@ -1,0 +1,185 @@
+<app-dashboard-layout [userSession]="userSession()" pageTitle="DragonFly Status">
+    <div class="p-6 max-w-5xl space-y-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">DragonFly Connection Status</h1>
+                <p class="text-sm text-base-content/60 mt-1">
+                    Internal status of the underlying DragonFly database connections.
+                </p>
+            </div>
+        </div>
+
+        @if (error()) {
+            <div class="alert alert-error">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{{ error() }}</span>
+            </div>
+        }
+
+        @if (!statuses()) {
+            <div class="flex justify-center py-12">
+                <span class="loading loading-spinner loading-lg"></span>
+            </div>
+        }
+
+        @if (statuses(); as statusList) {
+            @for (status of statusList; track $index) {
+                <div class="card bg-base-200 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-lg">
+                            {{ instanceLabels[$index] ?? ('Instance ' + ($index + 1)) }}
+                            @if (status.memory.overThreshold) {
+                                <div class="badge badge-error badge-sm">High Memory</div>
+                            } @else {
+                                <div class="badge badge-success badge-sm">Healthy</div>
+                            }
+                            <div class="badge badge-ghost badge-sm font-mono ml-auto text-base-content/60">{{ status.url }}</div>
+                        </h2>
+                        <p class="text-xs text-base-content/50">
+                            Updated: {{ status.updatedAt | date: 'medium' }}
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                            <!-- Memory -->
+                            <div class="bg-base-100 rounded-lg p-4 space-y-2">
+                                <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/70">Memory</h3>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Used</span>
+                                        <span class="font-mono">{{ formatBytes(status.memory.used) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Max</span>
+                                        <span class="font-mono">{{ formatBytes(status.memory.max) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Usage</span>
+                                        <span
+                                            class="font-mono"
+                                            [class.text-error]="status.memory.overThreshold"
+                                        >
+                                            {{ status.memory.usageRatio | number: '1.1-1' }} %
+                                        </span>
+                                    </div>
+                                </div>
+                                @if (status.memory.usageRatio !== null) {
+                                    <progress
+                                        class="progress w-full"
+                                        [class.progress-error]="status.memory.overThreshold"
+                                        [class.progress-success]="!status.memory.overThreshold"
+                                        [value]="status.memory.usageRatio * 100"
+                                        max="100"
+                                    ></progress>
+                                }
+                            </div>
+
+                            <!-- Clients -->
+                            <div class="bg-base-100 rounded-lg p-4 space-y-2">
+                                <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/70">Clients</h3>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Connected</span>
+                                        <span class="font-mono">{{ status.clients.connected ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Blocked</span>
+                                        <span class="font-mono">{{ status.clients.blocked ?? 'N/A' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CPU -->
+                            <div class="bg-base-100 rounded-lg p-4 space-y-2">
+                                <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/70">CPU</h3>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Sys</span>
+                                        <span class="font-mono">{{ status.cpu.sys | number: '1.2-2' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">User</span>
+                                        <span class="font-mono">{{ status.cpu.user | number: '1.2-2' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Sys (children)</span>
+                                        <span class="font-mono">{{ status.cpu.sysChildren ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">User (children)</span>
+                                        <span class="font-mono">{{ status.cpu.userChildren ?? 'N/A' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="bg-base-100 rounded-lg p-4 space-y-2">
+                                <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/70">Stats</h3>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Keyspace hits</span>
+                                        <span class="font-mono">{{ status.stats.keyspaceHits ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Keyspace misses</span>
+                                        <span class="font-mono">{{ status.stats.keyspaceMisses ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Evicted keys</span>
+                                        <span
+                                            class="font-mono"
+                                            [class.text-warning]="($any(status.stats.evictedKeys) ?? 0) > 0"
+                                        >{{ status.stats.evictedKeys ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Expired keys</span>
+                                        <span class="font-mono">{{ status.stats.expiredKeys ?? 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-base-content/60">Rejected connections</span>
+                                        <span
+                                            class="font-mono"
+                                            [class.text-error]="($any(status.stats.rejectedConnections) ?? 0) > 0"
+                                        >{{ status.stats.rejectedConnections ?? 'N/A' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Latency -->
+                            @if (status.latency.length > 0) {
+                                <div class="bg-base-100 rounded-lg p-4 space-y-2 md:col-span-2">
+                                    <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/70">Latency Events</h3>
+                                    <div class="overflow-x-auto">
+                                        <table class="table table-xs w-full">
+                                            <thead>
+                                                <tr>
+                                                    <th>Event</th>
+                                                    <th>Latency (ms)</th>
+                                                    <th>Samples</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (event of status.latency; track event.event) {
+                                                    <tr>
+                                                        <td class="font-mono">{{ event.event }}</td>
+                                                        <td
+                                                            class="font-mono"
+                                                            [class.text-error]="event.latencyMs > 100"
+                                                            [class.text-warning]="event.latencyMs > 50 && event.latencyMs <= 100"
+                                                        >{{ event.latencyMs }}</td>
+                                                        <td class="font-mono">{{ event.samples }}</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</app-dashboard-layout>

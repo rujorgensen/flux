@@ -1,0 +1,24 @@
+services:
+  portal-redis-e2e:
+    image: redis:8.6.3
+    command: redis-server --requirepass e2e-redis-password
+    restart: always
+    container_name: portal-redis-e2e # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ports:
+      - 6351:6379
+
+  mesh-dragonfly-e2e:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    container_name: mesh-dragonfly-e2e # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ulimits:
+      memlock: -1
+    ports:
+      - "6381:6379"
+    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
+    # `host` mode is NOT currently supported in Swarm Mode.
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+    # network_mode: "host"
+    volumes:
+      - dragonflydata:/data
+volumes:
+  dragonflydata:

@@ -1,0 +1,153 @@
+/* Dashboard Home Page Styles */
+
+.network-id-panel {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid oklch(var(--b3));
+    background: oklch(var(--b1));
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    flex-wrap: wrap;
+}
+
+.network-id-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.network-id-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.4rem;
+    background: oklch(var(--b2));
+    color: oklch(var(--bc));
+}
+
+.network-id-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: oklch(var(--bc));
+    white-space: nowrap;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .charts-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.chart-panel {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid oklch(var(--b3));
+    background: oklch(var(--b1));
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    min-height: 340px;
+}
+
+.agents-panel {
+    border-top: 3px solid #6366f1;
+}
+
+.authorities-panel {
+    border-top: 3px solid #10b981;
+}
+
+.channels-panel {
+    border-top: 3px solid #f59e0b;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.chart-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: oklch(var(--b2));
+    color: oklch(var(--bc));
+    flex-shrink: 0;
+}
+
+.chart-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: oklch(var(--bc));
+    margin: 0;
+}
+
+.chart-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.agents-badge {
+    background: rgba(99, 102, 241, 0.12);
+    color: #6366f1;
+}
+
+.authorities-badge {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+}
+
+.channels-badge {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.chart-subtitle {
+    font-size: 0.75rem;
+    color: oklch(var(--bc) / 0.5);
+    margin: 0;
+}
+
+.chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: oklch(var(--bc) / 0.4);
+    font-size: 0.85rem;
+    height: 100%;
+    min-height: 150px;
+}

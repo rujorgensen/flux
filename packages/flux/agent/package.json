@@ -1,0 +1,29 @@
+{
+    "name": "@persistica/flux-agent",
+    "version": "0.0.13",
+    "description": "Persistica Flux Agent",
+    "type": "module",
+    "keywords": [],
+    "publishConfig": {
+        "access": "public"
+    },
+    "exports": {
+        ".": {
+            "types": "./src/index.d.ts",
+            "import": "./index.js",
+            "default": "./index.js"
+        }
+    },
+    "main": "./index.js",
+    "types": "./src/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rujorgensen/persistica.git"
+    },
+    "author": "pixl.prophet",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/rujorgensen/persistica/issues"
+    },
+    "homepage": "https://github.com/rujorgensen/persistica#readme"
+}

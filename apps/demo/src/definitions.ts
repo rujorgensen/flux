@@ -1,0 +1,1 @@
+export const DEMO_CHANNEL_PASSWORD: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux

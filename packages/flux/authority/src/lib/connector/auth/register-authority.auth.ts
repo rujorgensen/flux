@@ -1,0 +1,68 @@
+import type {
+    TNetworkId_S,
+} from '@flux/shared/types';
+import type { TFluxClientUID } from '@flux/shared/utils';
+import { validateMachineUID } from '@flux/shared/utils';
+
+export class RetryableError extends Error {}
+export class ConnectionError extends RetryableError {}
+export class AuthenticationError extends Error {}
+
+/**
+ * Authenticates with the server and returns a ticket for connecting the websocket.
+ * 
+ * @param { TNetworkId_S } networkId - The network ID to connect to
+ * @param { string } domain - The domain of the authority server
+ * @param { string } authorityKey - The authority key for authentication
+ * @param { object } clientInfo - Optional client identification info
+ * 
+ * @returns { Promise<unknown> } The authentication ticket
+ */
+export const authenticateNetworkAuthorityOrThrow = async (
+    networkId: TNetworkId_S,
+    domain: string,
+    authorityKey: string,
+    clientInfo: {
+        machineUID?: TFluxClientUID,
+    },
+): Promise<unknown> => {
+
+    // * 1. Send the payload to the authority server and wait for the response
+    try {
+        const url = new URL(`${domain}/auth/network-authority`);
+        url.searchParams.set('networkId', networkId);
+        if (clientInfo.machineUID && validateMachineUID(clientInfo.machineUID)) {
+            url.searchParams.set('machineUID', clientInfo.machineUID);
+        }
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain', //  'application/json',
+                'Accept': 'text/plain',
+            },
+            body: authorityKey,
+        });
+
+        if (response.status === 401) {
+            throw new AuthenticationError('Unauthorized: invalid network access token');
+        }
+
+        if (!response.ok) {
+            throw new Error(`Auth failed: ${response.status}`);
+        }
+
+        const result = await response.text();
+        // if (!checkNAATTicketShape(result)) {
+        //     throw new Error('Auth failed: unexpected response');
+        // }
+
+        return result;
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error;
+        }
+
+        throw new ConnectionError((error as any).code);
+    }
+};

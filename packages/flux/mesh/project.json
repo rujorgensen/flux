@@ -1,0 +1,88 @@
+{
+    "name": "persistica-flux-mesh",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/flux/mesh/src",
+    "projectType": "library",
+    "tags": [
+        "type:npm-package",
+        "scope:any"
+    ],
+    "targets": {
+        "bun-serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun --watch run ./packages/flux/mesh/src/main.ts"
+            }
+        },
+        "build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun run {projectRoot}/build.js",
+                "args": [
+                    "--projectRoot={projectRoot}"
+                ]
+            }
+        },
+        "build:declaration": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "tsc",
+                "args": [
+                    "--project {projectRoot}/tsconfig.types.json"
+                ]
+            }
+        },
+        "serve": {
+            "executor": "@nx/js:node",
+            "defaultConfiguration": "development",
+            "dependsOn": [
+                "build"
+            ],
+            "options": {
+                "buildTarget": "persistica-flux-mesh:build",
+                "runBuildTargetDependencies": false
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "persistica-flux-mesh:build:development"
+                },
+                "production": {
+                    "buildTarget": "persistica-flux-mesh:build:production"
+                }
+            }
+        },
+        "link": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd ./dist/{projectRoot} && bun link"
+            },
+            "dependsOn": [
+                "build"
+            ]
+        },
+        "nx-release-publish": {
+            "options": {
+                "packageRoot": "dist/{projectRoot}"
+            },
+            "dependsOn": [
+                "build"
+            ]
+        },
+        "bun-test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun test {projectRoot}/ --env-file=.env.e2e"
+            }
+        }
+    },
+    "release": {
+        "version": {
+            "currentVersionResolver": "git-tag",
+            "fallbackCurrentVersionResolver": "disk",
+            "preserveLocalDependencyProtocols": false,
+            "manifestRootsToUpdate": [
+                "dist/{projectRoot}"
+            ]
+        }
+    }
+}

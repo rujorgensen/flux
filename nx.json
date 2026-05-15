@@ -1,0 +1,103 @@
+{
+    "$schema": "./node_modules/nx/schemas/nx-schema.json",
+    "targetDefaults": {
+        "build": {
+            "outputs": [
+                "{projectRoot}/dist"
+            ],
+            "cache": true
+        },
+        "@nx/js:swc": {
+            "cache": true,
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "default",
+                "^default"
+            ]
+        },
+        "bun-test": {
+            "inputs": [
+                "default",
+                "^production"
+            ],
+            "cache": true
+        },
+        "@nx/vitest:test": {
+            "cache": true,
+            "inputs": [
+                "default",
+                "^production"
+            ]
+        },
+        "@angular/build:application": {
+            "cache": true,
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "production",
+                "^production"
+            ]
+        },
+        "@angular/build:unit-test": {
+            "cache": true,
+            "inputs": [
+                "default",
+                "^production"
+            ]
+        }
+    },
+    "defaultBase": "main",
+    "plugins": [
+        {
+            "plugin": "@nx/vite/plugin",
+            "options": {
+                "buildTargetName": "build",
+                "testTargetName": "test",
+                "serveTargetName": "serve",
+                "devTargetName": "dev",
+                "previewTargetName": "preview",
+                "serveStaticTargetName": "serve-static",
+                "typecheckTargetName": "typecheck",
+                "buildDepsTargetName": "build-deps",
+                "watchDepsTargetName": "watch-deps"
+            }
+        },
+        {
+            "plugin": "@nx/playwright/plugin",
+            "options": {
+                "targetName": "e2e"
+            }
+        }
+    ],
+    "namedInputs": {
+        "sharedGlobals": [
+            "{workspaceRoot}/.github/workflows/e2e.yml"
+        ],
+        "default": [
+            "{projectRoot}/**/*",
+            "sharedGlobals"
+        ],
+        "production": [
+            "default",
+            "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+            "!{projectRoot}/tsconfig.spec.json",
+            "!{projectRoot}/biome.json"
+        ]
+    },
+    "tui": {
+        "enabled": true
+    },
+    "nxCloudId": "6809319308a2a647ce903863",
+    "analytics": false,
+    "generators": {
+        "@nx/angular:application": {
+            "e2eTestRunner": "playwright",
+            "linter": "none",
+            "style": "scss",
+            "unitTestRunner": "vitest-angular"
+        }
+    }
+}

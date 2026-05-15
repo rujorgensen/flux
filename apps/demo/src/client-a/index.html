@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Flux Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script type="module" src="web-rtc.ts"></script>
+    <script type="module" src="main-settings.ts"></script>
+    <script type="module" src="main-authority.ts"></script>
+    <script type="module" src="main-a.ts"></script>
+    <script type="module" src="main-b.ts"></script>
+    <script type="module" src="main-activity.ts"></script>
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="app-header-inner">
+            <div class="app-logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Flux</span>
+                <span class="logo-badge">Demo</span>
+            </div>
+            <p class="app-subtitle">Real-time P2P networking · WebRTC · Authority-based access control</p>
+        </div>
+    </header>
+
+    <main class="dashboard">
+
+        <div class="grid-panel panel-settings" x-data="fluxUrlSettings()">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">🔧</span>
+                    <h2 class="panel-title">Settings</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="field-group">
+                        <label for="flux-url">Flux URL</label>
+                        <input
+                            id="flux-url"
+                            type="url"
+                            x-model="fluxUrl"
+                            placeholder="http://localhost:5100"
+                        />
+                    </div>
+                    <div class="field-group">
+                        <label for="network-id">Network ID</label>
+                        <input
+                            id="network-id"
+                            type="text"
+                            x-model="networkId"
+                            placeholder="demo-network-id"
+                        />
+                    </div>
+                    <div class="panel-actions">
+                        <button class="btn btn-primary" @click="applyUrl()">Apply &amp; Reload</button>
+                        <span class="status-message success" x-show="saved">✅ Saved – reloading…</span>
+                        <span class="status-message error" x-show="error" x-text="error"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-panel panel-auth" x-data="fluxAuthSettings()">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">🔑</span>
+                    <h2 class="panel-title">Auth Settings</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="field-group">
+                        <label for="authority-key">Network Access Token</label>
+                        <input
+                            id="authority-key"
+                            type="text"
+                            x-model="authorityKey"
+                            placeholder="network-authority-key"
+                        />
+                    </div>
+                    <div class="field-group">
+                        <label for="authority-object">Authority Object (JSON)</label>
+                        <textarea
+                            id="authority-object"
+                            x-model="authorityObject"
+                            placeholder='{ "code": "code-to-access-network", "user": "client-a" }'
+                        ></textarea>
+                    </div>
+                    <div class="panel-actions">
+                        <button class="btn btn-primary" @click="apply()">Apply &amp; Reload</button>
+                        <span class="status-message success" x-show="saved">✅ Saved – reloading…</span>
+                        <span class="status-message error" x-show="error" x-text="error"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-data="webRTCApplication()">
+            <template x-if="false">
+                <!-- WebRTC panel intentionally hidden -->
+            </template>
+        </div>
+
+        <div class="grid-panel panel-authority" x-data="fluxAuthority()">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">🏛️</span>
+                    <h2 class="panel-title">Authority</h2>
+                    <div class="panel-status-bar">
+                        <div class="status-chip">
+                            <span class="status-label">network</span>
+                            <span class="status-value" id="authority-network-state" x-text="networkState"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <code class="log-view">
+                        <template x-for="log in authorityLog">
+                            <p x-text="log"></p>
+                        </template>
+                    </code>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-panel panel-client-a" x-data="fluxApplicationA()">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">🖥️</span>
+                    <h2 class="panel-title">Client A</h2>
+                    <div class="panel-status-bar">
+                        <div class="status-chip">
+                            <span class="status-label">network</span>
+                            <span class="status-value" x-text="networkState"></span>
+                        </div>
+                        <div class="status-chip">
+                            <span class="status-label">WebRTC</span>
+                            <span class="status-value" x-text="webRTCConncetionState"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <code class="log-view">
+                        <template x-for="log in clientLog">
+                            <p x-text="log"></p>
+                        </template>
+                    </code>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" @click="connectToNamedAgent('client-b-unique-identification-token')">
+                            Connect to Client B
+                        </button>
+                        <button class="btn btn-secondary" @click="joinChannel('channel-abc')">
+                            Join 'channel-abc'
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-panel panel-client-b" x-data="fluxApplicationB()">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">🖥️</span>
+                    <h2 class="panel-title">Client B</h2>
+                    <div class="panel-status-bar">
+                        <div class="status-chip">
+                            <span class="status-label">network</span>
+                            <span class="status-value" x-text="networkState"></span>
+                        </div>
+                        <div class="status-chip">
+                            <span class="status-label">WebRTC</span>
+                            <span class="status-value" x-text="webRTCConncetionState"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <code class="log-view">
+                        <template x-for="log in clientLog">
+                            <p x-text="log"></p>
+                        </template>
+                    </code>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" @click="joinChannel('channel-abc')">
+                            Join 'channel-abc' &amp; broadcast
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-panel panel-activity" x-data="fluxActivityDemoApplication()">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">📊</span>
+                    <h2 class="panel-title">Random Network Activity</h2>
+                    <div class="panel-status-bar">
+                        <div class="status-chip">
+                            <span class="status-label">Agents</span>
+                            <span class="status-value" x-text="agents.size"></span>
+                        </div>
+                        <div class="status-chip">
+                            <span class="status-label">Channels</span>
+                            <span class="status-value" x-text="channels.size"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <code class="log-view log-view--tall">
+                        <template x-for="log in clientLog">
+                            <p x-text="log"></p>
+                        </template>
+                    </code>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+</html>

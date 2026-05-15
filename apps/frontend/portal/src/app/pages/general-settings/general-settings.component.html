@@ -1,0 +1,16 @@
+<app-dashboard-layout [userSession]="userSession()" pageTitle="General Settings">
+    @if (selectedNetwork$ | async; as network) {
+        <div class="p-6 max-w-3xl space-y-8">
+            <section>
+                <h3 class="text-lg font-semibold mb-1">Server</h3>
+                <p class="text-sm text-base-content/70 mb-4">
+                    The domain of this Flux server. Use it to configure agents and authorities that should connect to this portal.
+                </p>
+                <app-flux-domain />
+            </section>
+            <section>
+                <app-network-tokens [networkId]="network.id" />
+            </section>
+        </div>
+    }
+</app-dashboard-layout>

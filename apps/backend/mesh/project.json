@@ -1,0 +1,30 @@
+{
+    "name": "flux-mesh",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/backend/mesh/src",
+    "projectType": "application",
+    "tags": [
+        "scope:portal"
+    ],
+    "targets": {
+        "serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun run --watch {projectRoot}/src/main.ts --tsconfig-override=tsconfig.app.json"
+            },
+            "continuous": true
+        },
+        "build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun run {projectRoot}/build.js",
+                "args": [
+                    "--projectRoot={projectRoot}"
+                ]
+            }
+        },
+        "docker-build": {
+            "command": "docker build -f apps/backend/mesh/Dockerfile . -t flux-mesh"
+        }
+    }
+}

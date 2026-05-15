@@ -1,0 +1,72 @@
+services:
+  flux-mesh-dragonfly-dev:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    container_name: flux-mesh-dragonfly-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ulimits:
+      memlock: -1
+    # Don't use all threads, occasionally fails with "There are 20 threads, so 5.00GiB are required. Exiting..."
+    command: dragonfly --proactor_threads=3
+    ports:
+      - "6381:6379"
+    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
+    # `host` mode is NOT currently supported in Swarm Mode.
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+    # network_mode: "host"
+    volumes:
+      - dragonflymeshdata:/mesh-dev-data
+    networks:
+      - portal-internal-network-2
+
+  flux-portal-dragonfly-dev:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    container_name: flux-portal-dragonfly-dev # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ulimits:
+      memlock: -1
+    # Don't use all threads, occasionally fails with "There are 20 threads, so 5.00GiB are required. Exiting..."
+    command: dragonfly --proactor_threads=3
+    ports:
+      - "6350:6379"
+    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
+    # `host` mode is NOT currently supported in Swarm Mode.
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+    # network_mode: "host"
+    volumes:
+      - dragonflyportaldata:/portal-dev-data
+    networks:
+      - portal-internal-network-2
+
+  flux-mesh-postgres-dev:
+    image: postgres:18.3-alpine
+    restart: always
+    container_name: flux-mesh-postgres-dev
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: dev-user
+      POSTGRES_PASSWORD: dev-password
+      POSTGRES_DB: devdb
+    healthcheck:
+      # Fixing docker-compose - "FATAL: role "root" does not exist"
+      test: [ "CMD-SHELL", "pg_isready -d devdb -U dev-user" ]
+      interval: 5s
+      timeout: 5s
+
+    volumes:
+      - mesh-pgdata-dev:/var/lib/postgresql
+    networks:
+      - portal-internal-network-2
+
+# *******************************************************************************
+# *** Networks
+# *******************************************************************************
+networks:
+  portal-internal-network-2:
+    driver: bridge
+
+# *******************************************************************************
+# *** Volumes
+# *******************************************************************************
+volumes:
+  dragonflymeshdata:
+  dragonflyportaldata:
+  mesh-pgdata-dev:

@@ -1,0 +1,12 @@
+{
+    "name": "network-authority-redis-store",
+    "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/flux/mesh/store/redis/network-authority/src",
+    "projectType": "library",
+    "tags": [
+        "type:service",
+        "scope:mesh"
+    ],
+    "// targets": "to see all targets run: nx show project network-authority-redis-store --web",
+    "targets": {}
+}

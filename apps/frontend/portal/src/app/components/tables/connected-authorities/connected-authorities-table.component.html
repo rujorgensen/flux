@@ -1,0 +1,74 @@
+@if (dataStore(); as data) {
+    @if (data.length > 0) {
+        <div class="flex justify-end mb-2">
+            <button
+                class="btn btn-sm btn-error btn-outline"
+                [disabled]="kickingAll()"
+                (click)="onKickAllAuthorities()"
+                title="Kick all authorities"
+            >
+                @if (kickingAll()) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                }
+                Kick All
+            </button>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Created At</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (row of data; track row.id) {
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.connectedAt | date:'fullDate' }}</td>
+                        <td>
+                            <button
+                                class="btn btn-ghost btn-sm text-error"
+                                [disabled]="kickingAuthorityId() === row.id"
+                                (click)="onKickAuthority(row)"
+                                [attr.aria-label]="'Kick authority ' + row.id"
+                                title="Kick authority"
+                            >
+                                @if (kickingAuthorityId() === row.id) {
+                                    <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                    Kick
+                                }
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="flex items-center justify-end mt-4">
+            <div class="flex items-center gap-2 text-sm">
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="whitespace-nowrap">Rows per page:</span>
+                    <select class="select select-sm" (change)="onPageSizeChange($event)">
+                        <option value="10" [selected]="pageSize() === 10">10</option>
+                        <option value="25" [selected]="pageSize() === 25">25</option>
+                        <option value="50" [selected]="pageSize() === 50">50</option>
+                        <option value="100" [selected]="pageSize() === 100">100</option>
+                    </select>
+                </div>
+                <span>Page {{ page() }} of {{ totalPages() }}</span>
+                <div class="join">
+                    <button class="join-item btn btn-sm" (click)="prevPage()" [disabled]="page() === 1">«</button>
+                    <button class="join-item btn btn-sm" (click)="nextPage()" [disabled]="page() >= totalPages()">»</button>
+                </div>
+            </div>
+        </div>
+    } @else {
+        <div class="flex flex-col items-center justify-center py-16 text-base-content/50">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-12 h-12 stroke-current mb-3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span class="text-sm font-medium">No connected authorities</span>
+        </div>
+    }
+}

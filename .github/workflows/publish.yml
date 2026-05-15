@@ -1,0 +1,161 @@
+name: Release packages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release-packages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project_name: persistica-flux-mesh
+            package_dir: packages/flux/mesh
+            test_target: bun-test
+            tag_prefix: flux-mesh-v
+          - project_name: persistica-flux-agent
+            package_dir: packages/flux/agent
+            test_target: test
+            tag_prefix: flux-agent-v
+          - project_name: persistica-flux-authority
+            package_dir: packages/flux/authority
+            test_target: test
+            tag_prefix: flux-authority-v
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 💾 Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org
+
+      - name: 💾 Cache Bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+
+      -
+        name: 💾 Install dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Detect release
+        id: release
+        shell: bash
+        run: |
+          PACKAGE_NAME="$(node -p "require('./${{ matrix.package_dir }}/package.json').name")"
+          VERSION="$(node -p "require('./${{ matrix.package_dir }}/package.json').version")"
+          RELEASE_TAG="${{ matrix.tag_prefix }}${VERSION}"
+          BEFORE_SHA="${{ github.event.before }}"
+
+          PREVIOUS_VERSION="$(
+            git show "${BEFORE_SHA}:${{ matrix.package_dir }}/package.json" 2> /dev/null \
+              | node -e "let raw=''; process.stdin.on('data', (chunk) => raw += chunk); process.stdin.on('end', () => { try { process.stdout.write(JSON.parse(raw).version ?? ''); } catch { process.stdout.write(''); } });"
+          )"
+
+          if [[ "$VERSION" == *"-alpha"* ]]; then
+            NPM_TAG="alpha"
+          elif [[ "$VERSION" == *"-beta"* ]]; then
+            NPM_TAG="beta"
+          elif [[ "$VERSION" == *"-rc"* ]]; then
+            NPM_TAG="rc"
+          else
+            NPM_TAG="latest"
+          fi
+
+          if [[ -n "$PREVIOUS_VERSION" && "$PREVIOUS_VERSION" == "$VERSION" ]]; then
+            SHOULD_RELEASE="false"
+          else
+            SHOULD_RELEASE="true"
+          fi
+
+          if npm view "${PACKAGE_NAME}@${VERSION}" version --registry=https://registry.npmjs.org > /dev/null 2>&1; then
+            ALREADY_PUBLISHED="true"
+          else
+            ALREADY_PUBLISHED="false"
+          fi
+
+          echo "package_name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "npm_tag=${NPM_TAG}" >> "$GITHUB_OUTPUT"
+          echo "should_release=${SHOULD_RELEASE}" >> "$GITHUB_OUTPUT"
+          echo "already_published=${ALREADY_PUBLISHED}" >> "$GITHUB_OUTPUT"
+
+      - name: Run package tests
+        if: steps.release.outputs.should_release == 'true' && steps.release.outputs.already_published != 'true'
+        run: bunx nx run ${{ matrix.project_name }}:${{ matrix.test_target }}
+
+      - name: Build package
+        if: steps.release.outputs.should_release == 'true' && steps.release.outputs.already_published != 'true'
+        run: bunx nx run ${{ matrix.project_name }}:build
+
+      - name: Publish to npm
+        if: steps.release.outputs.should_release == 'true' && steps.release.outputs.already_published != 'true'
+        run: npm publish "./dist/${{ matrix.package_dir }}" --provenance --access public --tag "${{ steps.release.outputs.npm_tag }}"
+
+      - name: Create GitHub release
+        if: steps.release.outputs.should_release == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.release.outputs.release_tag }}" > /dev/null 2>&1; then
+            exit 0
+          fi
+
+          ARGS=(
+            release
+            create
+            "${{ steps.release.outputs.release_tag }}"
+            --target "${GITHUB_SHA}"
+            --title "${{ steps.release.outputs.package_name }} v${{ steps.release.outputs.version }}"
+            --generate-notes
+          )
+
+          if [[ "${{ steps.release.outputs.npm_tag }}" != "latest" ]]; then
+            ARGS+=(--prerelease)
+          fi
+
+          gh "${ARGS[@]}"
+
+      - name: Workflow summary
+        shell: bash
+        run: |
+          {
+            echo "## ${{ steps.release.outputs.package_name }}"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Version | \`${{ steps.release.outputs.version }}\` |"
+            echo "| Git tag | \`${{ steps.release.outputs.release_tag }}\` |"
+            echo "| npm dist-tag | \`${{ steps.release.outputs.npm_tag }}\` |"
+            echo "| Version changed | \`${{ steps.release.outputs.should_release }}\` |"
+            echo "| Already on npm | \`${{ steps.release.outputs.already_published }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
