@@ -16,6 +16,9 @@
         },
         "build": {
             "executor": "nx:run-commands",
+            "outputs": [
+                "{workspaceRoot}/dist/{projectRoot}"
+            ],
             "options": {
                 "command": "bun run {projectRoot}/build.js",
                 "args": [
@@ -25,6 +28,9 @@
         },
         "build:declaration": {
             "executor": "nx:run-commands",
+            "outputs": [
+                "{workspaceRoot}/dist/{projectRoot}/src"
+            ],
             "options": {
                 "command": "tsc",
                 "args": [
