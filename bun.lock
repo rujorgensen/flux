@@ -112,6 +112,7 @@
         "@angular/language-service": "catalog:angular",
         "@angular/platform-browser": "catalog:angular",
         "@angular/platform-server": "catalog:angular",
+        "@angular/router": "catalog:angular",
         "@elysiajs/eden": "catalog:elysia",
         "@prisma/adapter-pg": "catalog:prisma",
         "@tailwindcss/postcss": "catalog:",
@@ -174,6 +175,7 @@
       "@angular/language-service": "21.2.13",
       "@angular/platform-browser": "21.2.13",
       "@angular/platform-server": "21.2.13",
+      "@angular/router": "21.2.13",
     },
     "elysia": {
       "@elysiajs/cors": "1.4.2",

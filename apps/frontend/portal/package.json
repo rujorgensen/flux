@@ -13,6 +13,7 @@
         "@angular/forms": "catalog:angular",
         "@angular/language-service": "catalog:angular",
         "@angular/platform-browser": "catalog:angular",
+        "@angular/router": "catalog:angular",
         "@angular/platform-server": "catalog:angular",
         "@elysiajs/eden": "catalog:elysia",
         "@prisma/adapter-pg": "catalog:prisma",

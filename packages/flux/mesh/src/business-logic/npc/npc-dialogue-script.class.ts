@@ -1,33 +1,36 @@
 import type { INpcInteractionResult } from './npc-dialogue.types';
 
+const MESH_NPC_RANDOM_MESSAGES: readonly string[] = [
+    'Steel yourself, traveler. Strange currents stir beyond these gates.',
+    'Every signal leaves a trail. Mind which ones you choose to follow.',
+    'I have watched green recruits chase glory into the dark and never return.',
+    'The mesh is restless today. Even the quiet channels feel like a warning.',
+    'Keep your wits sharp and your blade sharper. This road favors neither fools nor dreamers.',
+];
+
+const MESH_NPC_FINAL_MESSAGE =
+    'I have shared all the wisdom I can spare. The next step is yours alone, hero.';
+
+
+const INTERACTION_LIMIT = 5;
+
 export class NPCDialogueScript {
 
     constructor(
-        private readonly randomMessages: readonly string[],
-        private readonly finalMessage: string,
-        private readonly randomInteractionLimit: number,
         private readonly randomNumberGenerator: () => number = Math.random,
-    ) {
-        if (this.randomMessages.length === 0) {
-            throw new Error('NPCDialogueScript requires at least one random message');
-        }
-
-        if (this.randomInteractionLimit < 0) {
-            throw new Error('NPCDialogueScript random interaction limit cannot be negative');
-        }
-    }
+    ) {}
 
     public resolveInteraction(
         interactionCount: number,
     ): INpcInteractionResult {
-        const isFinalResponse: boolean = interactionCount > this.randomInteractionLimit;
+        const isFinalResponse: boolean = interactionCount > INTERACTION_LIMIT;
 
         return {
             interactionCount,
             isFinalResponse,
             message: this.resolveMessage(isFinalResponse),
             remainingRandomResponses: Math.max(
-                this.randomInteractionLimit - interactionCount,
+                INTERACTION_LIMIT - interactionCount,
                 0,
             ),
         };
@@ -37,12 +40,12 @@ export class NPCDialogueScript {
         isFinalResponse: boolean,
     ): string {
         if (isFinalResponse) {
-            return this.finalMessage;
+            return MESH_NPC_FINAL_MESSAGE;
         }
 
-        return this.randomMessages[
+        return MESH_NPC_RANDOM_MESSAGES[
             Math.floor(
-                this.randomNumberGenerator() * this.randomMessages.length,
+                this.randomNumberGenerator() * MESH_NPC_RANDOM_MESSAGES.length,
             )
         ];
     }
