@@ -7,7 +7,8 @@ import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
 import type { RedisStatusService } from './_services/redis-status.service';
-import type { TNetworkAgentCountAt, TNetworkChannelCountAt } from '@flux/shared/types';
+import type { TNetworkAgentCountAt, TNetworkChannelCountAt, TNetworkId_S } from '@flux/shared/types';
+import { randomUUIDv7 } from 'bun';
 
 interface IAgentJWTPayload extends jwt.JwtPayload {
     user: {
@@ -15,21 +16,25 @@ interface IAgentJWTPayload extends jwt.JwtPayload {
     };
 }
 
-const NETWORK_ID: string = 'cobalia'; // Key to register a network, known to flux
+const NETWORK_ID: TNetworkId_S = 'internal-network' as TNetworkId_S; // Key to register a network, known to flux
+const NETWORK_AUTHORITY_KEY: string = randomUUIDv7(); // Key to register an authority, known to flux
 
 // ****************************************************************************
-// * Setup Mesh Server
+// * Setup Mesh Server 
 // ****************************************************************************
 export class LiveUpdates {
 
     constructor(
-        private readonly localMestServerPort: number,
+        private readonly localMeshServerPort: number,
         private readonly portalRedisStatusService: RedisStatusService,
         private readonly meshRedisStatusService: RedisStatusService,
         private readonly FLUX_AUTHORITY_JWT_SECRET: string,
     ) {
         new FluxMeshServer({
-            port: this.localMestServerPort,
+            port: this.localMeshServerPort,
+            hardcodedNetworkCredentials: new Map([
+                [NETWORK_ID, NETWORK_AUTHORITY_KEY],
+            ]),
         })
             .onReady(async () => {
 
@@ -39,15 +44,13 @@ export class LiveUpdates {
 
                 console.log('🔑 Registering authority');
 
-                const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
-                const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
+                // Key to connect to the internal network, unknown and irelevant to flux (the flux server is not exposed)
+                const CODE_TO_ACCESS_NETWORK: string = randomUUIDv7();
 
                 const fluxAuthority = new FluxAuthority(
                     NETWORK_ID,
                     {
-                        domain: `http://localhost:${this.localMestServerPort}`,
-                        //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
-                        //         retries?: number; // Number of times to retry a failed message
+                        domain: `http://localhost:${this.localMeshServerPort}`,
                     },
                 );
 
@@ -109,16 +112,12 @@ export class LiveUpdates {
                 // * Setup Agent
                 // ****************************************************************************
 
-                const fluxAgent = new FluxAgent(
+                const fluxNetworkConnection: FluxAgentNetworkConnection = await new FluxAgent(
                     NETWORK_ID,
                     {
-                        domain: `http://localhost:${this.localMestServerPort}`,
-                        //         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
-                        //         retries?: number; // Number of times to retry a failed message
+                        domain: `http://localhost:${this.localMeshServerPort}`,
                     },
-                );
-
-                const fluxNetworkConnection: FluxAgentNetworkConnection = await fluxAgent
+                )
                     .connect(
                         CODE_TO_ACCESS_NETWORK,
                         'backend-agent',

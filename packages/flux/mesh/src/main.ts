@@ -29,6 +29,7 @@ import {
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
+    TNetworkId_S,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -102,6 +103,7 @@ type TWebSocketData = {};
 type TOptions = {
     port?: number;
     redisConnectionString?: string;
+    hardcodedNetworkCredentials?: Map<TNetworkId_S, string>,
 };
 
 export class FluxMeshServer {
@@ -157,7 +159,11 @@ export class FluxMeshServer {
                 // ****************************************************************************
                 '/auth/network-authority': {
                     OPTIONS: OPTIONS_RESPONSE,
-                    POST: authorizeNetworkAuthority,
+                    POST: (request: Bun.BunRequest) =>
+                        authorizeNetworkAuthority(
+                            request,
+                            optionsOrPort instanceof Object ? optionsOrPort.hardcodedNetworkCredentials : undefined,
+                        ),
                 },
 
                 // ****************************************************************************

@@ -5,7 +5,7 @@ import {
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
 
@@ -30,7 +30,7 @@ interface ChangelogEntry {
     selector: 'app-docs-changelog',
     imports: [
         CommonModule,
-        RouterModule,
+        RouterLink,
         DashboardLayoutComponent,
     ],
     templateUrl: './docs-changelog.component.html',

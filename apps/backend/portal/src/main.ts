@@ -84,6 +84,16 @@ Bun.cron('@hourly', async () => {
 // * Host the api
 export const app = new Elysia()
 
+    // ! NB During development, the output is not there and this will fail
+    .use(
+        staticPlugin({
+            // Reset the defaul '/public' prefix
+            prefix: '/',
+            assets: browserDistFolder,
+            alwaysStatic: true,
+        }),
+    )
+
     //  .use(rateLimiter)
     //  .onRequest(({ rateLimiter, ip, set, error }) => {
     //      if (rateLimiter.check(ip)) return error(420, 'Enhance your calm')
