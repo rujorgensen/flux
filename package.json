@@ -54,8 +54,7 @@
         "//-09a": "// ****************************************************************************",
         "//-09b": "// *** Deploy                                                                  ",
         "//-09c": "// ****************************************************************************",
-        "deploy:portal": "bun prisma:deploy && bun attempt-create-authority && bun run ./dist/apps/backend/portal/main.js",
-        "attempt-create-authority": "bun run ./libs/portal/backend/auth/src/lib/generate-admin.ts"
+        "deploy:portal": "bun prisma:deploy && bun run ./dist/apps/backend/portal/main.js"
     },
     "dependencies": {
         "@angular/common": "21.2.13",
