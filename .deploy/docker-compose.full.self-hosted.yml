@@ -4,6 +4,7 @@
 # *** WHAT YOU NEED TO DO:
 # ***
 # *** 1) Define FLUX_MASTER_PASSWORD in your environment
+# *** 2) Add your custom origin CUSTOM_TRUSTED_ORIGINS as a comma separated list in your environment (eg. http://mydomain.com,http://localhost:3001)
 # ***
 services:
   # ******************************************************************************
