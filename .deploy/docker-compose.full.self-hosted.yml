@@ -3,7 +3,7 @@
 # ***
 # *** WHAT YOU NEED TO DO:
 # ***
-# *** 1) Update the FLUX_MASTER_PASSWORD
+# *** 1) Define FLUX_MASTER_PASSWORD in your environment (or hardcode it here in the web-portal-sh service, not recommended)
 # ***
 services:
   # ******************************************************************************
@@ -105,7 +105,7 @@ services:
     image: 'rujorgensen/persistica-portal:latest'
     container_name: flux-web-portal-full-selfhosted
     environment:
-      - FLUX_MASTER_PASSWORD=p4sW0Rd-S3cReT+N4mB
+      - FLUX_MASTER_PASSWORD=
       - FLUX_AUTHORITY_JWT_SECRET=flux-authority-jwt-secret
       # Don't touch these
       - FLUX_DATABASE_URL=postgres://postgres_default_user:replace-with-password@postgres-sh:5432/mesh-db?schema=public

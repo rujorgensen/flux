@@ -1,4 +1,4 @@
-import { Elysia } from 'elysia';
+import { fileURLToPath } from 'node:url';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
