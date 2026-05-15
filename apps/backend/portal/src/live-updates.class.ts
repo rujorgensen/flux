@@ -18,6 +18,7 @@ interface IAgentJWTPayload extends jwt.JwtPayload {
 
 const NETWORK_ID: TNetworkId_S = 'internal-network' as TNetworkId_S; // Key to register a network, known to flux
 const NETWORK_AUTHORITY_KEY: string = randomUUIDv7(); // Key to register an authority, known to flux
+const FLUX_AUTHORITY_JWT_SECRET: string = randomUUIDv7(); // The authority uses this to sign the success payload
 
 // ****************************************************************************
 // * Setup Mesh Server 
@@ -28,7 +29,6 @@ export class LiveUpdates {
         private readonly localMeshServerPort: number,
         private readonly portalRedisStatusService: RedisStatusService,
         private readonly meshRedisStatusService: RedisStatusService,
-        private readonly FLUX_AUTHORITY_JWT_SECRET: string,
     ) {
         new FluxMeshServer({
             port: this.localMeshServerPort,
@@ -75,7 +75,7 @@ export class LiveUpdates {
                                 user: {
                                     allowAllChannels: true,
                                 },
-                            }, this.FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
+                            }, FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
                         },
 
                         // * Authorize channel
@@ -84,7 +84,7 @@ export class LiveUpdates {
                             identification: string,
                         ): Promise<boolean> => {
 
-                            const agentJWT = jwt.verify(identification, this.FLUX_AUTHORITY_JWT_SECRET) as IAgentJWTPayload;
+                            const agentJWT = jwt.verify(identification, FLUX_AUTHORITY_JWT_SECRET) as IAgentJWTPayload;
 
                             console.log(`🔒 A client is attempting to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
 

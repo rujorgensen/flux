@@ -1,4 +1,4 @@
-import Elysia, { type Context } from 'elysia';
+import Elysia from 'elysia';
 import {
     auth,
     isMasterPasswordLoginEnabled,
@@ -13,15 +13,8 @@ export const betterAuth = new Elysia({ name: 'better-auth' })
             ? MASTER_PASSWORD_ADMIN_EMAIL
             : null,
     }))
-    .all('/api/auth/*', (context: Context) => {
-        if (['POST', 'GET'].includes(context.request.method)) {
-            return auth.handler(context.request);
-        }
-
-        context.status(405);
-
-        return undefined;
-    })
+    .get('/api/auth/*', ({ request }) => auth.handler(request))
+    .post('/api/auth/*', ({ request }) => auth.handler(request))
 
     .macro({
         auth: {
