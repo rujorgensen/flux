@@ -25,6 +25,11 @@ services:
     # network_mode: "host"
     volumes:
       - dragonflymeshdata:/mesh-dev-data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - __flux-internal-network-mesh-dragonfly
 
@@ -41,6 +46,11 @@ services:
     # network_mode: "host"
     volumes:
       - dragonflyportaldata:/portal-dev-data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - __flux-internal-network-portal-dragonfly
 
@@ -82,10 +92,10 @@ services:
     depends_on:
       dragonfly-mesh-sh:
         condition: service_healthy
+      dragonfly-portal-sh:
+        condition: service_healthy
       postgres-sh:
         condition: service_healthy
-    # ports:
-    #   - "6350:6379"
     networks:
       - __flux-internal-network-mesh-dragonfly
       - __flux-internal-network-postgresql
@@ -102,12 +112,14 @@ services:
       # Don't touch these
       - FLUX_DATABASE_URL=postgres://postgres_default_user:replace-with-password@postgres-sh:5432/mesh-db?schema=public
       - FLUX_MESH_REDIS_URL=redis://dragonfly-mesh-sh:6379
-      - FLUX_PORTAL_REDIS_URL=redis://dragonfly-mesh-sh:6379
+      - FLUX_PORTAL_REDIS_URL=redis://dragonfly-portal-sh:6379
     build:
       context: ../
       dockerfile: ./apps/backend/portal/Dockerfile
       target: deploy
     depends_on:
+      dragonfly-mesh-sh:
+        condition: service_healthy
       dragonfly-portal-sh:
         condition: service_healthy
       postgres-sh:
@@ -116,6 +128,7 @@ services:
     # ports:
     #   - "3000:3000"
     networks:
+      - __flux-internal-network-mesh-dragonfly
       - __flux-internal-network-postgresql
       - __flux-internal-network-portal-dragonfly
       - __flux-internal-network-web
