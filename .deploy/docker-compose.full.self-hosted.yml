@@ -84,15 +84,12 @@ services:
     environment:
       - FLUX_DATABASE_URL=postgres://postgres_default_user:replace-with-password@postgres-sh:5432/mesh-db?schema=public
       - FLUX_MESH_REDIS_URL=redis://dragonfly-mesh-sh:6379
-      - FLUX_PORTAL_REDIS_URL=redis://dragonfly-portal-sh:6379
     build:
       context: ../
       dockerfile: ./apps/backend/mesh/Dockerfile
       target: deploy
     depends_on:
       dragonfly-mesh-sh:
-        condition: service_healthy
-      dragonfly-portal-sh:
         condition: service_healthy
       postgres-sh:
         condition: service_healthy
