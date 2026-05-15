@@ -35,6 +35,10 @@ COPY packages/flux/mesh/package.json ./packages/flux/mesh/
 RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/portal-api' --filter='@flux/portal-ui' --filter='./'
 
 # Generate Prisma types
+
+# Fake database URL to persuade Prisma into generating types
+ENV FLUX_DATABASE_URL=postgres://user:pw@localhost:1234/db?schema=none
+
 #   --generator: only run the 'client' generator to avoid generating dbml output
 RUN bunx --bun prisma generate --config=./prisma/prisma.config.ts --generator=client
 
@@ -45,10 +49,17 @@ RUN bunx --bun prisma generate --config=./prisma/prisma.config.ts --generator=cl
 FROM base AS build
 
 COPY --from=install ./src/node_modules node_modules
+
+# Include Prisma generated types
+COPY --from=install ./src/@prisma-types/flux  ./@prisma-types/flux
+
 COPY . .
 
 # Build the API
 RUN bun run apps/backend/portal/build.js --projectRoot=apps/backend/portal
+
+# Build the UI
+RUN bunx nx run @flux/portal-ui:build:production --verbose --skip-nx-cache
 
 # ******************************************************************************
 # *** DEPLOY STAGE

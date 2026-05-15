@@ -18,7 +18,7 @@ export class NetworkAgentRedisService {
 
     constructor(
         private readonly _client: RedisClient,
-    ) { }
+    ) {}
 
     // ****************************************************************************
     // * Create

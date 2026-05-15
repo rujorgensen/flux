@@ -1,5 +1,5 @@
 {
-    "name": "backend-mesh",
+    "name": "flux-mesh",
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "apps/backend/mesh/src",
     "projectType": "application",

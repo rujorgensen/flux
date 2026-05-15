@@ -9,6 +9,6 @@ http://:9000 {
 }
 
 # Route traffic to the mesh to the mesh service
-http://:6350 {
-	reverse_proxy mesh-server-sh:6350
+http://:5100 {
+	reverse_proxy mesh-server-sh:5100
 }
