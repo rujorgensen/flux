@@ -5,7 +5,7 @@ import {
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { SyntaxHighlightPipe } from '$lib/app/_pipes/syntax-highlight.pipe';
@@ -22,7 +22,7 @@ interface UserSession {
     imports: [
         // * Modules
         CommonModule,
-        RouterModule,
+        RouterLink,
         // * Pipes
         SyntaxHighlightPipe,
         // * Components
