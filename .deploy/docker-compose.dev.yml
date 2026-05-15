@@ -52,7 +52,7 @@ services:
       timeout: 5s
 
     volumes:
-      - mesh-pgdata-dev:/var/lib/postgresql/data
+      - mesh-pgdata-dev:/var/lib/postgresql
     networks:
       - portal-internal-network-2
 
@@ -62,7 +62,7 @@ services:
 networks:
   portal-internal-network-2:
     driver: bridge
-    
+
 # *******************************************************************************
 # *** Volumes
 # *******************************************************************************

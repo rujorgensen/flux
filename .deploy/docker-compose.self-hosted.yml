@@ -27,7 +27,7 @@ services:
     # ports:
     #   - "5434:5432"
     volumes:
-      - mesh-pgdata-dev:/var/lib/postgresql/data
+      - mesh-pgdata-dev:/var/lib/postgresql
     networks:
       - private-mesh-network
 
