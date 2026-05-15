@@ -1,4 +1,4 @@
-name: Release packages
+name: Release packages to npm
 
 on:
   push:
@@ -73,11 +73,16 @@ jobs:
           VERSION="$(node -p "require('./${{ matrix.package_dir }}/package.json').version")"
           RELEASE_TAG="${{ matrix.tag_prefix }}${VERSION}"
           BEFORE_SHA="${{ github.event.before }}"
+          PREVIOUS_VERSION=""
 
-          PREVIOUS_VERSION="$(
-            git show "${BEFORE_SHA}:${{ matrix.package_dir }}/package.json" 2> /dev/null \
-              | node -e "let raw=''; process.stdin.on('data', (chunk) => raw += chunk); process.stdin.on('end', () => { try { process.stdout.write(JSON.parse(raw).version ?? ''); } catch { process.stdout.write(''); } });"
-          )"
+          if [[ -n "$BEFORE_SHA" ]] && [[ ! "$BEFORE_SHA" =~ ^0+$ ]] && git cat-file -e "${BEFORE_SHA}^{commit}" 2> /dev/null; then
+            if git cat-file -e "${BEFORE_SHA}:${{ matrix.package_dir }}/package.json" 2> /dev/null; then
+              PREVIOUS_VERSION="$(
+                git show "${BEFORE_SHA}:${{ matrix.package_dir }}/package.json" \
+                  | node -e "let raw=''; process.stdin.on('data', (chunk) => raw += chunk); process.stdin.on('end', () => { try { process.stdout.write(JSON.parse(raw).version ?? ''); } catch { process.stdout.write(''); } });"
+              )"
+            fi
+          fi
 
           if [[ "$VERSION" == *"-alpha"* ]]; then
             NPM_TAG="alpha"
