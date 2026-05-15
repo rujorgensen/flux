@@ -1,8 +1,18 @@
 import Elysia, { type Context } from 'elysia';
-import { auth } from '@backend/portal/auth';
+import {
+    auth,
+    isMasterPasswordLoginEnabled,
+    MASTER_PASSWORD_ADMIN_EMAIL,
+} from '@backend/portal/auth';
 
 // user middleware (compute user and session and pass to routes)
 export const betterAuth = new Elysia({ name: 'better-auth' })
+    .get('/api/auth/config', () => ({
+        isMasterPasswordLoginEnabled,
+        masterPasswordAdminEmail: isMasterPasswordLoginEnabled
+            ? MASTER_PASSWORD_ADMIN_EMAIL
+            : null,
+    }))
     .all('/api/auth/*', (context: Context) => {
         if (['POST', 'GET'].includes(context.request.method)) {
             return auth.handler(context.request);
