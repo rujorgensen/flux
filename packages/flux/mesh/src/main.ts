@@ -72,8 +72,6 @@ import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
 import { AgentManager } from './_managers/agent.manager';
-import { NPCDialogueManager } from './business-logic/npc/npc-dialogue-manager.class';
-import { createMeshNPCDialogueManager } from './business-logic/npc/mesh-npc-dialogue.factory';
 import { interactWithNpc } from './_routes/npc-interact.get.route';
 
 PicoLogger.configure({
@@ -114,7 +112,6 @@ export class FluxMeshServer {
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
     private readonly agentManager: AgentManager;
-    private readonly npcDialogueManager: NPCDialogueManager;
 
     constructor(
         private readonly optionsOrPort?: TOptions | number,
@@ -123,8 +120,6 @@ export class FluxMeshServer {
 
         const networkAuthorityRedisCache: NetworkAuthorityRedisCache = new NetworkAuthorityRedisCache();
         const networkAgentRedisCache: NetworkAgentRedisCache = new NetworkAgentRedisCache();
-
-        this.npcDialogueManager = createMeshNPCDialogueManager();
 
         const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(
             // passToLocalClient:
@@ -183,11 +178,7 @@ export class FluxMeshServer {
                 // ****************************************************************************
                 '/*': {
                     OPTIONS: OPTIONS_RESPONSE,
-                    GET: (request: Bun.BunRequest) =>
-                        interactWithNpc(
-                            request,
-                            this.npcDialogueManager,
-                        ),
+                    GET: interactWithNpc,
                 },
             },
 

@@ -1,6 +1,6 @@
 import type * as Bun from 'bun';
 import * as nodeURL from 'node:url';
-import type { NPCDialogueManager } from '../business-logic/npc/npc-dialogue-manager.class';
+import { NPCDialogueManager } from '../business-logic/npc/npc-dialogue-manager.class';
 
 const DEFAULT_NPC_ID = 'mesh-guide';
 
@@ -30,6 +30,11 @@ const readQueryValue = (
         : undefined;
 };
 
+
+const npcDialogueManager: NPCDialogueManager = new NPCDialogueManager(
+    Math.random,
+);
+
 const resolvePlayerId = (
     request: Bun.BunRequest,
     parsedUrl: nodeURL.UrlWithParsedQuery,
@@ -45,7 +50,6 @@ const resolvePlayerId = (
  */
 export const interactWithNpc = (
     request: Bun.BunRequest,
-    npcDialogueManager: NPCDialogueManager,
 ): Response => {
     const parsedUrl: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);
     const npcId: string = readQueryValue(parsedUrl.query['npcId']) ?? DEFAULT_NPC_ID;
@@ -53,10 +57,7 @@ export const interactWithNpc = (
     const interaction = npcDialogueManager.interact(playerId, npcId);
 
     return new Response(
-        JSON.stringify({
-            npcId,
-            ...interaction,
-        }),
+        interaction.message,
         {
             headers: {
                 'Content-Type': 'application/json',
