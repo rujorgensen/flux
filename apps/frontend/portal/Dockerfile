@@ -22,11 +22,10 @@ COPY packages/flux/agent/package.json ./packages/flux/agent/
 COPY packages/flux/authority/package.json ./packages/flux/authority/
 COPY packages/flux/mesh/package.json ./packages/flux/mesh/
 
-# Don't run postinstall--you need to manually run the Prisma generate step
 #   --frozen-lockfile: don't update bun.lock
-#   --ignore-scripts: dont run the postinstall script
-#   --filter: only install seleceted workspace packages (skip others to save space/time)
-RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/portal-ui'
+#   --ignore-scripts: don't run the postinstall script, you need to manually run the Prisma generate step
+#   --filter: only install dependencies for relevant workspace
+RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/portal-ui' --filter='@flux/portal-api' --filter='./'
 
 # ******************************************************************************
 # *** BUILD STAGE
