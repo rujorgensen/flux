@@ -18,12 +18,12 @@
     "types": "./src/index.d.ts",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/rujorgensen/persistica.git"
+        "url": "git+https://github.com/rujorgensen/flux.git"
     },
     "author": "pixl.prophet",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/rujorgensen/persistica/issues"
+        "url": "https://github.com/rujorgensen/flux/issues"
     },
-    "homepage": "https://github.com/rujorgensen/persistica#readme"
+    "homepage": "https://github.com/rujorgensen/flux#readme"
 }
