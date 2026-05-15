@@ -51,8 +51,8 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres_default_user
-      POSTGRES_PASSWORD: ${MESH_POSTGRES_PASSWORD}
-      POSTGRES_DB: ${MESH_POSTGRES_DB}
+      POSTGRES_PASSWORD: replace-with-password
+      POSTGRES_DB: mesh-db
     # ports:
     #   - "5434:5432"
     healthcheck:
@@ -72,7 +72,7 @@ services:
     image: 'rujorgensen/persistica-mesh:latest'
     container_name: flux-mesh-server-full-selfhosted
     environment:
-      - FLUX_DATABASE_URL=postgres://mesh-pg-user-name:mesh-pg-password@mesh-postgres-sh:5432/mesh-db?schema=public
+      - FLUX_DATABASE_URL=postgres://postgres_default_user:replace-with-password@postgres-sh:5432/mesh-db?schema=public
       - FLUX_MESH_REDIS_URL=redis://dragonfly-mesh-sh:6379
       - FLUX_PORTAL_REDIS_URL=redis://dragonfly-portal-sh:6379
     build:
@@ -84,8 +84,8 @@ services:
         condition: service_healthy
       postgres-sh:
         condition: service_healthy
-    ports:
-      - "6350:6379"
+    # ports:
+    #   - "6350:6379"
     networks:
       - __flux-internal-network-mesh-dragonfly
       - __flux-internal-network-postgresql
@@ -97,7 +97,7 @@ services:
     image: 'rujorgensen/persistica-portal:latest'
     container_name: flux-web-portal-full-selfhosted
     environment:
-      - FLUX_MASTER_PASSWORD=
+      - FLUX_MASTER_PASSWORD=p4sW0Rd-S3cReT+N4mB
       - FLUX_AUTHORITY_JWT_SECRET=flux-authority-jwt-secret
       # Don't touch these
       - FLUX_DATABASE_URL=postgres://postgres_default_user:replace-with-password@postgres-sh:5432/mesh-db?schema=public
@@ -121,39 +121,20 @@ services:
       - __flux-internal-network-web
 
   # ******************************************************************************
-  # *** Portal Frontend Application
-  # ******************************************************************************
-  ui-sh:
-    image: 'persitica-portal-ui:latest'
-    container_name: flux-portal-ui-full-selfhosted
-    environment:
-      - PROD=true
-    build:
-      context: ../
-      dockerfile: ./apps/frontend/portal/Dockerfile
-      target: deploy
-    # Remove
-    # ports:
-    #   - "3001:3001"
-    networks:
-      - __flux-internal-network-web
-
-  # ******************************************************************************
   # *** Proxy
   # ******************************************************************************
-  cadd-shy:
+  caddy-sh:
     image: 'caddy:2.10.2'
     container_name: flux-caddy-proxy-full-selfhosted
     restart: unless-stopped
     ports:
       - "9000:9000"
+      - "6350:6350"
     depends_on:
-      portal-api-sh:
-        condition: service_started
-      portal-ui-sh:
+      web-portal-sh:
         condition: service_started
     volumes:
-      - ../Caddyfile.local:/etc/caddy/Caddyfile
+      - ../Caddyfile.full.standalone:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
     networks:

@@ -15,9 +15,6 @@
                 "command": "bunx open-cli http://localhost:3001"
             }
         },
-        "docker-build": {
-            "command": "docker build -f apps/frontend/portal/Dockerfile . -t flux-portal"
-        },
         "nx-release-publish": {
             "options": {
                 "packageRoot": "dist/{projectRoot}"
