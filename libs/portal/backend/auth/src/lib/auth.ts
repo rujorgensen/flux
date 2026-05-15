@@ -3,7 +3,10 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { PrismaClient } from '@prisma-types/flux';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-if (!process.env['FLUX_MASTER_PASSWORD']) {
+export const MASTER_PASSWORD_ADMIN_EMAIL = 'admin@admin.com';
+export const isMasterPasswordLoginEnabled = Boolean(process.env['FLUX_MASTER_PASSWORD']);
+
+if (!isMasterPasswordLoginEnabled) {
     if (!process.env['GOOGLE_CLIENT_ID']) {
         throw new Error('GOOGLE_CLIENT_ID is not set in environment variables');
     }
@@ -79,7 +82,7 @@ if (process.env['FLUX_MASTER_PASSWORD']) {
         const data = await auth.api.signUpEmail({
             body: {
                 name: 'Administrator',
-                email: 'admin@admin.com',
+                email: MASTER_PASSWORD_ADMIN_EMAIL,
                 password: MASTER_PASSWORD,
             },
         });

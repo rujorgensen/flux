@@ -6,7 +6,7 @@ import {
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
@@ -25,7 +25,7 @@ interface UserSession {
     imports: [
         // * Modules
         CommonModule,
-        RouterModule,
+        RouterLink,
         // * Pipes
         SyntaxHighlightPipe,
         // * Components
@@ -103,7 +103,9 @@ channel.publish({ text: 'Hello, Flux!' });`;
         private readonly _userService: UserService,
         protected readonly _packageManagerService: PackageManagerService,
     ) {
-        this.selectedPm = toSignal(this._packageManagerService.selectedPm$, { initialValue: 'bun' });
+        this.selectedPm = toSignal(this._packageManagerService.selectedPm$, {
+            initialValue: 'bun',
+        });
     }
 
     async ngOnInit(

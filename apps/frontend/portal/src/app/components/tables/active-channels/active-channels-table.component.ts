@@ -41,9 +41,9 @@ interface IChannelSSEEvent {
  * correct: Treaty detects Content-Type text/event-stream and returns an AsyncGenerator.
  */
 type TChannelSniffFn = (opts: {
-    query: { token: string };
+    query: { token: string; };
     fetch: RequestInit;
-}) => Promise<{ data: AsyncIterable<IChannelSSEEvent> | null }>;
+}) => Promise<{ data: AsyncIterable<IChannelSSEEvent> | null; }>;
 
 @Component({
     selector: 'app-active-channels-table',
