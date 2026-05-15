@@ -12,9 +12,7 @@ WORKDIR /src
 FROM base AS install
 
 COPY bunfig.toml package.json bun.lock ./
-
-# Avoid copying over all the package.json files--we need this until --ignore-missing-workspaces is supported (https://github.com/oven-sh/bun/issues/10930)
-RUN bun pm pkg set --json workspaces.packages='["**/*"]'
+COPY prisma ./prisma/
 
 # Copy over all the package.json files--we need this until --ignore-missing-workspaces is supported (https://github.com/oven-sh/bun/issues/10930)
 COPY apps/backend/mesh/package.json ./apps/backend/mesh/
@@ -29,6 +27,14 @@ COPY packages/flux/mesh/package.json ./packages/flux/mesh/
 #   --ignore-scripts: don't run the postinstall script, you need to manually run the Prisma generate step
 #   --filter: only install dependencies for relevant workspace
 RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/mesh'
+
+# Generate Prisma types
+
+# Fake database URL to persuade Prisma into generating types
+ENV FLUX_DATABASE_URL=postgres://user:pw@localhost:1234/db?schema=none
+
+#   --generator: only run the 'client' generator to avoid generating dbml output
+RUN bunx --bun prisma generate --config=./prisma/prisma.config.ts --generator=client
 
 # ******************************************************************************
 # *** BUILD STAGE
