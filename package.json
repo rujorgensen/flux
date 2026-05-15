@@ -2,6 +2,8 @@
     "name": "@persistica/source",
     "type": "module",
     "version": "0.0.1",
+    "author": "pixl.prophet",
+    "license": "ISC",
     "scripts": {
         "//-01a": "// ****************************************************************************",
         "//-01b": "// *** Docker                                                                ",
@@ -10,12 +12,13 @@
         "docker:portal:e2e:down": "docker compose -p flux-portal -f .deploy/docker-compose.e2e.yml down",
         "docker:dev:up": "docker compose -p flux-dev -f .deploy/docker-compose.dev.yml up -d --build",
         "docker:dev:down": "docker compose -p flux-dev -f .deploy/docker-compose.dev.yml down",
-        "start:self-hosted:dev": "docker compose --env-file .env -f 'docker-compose.portal.prod.yml' -f '.deploy/docker-compose.dev.yml' up -d --build",
+        "start:self-hosted:dev": "docker compose --env-file .env.dev -f 'docker-compose.portal.prod.yml' -f '.deploy/docker-compose.dev.yml' up -d --build",
+        "docker:self-hosted:start": "docker compose -f '.deploy/docker-compose.full.self-hosted.yml' up -d --build",
         "//-02a": "// ****************************************************************************",
         "//-02b": "// *** Prisma                                                                ",
         "//-02c": "// ****************************************************************************",
         "prisma:generate:portal": "rm -rf ./@prisma-types && bunx --bun prisma generate --config=./prisma/prisma.config.ts",
-        "prisma:migrate:dev:portal": "bunx --bun prisma migrate dev --config=./prisma/prisma.config.ts --name=add-network-token",
+        "prisma:migrate:dev:portal": "bunx --bun prisma migrate dev --config=./prisma/prisma.config.ts --name=rerun-better-auth",
         "prisma:deploy": "bunx --bun prisma migrate deploy --config=./prisma/prisma.config.ts",
         "prisma:studio": "bunx --bun prisma studio --config=./prisma/prisma.config.ts",
         "prisma:seed:portal": "bunx --bun prisma db seed --config=./prisma/prisma.config.ts",
@@ -38,8 +41,8 @@
         "//-07a": "// ****************************************************************************",
         "//-07b": "// *** Better Auth                                                             ",
         "//-07c": "// ****************************************************************************",
-        "auth:generate": "npx @better-auth/cli@latest generate --config=./apps/backend/portal/src/auth.ts",
-        "auth:migrate": "npx @better-auth/cli@latest migrate --config=./apps/backend/portal/src/auth.ts",
+        "auth:generate": "npx @better-auth/cli@latest generate --config=./libs/portal/backend/auth/src/lib/auth.ts",
+        "auth:migrate": "npx @better-auth/cli@latest migrate --config=./libs/portal/backend/auth/src/lib/auth.ts",
         "//-08a": "// ****************************************************************************",
         "//-08b": "// *** Development                                                             ",
         "//-08c": "// ****************************************************************************",
@@ -148,6 +151,7 @@
             "elysia": {
                 "@elysiajs/cors": "1.4.2",
                 "@elysiajs/eden": "1.4.9",
+                "@elysiajs/static": "1.4.10",
                 "@elysiajs/swagger": "1.3.1",
                 "elysia": "1.4.28"
             },
@@ -161,6 +165,7 @@
                 "@angular/forms": "21.2.13",
                 "@angular/language-service": "21.2.13",
                 "@angular/platform-browser": "21.2.13",
+                "@angular/router": "21.2.13",
                 "@angular/platform-server": "21.2.13"
             }
         }

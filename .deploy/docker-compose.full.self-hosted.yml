@@ -1,0 +1,168 @@
+# ***
+# *** This setup includes the full stack: a mesh server, and the portal management interface.
+# ***
+# *** WHAT YOU NEED TO DO:
+# ***
+# *** 1) Define FLUX_MASTER_PASSWORD in your environment
+# ***
+services:
+  # ******************************************************************************
+  # *** Infrastructure
+  # ******************************************************************************
+
+  # *** Dragonfly
+  dragonfly-mesh-sh:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    container_name: flux-dragonfly-mesh-full-selfhosted # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ulimits:
+      memlock: -1
+    # Don't use all threads, occasionally fails with "There are 20 threads, so 5.00GiB are required. Exiting..."
+    command: dragonfly --proactor_threads=3
+    # "6381:6379"
+    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
+    # `host` mode is NOT currently supported in Swarm Mode.
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+    # network_mode: "host"
+    volumes:
+      - dragonflymeshdata:/mesh-dev-data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - __flux-internal-network-mesh-dragonfly
+
+  dragonfly-portal-sh:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    container_name: flux-dragonfly-portal-full-selfhosted # Override the default name, as Docker adds index to the default name (eg. portal-redis-e2e-1) 
+    ulimits:
+      memlock: -1
+    # Don't use all threads, occasionally fails with "There are 20 threads, so 5.00GiB are required. Exiting..."
+    command: dragonfly --proactor_threads=3
+    # For better performance, consider `host` mode instead `port` to avoid docker NAT.
+    # `host` mode is NOT currently supported in Swarm Mode.
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+    # network_mode: "host"
+    volumes:
+      - dragonflyportaldata:/portal-dev-data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - __flux-internal-network-portal-dragonfly
+
+  # *** PostgreSQL
+  postgres-sh:
+    image: 'postgres:18.3-alpine'
+    container_name: flux-postgres-full-selfhosted
+    restart: always
+    environment:
+      POSTGRES_USER: postgres_default_user
+      POSTGRES_PASSWORD: replace-with-password
+      POSTGRES_DB: mesh-db
+    # ports:
+    #   - "5434:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres_default_user -d mesh-db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mesh-pgdata-full-sh:/var/lib/postgresql/data
+    networks:
+      - __flux-internal-network-postgresql
+
+  # ******************************************************************************
+  # *** Mesh Server
+  # ******************************************************************************
+  mesh-server-sh:
+    image: 'rujorgensen/persistica-mesh:latest'
+    container_name: flux-mesh-server-full-selfhosted
+    environment:
+      - FLUX_DATABASE_URL=postgres://postgres_default_user:replace-with-password@postgres-sh:5432/mesh-db?schema=public
+      - FLUX_MESH_REDIS_URL=redis://dragonfly-mesh-sh:6379
+    build:
+      context: ../
+      dockerfile: ./apps/backend/mesh/Dockerfile
+      target: deploy
+    depends_on:
+      dragonfly-mesh-sh:
+        condition: service_healthy
+      postgres-sh:
+        condition: service_healthy
+    networks:
+      - __flux-internal-network-mesh-dragonfly
+      - __flux-internal-network-postgresql
+      - __flux-internal-network-mesh
+
+  # ******************************************************************************
+  # *** Portal WEB Server (API and static files)
+  # ******************************************************************************
+  web-portal-sh:
+    image: 'rujorgensen/persistica-portal:latest'
+    container_name: flux-web-portal-full-selfhosted
+    environment:
+      # - FLUX_MASTER_PASSWORD=p4sW0Rd-S3cReT+N4mB
+      # Don't touch these
+      - FLUX_DATABASE_URL=postgres://postgres_default_user:replace-with-password@postgres-sh:5432/mesh-db?schema=public
+      - FLUX_MESH_REDIS_URL=redis://dragonfly-mesh-sh:6379
+      - FLUX_PORTAL_REDIS_URL=redis://dragonfly-portal-sh:6379
+    build:
+      context: ../
+      dockerfile: ./apps/backend/portal/Dockerfile
+      target: deploy
+    depends_on:
+      dragonfly-mesh-sh:
+        condition: service_healthy
+      dragonfly-portal-sh:
+        condition: service_healthy
+      postgres-sh:
+        condition: service_healthy
+    networks:
+      - __flux-internal-network-mesh-dragonfly
+      - __flux-internal-network-postgresql
+      - __flux-internal-network-portal-dragonfly
+      - __flux-internal-network-web
+
+  # ******************************************************************************
+  # *** Proxy
+  # ******************************************************************************
+  caddy-sh:
+    image: 'caddy:2.10.2'
+    container_name: flux-caddy-proxy-full-selfhosted
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "5100:5100"
+    depends_on:
+      web-portal-sh:
+        condition: service_started
+    volumes:
+      - ../Caddyfile.full.standalone:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - __flux-internal-network-mesh
+      - __flux-internal-network-web
+
+networks:
+  __flux-internal-network-portal-dragonfly:
+    driver: bridge
+  __flux-internal-network-mesh-dragonfly:
+    driver: bridge
+  __flux-internal-network-postgresql:
+    driver: bridge
+  __flux-internal-network-mesh:
+    driver: bridge
+  __flux-internal-network-web:
+    driver: bridge
+
+volumes:
+  dragonflymeshdata:
+  dragonflyportaldata:
+  mesh-pgdata-full-sh:
+  caddy_data:
+  caddy_config:

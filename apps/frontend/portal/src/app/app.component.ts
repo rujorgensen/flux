@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { version } from '../../package.json';
 
 @Component({
     imports: [
-        RouterModule,
+        RouterOutlet,
         NgxSonnerToaster,
     ],
     selector: 'prtl-root',

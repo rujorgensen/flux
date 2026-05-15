@@ -9,6 +9,7 @@
         "@prisma/client": "catalog:prisma",
         "@prisma/adapter-pg": "catalog:prisma",
         "better-auth": "catalog:",
+        "@elysiajs/static": "catalog:elysia",
         "jsonwebtoken": "catalog:",
         "prisma": "catalog:prisma"
     }

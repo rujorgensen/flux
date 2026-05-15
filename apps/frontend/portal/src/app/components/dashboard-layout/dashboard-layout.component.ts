@@ -11,7 +11,12 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import {
+    NavigationEnd,
+    Router,
+    RouterLink,
+    RouterLinkActive,
+} from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, startWith } from 'rxjs';
 import { NetworksService, INetwork, MAX_NETWORKS } from '../../_services/networks.service';
@@ -35,7 +40,8 @@ interface UserSession {
     imports: [
         CommonModule,
         FormsModule,
-        RouterModule,
+        RouterLink,
+        RouterLinkActive,
         NetworkSelectorComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -94,7 +100,9 @@ export class DashboardLayoutComponent {
                 map((e) => e.urlAfterRedirects),
                 startWith(this.router.url),
             ),
-            { initialValue: this.router.url },
+            {
+                initialValue: this.router.url,
+            },
         );
 
         this.isDashboardItemsOpen = computed(() => {

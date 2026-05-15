@@ -12,9 +12,7 @@ WORKDIR /src
 FROM base AS install
 
 COPY bunfig.toml package.json bun.lock ./
-
-# Avoid copying over all the package.json files--we need this until --ignore-missing-workspaces is supported (https://github.com/oven-sh/bun/issues/10930)
-RUN bun pm pkg set --json workspaces.packages='["**/*"]'
+COPY prisma ./prisma/
 
 # Copy over all the package.json files--we need this until --ignore-missing-workspaces is supported (https://github.com/oven-sh/bun/issues/10930)
 COPY apps/backend/mesh/package.json ./apps/backend/mesh/
@@ -25,11 +23,18 @@ COPY packages/flux/agent/package.json ./packages/flux/agent/
 COPY packages/flux/authority/package.json ./packages/flux/authority/
 COPY packages/flux/mesh/package.json ./packages/flux/mesh/
 
-# Don't run postinstall--you need to manually run the Prisma generate step
 #   --frozen-lockfile: don't update bun.lock
-#   --ignore-scripts: dont run the postinstall script
-#   --filter: only install seleceted workspace packages (skip others to save space/time)
+#   --ignore-scripts: don't run the postinstall script, you need to manually run the Prisma generate step
+#   --filter: only install dependencies for relevant workspace
 RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/mesh'
+
+# Generate Prisma types
+
+# Fake database URL to persuade Prisma into generating types
+ENV FLUX_DATABASE_URL=postgres://user:pw@localhost:1234/db?schema=none
+
+#   --generator: only run the 'client' generator to avoid generating dbml output
+RUN bunx --bun prisma generate --config=./prisma/prisma.config.ts --generator=client
 
 # ******************************************************************************
 # *** BUILD STAGE
@@ -38,6 +43,10 @@ RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/mesh'
 FROM base AS build
 
 COPY --from=install ./src/node_modules node_modules
+
+# Include Prisma generated types
+COPY --from=install ./src/@prisma-types/flux  ./@prisma-types/flux
+
 COPY . .
 
 # ENV NODE_ENV=production

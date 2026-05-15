@@ -1,4 +1,6 @@
-import { Elysia } from 'elysia';
+import { extname, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Elysia, NotFoundError } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
@@ -15,13 +17,17 @@ import { networkTokenController } from './api/networks/tokens/tokens.controller'
 import { networkRepository, networkService } from './_decorators/network-service.decorator';
 import { ConnectionHistorySnapshotService } from './_services/connection-history-snapshot.service';
 import { getPortalPgRepository } from '@backend/core/prisma';
+import { staticPlugin } from '@elysiajs/static';
 
-// ****************************************************************************
-// * Env
-// ****************************************************************************
-const FLUX_AUTHORITY_JWT_SECRET: string | undefined = process.env['FLUX_AUTHORITY_JWT_SECRET'];
-if (!FLUX_AUTHORITY_JWT_SECRET) {
-    throw new Error('Missing FLUX_AUTHORITY_JWT_SECRET in .env');
+// Resolve path to the frontend's browser output, which we will serve as static assets
+const serverDistFolder = dirname(fileURLToPath(import.meta.url));
+const browserDistFolder = resolve(serverDistFolder, '..', '..', 'frontend', 'portal', 'browser');
+const browserIndexHTML = resolve(browserDistFolder, 'index.html');
+
+function isClientSideRoute(
+    path: string,
+): boolean {
+    return !path.startsWith('/api') && extname(path) === '';
 }
 
 // ****************************************************************************
@@ -49,7 +55,6 @@ new LiveUpdates(
     fluxMeshServerPort,
     portalRedisStatusService,
     meshRedisStatusService,
-    FLUX_AUTHORITY_JWT_SECRET,
 );
 
 // ****************************************************************************
@@ -83,6 +88,16 @@ Bun.cron('@hourly', async () => {
 
 // * Host the api
 export const app = new Elysia()
+
+    // ! NB During development, the output is not there and this will fail
+    .use(
+        staticPlugin({
+            // Reset the defaul '/public' prefix
+            prefix: '/',
+            assets: browserDistFolder,
+            alwaysStatic: true,
+        }),
+    )
 
     //  .use(rateLimiter)
     //  .onRequest(({ rateLimiter, ip, set, error }) => {
@@ -122,6 +137,14 @@ export const app = new Elysia()
     .use(networkChannelController)
     .use(networksController)
     .use(networkTokenController)
+    .get('/*', ({ path }) => {
+        console.log(`Handling frontend route: ${path}`);
+        if (!isClientSideRoute(path)) {
+            throw new NotFoundError();
+        }
+
+        return Bun.file(browserIndexHTML);
+    })
 
     // return new Response(null, {
     //   status: 303,

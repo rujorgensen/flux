@@ -13,8 +13,6 @@
         "type": "git",
         "url": "git+https://github.com/rujorgensen/persistica.git"
     },
-    "author": "pixl.prophet",
-    "license": "ISC",
     "bugs": {
         "url": "https://github.com/rujorgensen/persistica/issues"
     },

@@ -49,7 +49,7 @@ export class ConnectedAuthoritiesTableComponent {
             .authorities
             .delete()
             .then((response) => {
-                const count = (response.data as { count: number } | null)?.count ?? 0;
+                const count = (response.data as { count: number; } | null)?.count ?? 0;
                 this.dataStore.set([]);
                 toast.success(`${count} authority(ies) kicked successfully.`);
             })

@@ -29,6 +29,7 @@ import {
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
+    TNetworkId_S,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -72,6 +73,7 @@ import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
 import { AgentManager } from './_managers/agent.manager';
+import { interactWithNpc } from './_routes/npc-interact.get.route';
 
 PicoLogger.configure({
     allowScopes: '*',
@@ -101,6 +103,7 @@ type TWebSocketData = {};
 type TOptions = {
     port?: number;
     redisConnectionString?: string;
+    hardcodedNetworkCredentials?: Map<TNetworkId_S, string>,
 };
 
 export class FluxMeshServer {
@@ -156,7 +159,11 @@ export class FluxMeshServer {
                 // ****************************************************************************
                 '/auth/network-authority': {
                     OPTIONS: OPTIONS_RESPONSE,
-                    POST: authorizeNetworkAuthority,
+                    POST: (request: Bun.BunRequest) =>
+                        authorizeNetworkAuthority(
+                            request,
+                            optionsOrPort instanceof Object ? optionsOrPort.hardcodedNetworkCredentials : undefined,
+                        ),
                 },
 
                 // ****************************************************************************
@@ -170,6 +177,14 @@ export class FluxMeshServer {
                             networkAuthorityRedisCache,
                             globalRPCClient,
                         ),
+                },
+
+                // ****************************************************************************
+                // *** NPC Interaction
+                // ****************************************************************************
+                '/*': {
+                    OPTIONS: OPTIONS_RESPONSE,
+                    GET: interactWithNpc,
                 },
             },
 

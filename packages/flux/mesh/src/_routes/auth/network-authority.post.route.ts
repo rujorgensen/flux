@@ -42,6 +42,7 @@ const getNetworkTokenCache = (
  */
 export const authorizeNetworkAuthority = async (
     request: Bun.BunRequest,
+    hardcodedNetworkCredentials?: Map<TNetworkId_S, string>,
 ): Promise<Response> => {
     const urlWithParsedQuery: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);
 
@@ -64,7 +65,9 @@ export const authorizeNetworkAuthority = async (
 
     PicoLogger.log(`Received authority token for network: ${networkId}`, 'authorize');
 
-    if (!await getNetworkTokenCache().isValidToken(
+    if (hardcodedNetworkCredentials?.has(networkId) && (hardcodedNetworkCredentials.get(networkId) === tokenValue)) {
+        PicoLogger.log(`Successfully authorized authority for network ${networkId} using hardcoded credentials`, 'authorize');
+    } else if (!await getNetworkTokenCache().isValidToken(
         networkId,
         tokenValue as TNetworkToken_S,
     )) {

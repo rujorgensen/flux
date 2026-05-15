@@ -23,7 +23,6 @@ services:
       FLUX_PORTAL_REDIS_URL: ${FLUX_PORTAL_REDIS_URL}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      FLUX_AUTHORITY_JWT_SECRET: ${FLUX_AUTHORITY_JWT_SECRET}
     build:
       context: .
       dockerfile: ./apps/backend/portal/Dockerfile

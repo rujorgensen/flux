@@ -5,7 +5,7 @@ import {
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
 
@@ -20,7 +20,7 @@ interface UserSession {
     selector: 'app-docs-introduction',
     imports: [
         CommonModule,
-        RouterModule,
+        RouterLink,
         DashboardLayoutComponent,
     ],
     templateUrl: './docs-introduction.component.html',
