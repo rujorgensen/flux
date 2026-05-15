@@ -1,6 +1,10 @@
 # ***
 # *** This setup includes the full stack: a mesh server, and the portal management interface.
 # ***
+# *** WHAT YOU NEED TO DO:
+# ***
+# *** 1) Update the FLUX_MASTER_PASSWORD
+# ***
 services:
   # ******************************************************************************
   # *** Infrastructure
@@ -51,6 +55,11 @@ services:
       POSTGRES_DB: ${MESH_POSTGRES_DB}
     # ports:
     #   - "5434:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres_default_user -d mesh-db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - mesh-pgdata-full-sh:/var/lib/postgresql/data
     networks:
@@ -82,25 +91,26 @@ services:
       - __flux-internal-network-postgresql
 
   # ******************************************************************************
-  # *** Portal Backend API
+  # *** Portal WEB Server (API and static files)
   # ******************************************************************************
-  api-sh:
-    image: 'rujorgensen/local-persistica-portal:latest'
-    container_name: flux-portal-api-full-selfhosted
+  web-portal-sh:
+    image: 'rujorgensen/persistica-portal:latest'
+    container_name: flux-web-portal-full-selfhosted
     environment:
-      - FLUX_DATABASE_URL=postgres://mesh-pg-user-name:mesh-pg-password@mesh-postgres-sh:5432/mesh-db?schema=public
-      - FLUX_MESH_REDIS_URL=redis://mesh-dragonfly-sh:6379
-      - FLUX_PORTAL_REDIS_URL=redis://mesh-dragonfly-sh:6379
-      - FLUX_MASTER_PASSWORD=p4sW0Rd-S3cReT+N4mB
+      - FLUX_MASTER_PASSWORD=
       - FLUX_AUTHORITY_JWT_SECRET=flux-authority-jwt-secret
+      # Don't touch these
+      - FLUX_DATABASE_URL=postgres://postgres_default_user:replace-with-password@postgres-sh:5432/mesh-db?schema=public
+      - FLUX_MESH_REDIS_URL=redis://dragonfly-mesh-sh:6379
+      - FLUX_PORTAL_REDIS_URL=redis://dragonfly-mesh-sh:6379
     build:
       context: ../
       dockerfile: ./apps/backend/portal/Dockerfile
       target: deploy
     depends_on:
-      mesh-dragonfly-sh:
+      dragonfly-portal-sh:
         condition: service_healthy
-      mesh-postgres-sh:
+      postgres-sh:
         condition: service_healthy
     # Remove
     # ports:

@@ -3,11 +3,12 @@ import { auth } from './auth';
 // * Create master user, if masterpassword is set, and running as self-hosted
 if (process.env['FLUX_MASTER_PASSWORD']) {
 
-    if (process.env['FLUX_MASTER_PASSWORD'].length < 8) {
+    const MASTER_PASSWORD = process.env['FLUX_MASTER_PASSWORD'];
+    if (MASTER_PASSWORD.length < 8) {
         throw new Error('FLUX_MASTER_PASSWORD was set, must be a string with at least 8 characters.');
     }
 
-    if (process.env['FLUX_MASTER_PASSWORD'].length > 128) {
+    if (MASTER_PASSWORD.length > 128) {
         throw new Error('FLUX_MASTER_PASSWORD was set, must be a string with at most 128 characters.');
     }
 
@@ -18,7 +19,7 @@ if (process.env['FLUX_MASTER_PASSWORD']) {
                 body: {
                     name: 'Administrator',
                     email: 'admin@admin.com',
-                    password: process.env['FLUX_MASTER_PASSWORD']!,
+                    password: MASTER_PASSWORD,
                 },
             });
 

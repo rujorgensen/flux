@@ -23,6 +23,9 @@ const prisma = new PrismaClient({
     }),
 });
 
+/**
+ * ! If changing this configuration, make sure to run `bun auth:generate` to apply the changes.
+ */
 export const auth = betterAuth({
     telemetry: {
         enabled: false,
