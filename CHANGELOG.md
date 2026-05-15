@@ -4,10 +4,6 @@
 
 - generating types ([3457991](https://github.com/rujorgensen/solid-octo-spoon/commit/3457991))
 
-### ❤️ Thank You
-
-- rj
-
 ## 0.0.11 (2025-09-03)
 
 This was a version bump only, there were no code changes.
@@ -169,6 +165,3 @@ This was a version bump only, there were no code changes.
 - switch to native Bun Redis connector ([fb09580](https://github.com/rujorgensen/solid-octo-spoon/commit/fb09580))
 
 ### ❤️ Thank You
-
-- rj
-- rujorgensen
