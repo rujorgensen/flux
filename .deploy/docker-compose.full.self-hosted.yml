@@ -142,7 +142,7 @@ services:
     restart: unless-stopped
     ports:
       - "9000:9000"
-      - "6350:6350"
+      - "5100:5100"
     depends_on:
       web-portal-sh:
         condition: service_started
