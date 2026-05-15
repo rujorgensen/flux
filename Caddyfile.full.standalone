@@ -1,0 +1,14 @@
+# Portal Selfhosted Caddyfile
+
+http://:9000 {
+	reverse_proxy * web-portal-sh:3000
+
+	handle /cddy {
+		respond "Caddytime!"
+	}
+}
+
+# Route traffic to the mesh to the mesh service
+http://:6350 {
+	reverse_proxy mesh-server-sh:6350
+}

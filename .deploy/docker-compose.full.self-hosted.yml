@@ -50,7 +50,7 @@ services:
     container_name: flux-postgres-full-selfhosted
     restart: always
     environment:
-      POSTGRES_USER: ${MESH_POSTGRES_USER}
+      POSTGRES_USER: postgres_default_user
       POSTGRES_PASSWORD: ${MESH_POSTGRES_PASSWORD}
       POSTGRES_DB: ${MESH_POSTGRES_DB}
     # ports:
@@ -73,16 +73,16 @@ services:
     container_name: flux-mesh-server-full-selfhosted
     environment:
       - FLUX_DATABASE_URL=postgres://mesh-pg-user-name:mesh-pg-password@mesh-postgres-sh:5432/mesh-db?schema=public
-      - FLUX_MESH_REDIS_URL=redis://mesh-dragonfly-sh:6379
-      - FLUX_PORTAL_REDIS_URL=redis://mesh-dragonfly-sh:6379
+      - FLUX_MESH_REDIS_URL=redis://dragonfly-mesh-sh:6379
+      - FLUX_PORTAL_REDIS_URL=redis://dragonfly-portal-sh:6379
     build:
       context: ../
       dockerfile: ./apps/backend/mesh/Dockerfile
       target: deploy
     depends_on:
-      mesh-dragonfly-sh:
+      dragonfly-mesh-sh:
         condition: service_healthy
-      mesh-postgres-sh:
+      postgres-sh:
         condition: service_healthy
     ports:
       - "6350:6379"

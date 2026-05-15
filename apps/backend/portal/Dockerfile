@@ -48,6 +48,7 @@ FROM base AS build
 COPY --from=install ./src/node_modules node_modules
 COPY . .
 
+# Build the API
 RUN bun run apps/backend/portal/build.js --projectRoot=apps/backend/portal
 
 # ******************************************************************************
