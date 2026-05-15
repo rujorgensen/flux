@@ -14,7 +14,7 @@ services:
     # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
     # network_mode: "host"
     volumes:
-      - dragonflymeshdata:/mesh-dev-data
+      - dragonflymeshdata:/data
 
   mesh-postgres:
     image: postgres:18.3-alpine
@@ -27,7 +27,7 @@ services:
     # ports:
     #   - "5434:5432"
     volumes:
-      - mesh-pgdata-dev:/var/lib/postgresql
+      - pg-data-mesh:/var/lib/postgresql
     networks:
       - private-mesh-network
 
@@ -53,4 +53,4 @@ networks:
 
 volumes:
   dragonflymeshdata:
-  mesh-pgdata-dev:
+  pg-data-mesh:

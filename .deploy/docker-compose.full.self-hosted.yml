@@ -24,7 +24,7 @@ services:
     # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
     # network_mode: "host"
     volumes:
-      - dragonflymeshdata:/mesh-dev-data
+      - dragonflymeshdata:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
@@ -45,7 +45,7 @@ services:
     # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
     # network_mode: "host"
     volumes:
-      - dragonflyportaldata:/portal-dev-data
+      - dragonflyportaldata:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
@@ -71,7 +71,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - mesh-pgdata-full-sh:/var/lib/postgresql/data
+      - pg-data-mesh-full-sh:/var/lib/postgresql
     networks:
       - __flux-internal-network-postgresql
 
@@ -163,6 +163,6 @@ networks:
 volumes:
   dragonflymeshdata:
   dragonflyportaldata:
-  mesh-pgdata-full-sh:
+  pg-data-mesh-full-sh:
   caddy_data:
   caddy_config:
