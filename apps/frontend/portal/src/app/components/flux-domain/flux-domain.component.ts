@@ -51,9 +51,9 @@ export function resolveFluxDomain(
         };
     }
 
-    const meshHostname: string = hostnameParts.length <= 2
-        ? `mesh.${location.hostname}`
-        : ['mesh', ...hostnameParts.slice(1)].join('.');
+    const meshHostname: string = hostnameParts.length > 2
+        ? ['mesh', ...hostnameParts.slice(1)].join('.')
+        : `mesh.${location.hostname}`;
 
     return {
         domain: `${location.protocol}//${meshHostname}`,
