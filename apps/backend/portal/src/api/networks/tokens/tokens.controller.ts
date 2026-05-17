@@ -4,7 +4,11 @@ import { betterAuth } from '../../../_decorators/auth.decorator';
 import { networkDecorator } from '../../../_decorators/network-service.decorator';
 import { TNetworkToken_S } from '@flux/shared/types';
 import { ITokenMetaData_S } from '../../../../../../../libs/flux/shared/types/src/lib/network.type';
-import { NetworkTokenWithUser } from '../../../../../../../libs/backend/features/network/src/lib/tokens/network-token.repository';
+import {
+    createNetworkToken,
+    MaximumTokensReachedError,
+    toMetadata,
+} from './create-network-token.fn';
 
 // ****************************************************************************
 // *** Elysia response schemas
@@ -28,19 +32,6 @@ const revealResponseSchema = t.Object({
 // *** Helpers
 // ****************************************************************************
 
-const toMetadata = (
-    token: NetworkTokenWithUser,
-    index: number,
-): ITokenMetaData_S => ({
-    id: token.id,
-    index,
-    isPrimary: index === 0,
-    entityCount: -1, // TODO
-    createdAt: token.createdAt.toISOString(),
-    createdBy: token.createdByUserName,
-    rotatedOutAt: token.rotatedOutAt?.toISOString() ?? null,
-});
-
 class TokenNotFoundError extends Error {
     status = 404;
 
@@ -48,15 +39,6 @@ class TokenNotFoundError extends Error {
         tokenIndex: number,
     ) {
         super(`Token at index ${tokenIndex} not found.`);
-    }
-}
-
-class MaximumTokensReachedError extends Error {
-    status = 400;
-
-    constructor(
-    ) {
-        super('Maximum of 3 tokens already reached. Please delete an existing token before creating a new one.');
     }
 }
 
@@ -113,34 +95,11 @@ export const networkTokenController = new Elysia({
             serviceProviders,
         }): Promise<ITokenMetaData_S> => {
             console.log(`Generating token for network ${networkId}`);
-
-            const existingCount = await serviceProviders
-                .networkTokenService
-                .countByNetworkId(networkId);
-
-            if (existingCount >= 3) {
-                throw new MaximumTokensReachedError();
-            }
-
-            const now = new Date();
-
-            const newToken = await serviceProviders
-                .networkTokenService
-                .createToken(
-                    networkId,
-                    user.name || user.id,
-                );
-
-            // Demote all older tokens
-            await serviceProviders
-                .networkTokenService
-                .rotateOutAllExcept(
-                    networkId,
-                    newToken.token as TNetworkToken_S,
-                    now,
-                );
-
-            return toMetadata(newToken, 0);
+            return createNetworkToken({
+                networkId,
+                user,
+                serviceProviders,
+            });
         },
         {
             response: {
@@ -236,4 +195,3 @@ export const networkTokenController = new Elysia({
         },
     )
     ;
-
