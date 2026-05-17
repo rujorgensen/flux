@@ -34,9 +34,9 @@ import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 
 interface IOptions {
+    domain?: string; // Override the domain for self hosted Flux instances. Should include protocol, e.g. "https://my-flux-instance.com"
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
     retries?: number; // Number of times to retry a failed message
-    port?: number;
 }
 
 /**
@@ -59,12 +59,13 @@ export const createWSConnection = <T, M>(
         stateManager,
         ticket,
         {
+            domain: options?.domain,
             secretKey: options?.secretKey,
             retries: options?.retries,
-            port: options?.domain ? new URL(options.domain).port ? Number.parseInt(new URL(options.domain).port) : undefined : undefined,
         },
     );
 };
+
 
 export class FluxWebSocketConnection {
     private readonly socket: FluxWebSocketClientConnection;
@@ -86,15 +87,19 @@ export class FluxWebSocketConnection {
         private readonly options?: IOptions,
     ) {
         this.options = {
+            domain: this.options?.domain,
             secretKey: this.options?.secretKey,
             retries: this.options?.retries ?? 10_000,
-            port: this.options?.port ?? 5_100,
         };
+        const url = new URL(this.options?.domain ?? 'http://localhost:5100');
+
+        url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+        url.searchParams.set('token', this.token);
 
         // 1. Connect to websocket
         this.socket = new FluxWebSocketClientConnection(
             {
-                url: `ws://localhost:${this.options.port}?token=${this.token}`,
+                url: url.toString(),
                 autoReconnect: true,
                 reconnectDelay: 2_000,
                 retries: this.options.retries,

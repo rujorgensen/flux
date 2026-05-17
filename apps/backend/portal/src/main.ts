@@ -92,7 +92,7 @@ export const app = new Elysia()
     // ! NB During development, the output is not there and this will fail
     .use(
         staticPlugin({
-            // Reset the defaul '/public' prefix
+            // Reset the default '/public' prefix
             prefix: '/',
             assets: browserDistFolder,
             alwaysStatic: true,
