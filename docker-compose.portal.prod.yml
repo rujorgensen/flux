@@ -37,7 +37,7 @@ services:
   # *** Proxy
   # ******************************************************************************
   caddy:
-    image: caddy:2.11.2
+    image: caddy:2.11.3
     container_name: portal-caddy-proxy-prod
     restart: unless-stopped
     ports:
