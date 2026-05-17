@@ -26,6 +26,17 @@ function isLocalHostname(
         || hostname === '[::1]';
 }
 
+function getLocalFluxDomain(
+    protocol: string,
+    hostname: string,
+): string {
+    const normalizedHostname: string = hostname === '::1'
+        ? '[::1]'
+        : hostname;
+
+    return `${protocol}//${normalizedHostname}:5100`;
+}
+
 export function resolveFluxDomain(
     location: IFluxDomainLocation | undefined,
 ): IResolvedFluxDomain {
@@ -38,7 +49,7 @@ export function resolveFluxDomain(
 
     if (isLocalHostname(location.hostname)) {
         return {
-            domain: `${location.protocol}//${location.hostname}:5100`,
+            domain: getLocalFluxDomain(location.protocol, location.hostname),
             isVisible: true,
         };
     }

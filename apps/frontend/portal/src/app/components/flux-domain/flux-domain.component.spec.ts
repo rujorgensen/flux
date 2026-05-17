@@ -57,6 +57,44 @@ describe('FluxDomainComponent', () => {
         });
     });
 
+    it('should keep local hosts on port 5100', () => {
+        expect(resolveFluxDomain({
+            hostname: 'localhost',
+            origin: 'http://localhost:3001',
+            protocol: 'http:',
+        })).toEqual({
+            domain: 'http://localhost:5100',
+            isVisible: true,
+        });
+
+        expect(resolveFluxDomain({
+            hostname: '127.0.0.1',
+            origin: 'http://127.0.0.1:3001',
+            protocol: 'http:',
+        })).toEqual({
+            domain: 'http://127.0.0.1:5100',
+            isVisible: true,
+        });
+
+        expect(resolveFluxDomain({
+            hostname: '::1',
+            origin: 'http://[::1]:3001',
+            protocol: 'http:',
+        })).toEqual({
+            domain: 'http://[::1]:5100',
+            isVisible: true,
+        });
+
+        expect(resolveFluxDomain({
+            hostname: '[::1]',
+            origin: 'http://[::1]:3001',
+            protocol: 'http:',
+        })).toEqual({
+            domain: 'http://[::1]:5100',
+            isVisible: true,
+        });
+    });
+
     it('should hide the server domain when the portal already runs on the mesh host', () => {
         expect(resolveFluxDomain({
             hostname: 'mesh.persistica.io',
@@ -65,6 +103,13 @@ describe('FluxDomainComponent', () => {
         })).toEqual({
             domain: 'https://mesh.persistica.io',
             isVisible: false,
+        });
+    });
+
+    it('should fall back to the default local domain when location is unavailable', () => {
+        expect(resolveFluxDomain(undefined)).toEqual({
+            domain: 'http://localhost:5100',
+            isVisible: true,
         });
     });
 
