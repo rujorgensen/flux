@@ -9,15 +9,32 @@
 
         @if (networkId) {
             <div class="network-id-panel">
-                <div class="network-id-header">
-                    <span class="network-id-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-4 w-4 stroke-current">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                        </svg>
-                    </span>
-                    <span class="network-id-label">Network ID</span>
+                <div class="network-overview-item">
+                    <div class="network-id-header">
+                        <span class="network-id-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-4 w-4 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                            </svg>
+                        </span>
+                        <span class="network-id-label">Network ID</span>
+                    </div>
+                    <app-network-id [networkId]="networkId" />
                 </div>
-                <app-network-id [networkId]="networkId" />
+
+                <div class="network-overview-item">
+                    <div class="network-id-header">
+                        <span class="network-id-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-4 w-4 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </span>
+                        <span class="network-id-label">Server</span>
+                    </div>
+                    <p class="network-overview-copy">
+                        Use this server domain when configuring agents and authorities.
+                    </p>
+                    <app-flux-domain />
+                </div>
             </div>
         }
 
