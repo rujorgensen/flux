@@ -83,9 +83,7 @@ export class FluxDomainComponent {
             ? window.location
             : undefined,
     );
-
     protected readonly domain = this.resolvedDomain.domain;
-    protected readonly shouldShowDomain = this.resolvedDomain.isVisible;
     protected readonly isCopied = signal<boolean>(false);
 
     protected onCopy(

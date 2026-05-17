@@ -20,21 +20,19 @@
                     </div>
                     <app-network-id [networkId]="networkId" />
                 </div>
-
-                <div class="network-overview-item">
-                    <div class="network-id-header">
-                        <span class="network-id-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-4 w-4 stroke-current">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                        </span>
-                        <span class="network-id-label">Server</span>
+                @if (shouldShowDomain) {
+                    <div class="network-overview-item">
+                        <div class="network-id-header">
+                            <span class="network-id-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-4 w-4 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </span>
+                            <span class="network-id-label">Server URL</span>
+                        </div>
+                        <app-flux-domain />
                     </div>
-                    <p class="network-overview-copy">
-                        Use this server domain when configuring agents and authorities.
-                    </p>
-                    <app-flux-domain />
-                </div>
+                }
             </div>
         }
 

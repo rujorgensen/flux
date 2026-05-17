@@ -15,12 +15,6 @@
     gap: 0.65rem;
 }
 
-.network-overview-copy {
-    margin: 0;
-    font-size: 0.8rem;
-    color: oklch(var(--bc) / 0.65);
-}
-
 .network-id-header {
     display: flex;
     align-items: center;
