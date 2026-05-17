@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FluxDomainComponent } from './flux-domain.component';
+import { FluxDomainComponent, resolveFluxDomain } from './flux-domain.component';
 
 describe('FluxDomainComponent', () => {
     beforeAll(() => {
@@ -35,6 +35,37 @@ describe('FluxDomainComponent', () => {
         const fixture = TestBed.createComponent(FluxDomainComponent);
         const component = fixture.componentInstance;
         expect(component).toBeTruthy();
+    });
+
+    it('should resolve the active mesh domain for non-local portal hosts', () => {
+        expect(resolveFluxDomain({
+            hostname: 'persistica.io',
+            origin: 'https://persistica.io',
+            protocol: 'https:',
+        })).toEqual({
+            domain: 'https://mesh.persistica.io',
+            isVisible: true,
+        });
+
+        expect(resolveFluxDomain({
+            hostname: 'portal.persistica.io',
+            origin: 'https://portal.persistica.io',
+            protocol: 'https:',
+        })).toEqual({
+            domain: 'https://mesh.persistica.io',
+            isVisible: true,
+        });
+    });
+
+    it('should hide the server domain when the portal already runs on the mesh host', () => {
+        expect(resolveFluxDomain({
+            hostname: 'mesh.persistica.io',
+            origin: 'https://mesh.persistica.io',
+            protocol: 'https:',
+        })).toEqual({
+            domain: 'https://mesh.persistica.io',
+            isVisible: false,
+        });
     });
 
     it('should copy domain to clipboard and show "Copied!" state on click', async () => {

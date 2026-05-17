@@ -4,13 +4,77 @@ import {
     signal,
 } from '@angular/core';
 
+interface IFluxDomainLocation {
+    hostname: string;
+    origin: string;
+    protocol: string;
+}
+
+interface IResolvedFluxDomain {
+    domain: string;
+    isVisible: boolean;
+}
+
+const DEFAULT_FLUX_DOMAIN = 'http://localhost:5100';
+
+function isLocalHostname(
+    hostname: string,
+): boolean {
+    return hostname === 'localhost'
+        || hostname === '127.0.0.1'
+        || hostname === '::1'
+        || hostname === '[::1]';
+}
+
+export function resolveFluxDomain(
+    location: IFluxDomainLocation | undefined,
+): IResolvedFluxDomain {
+    if (!location) {
+        return {
+            domain: DEFAULT_FLUX_DOMAIN,
+            isVisible: true,
+        };
+    }
+
+    if (isLocalHostname(location.hostname)) {
+        return {
+            domain: `${location.protocol}//${location.hostname}:5100`,
+            isVisible: true,
+        };
+    }
+
+    const hostnameParts: string[] = location.hostname.split('.');
+    if (hostnameParts[0] === 'mesh') {
+        return {
+            domain: location.origin,
+            isVisible: false,
+        };
+    }
+
+    const meshHostname: string = hostnameParts.length <= 2
+        ? `mesh.${location.hostname}`
+        : ['mesh', ...hostnameParts.slice(1)].join('.');
+
+    return {
+        domain: `${location.protocol}//${meshHostname}`,
+        isVisible: true,
+    };
+}
+
 @Component({
     selector: 'app-flux-domain',
     templateUrl: './flux-domain.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FluxDomainComponent {
-    protected readonly domain = 'http://localhost:5100';
+    private readonly resolvedDomain = resolveFluxDomain(
+        typeof window !== 'undefined'
+            ? window.location
+            : undefined,
+    );
+
+    protected readonly domain = this.resolvedDomain.domain;
+    protected readonly shouldShowDomain = this.resolvedDomain.isVisible;
     protected readonly isCopied = signal<boolean>(false);
 
     protected onCopy(
