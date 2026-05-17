@@ -57,7 +57,7 @@ services:
 
   # *** PostgreSQL
   postgres-sh:
-    image: 'postgres:18.3-alpine'
+    image: 'postgres:18.4-alpine'
     container_name: flux-postgres-full-selfhosted
     restart: always
     environment:
@@ -132,7 +132,7 @@ services:
   # *** Proxy
   # ******************************************************************************
   caddy-sh:
-    image: 'caddy:2.10.2'
+    image: 'caddy:2.11.3'
     container_name: flux-caddy-proxy-full-selfhosted
     restart: unless-stopped
     ports:
