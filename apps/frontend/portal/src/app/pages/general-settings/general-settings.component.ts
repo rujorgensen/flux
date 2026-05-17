@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import type { Observable } from 'rxjs';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { NetworkTokensComponent } from '../../components/network-tokens/network-tokens.component';
-import { FluxDomainComponent } from '../../components/flux-domain/flux-domain.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { NetworksService, type INetwork } from '../../_services/networks.service';
 
@@ -20,7 +19,6 @@ interface UserSession {
         CommonModule,
         DashboardLayoutComponent,
         NetworkTokensComponent,
-        FluxDomainComponent,
     ],
     templateUrl: './general-settings.component.html',
     styleUrls: ['./general-settings.component.scss'],

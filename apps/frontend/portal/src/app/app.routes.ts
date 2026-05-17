@@ -70,6 +70,11 @@ export const appRoutes: Route[] = [
         children: [
             {
                 path: 'general',
+                pathMatch: 'full',
+                redirectTo: 'tokens',
+            },
+            {
+                path: 'tokens',
                 canActivate: [authGuard, networkGuard],
                 loadComponent: () => import('./pages/general-settings/general-settings.component').then(m => m.GeneralSettingsPageComponent),
             },

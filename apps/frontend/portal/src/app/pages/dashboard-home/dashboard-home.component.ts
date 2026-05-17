@@ -16,6 +16,7 @@ import type { IChartDataset } from '../../components/chart/chart.component';
 import { NetworksService } from '../../_services/networks.service';
 import { DashboardHistoryService } from '../../_services/dashboard-history/dashboard-history.service';
 import { NetworkIdComponent } from '../../components/network-id/network-id.component';
+import { FluxDomainComponent, resolveFluxDomain } from '../../components/flux-domain/flux-domain.component';
 
 interface UserSession {
     id?: string;
@@ -33,15 +34,23 @@ interface UserSession {
         DashboardComponent,
         ChartComponent,
         NetworkIdComponent,
+        FluxDomainComponent,
     ],
     templateUrl: './dashboard-home.component.html',
     styleUrls: ['./dashboard-home.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardHomePageComponent implements OnInit {
+        private readonly resolvedDomain = resolveFluxDomain(
+        typeof window !== 'undefined'
+            ? window.location
+            : undefined,
+    );
+
     protected readonly networkCode = signal<string | null>(null);
     protected readonly userSession = signal<UserSession | null>(null);
     protected readonly networkId$;
+    protected readonly shouldShowDomain = this.resolvedDomain.isVisible;
 
     protected readonly agentChartConfig$;
     protected readonly authorityChartConfig$;
