@@ -96,7 +96,7 @@ export const authenticateAgentOrThrow = async (
         }
 
         if (response.status === 404) {
-            throw new Error(`Mesh auth endpoint not found at ${url.origin}.`);
+            throw new Error(`Mesh server not found at ${url.origin}.`);
         }
 
         throw new Error(textResponse

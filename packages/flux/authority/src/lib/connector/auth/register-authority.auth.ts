@@ -71,7 +71,7 @@ export const authenticateNetworkAuthorityOrThrow = async (
         }
 
         if (response.status === 404) {
-            throw new EndpointNotFoundError(`Mesh auth endpoint not found at ${url.origin}.`);
+            throw new EndpointNotFoundError(`Mesh server not found at ${url.origin}.`);
         }
 
         if (!response.ok) {
