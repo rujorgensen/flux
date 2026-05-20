@@ -42,7 +42,7 @@ interface IOptions {
 /**
  * Creates a WebSocket connection to the Flux platform.
  */
-export const createWSConnection = <T, M>(
+export const createWSConnection = (
     id: string,
     ticket: string,
     stateManager: StateManager,
