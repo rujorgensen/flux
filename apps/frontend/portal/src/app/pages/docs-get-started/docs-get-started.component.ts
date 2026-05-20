@@ -53,15 +53,15 @@ server.onReady(() => {
     protected readonly authoritySnippet = `import { FluxAuthority } from '@persistica/flux-authority';
 
 const NETWORK_ID = 'your-network-id';
-const AUTHORIZATION_KEY = 'your-network-authorization-key';
+const NETWORK_ACCESS_TOKEN = 'your-network-access-token';
 
 const authority = new FluxAuthority(NETWORK_ID);
 
-await authority.registerAuthority(
-    AUTHORIZATION_KEY,
+await authority.registerAuthority({
+    networkAccessToken: NETWORK_ACCESS_TOKEN,
 
     // Validate network access
-    async (auth: unknown) => {
+    authorizeAgentConnection: async (auth: unknown) => {
         if (!isValidToken(auth)) {
             throw new Error('Access denied');
         }
@@ -69,11 +69,11 @@ await authority.registerAuthority(
     },
 
     // Validate channel access
-    async (channelTopic: string, identity: string) => {
+    authorizeChannelAccess: async (channelTopic: string, identity: string) => {
         console.log(\`Agent joining channel: \${channelTopic}\`);
         return true; // allow all channels
     },
-);
+});
 
 console.log('✅ Authority registered');`;
 

@@ -53,11 +53,11 @@ const AUTHORIZATION_KEY = process.env.AUTHORIZATION_KEY!;
 
 const authority = new FluxAuthority(NETWORK_ID);
 
-await authority.registerAuthority(
-    AUTHORIZATION_KEY,
+await authority.registerAuthority({
+    networkAccessToken: AUTHORIZATION_KEY,
 
     // Step 1: Verify the agent's credentials and return an identity token
-    async (auth: unknown) => {
+    authorizeAgentConnection: async (auth: unknown) => {
         const { username, password } = auth as { username: string; password: string };
 
         const user = await db.users.findOne({ username });
@@ -71,7 +71,7 @@ await authority.registerAuthority(
     },
 
     // Step 2: Decide which channels this agent can join
-    async (channelTopic: string, identity: string) => {
+    authorizeChannelAccess: async (channelTopic: string, identity: string) => {
         const payload = jwt.verify(identity, JWT_SECRET) as { userId: string };
 
         // Only let users join channels they are members of
@@ -82,7 +82,7 @@ await authority.registerAuthority(
 
         return isMember;
     },
-);
+});
 
 console.log('✅ Chat authority ready');`;
 

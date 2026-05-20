@@ -17,7 +17,7 @@ interface IAgentJWTPayload extends jwt.JwtPayload {
 }
 
 const NETWORK_ID: TNetworkId_S = 'internal-network' as TNetworkId_S; // Key to register a network, known to flux
-const NETWORK_AUTHORITY_KEY: string = randomUUIDv7(); // Key to register an authority, known to flux
+const NETWORK_ACCESS_TOKEN: string = randomUUIDv7(); // Key to register an authority, known to flux
 const FLUX_AUTHORITY_JWT_SECRET: string = randomUUIDv7(); // The authority uses this to sign the success payload
 
 // ****************************************************************************
@@ -33,7 +33,7 @@ export class LiveUpdates {
         new FluxMeshServer({
             port: this.localMeshServerPort,
             hardcodedNetworkCredentials: new Map([
-                [NETWORK_ID, NETWORK_AUTHORITY_KEY],
+                [NETWORK_ID, NETWORK_ACCESS_TOKEN],
             ]),
         })
             .onReady(async () => {
@@ -55,9 +55,9 @@ export class LiveUpdates {
                 );
 
                 await fluxAuthority
-                    .registerAuthority(
-                        NETWORK_AUTHORITY_KEY,
-                        (
+                    .registerAuthority({
+                        networkAccessToken: NETWORK_ACCESS_TOKEN,
+                        authorizeAgentConnection: (
                             auth: unknown,
                         ): Promise<string> => {
                             console.log('🔑 A client is trying to access the network', auth);
@@ -79,7 +79,7 @@ export class LiveUpdates {
                         },
 
                         // * Authorize channel
-                        (
+                        authorizeChannelAccess: (
                             channelTopic: string,
                             identification: string,
                         ): Promise<boolean> => {
@@ -102,7 +102,7 @@ export class LiveUpdates {
 
                             return Promise.resolve(true);
                         },
-                    )
+                    })
                     .catch((error) => {
                         console.error(`❌ Failed to register authority: ${error instanceof Error ? error.message : String(error)}`);
                     })

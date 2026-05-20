@@ -54,7 +54,7 @@ import {
 } from './routing/addressing.utils';
 import { OPTIONS_RESPONSE } from './_routes/options.route';
 import { authorizeNetworkAuthority } from './_routes/auth/network-authority.post.route';
-import { authorizeNetworkAgent } from './_routes/auth/network-client.post.route';
+import { authorizeAgentConnection } from './_routes/auth/network-client.post.route';
 import type {
     RPCResponse,
     TRPCResponseCallbackFunction,
@@ -141,7 +141,7 @@ export class FluxMeshServer {
         const processMessageRouter: ProcessMessageRouter = new ProcessMessageRouter();
 
         const globalRPCClient: GlobalRPCClient<
-            'authorize' | 'authorizeNetworkChannel'
+            'authorizeAgentConnection' | 'authorizeChannelAccess'
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
         this.agentManager = new AgentManager(
@@ -172,7 +172,7 @@ export class FluxMeshServer {
                 '/auth/network-client': {
                     OPTIONS: OPTIONS_RESPONSE,
                     POST: (request: Bun.BunRequest) =>
-                        authorizeNetworkAgent(
+                        authorizeAgentConnection(
                             request,
                             networkAuthorityRedisCache,
                             globalRPCClient,
@@ -430,7 +430,7 @@ export class FluxMeshServer {
                                 try {
                                     const authorize: boolean = await globalRPCClient.call(
                                         networkAuthorityAddress,
-                                        'authorizeNetworkChannel',
+                                        'authorizeChannelAccess',
                                         channelName,
                                         ws.data.claim
                                     );

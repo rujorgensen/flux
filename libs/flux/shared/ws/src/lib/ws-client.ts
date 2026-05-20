@@ -181,8 +181,8 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 // Defines possible RPC methods (should possibly be free)
 export class FluxWebSocketClientConnection extends WebSocketClient<
     // ⬇️ For authorities only ⬇️
-    'authorize' |
-    'authorizeNetworkChannel' |
+    'authorizeAgentConnection' |
+    'authorizeChannelAccess' |
 
     // ⬇️ For agents only ⬇️
     'createOffer' |

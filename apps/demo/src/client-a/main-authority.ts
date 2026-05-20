@@ -30,18 +30,19 @@ Alpine.data('fluxAuthority', () => ({
 
         console.log('🔑 Registering authority in browser');
 
-        this.flux.onNetworkState((
-            networkState: TNetworkConnectionState,
-        ) => {
-            this.networkState = networkState;
-            this.log(`📡 Network state changed to '${networkState}'`);
-        });
+        this.flux
+            .onNetworkState((
+                networkState: TNetworkConnectionState,
+            ) => {
+                this.networkState = networkState;
+                this.log(`📡 Network state changed to '${networkState}'`);
+            });
 
         try {
-            await this.flux.registerAuthority(
-                getAuthorityKey(),
+            await this.flux.registerAuthority({
+                networkAccessToken: getAuthorityKey(),
 
-                (auth: unknown): Promise<string> => {
+                authorizeAgentConnection: (auth: unknown): Promise<string> => {
                     if ((auth as any).code !== DEMO_CHANNEL_PASSWORD) {
                         this.log('❌ Client rejected – wrong code');
                         return Promise.reject(new Error('Not allowed'));
@@ -58,14 +59,14 @@ Alpine.data('fluxAuthority', () => ({
                     return Promise.resolve(token);
                 },
 
-                (
+                authorizeChannelAccess: (
                     channelTopic: TChannelName,
                     identification: string,
                 ): Promise<boolean> => {
                     this.log(`🔒 Client '${identification}' joining channel '${channelTopic}'`);
                     return Promise.resolve(true);
                 },
-            );
+            });
         } catch (error) {
             this.log(`❌ Authority registration failed: ${(error as Error).message}`);
 

@@ -11,7 +11,7 @@ export interface IValidationSocketPackage {
 
 export interface IRegisterAutoritySocketPackage {
     networkId: TNetworkId_S;
-    authorityKey: string;
+    networkAccessToken: string;
 }
 
 // ****************************************************************************

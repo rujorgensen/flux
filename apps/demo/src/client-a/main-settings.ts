@@ -1,9 +1,8 @@
 import Alpine from 'alpinejs';
 import { DEFAULT_FLUX_URL, getFluxUrl, setFluxUrl } from '../flux-url';
 import {
-    DEFAULT_AUTHORITY_KEY,
+    DEFAULT_NETWORK_ACCESS_TOKEN,
     DEFAULT_AUTHORITY_OBJECT,
-    DEFAULT_AUTHORITY_PASSWORD,
     getAuthorityKey,
     getAuthorityObject,
     setAuthorityKey,
@@ -45,7 +44,7 @@ Alpine.data('fluxUrlSettings', () => ({
 }));
 
 Alpine.data('fluxAuthSettings', () => ({
-    authorityKey: getAuthorityKey(),
+    networkAccessToken: getAuthorityKey(),
     authorityObject: JSON.stringify(getAuthorityObject(
         'client-a',
     ), null, 2),
@@ -54,7 +53,7 @@ Alpine.data('fluxAuthSettings', () => ({
 
     apply() {
         try {
-            const key = (this.authorityKey as string).trim() || DEFAULT_AUTHORITY_KEY;
+            const key = (this.networkAccessToken as string).trim() || DEFAULT_NETWORK_ACCESS_TOKEN;
             const object = (this.authorityObject as string).trim() || DEFAULT_AUTHORITY_OBJECT;
 
             // Validate JSON before saving
@@ -63,7 +62,7 @@ Alpine.data('fluxAuthSettings', () => ({
             setAuthorityKey(key);
             setAuthorityObject(object);
         } catch {
-            this.error = 'Invalid JSON - please enter a valid JSON object';
+            this.error = 'Invalid JSON - please enter a valid authority JSON object';
             return;
         }
 

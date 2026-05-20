@@ -26,7 +26,7 @@ import {
 } from '@flux/mesh/test/setup/infrastructure';
 
 const NETWORK_ID: string = 'rAnD0M-network-id'; // Key to register a network, known to flux´
-const NETWORK_AUTHORITY_KEY: string = 'network-authority-key'; // Key to register an authority, known to flux
+const NETWORK_ACCESS_TOKEN: string = 'network-access-token'; // Key to register an authority, known to flux
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 
 describe('persistica-flux-mesh', () => {
@@ -49,17 +49,19 @@ describe('persistica-flux-mesh', () => {
         }
 
         // Seed the test authority token so the mesh cache can bootstrap on cold start
-        await seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_AUTHORITY_KEY]);
+        await seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_ACCESS_TOKEN]);
 
         // * Start mesh server
         fluxMeshServer = new FluxMeshServer(fluxServerPort);
 
-        let timeout: ReturnType<typeof setTimeout> | undefined;
+        let timeout: ReturnType<typeof setTimeout> | undefined | null;
         await new Promise((resolve, reject) => {
             timeout = setTimeout(reject, 1_000);
 
             fluxMeshServer.onReady(() => {
-                clearTimeout(timeout);
+                if (timeout !== null) {
+                    clearTimeout(timeout);
+                }
                 timeout = null;
                 resolve(void 0);
             });
@@ -96,9 +98,9 @@ describe('persistica-flux-mesh', () => {
             );
 
             fluxAuthorityNetworkConnection = await fluxAuthority
-                .registerAuthority(
-                    NETWORK_AUTHORITY_KEY,
-                    (
+                .registerAuthority({
+                    networkAccessToken: NETWORK_ACCESS_TOKEN,
+                    authorizeAgentConnection: (
                         auth: unknown,
                     ): Promise<string> => {
 
@@ -112,13 +114,13 @@ describe('persistica-flux-mesh', () => {
                         return Promise.resolve('allowed');
                     },
 
-                    (
+                    authorizeChannelAccess: (
                         _channelTopic: string,
                         _identification: string,
                     ): Promise<boolean> => {
                         return Promise.resolve(true);
                     },
-                );
+                });
 
             expect(true).toBeTrue();
         });
@@ -172,9 +174,9 @@ describe('persistica-flux-mesh', () => {
             );
 
             const fluxAuthorityNetworkConnection: FluxAuthorityNetworkConnection = await fluxAuthority
-                .registerAuthority(
-                    NETWORK_AUTHORITY_KEY,
-                    (
+                .registerAuthority({
+                    networkAccessToken: NETWORK_ACCESS_TOKEN,
+                    authorizeAgentConnection: (
                         auth: unknown,
                     ): Promise<string> => {
 
@@ -188,13 +190,13 @@ describe('persistica-flux-mesh', () => {
                         return Promise.resolve('allowed');
                     },
 
-                    (
+                    authorizeChannelAccess: (
                         _channelTopic: string,
                         _identification: string,
                     ): Promise<boolean> => {
                         return Promise.resolve(true);
                     },
-                );
+                });
 
             const fluxAgent = new FluxAgent(
                 NETWORK_ID,

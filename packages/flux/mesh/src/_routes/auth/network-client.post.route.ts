@@ -19,18 +19,18 @@ import {
 } from '@flux/shared/utils';
 
 /**
- * This route is used to authorize a network agent.
+ * This route is used to authorize an agent connection.
  * 
  * @param { BunRequest } request - The incoming HTTP request
  * @param { NetworkAuthorityRedisCache } networkAuthorityManager - The network authority manager
- * @param { GlobalRPCClient<'authorize'> } globalRPCClient - The global RPC client
+ * @param { GlobalRPCClient<'authorizeAgentConnection'> } globalRPCClient - The global RPC client
  * 
  * @returns { Promise<Response> } The HTTP response with auth token or error
  */
-export const authorizeNetworkAgent = async (
+export const authorizeAgentConnection = async (
     request: BunRequest,
     networkAuthorityManager: NetworkAuthorityRedisCache,
-    globalRPCClient: GlobalRPCClient<'authorize'>,
+    globalRPCClient: GlobalRPCClient<'authorizeAgentConnection'>,
 ) => {
     const urlWithParsedQuery: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);
 
@@ -76,7 +76,7 @@ export const authorizeNetworkAgent = async (
 
                 return globalRPCClient.call(
                     networkAuthorityAddress,
-                    'authorize',
+                    'authorizeAgentConnection',
                     `${contentType === 'application/json' ? 'json' : 'text'}:${text}`
                 );
             },
@@ -102,14 +102,14 @@ export const authorizeNetworkAgent = async (
                     attempt: number,
                     retries: number,
                 ) => {
-                    console.log(`[authorizeNetworkAgent] Retrying... (attempt: ${attempt} of ${retries})`);
+                    console.log(`[authorizeAgentConnection] Retrying... (attempt: ${attempt} of ${retries})`);
                 },
             },
         );
 
         // const authorizedJWT: string = await globalRPCClient.call(
         //     networkAuthorityAddress,
-        //     'authorize',
+        //     'authorizeAgentConnection',
         //     `${contentType === 'application/json' ? 'json' : 'text'}:${text}`
         // );
 

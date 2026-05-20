@@ -2,12 +2,12 @@ import {
     RPCServer,
 } from '@flux/shared/ws';
 
-export class AuthorityClient extends RPCServer<'authorize'> {
-    public authorize(
+export class AuthorityClient extends RPCServer<'authorizeAgentConnection'> {
+    public authorizeAgentConnection(
         fn: (
             jwt: unknown,
         ) => boolean,
     ): void {
-        super.registerMethod('authorize', fn);
+        super.registerMethod('authorizeAgentConnection', fn);
     }
 }
