@@ -69,11 +69,13 @@ Alpine.data('fluxAuthority', () => ({
             });
         } catch (error) {
             this.log(`❌ Authority registration failed: ${(error as Error).message}`);
-
-            throw error;
+            this.log('💡 Check that Flux URL points to the mesh server and that the Network Access Token was revealed from Portal -> Network Settings.');
+            return;
         }
 
         console.log('✅ Demo Authority registered');
-        this.log('✅ Authority registered and waiting for clients');
+        if (this.networkState === 'connected') {
+            this.log('✅ Authority registered and waiting for clients');
+        }
     },
 }));
