@@ -75,57 +75,6 @@ export class NetworkAuthorityRedisSortedSet {
         }
     }
 
-    /**
-     * Unregisters a network authority from the sorted set.
-     */
-    public async unregister(
-        networkId: TNetworkId_S,
-        clientId: TClientId,
-    ): Promise<number> {
-        const key: string = `networks/${networkId}/authorities`;
-
-        const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
-
-        await this._client.srem(`networks/${networkId}/authorities`, clientId);
-
-        // Update the refresh interval cache
-        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
-        if (refreshNetworkExpiry) {
-            refreshNetworkExpiry.delete(clientId);
-
-            if (refreshNetworkExpiry.size === 0) {
-                this.refreshNetworkExpiry.delete(networkId);
-            }
-        }
-
-        return await this._client.srem(key, address);
-    }
-
-    /**
-     * Unregisters a network authority from the sorted set, even if it wasnt added by this worker.
-     */
-    public async unregisterGlobal(
-        networkId: TNetworkId_S,
-        address: TAddress,
-    ): Promise<number> {
-        const key: string = `networks/${networkId}/authorities`;
-
-        // Update the refresh interval cache
-        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
-        if (refreshNetworkExpiry) {
-            try {
-                const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address);
-                refreshNetworkExpiry.delete(clientId);
-
-                if (refreshNetworkExpiry.size === 0) {
-                    this.refreshNetworkExpiry.delete(networkId);
-                }
-            } catch { }
-        }
-
-        return await this._client.srem(key, address);
-    }
-
     // ****************************************************************************
     // *** Read
     // ****************************************************************************
@@ -137,15 +86,17 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
     ): Promise<TNetworkAuthority[]> {
         // Add to network
-        const networkAgents = await this._client.smembers(`networks/${networkId}/agents`);
+        const networkAuthorities: TAddress[] = await this._client.smembers(`networks/${networkId}/authorities`) as TAddress[];
 
-        // Add to agent
+        // Add to authorities
         const authorities: TNetworkAuthority[] = [];
 
-        for (const id of networkAgents) {
+        for (const address of networkAuthorities) {
+            const clientId: TClientId = splitAddressOrThrow(address)[2];
+
             const networkAuthority: TNetworkAuthority | null = await this.readNetworkAuthorityByClientId(
                 networkId,
-                id as TClientId,
+                clientId,
             );
 
             if (networkAuthority) {
@@ -219,4 +170,56 @@ export class NetworkAuthorityRedisSortedSet {
     // *** Delete
     // ****************************************************************************
 
+    /**
+     * Unregisters a network authority from the sorted set.
+     */
+    public async unregister(
+        networkId: TNetworkId_S,
+        clientId: TClientId,
+    ): Promise<number> {
+        const key: string = `networks/${networkId}/authorities`;
+
+        const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
+
+        await this._client.srem(key, clientId);
+
+        // Update the refresh interval cache
+        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
+        if (refreshNetworkExpiry) {
+            refreshNetworkExpiry.delete(clientId);
+
+            if (refreshNetworkExpiry.size === 0) {
+                this.refreshNetworkExpiry.delete(networkId);
+            }
+        }
+
+        return await this._client.srem(key, address);
+    }
+
+    /**
+     * Unregisters a network authority from the sorted set, even if it wasnt added by this worker.
+     */
+    public async unregisterGlobal(
+        networkId: TNetworkId_S,
+        address: TAddress,
+    ): Promise<number> {
+
+        // Update the refresh interval cache
+        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
+        if (refreshNetworkExpiry) {
+            try {
+                const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address);
+                refreshNetworkExpiry.delete(clientId);
+
+                if (refreshNetworkExpiry.size === 0) {
+                    this.refreshNetworkExpiry.delete(networkId);
+                }
+            } catch {}
+        }
+
+        return await this._client.srem(
+            `networks/${networkId}/authorities`,
+            address,
+        );
+    }
 }

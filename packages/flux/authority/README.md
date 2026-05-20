@@ -9,10 +9,10 @@ const fluxAuthority: FluxAuthority = new FluxAuthority(
 );
 
 await fluxAuthority
-    .registerAuthority(
-        'network-authorization-key',
+    .registerAuthority({
+        networkAccessToken: 'network-access-token',
         
-        (
+        authorizeNetworkAgent: (
             auth: unknown,
         ): Promise<IIdentificationString> => {
             console.log('🔑 A client is trying to access the network');
@@ -32,7 +32,7 @@ await fluxAuthority
         },
 
         // * Authorize channel
-        (
+        authorizeNetworkChannel: (
             channelTopic: string,
             identification: IIdentificationString,
         ): Promise<boolean> => {
@@ -55,6 +55,6 @@ await fluxAuthority
 
             return Promise.resolve(true);
         },
-    );
+    });
 
 ```

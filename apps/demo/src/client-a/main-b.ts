@@ -42,15 +42,21 @@ Alpine.data('fluxApplicationB', () => ({
             .onNetworkState(
                 (networkState: TNetworkConnectionState) => {
                     this.networkState = networkState;
+                    this.clientLog.unshift(`📡 Network state changed to '${networkState}'`);
                 },
             );
 
-        this.fluxNetworkConnection = await this.flux.connect(
-            getAuthorityObject(
-                'client-b',
-            ),
-            'client-b-unique-identification-token',
-        );
+        try {
+            this.fluxNetworkConnection = await this.flux.connect(
+                getAuthorityObject(
+                    'client-b',
+                ),
+                'client-b-unique-identification-token',
+            );
+        } catch (error) {
+            this.clientLog.unshift(`❌ Client B failed to connect: ${(error as Error).message}`);
+            return;
+        }
 
         console.log('✅ Client B connected to network', this.flux.id);
     },

@@ -87,14 +87,21 @@ export const authenticateAgentOrThrow = async (
     });
 
     if (!response.ok) {
+        const textResponse = await response.text();
+
         if (response.status === 401) {
-            const textResponse = await response.text();
             if (textResponse.startsWith(NetworkAuthorityNotFoundError.message)) {
                 throw new NetworkAuthorityNotFoundError(networkId);
             }
         }
 
-        throw new Error(`Auth failed: ${response.status}`);
+        if (response.status === 404) {
+            throw new Error(`Mesh server not found at ${url.origin}.`);
+        }
+
+        throw new Error(textResponse
+            ? `Auth failed: ${response.status} - ${textResponse}`
+            : `Auth failed: ${response.status}`);
     }
 
     const result = await response.text();

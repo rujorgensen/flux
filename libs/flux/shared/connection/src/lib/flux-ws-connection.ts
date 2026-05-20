@@ -42,7 +42,7 @@ interface IOptions {
 /**
  * Creates a WebSocket connection to the Flux platform.
  */
-export const createWSConnection = <T, M>(
+export const createWSConnection = (
     id: string,
     ticket: string,
     stateManager: StateManager,
@@ -220,24 +220,24 @@ export class FluxWebSocketConnection {
      * Registers an authority to the network.
      */
     public async registerAuthority<T, M>(
-        cb: TAuthorizeCallback<T>,
-        authorizeNetworkChannel: TChannnelAuthCallback<M>,
+        authorizeAgentConnection: TAuthorizeCallback<T>,
+        authorizeChannelAccess: TChannnelAuthCallback<M>,
     ): Promise<void> {
         const webSocketClient: FluxWebSocketClientConnection = await this.connect();
 
         // * 1 Register function for handling authorization
         webSocketClient
-            .registerMethod('authorize', (messageWithType: string) => {
+            .registerMethod('authorizeAgentConnection', (messageWithType: string) => {
                 const dataType: string | undefined = messageWithType.split(':')[0];
 
                 const message: string = messageWithType.substring(messageWithType.indexOf(':') + 1);
 
-                return cb((dataType === 'json') ? JSON.parse(message) : message as T);
+                return authorizeAgentConnection((dataType === 'json') ? JSON.parse(message) : message as T);
             });
 
         // * 2 Register function for authorizing a channel
         webSocketClient
-            .registerMethod('authorizeNetworkChannel', authorizeNetworkChannel);
+            .registerMethod('authorizeChannelAccess', authorizeChannelAccess);
 
         // TODO: WAIT FOR CONNECTION TO BE ACCEPTED
         return Promise.resolve(void 0);

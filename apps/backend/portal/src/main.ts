@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { extname, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Elysia, NotFoundError } from 'elysia';
@@ -20,9 +21,22 @@ import { getPortalPgRepository } from '@backend/core/prisma';
 import { staticPlugin } from '@elysiajs/static';
 
 // Resolve path to the frontend's browser output, which we will serve as static assets
-const serverDistFolder = dirname(fileURLToPath(import.meta.url));
-const browserDistFolder = resolve(serverDistFolder, '..', '..', 'frontend', 'portal', 'browser');
-const browserIndexHTML = resolve(browserDistFolder, 'index.html');
+const browserDistFolder = resolveBrowserDistFolder();
+
+// Resolve path to the frontend's browser output, which we will serve as static assets
+function resolveBrowserDistFolder(): string | undefined {
+    const serverRuntimeFolder = dirname(fileURLToPath(import.meta.url));
+
+    const candidates = [
+        resolve(serverRuntimeFolder, '..', '..', 'frontend', 'portal', 'browser'),
+        resolve(process.cwd(), 'dist', 'apps', 'frontend', 'portal', 'browser'),
+    ];
+
+    return candidates.find((candidate) => existsSync(candidate));
+}
+
+// Resolve path to the frontend's browser output when it is available
+const browserIndexHTML = browserDistFolder ? resolve(browserDistFolder, 'index.html') : undefined;
 
 function isClientSideRoute(
     path: string,
@@ -89,7 +103,6 @@ Bun.cron('@hourly', async () => {
 // * Host the api
 export const app = new Elysia()
 
-    // ! NB During development, the output is not there and this will fail
     .use(
         staticPlugin({
             // Reset the default '/public' prefix
@@ -139,7 +152,7 @@ export const app = new Elysia()
     .use(networkTokenController)
     .get('/*', ({ path }) => {
         console.log(`Handling frontend route: ${path}`);
-        if (!isClientSideRoute(path)) {
+        if (!isClientSideRoute(path) || !browserIndexHTML) {
             throw new NotFoundError();
         }
 

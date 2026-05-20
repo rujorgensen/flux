@@ -34,6 +34,14 @@ import {
 } from '@flux/shared/connection';
 import { FluxAuthorityNetworkConnection } from './flux-authority-network.class';
 
+const DEFAULT_FLUX_DOMAIN = 'http://localhost:5100';
+
+interface IRegisterAuthorityConfiguration<T, M> {
+    networkAccessToken: string; // The key to authenticate with the network
+    authorizeAgentConnection: TAuthorizeCallback<T>; // Callback to authorize agent connections
+    authorizeChannelAccess: TChannnelAuthCallback<M>; // Callback to authorize channel connections
+}
+
 export class FluxAuthority {
 
     public readonly id: string = nanoid();
@@ -58,16 +66,12 @@ export class FluxAuthority {
     /**
      * Registers an authority on the network.
      * 
-     * @param { string } authorityKey - The key to authenticate with the network
-     * @param { TAuthorizeCallback<T> } authorizeNetworkAgent - Callback to authorize network agents
-     * @param { TChannnelAuthCallback<M> } authorizeNetworkChannel - Callback to authorize channel connections
+     * @param { IRegisterAuthorityConfiguration } registerAuthorityConfiguration
      * 
      * @returns { Promise<FluxAuthorityNetworkConnection> } The authority network connection
      */
     public async registerAuthority<T, M>(
-        authorityKey: string,
-        authorizeNetworkAgent: TAuthorizeCallback<T>,
-        authorizeNetworkChannel: TChannnelAuthCallback<M>,
+        registerAuthorityConfiguration: IRegisterAuthorityConfiguration<T, M>,
     ): Promise<FluxAuthorityNetworkConnection> {
         this.stateManager.emitNetworkState('authorizing');
 
@@ -77,8 +81,8 @@ export class FluxAuthority {
             const ticket: string = await retryOrThrow<any>(
                 () => authenticateNetworkAuthorityOrThrow(
                     this.networkId as TNetworkId_S,
-                    this.options?.domain ?? 'http://localhost:5100',
-                    authorityKey,
+                    this.options?.domain ?? DEFAULT_FLUX_DOMAIN,
+                    registerAuthorityConfiguration.networkAccessToken,
                     {
                         machineUID,
                     },
@@ -103,9 +107,9 @@ export class FluxAuthority {
                 async () => {
                     // For reconnection logic
                     this.registerAuthority(
-                        authorityKey,
-                        authorizeNetworkAgent,
-                        authorizeNetworkChannel,
+                        {
+                            ...registerAuthorityConfiguration,
+                        },
                     );
                 },
                 this.options,
@@ -116,8 +120,8 @@ export class FluxAuthority {
             await this
                 .fluxWebSocketConnection
                 .registerAuthority(
-                    authorizeNetworkAgent,
-                    authorizeNetworkChannel,
+                    registerAuthorityConfiguration.authorizeAgentConnection,
+                    registerAuthorityConfiguration.authorizeChannelAccess,
                 );
 
             return Promise.resolve(new FluxAuthorityNetworkConnection(this.fluxWebSocketConnection));

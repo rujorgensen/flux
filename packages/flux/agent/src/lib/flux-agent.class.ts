@@ -27,7 +27,13 @@ import {
 import { nanoid } from 'nanoid';
 import { authenticateAgentOrThrow } from './connector/auth/register-client.auth';
 import { FluxClientData } from './connector/flux-client-data.class';
-import { getMachineUID, retryOrThrow, StateManager } from '@flux/shared/utils';
+import {
+    getMachineUID,
+    retryOrThrow,
+    StateManager,
+} from '@flux/shared/utils';
+
+const DEFAULT_FLUX_DOMAIN = 'http://localhost:5100';
 
 export class FluxAgent {
     public readonly id: string = nanoid();
@@ -61,6 +67,8 @@ export class FluxAgent {
         identification: unknown,
         clientUId?: string,
     ): Promise<FluxAgentNetworkConnection> {
+        const domain: string = this.options?.domain ?? DEFAULT_FLUX_DOMAIN;
+
         this.stateManager.emitNetworkState('authorizing');
 
         if (clientUId && !validateAgentUIDOrThrow(clientUId)) {
@@ -72,7 +80,7 @@ export class FluxAgent {
                 async () => {
                     return authenticateAgentOrThrow(
                         this.networkId as TNetworkId_S,
-                        this.options?.domain ?? 'http://localhost:5100',
+                        domain,
                         identification,
                         {
                             clientUId: clientUId as TAgentOwnUId,
@@ -113,6 +121,7 @@ export class FluxAgent {
 
             return fluxNetworkConnection;
         } catch (error) {
+            this.stateManager.emitNetworkState('auth-error');
             return Promise.reject(error);
         }
     }
