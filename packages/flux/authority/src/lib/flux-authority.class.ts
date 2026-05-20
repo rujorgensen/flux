@@ -34,6 +34,8 @@ import {
 } from '@flux/shared/connection';
 import { FluxAuthorityNetworkConnection } from './flux-authority-network.class';
 
+const DEFAULT_FLUX_DOMAIN = 'http://localhost:5100';
+
 interface IRegisterAuthorityConfiguration<T, M> {
     networkAccessToken: string; // The key to authenticate with the network
     authorizeAgentConnection: TAuthorizeCallback<T>; // Callback to authorize agent connections
@@ -79,8 +81,8 @@ export class FluxAuthority {
             const ticket: string = await retryOrThrow<any>(
                 () => authenticateNetworkAuthorityOrThrow(
                     this.networkId as TNetworkId_S,
-                    this.options?.domain ?? 'http://localhost:5100',
-                    registerAuthorityConfiguration.authorityKey,
+                    this.options?.domain ?? DEFAULT_FLUX_DOMAIN,
+                    registerAuthorityConfiguration.networkAccessToken,
                     {
                         machineUID,
                     },
