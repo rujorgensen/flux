@@ -10,7 +10,41 @@ import { NetworkIdComponent } from '../../components/network-id/network-id.compo
 import { FluxDomainComponent } from '../../components/flux-domain/flux-domain.component';
 import { NetworksService } from '../../_services/networks.service';
 import { DashboardHistoryService } from '../../_services/dashboard-history/dashboard-history.service';
-import { DashboardHomePageComponent } from './dashboard-home.component';
+import { SidebarCountsService } from '../../_services/sidebar-counts/sidebar-counts.service';
+import { buildChartConfig, DashboardHomePageComponent } from './dashboard-home.component';
+
+describe('buildChartConfig', () => {
+    it('should plot the live count as the latest chart value', () => {
+        const config = buildChartConfig(
+            [
+                { label: '08:00', value: 12 },
+                { label: 'Now', value: 1_248 },
+            ],
+            60,
+            'Agents',
+            '#6366f1',
+            'rgba(99, 102, 241, 0.08)',
+        );
+
+        expect(config.currentValue).toBe(60);
+        expect(config.labels).toEqual(['08:00', 'Now']);
+        expect(config.datasets[0].data).toEqual([12, 60]);
+    });
+
+    it('should render a current point when only live data exists', () => {
+        const config = buildChartConfig(
+            [],
+            0,
+            'Agents',
+            '#6366f1',
+            'rgba(99, 102, 241, 0.08)',
+        );
+
+        expect(config.currentValue).toBe(0);
+        expect(config.labels).toEqual(['Now']);
+        expect(config.datasets[0].data).toEqual([0]);
+    });
+});
 
 @Component({
     selector: 'app-dashboard-layout',
@@ -85,6 +119,14 @@ describe('DashboardHomePageComponent', () => {
                         channelHistory$: of([]),
                     },
                 },
+                {
+                    provide: SidebarCountsService,
+                    useValue: {
+                        agentCount$: of(7),
+                        authorityCount$: of(5),
+                        channelCount$: of(3),
+                    },
+                },
             ],
         })
             .overrideComponent(DashboardHomePageComponent, {
@@ -123,5 +165,18 @@ describe('DashboardHomePageComponent', () => {
         expect(text).toContain('Network ID');
         expect(text).toContain('Server');
         expect(text).toContain('flux-domain-stub');
+    });
+
+    it('should prefer live sidebar counts for the chart badges', async () => {
+        const fixture = TestBed.createComponent(DashboardHomePageComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        const text: string = fixture.nativeElement.textContent;
+
+        expect(text).toContain('7 now');
+        expect(text).toContain('5 now');
+        expect(text).toContain('3 now');
     });
 });

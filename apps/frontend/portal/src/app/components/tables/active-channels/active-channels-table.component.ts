@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { INetworkChannel } from '@flux/shared/types';
+import type { INetworkChannel, INetworkChannelMembers } from '@flux/shared/types';
 import { api } from '$lib/app/_services/api/api';
 import { apiBaseUrl } from '$lib/app/_services/api/api-base';
 import { NetworkTokensService } from '$lib/app/_services/network-tokens/network-tokens.service';
@@ -59,6 +59,9 @@ export class ActiveChannelsTableComponent implements OnDestroy {
 
     protected readonly dataStore = signal<INetworkChannel[] | undefined>(undefined);
     protected readonly closingChannelName = signal<string | null>(null);
+    protected readonly selectedMembersChannel = signal<INetworkChannel | null>(null);
+    protected readonly selectedMemberAddresses = signal<string[] | null>(null);
+    protected readonly membersLoading = signal<boolean>(false);
     protected readonly page = signal<number>(1);
     protected readonly pageSize = signal<number>(25);
     protected readonly total = signal<number>(0);
@@ -113,6 +116,44 @@ export class ActiveChannelsTableComponent implements OnDestroy {
         return this.sniffPackets().get(channelName) ?? [];
     }
 
+    protected openMembersModal(
+        channel: INetworkChannel,
+    ): void {
+        this.selectedMembersChannel.set(channel);
+        this.selectedMemberAddresses.set(null);
+        this.membersLoading.set(true);
+
+        api
+            .api
+            .networks({
+                networkId: this.networkId(),
+            })
+            .channels({
+                channelName: channel.channelName,
+            })
+            .members
+            .get()
+            .then((response) => {
+                const memberData = response.data as INetworkChannelMembers | null;
+                this.selectedMemberAddresses.set(memberData?.memberAddresses ?? []);
+            })
+            .catch((error: unknown) => {
+                console.error('Error fetching channel members:', error);
+                this.selectedMemberAddresses.set([]);
+                toast.error('Failed to load channel members. Please try again.');
+            })
+            .finally(() => {
+                this.membersLoading.set(false);
+            });
+    }
+
+    protected closeMembersModal(
+    ): void {
+        this.selectedMembersChannel.set(null);
+        this.selectedMemberAddresses.set(null);
+        this.membersLoading.set(false);
+    }
+
     protected sniffUrlFor(
         channelName: string,
     ): string | undefined {
@@ -159,7 +200,11 @@ export class ActiveChannelsTableComponent implements OnDestroy {
             .delete()
             .then(() => {
                 this.stopSniffing(channel.channelName);
+                if (this.selectedMembersChannel()?.channelName === channel.channelName) {
+                    this.closeMembersModal();
+                }
                 this.dataStore.update((data) => data?.filter((c) => c.channelName !== channel.channelName));
+                this.total.update((total) => Math.max(0, total - 1));
                 toast.success(`Channel "${channel.channelName}" closed successfully.`);
             })
             .catch((error: unknown) => {

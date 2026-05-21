@@ -5,6 +5,39 @@
         text-align: right;
     }
 
+    .members-body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 1rem;
+        background-color: oklch(var(--b1));
+        border-radius: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .members-badge {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .members-empty {
+        margin: 0;
+        width: 100%;
+        text-align: center;
+        color: oklch(var(--bc) / 0.5);
+        font-size: 0.75rem;
+        font-style: italic;
+    }
+
+    .members-modal-box {
+        max-width: 42rem;
+    }
+
+    .members-modal-body {
+        max-height: 22rem;
+        overflow-y: auto;
+    }
+
     .sniffer-panel {
         display: flex;
         flex-direction: column;

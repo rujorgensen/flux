@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, switchMap, map, catchError, of } from 'rxjs';
+import { BehaviorSubject, catchError, from, map, of, switchMap, timer } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { api } from '../api/api';
 import { NetworksService } from '../networks.service';
+
+const SIDEBAR_COUNT_POLL_INTERVAL_MS = 5_000;
 
 @Injectable({
     providedIn: 'root',
@@ -29,18 +31,21 @@ export class SidebarCountsService {
 
                 const networkId = network.id;
 
-                return from(
-                    api.api.networks({ networkId })['connection-status'].get(),
-                ).pipe(
-                    map((response) => [
-                        response.data?.agents ?? null,
-                        response.data?.authorities ?? null,
-                        response.data?.channels ?? null,
-                    ] as const),
-                    catchError((error: unknown) => {
-                        console.error('Error fetching sidebar counts:', error);
-                        return of([null, null, null] as const);
-                    }),
+                // todo: This should use the flux conenction for live updates
+                return timer(0, SIDEBAR_COUNT_POLL_INTERVAL_MS).pipe(
+                    switchMap(() => from(
+                        api.api.networks({ networkId })['connection-status'].get(),
+                    ).pipe(
+                        map((response) => [
+                            response.data?.agents ?? null,
+                            response.data?.authorities ?? null,
+                            response.data?.channels ?? null,
+                        ] as const),
+                        catchError((error: unknown) => {
+                            console.error('Error fetching sidebar counts:', error);
+                            return of([null, null, null] as const);
+                        }),
+                    )),
                 );
             }),
         )

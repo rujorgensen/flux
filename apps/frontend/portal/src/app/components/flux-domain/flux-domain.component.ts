@@ -29,12 +29,13 @@ function isLocalHostname(
 function getLocalFluxDomain(
     protocol: string,
     hostname: string,
+    localMeshServerPort: number = 5_100,
 ): string {
     const normalizedHostname: string = hostname === '::1'
         ? '[::1]'
         : hostname;
 
-    return `${protocol}//${normalizedHostname}:5100`;
+    return `${protocol}//${normalizedHostname}:${localMeshServerPort}`;
 }
 
 export function resolveFluxDomain(

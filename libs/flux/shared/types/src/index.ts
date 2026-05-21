@@ -13,6 +13,7 @@ export * from './lib/flux-shared';
 
 export {
     type TChannelName,
+    InvaliChannelNameError,
     validateChannelNameOrThrow,
 } from './lib/channel.type';
 
@@ -76,6 +77,7 @@ export type {
 
 export type {
     INetworkChannel,
+    INetworkChannelMembers,
     TNetworkChannelCountAt,
 } from './lib/channels/network-channel.type';
 

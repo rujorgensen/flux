@@ -23,7 +23,7 @@ export class NetworkChannelHash {
 
     constructor(
         private readonly _redisConnection: RedisConnection,
-    ) { }
+    ) {}
 
     // ****************************************************************************
     // * Create
@@ -71,11 +71,12 @@ export class NetworkChannelHash {
         const channels: INetworkChannel[] = [];
 
         for (const channelName of channelNames) {
-            const [createdAt, memberDistribution, usage] = await this._redisConnection.hash.hmget(
+            const [createdAt, memberDistribution, members, usage] = await this._redisConnection.hash.hmget(
                 `networks/${networkId}/channels/${channelName}`,
                 [
                     'createdAt',
                     'memberDistribution',
+                    'members',
                     'usage',
                 ],
             );
@@ -84,7 +85,7 @@ export class NetworkChannelHash {
                 channels.push({
                     channelName,
                     memberDistribution: memberDistribution as string,
-                    members: await this.readNetworkMemberCount(networkId, channelName),
+                    members: Number.parseInt((members as string | undefined) ?? '0', 10),
                     bytes: Number.parseInt(usage || '0', 10),
                     createdAt: new Date(createdAt as string),
                 });
@@ -142,6 +143,16 @@ export class NetworkChannelHash {
     }
 
     /**
+     * Reads all members of a channel on a network.
+     */
+    public async readNetworkChannelMemberAddresses(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<TAddress[]> {
+        return await this._redisConnection.hash.smembers(`networks/${networkId}/channels/${channelName}/members`) as TAddress[];
+    }
+
+    /**
      * Deletes a channel on a network.
      */
     public async deleteNetworkChannel(
@@ -162,13 +173,30 @@ export class NetworkChannelHash {
         clientAddress: TAddress,
     ): Promise<number> {
         // * Add member
-        await this._redisConnection.hash.sadd(`networks/${networkId}/channels/${channelName}/members`, clientAddress);
+        const membersAdded = await this._redisConnection.hash.sadd(
+            `networks/${networkId}/channels/${channelName}/members`,
+            clientAddress,
+        );
 
         // * Check member distribution
-        await this.checkAndUpdateChannelMemberDistribution(networkId, channelName);
+        await this.checkAndUpdateChannelMemberDistribution(
+            networkId,
+            channelName,
+        );
+
+        if (membersAdded === 0) {
+            // The member must already be a member of this channel
+            PicoLogger.warn(`Unexpected existing member on network / channel "${networkId}"/"${channelName}". The member appears to already be part of the channel and cannot be added again.`, 'network-channel');
+
+            return Promise.reject(new Error(`Client ${clientAddress} is already a member of channel "${channelName}" on network "${networkId}".`));
+        }
 
         // * Increment channel member count
-        return await this._redisConnection.hash.hincrby(`networks/${networkId}/channels/${channelName}`, 'members', 1);
+        return await this._redisConnection.hash.hincrby(
+            `networks/${networkId}/channels/${channelName}`,
+            'members',
+            1,
+        );
     }
 
     /**
@@ -181,10 +209,24 @@ export class NetworkChannelHash {
         clientAddress: TAddress,
     ): Promise<number> {
         // * Remove member
-        await this._redisConnection.hash.srem(`networks/${networkId}/channels/${channelName}/members`, clientAddress);
+        const membersRemoved = await this._redisConnection.hash.srem(
+            `networks/${networkId}/channels/${channelName}/members`,
+            clientAddress,
+        );
+
+        if (membersRemoved === 0) {
+            // The member must not be a member of this channel
+            PicoLogger.warn(`Unexpected non-existing member on network / channel "${networkId}"/"${channelName}". The client does not appear to be a member of the channel and can not be removed.`, 'network-channel');
+
+            return Promise.reject(new Error(`Client ${clientAddress} is not a member of channel "${channelName}" on network "${networkId}".`));
+        }
 
         // * Decrement channel member count
-        const membersLeft: number = await this._redisConnection.hash.hincrby(`networks/${networkId}/channels/${channelName}`, 'members', -1);
+        const membersLeft: number = await this._redisConnection.hash.hincrby(
+            `networks/${networkId}/channels/${channelName}`,
+            'members',
+            -1,
+        );
 
         // * If no members left, delete the channel
         if (membersLeft === 0) {
@@ -236,16 +278,6 @@ export class NetworkChannelHash {
     // ****************************************************************************
     // * Internal Helpers
     // ****************************************************************************
-
-    /**
-     * Reads all members of a channel on a network.
-     */
-    private async readNetworkChannelMemberAddresses(
-        networkId: TNetworkId_S,
-        channelName: TChannelName,
-    ): Promise<TAddress[]> {
-        return await this._redisConnection.hash.smembers(`networks/${networkId}/channels/${channelName}/members`) as TAddress[];
-    }
 
     /**
      * Checks if the connected members are all on the same process, same machine or distributed, and updates the channel's hash.
