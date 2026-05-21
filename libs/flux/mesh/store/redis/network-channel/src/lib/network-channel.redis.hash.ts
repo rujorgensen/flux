@@ -186,7 +186,7 @@ export class NetworkChannelHash {
 
         if (membersAdded === 0) {
             // The member must already be a member of this channel
-            PicoLogger.warn(`Unexpected existing member on network / channel "${networkId}"/"${channelName}". This should not happen as the client should have been cleaned up.`, 'network-channel');
+            PicoLogger.warn(`Unexpected existing member on network / channel "${networkId}"/"${channelName}". The member appears to already be part of the channel and cannot be added again.`, 'network-channel');
 
             return Promise.reject(new Error(`Client ${clientAddress} is already a member of channel "${channelName}" on network "${networkId}".`));
         }
@@ -209,7 +209,17 @@ export class NetworkChannelHash {
         clientAddress: TAddress,
     ): Promise<number> {
         // * Remove member
-        await this._redisConnection.hash.srem(`networks/${networkId}/channels/${channelName}/members`, clientAddress);
+        const membersRemoved = await this._redisConnection.hash.srem(
+            `networks/${networkId}/channels/${channelName}/members`,
+            clientAddress,
+        );
+
+        if (membersRemoved === 0) {
+            // The member must not be a member of this channel
+            PicoLogger.warn(`Unexpected non-existing member on network / channel "${networkId}"/"${channelName}". The client does not appear to be a member of the channel and can not be removed.`, 'network-channel');
+
+            return Promise.reject(new Error(`Client ${clientAddress} is not a member of channel "${channelName}" on network "${networkId}".`));
+        }
 
         // * Decrement channel member count
         const membersLeft: number = await this._redisConnection.hash.hincrby(
