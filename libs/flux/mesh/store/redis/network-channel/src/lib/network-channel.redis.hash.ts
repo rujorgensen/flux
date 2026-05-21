@@ -173,13 +173,30 @@ export class NetworkChannelHash {
         clientAddress: TAddress,
     ): Promise<number> {
         // * Add member
-        await this._redisConnection.hash.sadd(`networks/${networkId}/channels/${channelName}/members`, clientAddress);
+        const membersAdded = await this._redisConnection.hash.sadd(
+            `networks/${networkId}/channels/${channelName}/members`,
+            clientAddress,
+        );
 
         // * Check member distribution
-        await this.checkAndUpdateChannelMemberDistribution(networkId, channelName);
+        await this.checkAndUpdateChannelMemberDistribution(
+            networkId,
+            channelName,
+        );
+
+        if (membersAdded === 0) {
+            // The member must already be a member of this channel
+            PicoLogger.warn(`Unexpected existing member on network / channel "${networkId}"/"${channelName}". This should not happen as the client should have been cleaned up.`, 'network-channel');
+
+            return Promise.reject(new Error(`Client ${clientAddress} is already a member of channel "${channelName}" on network "${networkId}".`));
+        }
 
         // * Increment channel member count
-        return await this._redisConnection.hash.hincrby(`networks/${networkId}/channels/${channelName}`, 'members', 1);
+        return await this._redisConnection.hash.hincrby(
+            `networks/${networkId}/channels/${channelName}`,
+            'members',
+            1,
+        );
     }
 
     /**
