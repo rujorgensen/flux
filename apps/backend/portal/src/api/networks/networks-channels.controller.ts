@@ -5,6 +5,7 @@ import {
     type TNetworkChannelCountAt,
     TNetworkToken_S,
     validateChannelNameOrThrow,
+    InvaliChannelNameError,
 } from '@flux/shared/types';
 import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import { getNetworkTokenServiceInstance, NetworkTokenCache } from '@backend/features/network';
@@ -21,7 +22,7 @@ const networkTokenCache: NetworkTokenCache = new NetworkTokenCache(
     getNetworkTokenServiceInstance(),
 );
 
-class InvalidChannelNameError extends Error {
+class InvalidChannelNameHttpError extends Error {
     status = 400;
 
     constructor(
@@ -108,7 +109,7 @@ export const networkChannelController = new Elysia({
     prefix: '/api/networks/:networkId/channels',
 })
     .error({
-        InvalidChannelNameError,
+        InvalidChannelNameHttpError,
         UnauthorizedError,
     })
     .use(networkIdValidatorPlugin)
@@ -163,6 +164,26 @@ export const networkChannelController = new Elysia({
         },
     )
 
+    .get('/:channelName/members', async ({
+        networkId,
+        params,
+    }) => {
+        try {
+            validateChannelNameOrThrow(params.channelName);
+        } catch (error) {
+            if (error instanceof InvaliChannelNameError) {
+                console.error('Invalid channel name:', error.message);
+            }
+
+            throw new InvalidChannelNameHttpError();
+        }
+
+        return await networkChannelRedisCacheService.readNetworkChannelMembers(
+            networkId,
+            params.channelName as TChannelName,
+        );
+    })
+
     /**
      * 'GET /api/networks/:networkId/channels/:channelName?token=<networkToken>'
      *
@@ -215,7 +236,7 @@ export const networkChannelController = new Elysia({
         try {
             validateChannelNameOrThrow(channelName);
         } catch {
-            throw new InvalidChannelNameError();
+            throw new InvalidChannelNameHttpError();
         }
 
         return networkChannelRedisCacheService
