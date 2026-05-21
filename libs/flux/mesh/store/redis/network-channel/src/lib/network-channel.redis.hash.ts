@@ -23,7 +23,7 @@ export class NetworkChannelHash {
 
     constructor(
         private readonly _redisConnection: RedisConnection,
-    ) { }
+    ) {}
 
     // ****************************************************************************
     // * Create
@@ -71,11 +71,12 @@ export class NetworkChannelHash {
         const channels: INetworkChannel[] = [];
 
         for (const channelName of channelNames) {
-            const [createdAt, memberDistribution, usage] = await this._redisConnection.hash.hmget(
+            const [createdAt, memberDistribution, members, usage] = await this._redisConnection.hash.hmget(
                 `networks/${networkId}/channels/${channelName}`,
                 [
                     'createdAt',
                     'memberDistribution',
+                    'members',
                     'usage',
                 ],
             );
@@ -84,7 +85,7 @@ export class NetworkChannelHash {
                 channels.push({
                     channelName,
                     memberDistribution: memberDistribution as string,
-                    members: await this.readNetworkMemberCount(networkId, channelName),
+                    members: Number.parseInt((members as string | undefined) ?? '0', 10),
                     bytes: Number.parseInt(usage || '0', 10),
                     createdAt: new Date(createdAt as string),
                 });
@@ -194,7 +195,11 @@ export class NetworkChannelHash {
         await this._redisConnection.hash.srem(`networks/${networkId}/channels/${channelName}/members`, clientAddress);
 
         // * Decrement channel member count
-        const membersLeft: number = await this._redisConnection.hash.hincrby(`networks/${networkId}/channels/${channelName}`, 'members', -1);
+        const membersLeft: number = await this._redisConnection.hash.hincrby(
+            `networks/${networkId}/channels/${channelName}`,
+            'members',
+            -1,
+        );
 
         // * If no members left, delete the channel
         if (membersLeft === 0) {
