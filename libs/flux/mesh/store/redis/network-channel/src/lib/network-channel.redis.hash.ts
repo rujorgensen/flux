@@ -142,6 +142,16 @@ export class NetworkChannelHash {
     }
 
     /**
+     * Reads all members of a channel on a network.
+     */
+    public async readNetworkChannelMemberAddresses(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<TAddress[]> {
+        return await this._redisConnection.hash.smembers(`networks/${networkId}/channels/${channelName}/members`) as TAddress[];
+    }
+
+    /**
      * Deletes a channel on a network.
      */
     public async deleteNetworkChannel(
@@ -236,16 +246,6 @@ export class NetworkChannelHash {
     // ****************************************************************************
     // * Internal Helpers
     // ****************************************************************************
-
-    /**
-     * Reads all members of a channel on a network.
-     */
-    private async readNetworkChannelMemberAddresses(
-        networkId: TNetworkId_S,
-        channelName: TChannelName,
-    ): Promise<TAddress[]> {
-        return await this._redisConnection.hash.smembers(`networks/${networkId}/channels/${channelName}/members`) as TAddress[];
-    }
 
     /**
      * Checks if the connected members are all on the same process, same machine or distributed, and updates the channel's hash.

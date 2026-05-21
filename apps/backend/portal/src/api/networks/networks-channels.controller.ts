@@ -178,10 +178,11 @@ export const networkChannelController = new Elysia({
             throw new InvalidChannelNameHttpError();
         }
 
-        return await networkChannelRedisCacheService.readNetworkChannelMembers(
-            networkId,
-            params.channelName as TChannelName,
-        );
+        return await networkChannelRedisCacheService
+            .readNetworkChannelMemberAddresses(
+                networkId,
+                params.channelName as TChannelName,
+            );
     })
 
     /**
