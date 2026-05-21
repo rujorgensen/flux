@@ -32,7 +32,20 @@
                                 }
                             }
                         </td>
-                        <td class="text-right">{{ row.members }}</td>
+                        <td class="text-right">
+                            {{ row.members }}
+                            <button
+                                class="btn btn-ghost btn-sm"
+                                (click)="openMembersModal(row)"
+                                [attr.aria-label]="'View members for ' + row.channelName"
+                                title="View channel members"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.742-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.035.666A11.944 11.944 0 0 1 12 21c-2.279 0-4.41-.636-6.226-1.742a9.31 9.31 0 0 1-.035-.666l.001-.031m12.26 0A17.919 17.919 0 0 0 12 18c-2.2 0-4.318.396-6.26 1.122m12.26 0a3 3 0 0 0-5.218-2.015M6.26 19.122a3 3 0 0 1 5.218-2.015m0 0a3 3 0 1 0-5.218-2.015m5.218 2.015a3 3 0 1 0 5.218-2.015M15 7.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                                </svg>
+                                View members
+                            </button>
+                        </td>
                         <td>
                             @let fillPercent = deriveChannelFillPercent(row.members);
                             <div class="flex items-center gap-2 min-w-44">
@@ -163,6 +176,40 @@
                 </div>
             </div>
         </div>
+        @if (selectedMembersChannel(); as channel) {
+            <div class="modal modal-open">
+                <div class="modal-box members-modal-box">
+                    <h3 class="font-bold text-lg">Channel members</h3>
+                    <div class="flex items-center justify-between gap-3 pt-2">
+                        <span class="text-sm text-base-content/70 font-mono break-all">{{ channel.channelName }}</span>
+                        <span class="badge badge-sm badge-outline">{{ channel.members }}</span>
+                    </div>
+                    <div class="members-body members-modal-body">
+                        @if (membersLoading()) {
+                            <div class="w-full flex justify-center py-8">
+                                <span class="loading loading-spinner loading-md"></span>
+                            </div>
+                        } @else if (selectedMemberAddresses()?.length === 0) {
+                            <p class="members-empty">No members are currently connected to this channel.</p>
+                        } @else {
+                            @for (memberAddress of selectedMemberAddresses(); track memberAddress) {
+                                <span class="members-badge badge badge-outline badge-sm font-mono">{{ memberAddress }}</span>
+                            }
+                        }
+                    </div>
+                    <div class="modal-action">
+                        <button
+                            class="btn"
+                            (click)="closeMembersModal()"
+                            type="button"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-backdrop" (click)="closeMembersModal()"></div>
+            </div>
+        }
     } @else {
         <div class="flex flex-col items-center justify-center py-16 text-base-content/50">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-12 h-12 stroke-current mb-3" aria-hidden="true">
