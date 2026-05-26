@@ -33,7 +33,7 @@ import {
     StateManager,
 } from '@flux/shared/utils';
 
-const DEFAULT_FLUX_DOMAIN = 'http://localhost:5100';
+const DEFAULT_FLUX_DOMAIN: string = 'https://mesh.persistica.io';
 
 export class FluxAgent {
     public readonly id: string = nanoid();

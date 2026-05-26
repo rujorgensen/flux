@@ -2,7 +2,7 @@
 ```TypeScript
 import { FluxAuthority } from '@persistica/flux-authority';
 
-const IIdentificationString = string & { brand__: 'IdentificationString' };
+type IIdentificationString = string & { brand__: 'IdentificationString' };
 
 const fluxAuthority: FluxAuthority = new FluxAuthority(
     'network-id'

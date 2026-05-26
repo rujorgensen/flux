@@ -34,7 +34,7 @@ import {
 } from '@flux/shared/connection';
 import { FluxAuthorityNetworkConnection } from './flux-authority-network.class';
 
-const DEFAULT_FLUX_DOMAIN = 'http://localhost:5100';
+const DEFAULT_FLUX_DOMAIN: string = 'https://mesh.persistica.io';
 
 interface IRegisterAuthorityConfiguration<T, M> {
     networkAccessToken: string; // The key to authenticate with the network
