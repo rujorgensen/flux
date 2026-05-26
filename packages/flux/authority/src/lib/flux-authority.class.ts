@@ -78,10 +78,12 @@ export class FluxAuthority {
         const machineUID: TFluxClientUID | undefined = await getMachineUID() ?? undefined;
 
         try {
+            const domain: string = this.options?.domain ?? DEFAULT_FLUX_DOMAIN;
+
             const ticket: string = await retryOrThrow<any>(
                 () => authenticateNetworkAuthorityOrThrow(
                     this.networkId as TNetworkId_S,
-                    this.options?.domain ?? DEFAULT_FLUX_DOMAIN,
+                    domain,
                     registerAuthorityConfiguration.networkAccessToken,
                     {
                         machineUID,
@@ -112,7 +114,10 @@ export class FluxAuthority {
                         },
                     );
                 },
-                this.options,
+                {
+                    ...this.options,
+                    domain,
+                },
             );
 
             this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
