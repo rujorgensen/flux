@@ -30,6 +30,7 @@ import {
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
     TNetworkId_S,
+    VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -461,7 +462,7 @@ export class FluxMeshServer {
                                     ws.send(`${ERROR}:Unknown error`);
                                 }
                             } catch {
-                                ws.send(`${ERROR}:No network authority found`);
+                                ws.send(`${ERROR}:${VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE}`);
                                 return;
                             }
                             break;
