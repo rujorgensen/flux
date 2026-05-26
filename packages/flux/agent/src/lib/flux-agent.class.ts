@@ -110,7 +110,10 @@ export class FluxAgent {
                         clientUId,
                     );
                 },
-                this.options,
+                {
+                    ...this.options,
+                    domain,
+                },
             );
 
             this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);

@@ -34,7 +34,7 @@ import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 
 interface IOptions {
-    domain?: string; // Override the domain for self hosted Flux instances. Should include protocol, e.g. "https://my-flux-instance.com"
+    domain: string; // Override the domain for self hosted Flux instances. Should include protocol, e.g. "https://my-flux-instance.com"
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
     retries?: number; // Number of times to retry a failed message
 }
@@ -47,8 +47,8 @@ export const createWSConnection = (
     ticket: string,
     stateManager: StateManager,
     onReconnectCallback: () => void,
-    options?: {
-        domain?: string,
+    options: {
+        domain: string,
         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
         retries?: number; // Number of times to retry a failed message
     },
@@ -59,7 +59,7 @@ export const createWSConnection = (
         stateManager,
         ticket,
         {
-            domain: options?.domain,
+            domain: options.domain,
             secretKey: options?.secretKey,
             retries: options?.retries,
         },
@@ -84,10 +84,10 @@ export class FluxWebSocketConnection {
         private readonly onReconnectCallback: () => void,
         private readonly stateManager: StateManager,
         private readonly token: string,
-        private readonly options?: IOptions,
+        private readonly options: IOptions,
     ) {
         this.options = {
-            domain: this.options?.domain,
+            domain: this.options.domain,
             secretKey: this.options?.secretKey,
             retries: this.options?.retries ?? 10_000,
         };
