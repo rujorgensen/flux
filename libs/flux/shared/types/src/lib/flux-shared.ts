@@ -18,7 +18,7 @@ export interface IRegisterAutoritySocketPackage {
 // *** Errors
 // ****************************************************************************
 
-export const VALIDATION_ERROR_SOCKET_PACKAGE: string = 'No network authority found';
+export const VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE: string = 'No network authority found';
 export const VALIDATION_ERROR_NO_NETWORK_SOCKET_PACKAGE: string = 'Network not found';
 export const VALIDATION_ERROR_WS_DATA_SOCKET_PACKAGE: string = 'Expected data property not found';
 

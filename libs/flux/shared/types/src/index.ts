@@ -33,7 +33,7 @@ export {
     type IRegisterAutoritySocketPackage,
     type IConnectedNode,
     type TCallbackFunction,
-    VALIDATION_ERROR_SOCKET_PACKAGE,
+    VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE,
     VALIDATION_ERROR_NO_NETWORK_SOCKET_PACKAGE,
     VALIDATION_ERROR_WS_DATA_SOCKET_PACKAGE,
 } from './lib/flux-shared';

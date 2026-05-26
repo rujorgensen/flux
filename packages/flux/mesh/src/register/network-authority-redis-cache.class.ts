@@ -101,29 +101,23 @@ export class NetworkAuthorityRedisCache {
         const cached: Set<TAddress> | undefined = this.cache.get(networkId);
 
         if (cached && (cached.size > 0)) {
-            const randomItem = [...cached][Math.floor(Math.random() * [...cached].length)];
+            const randomItem = [...cached][Math.floor(Math.random() * cached.size)];
 
             if (randomItem) {
                 return randomItem;
             }
         }
 
-        const address: TAddress[] = await this.redisConnection
+        const addresses: TAddress[] = await this.redisConnection
             .networkAuthoritySet
             .resolveNetworkAuthorityAddressesOrThrow(
                 networkId,
             );
 
-        if (cached) {
-            for (const a of address) {
-                cached.add(a);
-            }
-        } else {
-            this.cache.set(networkId, new Set(address));
-        }
+        // Update the local cache
+        this.cache.set(networkId, new Set(addresses));
 
-        const cached_: Set<TAddress> = this.cache.get(networkId) as Set<TAddress>;
-        const randomItem = [...cached_][Math.floor(Math.random() * [...cached_].length)];
+        const randomItem = addresses[Math.floor(Math.random() * addresses.length)];
 
         return randomItem;
     }
@@ -131,7 +125,7 @@ export class NetworkAuthorityRedisCache {
     /**
      * Removes a client from the cache and unregisters it globally.
      * 
-     * @param { TNetworkId_S } networkId - The network ID
+     * @param { TNetworkId_S } networkId
      * @param { TAddress } networkAuthorityAddress - The address of the unresponsive client
      */
     public removeUnresponsiveClient(
