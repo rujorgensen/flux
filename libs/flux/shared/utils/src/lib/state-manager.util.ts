@@ -1,5 +1,14 @@
-export type TNetworkConnectionState = 'disconnected' | 'connected' | 'connecting' | 'authorizing' | 'denied' | 'auth-error';
-export type TRTCState = 'idle' |
+export type TNetworkConnectionState =
+    'disconnected' |
+    'connected' |
+    'connecting' |
+    'authorizing' |
+    'denied' |
+    'auth-error' |
+    'kicked';
+
+export type TRTCState =
+    'idle' |
     'creating-offer' |
     'setting-remote-offer' |
     'creating-answer' |
