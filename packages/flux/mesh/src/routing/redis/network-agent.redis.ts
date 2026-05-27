@@ -3,21 +3,16 @@
  */
 import type { RedisClient } from 'bun';
 import type {
-    TAddress,
     TClientId,
-    TAgentOwnUId,
     TNetworkId_S,
 } from '@flux/shared/types';
-import { NetworkAgentRedisSortedSet } from './hash/network-agent.redis.sorted-set';
 
 export class NetworkAgentRedis {
-    private readonly networkAgentRedisSortedSet: NetworkAgentRedisSortedSet;
     private readonly cashedDataUsage: Map<string, number> = new Map();
 
     constructor(
         private readonly client: RedisClient,
     ) {
-        this.networkAgentRedisSortedSet = new NetworkAgentRedisSortedSet(client);
 
         // Update the network agent data usage regularly
         setInterval(this.pushDataUsage.bind(this), 3_000);
@@ -56,34 +51,6 @@ export class NetworkAgentRedis {
             );
     }
      */
-
-    /**
-     * Unregisters a network agent from the sorted set.
-     * 
-     * @param { TNetworkId_S } networkId - The network ID
-     * @param { TClientId } clientId - The socket ID
-     * 
-     * @returns { Promise<number> } The number of elements removed
-     */
-    public async unregisterNetworkAgent(
-        networkId: TNetworkId_S,
-        clientId: TClientId,
-    ): Promise<number> {
-        const key: string = `networks/${networkId}/agents/${clientId}`;
-
-        await this.client.hset(
-            key,
-            {
-                'unregisteredAt': new Date().toISOString(),
-            },
-        );
-
-        return await this.networkAgentRedisSortedSet
-            .unregisterAgent(
-                networkId,
-                clientId,
-            );
-    }
 
     /**
      * Caches the data usage for a network agent to be pushed periodically.

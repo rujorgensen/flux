@@ -32,6 +32,7 @@ import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
 import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
+import { RECONNECTION_DELAY_ON_KICK_MS } from '../../../ws/src/lib/ws-client';
 
 interface IOptions {
     domain: string; // Override the domain for self hosted Flux instances. Should include protocol, e.g. "https://my-flux-instance.com"
@@ -178,10 +179,19 @@ export class FluxWebSocketConnection {
             this.socket
                 .on('message', this.handleMessage.bind(this))
 
-                .on('close', () => {
+                .on('close', (reason?: 'kicked') => {
                     this.webSocketClient = undefined;
-                    this.stateManager.emitNetworkState('disconnected');
-                    PicoLogger.log('🔌🔴 Disconnected', this.fluxInstanceId);
+
+                    PicoLogger.log(
+                        reason === 'kicked'
+                            ?
+                            `🔌🔴 Kicked, delaying reconnect ${RECONNECTION_DELAY_ON_KICK_MS / 60_000} minutes`
+                            :
+                            '🔌🔴 Disconnected',
+                        this.fluxInstanceId,
+                    );
+
+                    this.stateManager.emitNetworkState(reason === 'kicked' ? 'kicked' : 'disconnected');
                 })
 
                 .on('connecting', (retryAttempt: number) => {

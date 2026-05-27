@@ -1,12 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import type { TNetworkAgent } from '@flux/mesh/store/redis/network-agent';
 import { api } from '$lib/app/_services/api/api';
 import { toast } from 'ngx-sonner';
 
 @Component({
     selector: 'app-connected-agents-table',
-    imports: [CommonModule],
+    imports: [
+        // * Pipes
+        DatePipe,
+    ],
     templateUrl: './connected-agents-table.component.html',
     styleUrls: ['./connected-agents-table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,

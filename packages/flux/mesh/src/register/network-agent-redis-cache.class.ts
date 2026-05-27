@@ -97,27 +97,28 @@ export class NetworkAgentRedisCache {
     /**
      * Unregisters a network agent UID and associated data from the Redis hash.
      * 
-     * @param { TNetworkId_S } networkId - The network ID
-     * @param { TClientId } clientId - The client socket ID
+     * @param { TClientId } clientId
+     * @param { TNetworkId_S } [networkId]
      * @param { TAgentOwnUId } [clientOwnUId] - Optional agent UID
      * 
      * @returns { void }
      */
-    public unregisterNetworkAgent(
-        networkId: TNetworkId_S,
+    public async unregister(
         clientId: TClientId,
-        clientOwnUId?: TAgentOwnUId,
-    ): void {
+        networkId?: TNetworkId_S,
+        clientOwnUId?: { clientOwnUId: TAgentOwnUId, networkId: TNetworkId_S; },
+    ): Promise<void> {
         if (clientOwnUId) {
             // Unregisters a network client UID and address in the Redis hash.
-            this.cache.delete(`${networkId}.${clientOwnUId}`);
-
-            this.networkAgentRedisService.unregisterNetworkAgent(
-                networkId,
-                clientId,
-                clientOwnUId,
-            );
+            this.cache.delete(`${clientOwnUId.networkId}.${clientOwnUId.clientOwnUId}`);
         }
+
+        await this.networkAgentRedisService
+            .unregisterAgentOrThrow(
+                clientId,
+                networkId,
+                clientOwnUId?.clientOwnUId,
+            );
 
         // Cancel the timer
         clearInterval(this.timers.get(clientId));
@@ -132,7 +133,7 @@ export class NetworkAgentRedisCache {
      * 
      * @returns { Promise<TAddress> } The resolved address
      */
-    public async resolveNetworkClientAddressByUid(
+    public async resolveClientAddressByUid(
         networkId: TNetworkId_S,
         clientOwnUId: TAgentOwnUId,
         // retryWithDelay?: number,
@@ -147,7 +148,7 @@ export class NetworkAgentRedisCache {
 
         const address: TAddress = await this.redisConnection
             .networkAgentRedisService
-            .readNetworkClientAddressByUIDOrThrow(
+            .readClientAddressByUIDOrThrow(
                 networkId,
                 clientOwnUId
             );

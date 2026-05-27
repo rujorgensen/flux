@@ -11,32 +11,32 @@ export class LocalAuthorityManager {
     constructor(
         private readonly _clientMap: Map<TClientId, TConnectedClientSocket>,
         private readonly _networkAuthorityRedisCache: NetworkAuthorityRedisCache,
-    ) { }
+    ) {}
 
-    public kickAuthority(
-        clientAddress: TClientId,
-    ): void {
+    public async kickAuthority(
+        clientId: TClientId,
+    ): Promise<void> {
         const client: TConnectedClientSocket | undefined = this._clientMap
-            .get(clientAddress);
+            .get(clientId);
 
-        if (!client) {
+        if (client) {
+            // Let the client know
+            client.close(1002, 'Kicked by process');
+
+            // Cleanup local
+            this._clientMap
+                .delete(
+                    clientId,
+                );
+        } else {
             PicoLogger.warn(`We expected to find a client, but didn't. Ignoring.`, 'authority-manager');
-            return;
         }
 
-        // Let the client know
-        client.close(1002, 'Kicked by process');
-
         // Cleanup redis
-        this._networkAuthorityRedisCache
+        await this._networkAuthorityRedisCache
             .unregister(
-                client.data.networkId,
-                client.data.address,
+                clientId,
+                client?.data.networkId,
             );
-
-        // Cleanup local
-        this._clientMap.delete(
-            clientAddress,
-        );
     }
 }

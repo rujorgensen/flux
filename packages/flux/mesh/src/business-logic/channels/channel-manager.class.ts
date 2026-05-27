@@ -235,12 +235,12 @@ export class NetworkChannelManager {
     /**
      * Leaves all network channels.
      */
-    public leaveAllNetworkChannels(
+    public async leaveAllNetworkChannels(
         networkId: TNetworkId_S,
         clientAddress: TAddress,
         channelNames: Set<TChannelName>,
-    ): void {
-        this.networkChannelHash.leaveAllNetworkChannels(
+    ): Promise<void> {
+        return await this.networkChannelHash.leaveAllNetworkChannels(
             networkId,
             clientAddress,
             channelNames,

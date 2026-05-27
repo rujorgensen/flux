@@ -48,7 +48,15 @@ export class NetworkAgentRedisService {
         // Add to network
         await this._client.sadd(`networks/${networkId}/agents`, clientId);
 
-        // Add to agent
+        // Add to global list
+        await this._client.hset(
+            `~/agents`,
+            {
+                [clientId]: networkId,
+            }
+        );
+
+        // Add to agent info hash
         await this._client.hset(
             `networks/${networkId}/agents/${clientId}`,
             {
@@ -87,7 +95,6 @@ export class NetworkAgentRedisService {
             'bytes': `${bytes}`,
             'packets': `${packets}`,
         });
-
     }
 
     // ****************************************************************************
@@ -97,7 +104,7 @@ export class NetworkAgentRedisService {
     /**
      * Returns all agents on a network.
      */
-    public async readNetworkAgents(
+    public async readAgents(
         networkId: TNetworkId_S,
     ): Promise<TNetworkAgent[]> {
         // Add to network
@@ -107,7 +114,7 @@ export class NetworkAgentRedisService {
         const agentData: TNetworkAgent[] = [];
 
         for (const id of networkAgents) {
-            const networkAgent: TNetworkAgent | null = await this.readNetworkAgentByClientId(
+            const networkAgent: TNetworkAgent | null = await this.readAgentByClientId(
                 networkId,
                 id as TClientId,
             );
@@ -123,7 +130,7 @@ export class NetworkAgentRedisService {
     /**
      * Reads the current number of connected agents on the given network.
      */
-    public async readNetworkAgentCount(
+    public async readAgentCount(
         networkId: TNetworkId_S,
     ): Promise<TNetworkAgentCountAt> {
         return {
@@ -135,7 +142,7 @@ export class NetworkAgentRedisService {
     /**
      * Resolves the network client address by an agent's UID or throws.
      */
-    public async readNetworkClientAddressByUIDOrThrow(
+    public async readClientAddressByUIDOrThrow(
         networkId: TNetworkId_S,
         clientOwnUId: TAgentOwnUId,
     ): Promise<TAddress> {
@@ -148,21 +155,22 @@ export class NetworkAgentRedisService {
         return clientAddress as TAddress;
     }
 
-    public async readNetworkAgentByClientId(
+    public async readAgentByClientId(
         networkId: TNetworkId_S,
         clientId: TClientId,
     ): Promise<TNetworkAgent | null> {
 
-        const [name, ip, address, bytes, packets, connectedAt] = await this._client.hmget(
-            `networks/${networkId}/agents/${clientId}`,
-            [
-                'name',
-                'ip',
-                'address',
-                'bytes',
-                'packets',
-                'connectedAt',
-            ]);
+        const [name, ip, address, bytes, packets, connectedAt] = await this._client
+            .hmget(
+                `networks/${networkId}/agents/${clientId}`,
+                [
+                    'name',
+                    'ip',
+                    'address',
+                    'bytes',
+                    'packets',
+                    'connectedAt',
+                ]);
 
         if (ip || address || bytes || packets) {
             return {
@@ -185,15 +193,47 @@ export class NetworkAgentRedisService {
 
     /**
      * Unregisters a network agent UID and address in the Redis hash.
+     * 
+     * @throws 'Network agent not found for clientId ...'
      */
-    public async unregisterNetworkAgent(
-        networkId: TNetworkId_S,
+    public async unregisterAgentOrThrow(
         clientId: TClientId,
+        networkId?: TNetworkId_S,
         uid?: TAgentOwnUId,
     ): Promise<void> {
+        const networkId_: TNetworkId_S = networkId ?? await this.readAgentNetworkIdByClientIdOrThrow(clientId);
+        console.log("starting");
+
         if (uid) {
-            await this._client.send('HDEL', [`networks/${networkId}/agent-uids`, uid]);
+            await this._client.hdel(`networks/${networkId_}/agent-uids`, uid);
         }
-        await this._client.srem(`networks/${networkId}/agents`, clientId);
+
+        // Remove from global
+        await this._client
+            .hdel(
+                `~/agents`,
+                clientId,
+            );
+
+        // Remove from network
+        await this._client.srem(`networks/${networkId_}/agents`, clientId);
+
+        // Remove from agent info hash
+        await this._client.del(`networks/${networkId_}/agents/${clientId}`);
+    }
+
+    // ****************************************************************************
+    // * Internal Helpers
+    // ****************************************************************************
+    private async readAgentNetworkIdByClientIdOrThrow(
+        clientId: TClientId,
+    ): Promise<TNetworkId_S> {
+        const networkId = await this._client.hget(`~/agents`, clientId);
+
+        if (!networkId) {
+            throw new Error(`Network agent not found for clientId: '${clientId}'`);
+        }
+
+        return networkId as TNetworkId_S;
     }
 }

@@ -1,8 +1,9 @@
 import {
     type TAddress,
     type TClientId,
-    type TMachineAddress,
     type TProcessId,
+    type TNetworkId_S,
+    type TMachineAddress,
     splitAddressOrThrow,
 } from '@flux/shared/types';
 import { RedisConnection } from '../routing/redis/redis-connection.class';
@@ -32,7 +33,10 @@ export class AgentManager {
 
         // Subscribe to global events
         this._globalClientManager
-            .onKickClient(this._localAgentManager.kickAgent.bind(this._localAgentManager));
+            .onKickClient(
+                'agent',
+                this._localAgentManager.kickAgent.bind(this._localAgentManager),
+            );
     }
 
     public kick(
@@ -42,14 +46,22 @@ export class AgentManager {
 
         // * Not on the same machine
         if (machineAddress !== this.machineAddress) {
-            this._globalClientManager.kickClient(agentAddress);
+            this._globalClientManager
+                .kickClient(
+                    'agent',
+                    agentAddress,
+                );
             return;
         }
 
         // * Not on the same process
         if (processId !== this.processAddress) {
             // ! Route through Redis for now, but change to direct process connection
-            this._globalClientManager.kickClient(agentAddress);
+            this._globalClientManager
+                .kickClient(
+                    'agent',
+                    agentAddress,
+                );
             return;
         }
 

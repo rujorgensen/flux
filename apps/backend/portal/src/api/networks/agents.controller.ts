@@ -33,7 +33,7 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
     .get('/count', ({ networkId, query }): Promise<TNetworkAgentCountAt> => {
         if (query.when === 'now') {
             return networkAgentRedisCacheService
-                .readNetworkAgentCount(
+                .readAgentCount(
                     networkId,
                 );
         }
@@ -59,7 +59,8 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
         }) => {
             const page = query.page ?? 1;
             const pageSize = Math.min(query.pageSize ?? 25, 100);
-            const all = await networkAgentRedisCacheService.readNetworkAgents(networkId);
+            const all = await networkAgentRedisCacheService
+                .readAgents(networkId);
             const total = all.length;
             const start = (page - 1) * pageSize;
 
@@ -87,13 +88,19 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
         networkId,
     }) => {
         const agents = await networkAgentRedisCacheService
-            .readNetworkAgents(networkId);
+            .readAgents(networkId);
 
         await Promise.all(
-            agents.map((agent) => kickSocket(agent.address as TAddress)),
+            agents.map((agent) => kickSocket(
+                'agent',
+                agent.address as TAddress,
+            )),
         );
 
-        return { message: `${agents.length} agent(s) kicked successfully.`, count: agents.length };
+        return {
+            message: `${agents.length} agent(s) kicked successfully.`,
+            count: agents.length,
+        };
     })
 
     /**
@@ -110,16 +117,21 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
         }
 
         const agent = await networkAgentRedisCacheService
-            .readNetworkAgentByClientId(
+            .readAgentByClientId(
                 networkId,
                 agentId as TClientId,
-        );
+            );
 
         if (agent?.address) {
-            await kickSocket(agent.address as TAddress);
+            await kickSocket(
+                'agent',
+                agent.address as TAddress,
+            );
         }
 
-        return { message: `Agent ${agentId} kicked successfully.` };
+        return {
+            message: `Agent ${agentId} kicked successfully.`,
+        };
     }, {
 
     })

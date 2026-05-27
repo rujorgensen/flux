@@ -19,6 +19,8 @@ type WebSocketClientOptions = {
     connectionTimeout?: number;
 };
 
+export const RECONNECTION_DELAY_ON_KICK_MS: number = 1_800_000; // 30 minutes
+
 export class WebSocketClient<T extends string> extends RPCServer<T> {
 
     private readonly options: WebSocketClientOptions;
@@ -79,13 +81,18 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
                 this.emit('message', event.data);
             };
 
-            this.ws.onclose = () => {
+            this.ws.onclose = (closeEvent) => {
+                const wasKicked = closeEvent.reason === 'Kicked by process';
+
                 // Cancel timeout
                 clearTimeout(timeout);
 
                 // Only emit, if the connection was open before
                 if (this.isOpen) {
-                    this.emit('close');
+                    this.emit(
+                        'close',
+                        wasKicked ? 'kicked' : undefined,
+                    );
                     this.isOpen = false;
                 }
 
@@ -93,10 +100,18 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
                     this.options.autoReconnect &&
                     ((this.options.retries === undefined) || (this.reconnectAttempts < this.options.retries))
                 ) {
+                    const delay: number = wasKicked ?
+                        RECONNECTION_DELAY_ON_KICK_MS
+                        :
+                        Math.min(
+                            this.options.reconnectDelay ?? Number.POSITIVE_INFINITY,
+                            (this.options.reconnectDelay ?? 0) * (this.reconnectAttempts || 1),
+                        );
+
                     setTimeout(() => {
                         this.reconnectAttempts++;
                         this.connect();
-                    }, Math.min(this.options.reconnectDelay ?? Number.POSITIVE_INFINITY, this.options.reconnectDelay! * (this.reconnectAttempts || 1)));
+                    }, delay);
                 } else if (this.options.autoReconnect) {
                     this.emit('error', new Error('Connection failed: retries exhausted'));
                 }
@@ -189,4 +204,4 @@ export class FluxWebSocketClientConnection extends WebSocketClient<
     'acceptOffer' |
     'acceptAnswer' |
     'answerAcceptedByInitiator'
-> { }
+> {}
