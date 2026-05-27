@@ -413,7 +413,7 @@ export class FluxMeshServer {
 
                             try {
                                 const networkAuthorityAddress: TAddress = await networkAuthorityRedisCache
-                                    .resolveNetworkAuthorityAddressOrThrow(
+                                    .resolveAuthorityAddressOrThrow(
                                         ws.data.networkId,
                                     );
 
@@ -546,7 +546,7 @@ export class FluxMeshServer {
                                 message_.indexOf(':') + 1
                             ) as TAgentOwnUId;
                             const networkClientAddress: TAddress =
-                                await networkAgentRedisCache.resolveNetworkClientAddressByUid(
+                                await networkAgentRedisCache.resolveClientAddressByUid(
                                     ws.data.networkId,
                                     clientOwnUId
                                 );
@@ -579,7 +579,7 @@ export class FluxMeshServer {
                 },
 
                 // A socket is closed
-                close: (
+                close: async (
                     ws: TConnectedClientSocket,
                     code: number,
                 ) => {
@@ -588,10 +588,11 @@ export class FluxMeshServer {
                     if (ws.data.isAuthority) {
                         PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
 
-                        networkAuthorityRedisCache.unregister(
-                            ws.data.networkId,
-                            ws.data.address,
-                        );
+                        networkAuthorityRedisCache
+                            .unregister(
+                                ws.data.id,
+                                ws.data.networkId,
+                            );
                     } else {
                         PicoLogger.log(`🛑🤵 Agent socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
                         // Unsubscribe from topics
@@ -604,19 +605,28 @@ export class FluxMeshServer {
 
                         //  * Leave all channels
                         if (ws.data.channelNames.size > 0) {
-                            this.channelManager
+                            await this.channelManager
                                 .leaveAllNetworkChannels(
                                     ws.data.networkId,
                                     ws.data.address,
                                     ws.data.channelNames,
-                                );
+                                ).catch(() => {
+                                    PicoLogger.error(`Caught error while leaving network channels.`, 'ws-disconnect');
+                                });
                         }
 
-                        networkAgentRedisCache.unregisterNetworkAgent(
-                            ws.data.networkId,
-                            ws.data.id,
-                            ws.data.uid,
-                        );
+                        await networkAgentRedisCache
+                            .unregister(
+                                ws.data.id,
+                                ws.data.networkId,
+                                ws.data.uid ? {
+                                    clientOwnUId: ws.data.uid,
+                                    networkId: ws.data.networkId,
+                                } : undefined,
+                            )
+                            .catch(() => {
+                                PicoLogger.error(`Caught error while unregistering agent.`, 'ws-disconnect');
+                            });
                     }
                 },
 

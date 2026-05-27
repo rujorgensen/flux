@@ -42,7 +42,7 @@ export class NetworkAuthorityRedisSortedSet {
     /**
      * Register a network authority.
      */
-    public async registerNetworkAuthority(
+    public async registerAuthority(
         networkId: TNetworkId_S,
         clientId: TClientId,
         machineUID?: TFluxClientUID,
@@ -53,6 +53,14 @@ export class NetworkAuthorityRedisSortedSet {
         await this._client.sadd(key, address);
 
         await this._client.expire(key, 500);
+
+        // Add to global list
+        await this._client.hset(
+            `~/authorities`,
+            {
+                [clientId]: networkId,
+            }
+        );
 
         // Add to authority
         await this._client.hset(
@@ -82,7 +90,7 @@ export class NetworkAuthorityRedisSortedSet {
     /**
      * Returns all network authorities.
      */
-    public async readNetworkAuthorities(
+    public async readAuthorities(
         networkId: TNetworkId_S,
     ): Promise<TNetworkAuthority[]> {
         // Add to network
@@ -94,7 +102,7 @@ export class NetworkAuthorityRedisSortedSet {
         for (const address of networkAuthorities) {
             const clientId: TClientId = splitAddressOrThrow(address)[2];
 
-            const networkAuthority: TNetworkAuthority | null = await this.readNetworkAuthorityByClientId(
+            const networkAuthority: TNetworkAuthority | null = await this.readAuthorityByClientId(
                 networkId,
                 clientId,
             );
@@ -110,7 +118,7 @@ export class NetworkAuthorityRedisSortedSet {
     /**
      * Reads the network authority address from the sorted set.
      */
-    public async resolveNetworkAuthorityAddressesOrThrow(
+    public async resolveAuthorityAddressesOrThrow(
         networkId: TNetworkId_S,
     ): Promise<TAddress[]> {
         if (!this._client.connected) {
@@ -131,7 +139,7 @@ export class NetworkAuthorityRedisSortedSet {
     /**
      * Reads the current number of connected authorities on the given network.
      */
-    public async readNetworkAuthorityCount(
+    public async readAuthorityCount(
         networkId: TNetworkId_S,
     ): Promise<TNetworkAuthorityCountAt> {
         return {
@@ -140,7 +148,7 @@ export class NetworkAuthorityRedisSortedSet {
         };
     }
 
-    public async readNetworkAuthorityByClientId(
+    public async readAuthorityByClientId(
         networkId: TNetworkId_S,
         clientId: TClientId,
     ): Promise<TNetworkAuthority | null> {
@@ -151,10 +159,10 @@ export class NetworkAuthorityRedisSortedSet {
             'connectedAt',
         ]);
 
-        if (address) {
+        if (address && connectedAt) {
             return {
                 id: clientId,
-                connectedAt: new Date(connectedAt as unknown as Date),
+                connectedAt: new Date(connectedAt),
                 address: address as TAddress,
             };
         }
@@ -173,27 +181,40 @@ export class NetworkAuthorityRedisSortedSet {
     /**
      * Unregisters a network authority from the sorted set.
      */
-    public async unregister(
-        networkId: TNetworkId_S,
+    public async unregisterAuthority(
         clientId: TClientId,
-    ): Promise<number> {
-        const key: string = `networks/${networkId}/authorities`;
+        networkId?: TNetworkId_S,
+    ): Promise<void> {
+        const networkId_ = networkId ?? await this.readNetworkIdByClientIdOrThrow(clientId);
 
-        const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
+        const key: string = `networks/${networkId_}/authorities`;
 
+        // Remove from global
+        await this._client
+            .hdel(
+                `~/authorities`,
+                clientId,
+            );
+
+        // Remove from network
         await this._client.srem(key, clientId);
 
         // Update the refresh interval cache
-        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
+        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId_);
         if (refreshNetworkExpiry) {
             refreshNetworkExpiry.delete(clientId);
 
             if (refreshNetworkExpiry.size === 0) {
-                this.refreshNetworkExpiry.delete(networkId);
+                this.refreshNetworkExpiry.delete(networkId_);
             }
         }
+        const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
 
-        return await this._client.srem(key, address);
+        // Remove from network
+        await this._client.srem(
+            key,
+            address,
+        );
     }
 
     /**
@@ -203,12 +224,12 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
         address: TAddress,
     ): Promise<number> {
+        const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address);
 
         // Update the refresh interval cache
         const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
         if (refreshNetworkExpiry) {
             try {
-                const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address);
                 refreshNetworkExpiry.delete(clientId);
 
                 if (refreshNetworkExpiry.size === 0) {
@@ -217,9 +238,32 @@ export class NetworkAuthorityRedisSortedSet {
             } catch {}
         }
 
-        return await this._client.srem(
-            `networks/${networkId}/authorities`,
-            address,
-        );
+        // Remove from global
+        await this._client
+            .hdel(
+                `~/authorities`,
+                clientId,
+            );
+
+        return await this._client
+            .srem(
+                `networks/${networkId}/authorities`,
+                address,
+            );
+    }
+
+    // ****************************************************************************
+    // * Internal Helpers
+    // ****************************************************************************
+    private async readNetworkIdByClientIdOrThrow(
+        clientId: TClientId,
+    ): Promise<TNetworkId_S> {
+        const networkId = await this._client.hget(`~/authorities`, clientId);
+
+        if (!networkId) {
+            throw new Error(`Network authority not found for clientId: '${clientId}'`);
+        }
+
+        return networkId as TNetworkId_S;
     }
 }

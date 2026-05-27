@@ -70,7 +70,7 @@ export const authorizeAgentConnection = async (
         const authorizedJWT: string = await retryOrThrow<string>(
             async () => {
                 networkAuthorityAddress = await networkAuthorityManager
-                    .resolveNetworkAuthorityAddressOrThrow(
+                    .resolveAuthorityAddressOrThrow(
                         networkId,
                     );
 
@@ -85,10 +85,11 @@ export const authorizeAgentConnection = async (
                     (error instanceof UnknownClientError) ||
                     (error instanceof GlobalRPCTimeoutError)
                 ) {
-                    networkAuthorityManager.removeUnresponsiveClient(
-                        networkId,
-                        networkAuthorityAddress,
-                    );
+                    networkAuthorityManager
+                        .removeUnresponsiveClient(
+                            networkId,
+                            networkAuthorityAddress,
+                        );
 
                     return true;
                 }

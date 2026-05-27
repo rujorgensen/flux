@@ -18,8 +18,8 @@ export class NetworkService {
         authorities: number;
         channels: number;
     }> {
-        const allNetworkAgents = await this._networkAgentRedisCacheService.readNetworkAgents(networkId);
-        const allNetworkAuthorities = await this._networkAuthorityService.readNetworkAuthorities(networkId);
+        const allNetworkAgents = await this._networkAgentRedisCacheService.readAgents(networkId);
+        const allNetworkAuthorities = await this._networkAuthorityService.readAuthorities(networkId);
         const allNetworkChannels = await this._networkChannelRedisCacheService
             .readNetworkChannelCount(
                 networkId,
