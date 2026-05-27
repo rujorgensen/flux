@@ -6,15 +6,21 @@ import type { TAddress } from '@flux/shared/types';
  * it is closed. Delegates to `GlobalClientManager.kickClient()` which
  * resolves the correct Redis channel from the address.
  *
+ * @param { 'agent' | 'authority' } type
  * @param { TAddress } address - Full client address (`{machineAddress}/{processId}/{clientId}`)
  *
  * @returns { Promise<void> }
  */
-export async function kickSocket(
+export const kickSocket = async (
+    type: 'agent' | 'authority',
     address: TAddress,
-): Promise<void> {
+): Promise<void> => {
     const connection = getMeshRedisConnection();
     const manager = new GlobalClientManager(connection);
 
-    await manager.kickClient(address);
-}
+    await manager
+        .kickClient(
+            type,
+            address,
+        );
+};

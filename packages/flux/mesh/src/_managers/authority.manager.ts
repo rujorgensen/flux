@@ -1,6 +1,6 @@
 import {
     type TAddress,
-    TClientId,
+    type TClientId,
     type TMachineAddress,
     type TProcessId,
     splitAddressOrThrow,
@@ -32,24 +32,35 @@ export class AuthorityManager {
 
         // Subscribe to global events
         this._globalClientManager
-            .onKickClient(this._localAuthorityManager.kickAuthority.bind(this._localAuthorityManager));
+            .onKickClient(
+                'authority',
+                this._localAuthorityManager.kickAuthority.bind(this._localAuthorityManager),
+            );
     }
 
     public kick(
-        agentAddress: TAddress,
+        authorityAddress: TAddress,
     ): void {
-        const [machineAddress, processId, clientId] = splitAddressOrThrow(agentAddress);
+        const [machineAddress, processId, clientId] = splitAddressOrThrow(authorityAddress);
 
         // * Not on the same machine
         if (machineAddress !== this.machineAddress) {
-            this._globalClientManager.kickClient(agentAddress);
+            this._globalClientManager
+                .kickClient(
+                    'authority',
+                    authorityAddress,
+                );
             return;
         }
 
         // * Not on the same process
         if (processId !== this.processAddress) {
             // ! Route through Redis for now, but change to direct process connection
-            this._globalClientManager.kickClient(agentAddress);
+            this._globalClientManager
+                .kickClient(
+                    'authority',
+                    authorityAddress,
+                );
             return;
         }
 

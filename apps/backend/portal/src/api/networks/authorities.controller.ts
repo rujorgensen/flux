@@ -27,7 +27,7 @@ async function kickAuthoritySocket(
     authorityId: TClientId,
 ): Promise<void> {
     const authority = await networkAuthorityService
-        .readNetworkAuthorityByClientId(
+        .readAuthorityByClientId(
             networkId,
             authorityId,
         );
@@ -36,7 +36,10 @@ async function kickAuthoritySocket(
         return;
     }
 
-    await kickSocket(authority.address);
+    await kickSocket(
+        'authority',
+        authority.address,
+    );
 }
 
 export const networkAuthorityController = new Elysia({
@@ -54,7 +57,7 @@ export const networkAuthorityController = new Elysia({
     .get('/count', ({ networkId, query }): Promise<TNetworkAuthorityCountAt> => {
         if (query.when === 'now') {
             return networkAuthorityService
-                .readNetworkAuthorityCount(
+                .readAuthorityCount(
                     networkId,
                 );
         }
@@ -79,7 +82,7 @@ export const networkAuthorityController = new Elysia({
     }) => {
         const page = query.page ?? 1;
         const pageSize = Math.min(query.pageSize ?? 25, 100);
-        const all = await networkAuthorityService.readNetworkAuthorities(networkId);
+        const all = await networkAuthorityService.readAuthorities(networkId);
         const total = all.length;
         const start = (page - 1) * pageSize;
 
@@ -107,7 +110,9 @@ export const networkAuthorityController = new Elysia({
         networkId,
     }) => {
         const authorities = await networkAuthorityService
-            .readNetworkAuthorities(networkId);
+            .readAuthorities(
+                networkId,
+            );
 
         await Promise.all(
             authorities.map((authority) => kickAuthoritySocket(

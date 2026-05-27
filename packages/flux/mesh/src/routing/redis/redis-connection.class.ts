@@ -278,7 +278,7 @@ export class RedisConnection {
     // *** Publish Directly to Address - Custom messages
     // ****************************************************************************
     public async publishCustom(
-        subChannel: 'kick-client',
+        subChannel: 'kick-client-agent' | 'kick-client-authority',
         destinationProcessAddress: TProcessAddress,
         message: string,
     ): Promise<number> {
@@ -290,7 +290,7 @@ export class RedisConnection {
     }
 
     public subscribeToCustom(
-        subChannel: 'kick-client',
+        subChannel: 'kick-client-agent' | 'kick-client-authority',
         destinationProcessAddress: TProcessAddress,
         callback: (data: string) => void,
     ): void {
