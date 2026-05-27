@@ -15,25 +15,27 @@ import type {
 export class NetworkAuthorityRedisCache {
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
     private readonly cache: Map<TNetworkId_S, Set<TAddress>> = new Map();
+    private readonly clientCache: Map<TClientId, { networkId: TNetworkId_S, address: TAddress; }> = new Map();
 
     /**
      * Registers a network authority.
      * 
      * @param { TNetworkId_S } networkId - The network ID to register on
-     * @param { TClientId } socketId - The socket ID of the authority
+     * @param { TClientId } clientId - The socket ID of the authority
      * @param { TFluxClientUID } [machineUID] - Optional machine UID
      * 
      * @returns { Promise<void> }
      */
     public async register(
         networkId: TNetworkId_S,
-        socketId: TClientId,
+        clientId: TClientId,
         machineUID?: TFluxClientUID,
     ): Promise<void> {
-        await this.redisConnection.networkAuthoritySet
-            .registerNetworkAuthority(
+        await this.redisConnection
+            .networkAuthoritySet
+            .registerAuthority(
                 networkId,
-                socketId,
+                clientId,
                 machineUID,
             );
     }
@@ -41,26 +43,35 @@ export class NetworkAuthorityRedisCache {
     /**
      * Unregisters a network authority from the local network.
      * 
-     * @param { TNetworkId_S } networkId - The network ID
-     * @param { TAddress } networkAuthorityAddress - The address of the authority to unregister
+     * @param { TClientId } clientId
+     * @param { TNetworkId_S } [networkId]
      * 
-     * @returns { void }
+     * @returns { Promise<void> }
      */
-    public unregister(
-        networkId: TNetworkId_S,
-        networkAuthorityAddress: TAddress,
-    ): void {
-        const cached: Set<TAddress> | undefined = this.cache.get(networkId);
-        if (cached) {
-            cached.delete(networkAuthorityAddress);
+    public async unregister(
+        clientId: TClientId,
+        networkId?: TNetworkId_S,
+    ): Promise<void> {
+        const clientInfo: { networkId: TNetworkId_S, address: TAddress; } | undefined = this.clientCache.get(clientId);
+
+        if (clientInfo) {
+            const cached: Set<TAddress> | undefined = this.cache.get(clientInfo.networkId);
+            if (cached) {
+                cached.delete(clientInfo.address);
+                if (cached.size === 0) {
+                    this.cache.delete(clientInfo.networkId);
+                }
+            }
+
+            this.clientCache.delete(clientId);
         }
 
-        const [_machineAddress, _processId, clientId] = splitAddressOrThrow(networkAuthorityAddress);
-
-        this.redisConnection.networkAuthoritySet.unregister(
-            networkId,
-            clientId,
-        );
+        this.redisConnection
+            .networkAuthoritySet
+            .unregisterAuthority(
+                clientId,
+                networkId,
+            );
     }
 
     /**
@@ -78,7 +89,13 @@ export class NetworkAuthorityRedisCache {
         const cached: Set<TAddress> | undefined = this.cache.get(networkId);
         if (cached) {
             cached.delete(networkAuthorityAddress);
+            if (cached.size === 0) {
+                this.cache.delete(networkId);
+            }
         }
+
+        const [_machineAddress, _processId, clientId] = splitAddressOrThrow(networkAuthorityAddress);
+        this.clientCache.delete(clientId);
 
         this.redisConnection.networkAuthoritySet
             .unregisterGlobal(
@@ -94,7 +111,7 @@ export class NetworkAuthorityRedisCache {
      * 
      * @returns { Promise<TAddress> } The resolved authority address
      */
-    public async resolveNetworkAuthorityAddressOrThrow(
+    public async resolveAuthorityAddressOrThrow(
         networkId: TNetworkId_S
         // retryWithDelay?: number,
     ): Promise<TAddress> {
@@ -110,9 +127,14 @@ export class NetworkAuthorityRedisCache {
 
         const addresses: TAddress[] = await this.redisConnection
             .networkAuthoritySet
-            .resolveNetworkAuthorityAddressesOrThrow(
+            .resolveAuthorityAddressesOrThrow(
                 networkId,
             );
+
+        for (const address of addresses) {
+            const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address);
+            this.clientCache.set(clientId, { networkId, address });
+        }
 
         // Update the local cache
         this.cache.set(networkId, new Set(addresses));
