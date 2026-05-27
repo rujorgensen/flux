@@ -281,12 +281,12 @@ export class RedisConnection {
         subChannel: 'kick-client',
         destinationProcessAddress: TProcessAddress,
         message: string,
-    ): Promise<void> {
-        try {
-            await this.pubSub.publish(`~${subChannel}/${destinationProcessAddress}`, message);
-        } catch {
-            console.error(`Publish failed on global channel event: '${destinationProcessAddress}'`);
-        }
+    ): Promise<number> {
+        return await this.pubSub
+            .publish(
+                `~${subChannel}/${destinationProcessAddress}`,
+                message,
+            );
     }
 
     public subscribeToCustom(

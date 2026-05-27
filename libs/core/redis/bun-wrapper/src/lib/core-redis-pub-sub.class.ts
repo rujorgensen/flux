@@ -88,11 +88,12 @@ export class BunRedisPubSub {
     public async publish(
         address: string,
         message: string,
-    ): Promise<void> {
+    ): Promise<number> {
         try {
-            await this.publisher.publish(address, message);
+            return await this.publisher.publish(address, message);
         } catch {
             console.log('publish failed');
+            return 0;
         }
     }
 
