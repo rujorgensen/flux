@@ -27,8 +27,6 @@ export class ChannelStateManager {
     ): Promise<FluxNetworkChannel> {
         if (webSocketClient) {
             return new Promise((resolve, reject) => {
-                webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
-
                 const existingTimeout = this.connectionTimeouts.get(channelName);
                 if (existingTimeout) {
                     clearTimeout(existingTimeout);
@@ -59,6 +57,12 @@ export class ChannelStateManager {
                     resolve(new FluxNetworkChannel(channelName, fluxWebSocketConnection));
                 };
 
+                fluxWebSocketConnection
+                    .interceptPackageTypeMessages(
+                        SUBSCRIBED_NETWORK_CHANNEL_NAME,
+                        cb,
+                    );
+
                 this.connectionTimeouts.set(
                     channelName,
                     setTimeout(() => {
@@ -68,11 +72,7 @@ export class ChannelStateManager {
                     }, CONNECTION_TIMEOUT_MS),
                 );
 
-                fluxWebSocketConnection
-                    .interceptPackageTypeMessages(
-                        SUBSCRIBED_NETWORK_CHANNEL_NAME,
-                        cb,
-                    );
+                webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
             });
         }
 
