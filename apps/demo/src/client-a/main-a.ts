@@ -76,18 +76,7 @@ Alpine.data('fluxApplicationA', () => ({
     ) {
         console.log('Conneting to remo');
         this.remoteClient = this.fluxNetworkConnection?.connectToAgent(clientName);
-
-        // await new Promise((_resolve, reject) => {
-
-
-        //     setTimeout(() => {
-        //         reject(new Error('Timeout'));
-        //     }, 600_000);
-        // });
-
-        // sendMessage
     },
-
 
     // Send message over DataChannel
     sendRTCMessage(
