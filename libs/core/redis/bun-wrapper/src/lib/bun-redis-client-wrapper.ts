@@ -17,8 +17,8 @@ export class BunRedisClient extends EventEmitter<{
 
     private reconnectAttempts = 0;
     private readonly maxReconnects: number | null = null;
-    private readonly baseDelay = 200; // ms
-    private readonly maxDelay = 2000; // ms
+    private readonly baseDelayMilliseconds = 200;
+    private readonly maxDelayMilliseconds = 2_000;
 
     constructor(
         private readonly options: {
@@ -150,7 +150,7 @@ export class BunRedisClient extends EventEmitter<{
         this.reconnecting = true;
 
         while (!this.connected && !this.disconnected && (this.reconnectAttempts <= (this.maxReconnects ?? Number.POSITIVE_INFINITY))) {
-            const delay: number = this.options.socket.reconnectStrategy(this.reconnectAttempts) ?? Math.min(this.baseDelay * 2 ** this.reconnectAttempts, this.maxDelay);
+            const delay: number = this.options.socket.reconnectStrategy(this.reconnectAttempts) ?? Math.min(this.baseDelayMilliseconds * 2 ** this.reconnectAttempts, this.maxDelayMilliseconds);
 
             this.emit('reconnecting', void 0);
             console.log(this.options.url, `Reconnecting (${this.reconnectAttempts}) to Redis in ${delay}ms...`);
