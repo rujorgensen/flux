@@ -11,7 +11,7 @@ import {
     beforeAll,
     expect,
 } from 'bun:test';
-import { isNanoId } from '@flux/shared/types';
+import { isNanoId, TNetworkToken_S } from '@flux/shared/types';
 import { $ } from 'bun';
 import {
     waitUntilAvailable,
@@ -21,7 +21,7 @@ import {
 } from '@flux/mesh/test/setup/infrastructure';
 
 const NETWORK_ID: string = 'agent-api-testing-network-id'; // Key to register a network, known to flux´
-const NETWORK_ACCESS_TOKEN: string = 'network-access-token'; // Key to register an authority, known to flux
+const NETWORK_ACCESS_TOKEN: TNetworkToken_S = 'network-access-token' as TNetworkToken_S; // Key to register an authority, known to flux
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to connect to a network, unknown and irelevant to flux
 const LIVE_UPDATES_NETWORK_ID: string = 'rAnD0M-network-id'; // Portal bootstraps its own status authority on this network
 

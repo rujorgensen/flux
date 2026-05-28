@@ -1,5 +1,7 @@
+import { TNetworkToken_S } from "@flux/shared/types";
+
 export const DEFAULT_AUTHORITY_PASSWORD = 'code-to-access-network';
-export const DEFAULT_NETWORK_ACCESS_TOKEN = 'network-access-token';
+export const DEFAULT_NETWORK_ACCESS_TOKEN: TNetworkToken_S = 'network-access-token' as TNetworkToken_S;
 
 export const DEFAULT_AUTHORITY_OBJECT = JSON.stringify(
     {
@@ -13,8 +15,8 @@ export const DEFAULT_AUTHORITY_OBJECT = JSON.stringify(
 const AUTHORITY_OBJECT_KEY = 'flux_authority_object';
 const AUTHORITY_KEY_STORAGE_KEY = 'flux_authority_key';
 
-export const getAuthorityKey = (): string =>
-    localStorage.getItem(AUTHORITY_KEY_STORAGE_KEY) ?? DEFAULT_NETWORK_ACCESS_TOKEN;
+export const getAuthorityKey = (): TNetworkToken_S =>
+    (localStorage.getItem(AUTHORITY_KEY_STORAGE_KEY) as TNetworkToken_S) ?? DEFAULT_NETWORK_ACCESS_TOKEN;
 
 export const setAuthorityKey = (
     password: string,

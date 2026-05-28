@@ -7,7 +7,7 @@ import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
 import type { RedisStatusService } from './_services/redis-status.service';
-import type { TNetworkAgentCountAt, TNetworkChannelCountAt, TNetworkId_S } from '@flux/shared/types';
+import type { TNetworkAgentCountAt, TNetworkChannelCountAt, TNetworkId_S, TNetworkToken_S } from '@flux/shared/types';
 import { randomUUIDv7 } from 'bun';
 
 interface IAgentJWTPayload extends jwt.JwtPayload {
@@ -17,7 +17,7 @@ interface IAgentJWTPayload extends jwt.JwtPayload {
 }
 
 const NETWORK_ID: TNetworkId_S = 'internal-network' as TNetworkId_S; // Key to register a network, known to flux
-const NETWORK_ACCESS_TOKEN: string = randomUUIDv7(); // Key to register an authority, known to flux
+const NETWORK_ACCESS_TOKEN: TNetworkToken_S = randomUUIDv7() as TNetworkToken_S; // Key to register an authority, known to flux
 const FLUX_AUTHORITY_JWT_SECRET: string = randomUUIDv7(); // The authority uses this to sign the success payload
 
 // ****************************************************************************

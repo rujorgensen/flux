@@ -8,7 +8,7 @@
                     <th>Member Count</th>
                     <th>Capacity</th>
                     <th>Data Usage [bytes]</th>
-                    <th>Created At</th>
+                    <th>Connected At</th>
                     <th></th>
                 </tr>
             </thead>
@@ -35,7 +35,7 @@
                         <td class="text-right">
                             {{ row.members }}
                             <button
-                                class="btn btn-ghost btn-sm"
+                                class="btn btn-ghost btn-sm nowrap"
                                 (click)="openMembersModal(row)"
                                 [attr.aria-label]="'View members for ' + row.channelName"
                                 title="View channel members"

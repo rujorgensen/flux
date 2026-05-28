@@ -10,3 +10,6 @@ export {
     getMachineUID,
     validateMachineUID,
 } from './lib/machine-id.util';
+export {
+    truncateString,
+} from './lib/limit-string-length';
