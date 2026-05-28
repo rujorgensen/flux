@@ -89,8 +89,7 @@ export class NetworkAgentRedisService {
     ): Promise<void> {
         const key: string = `networks/${networkId}/agents/${clientId}`;
 
-        // Consider if this should only be emitted via sockets, and not stored. Increase the total network 
-        // usage though.
+        // Consider if this should only be emitted via sockets, and not stored. Increase the total network usage though.
         await this._client.hset(key, {
             'bytes': `${bytes}`,
             'packets': `${packets}`,
@@ -202,7 +201,6 @@ export class NetworkAgentRedisService {
         uid?: TAgentOwnUId,
     ): Promise<void> {
         const networkId_: TNetworkId_S = networkId ?? await this.readAgentNetworkIdByClientIdOrThrow(clientId);
-        console.log("starting");
 
         if (uid) {
             await this._client.hdel(`networks/${networkId_}/agent-uids`, uid);

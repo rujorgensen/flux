@@ -98,13 +98,6 @@ export class FluxAgentNetworkConnection {
         this._fluxWebSocketConnection.connectToAgent(clientId as TAgentOwnUId);
 
         return new FluxRemoteClient(this.iceConnection as ICEConnection);
-
-        // return new Promise((_resolve, _reject) => {
-        // 
-        //     // setTimeout(() => {
-        //     //     reject(new Error('Timeout'));
-        //     // }, 600_000);
-        // });
     }
 
     /**

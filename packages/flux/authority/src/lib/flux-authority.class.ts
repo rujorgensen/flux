@@ -20,6 +20,7 @@ import type {
 import {
     type TAuthorizeCallback,
     type TNetworkId_S,
+    type TNetworkToken_S,
     validateNetworkIdOrThrow,
 } from '@flux/shared/types';
 import {
@@ -37,7 +38,7 @@ import { FluxAuthorityNetworkConnection } from './flux-authority-network.class';
 const DEFAULT_FLUX_DOMAIN: string = 'https://mesh.persistica.io';
 
 interface IRegisterAuthorityConfiguration<T, M> {
-    networkAccessToken: string; // The key to authenticate with the network
+    networkAccessToken: TNetworkToken_S; // The key to authenticate with the network
     authorizeAgentConnection: TAuthorizeCallback<T>; // Callback to authorize agent connections
     authorizeChannelAccess: TChannnelAuthCallback<M>; // Callback to authorize channel connections
 }
