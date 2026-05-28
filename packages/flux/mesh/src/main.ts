@@ -1,13 +1,3 @@
-// Make TypeScript happy
-declare global {
-    var meshLoadCount: number | null;
-}
-
-globalThis.meshLoadCount ??= 0;
-globalThis.meshLoadCount++;
-
-console.log(`[flux-mesh] Reloaded ${globalThis.meshLoadCount} time(s)`);
-
 import {
     type TAddress,
     type TChannelName,
@@ -75,6 +65,7 @@ import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
 import { AgentManager } from './_managers/agent.manager';
 import { interactWithNpc } from './_routes/npc-interact.get.route';
+import { truncateString } from '@flux/shared/utils';
 
 PicoLogger.configure({
     allowScopes: '*',
@@ -262,7 +253,7 @@ export class FluxMeshServer {
                     clientMap.set(_ws.data.id, _ws);
 
                     if (_ws.data.isAuthority) {
-                        PicoLogger.log(`👮 Authority connected at address: '${_ws.data.address}'`, 'ws-connection');
+                        PicoLogger.log(`👮 Authority connected to network '${truncateString(_ws.data.networkId)}' at address: '${_ws.data.address}'`, 'ws-connection');
 
                         await networkAuthorityRedisCache
                             .register(
@@ -270,43 +261,37 @@ export class FluxMeshServer {
                                 _ws.data.id,
                                 _ws.data.machineUID,
                             );
+                    } else {
+                        PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
 
-                        // Let the client detect readyState. Regular ping cannot be detected by the WebSocket client in the browser 
-                        _ws.send('isReady');
-
-                        return;
-                    }
-
-                    PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
-
-                    await networkAgentRedisCache
-                        .registerAgent(
-                            _ws.data.networkId,
-                            _ws.data.id,
-                            _ws.data.ip,
-                            _ws.data.address,
-                            _ws.data.throughput,
-                            _ws.data.uid,
-                            _ws.data.machineUID,
-                        );
-
-                    _ws.data.rtcClient = new WebRTCClient(
-                        processAddress,
-                        _ws.send.bind(_ws),
-                        (cb: TRPCResponseCallbackFunction) => {
-                            const cbs:
-                                | Set<TRPCResponseCallbackFunction>
-                                | undefined = clientRPCResponseCallbacks.get(
-                                    _ws.data.id
-                                );
-
-                            clientRPCResponseCallbacks.set(
+                        await networkAgentRedisCache
+                            .registerAgent(
+                                _ws.data.networkId,
                                 _ws.data.id,
-                                cbs === undefined ? new Set([cb]) : cbs.add(cb)
+                                _ws.data.ip,
+                                _ws.data.address,
+                                _ws.data.throughput,
+                                _ws.data.uid,
+                                _ws.data.machineUID,
                             );
-                        }
-                    );
 
+                        _ws.data.rtcClient = new WebRTCClient(
+                            processAddress,
+                            _ws.send.bind(_ws),
+                            (cb: TRPCResponseCallbackFunction) => {
+                                const cbs:
+                                    | Set<TRPCResponseCallbackFunction>
+                                    | undefined = clientRPCResponseCallbacks.get(
+                                        _ws.data.id
+                                    );
+
+                                clientRPCResponseCallbacks.set(
+                                    _ws.data.id,
+                                    cbs === undefined ? new Set([cb]) : cbs.add(cb)
+                                );
+                            }
+                        );
+                    }
                     // Let the client detect readyState. Regular ping cannot be detected by the WebSocket client in the browser 
                     _ws.send('isReady');
                     // This will make the client retry: _ws.terminate();
@@ -429,14 +414,14 @@ export class FluxMeshServer {
                                 }
 
                                 try {
-                                    const authorize: boolean = await globalRPCClient.call(
+                                    const authorized: boolean = await globalRPCClient.call(
                                         networkAuthorityAddress,
                                         'authorizeChannelAccess',
                                         channelName,
-                                        ws.data.claim
+                                        ws.data.claim,
                                     );
 
-                                    if (authorize) {
+                                    if (authorized) {
                                         ws.subscribe(`networks/${ws.data.networkId}/channels/${channelName}`);
                                         ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
                                         ws.data.channelNames.add(channelName);
@@ -461,7 +446,9 @@ export class FluxMeshServer {
                                     console.error('Unknown error', error);
                                     ws.send(`${ERROR}:Unknown error`);
                                 }
-                            } catch {
+                            } catch (error) {
+                                PicoLogger.error(`Failed to resolve network authority address for networkId '${ws.data.networkId}': ${error instanceof Error ? error.message : 'Unknown error'}`, 'not-authorized');
+
                                 ws.send(`${ERROR}:${VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE}`);
                                 return;
                             }
@@ -646,7 +633,6 @@ export class FluxMeshServer {
 
         // TODO: DETECT WHEN READY
         setTimeout(() => {
-            console.log(`Reloaded ${(globalThis as any).meshLoadCount} time(s)`);
             console.log(`🚀 Flux mesh server running on localhost:${port}`);
 
             setInterval(() => {
