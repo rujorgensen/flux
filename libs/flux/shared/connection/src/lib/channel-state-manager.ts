@@ -36,6 +36,12 @@ export class ChannelStateManager {
                 const cb = (
                     message: string,
                 ) => {
+                    const receivedChannelName: TChannelName = message.substring(message.indexOf(':') + 1) as TChannelName;
+
+                    if (channelName !== receivedChannelName) {
+                        return;
+                    }
+
                     // Cancel timeout
                     const timeout = this.connectionTimeouts.get(channelName);
                     if (timeout) {
@@ -46,13 +52,6 @@ export class ChannelStateManager {
                     // Remove the interceptor
                     fluxWebSocketConnection
                         .removePackageTypeInterceptor(SUBSCRIBED_NETWORK_CHANNEL_NAME, cb);
-
-                    const receivedChannelName: TChannelName = message.substring(message.indexOf(':') + 1) as TChannelName;
-
-                    if (channelName !== receivedChannelName) {
-                        reject(new Error(`Channel name mismatch: "${channelName}" !== "${receivedChannelName}"`));
-                        return;
-                    }
 
                     resolve(new FluxNetworkChannel(channelName, fluxWebSocketConnection));
                 };
