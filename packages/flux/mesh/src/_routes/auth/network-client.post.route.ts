@@ -9,7 +9,10 @@ import {
     validateNetworkIdOrThrow,
     NetworkAuthorityNotFoundError,
 } from '@flux/shared/types';
-import { generateToken } from '../../auth/auth';
+import {
+    generateToken,
+    normalizeAuthorityClaimOrThrow,
+} from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
 import type { NetworkAuthorityRedisCache } from '../../register/network-authority-redis-cache.class';
 import { retryOrThrow } from '@flux/shared/utils';
@@ -77,15 +80,10 @@ export const authorizeAgentConnection = async (
                 const claim = await globalRPCClient.call(
                     networkAuthorityAddress,
                     'authorizeAgentConnection',
-                    `${contentType === 'application/json' ? 'json' : 'text'}:${text}`
+                    `${contentType === 'application/json' ? 'json' : 'text'}:${text}`,
                 );
 
-                if (typeof claim !== 'string') {
-                    // 2026.05.28: Delete if never invoked
-                    throw new Error('Network authority returned an invalid claim. Expected a string token.');
-                }
-
-                return claim;
+                return normalizeAuthorityClaimOrThrow(claim);
             },
             (error: unknown) => {
                 if (

@@ -6,6 +6,7 @@ import {
     readSubscriptionTypeFromClaim,
     resolveSubscriptionTypeOrDefault,
 } from './business-logic/channels/channel-manager.class';
+import { normalizeAuthorityClaimOrThrow } from './auth/auth';
 
 const ONE_MILLION_MESSAGES = 1_000_000;
 
@@ -124,6 +125,31 @@ describe('channel member limit', () => {
         expect(readSubscriptionTypeFromClaim({
             subscriptionType: 'high',
         })).toBeUndefined();
+    });
+});
+
+describe('authority claim normalization', () => {
+    it('should keep string claims unchanged', () => {
+        expect(normalizeAuthorityClaimOrThrow('signed-jwt')).toBe('signed-jwt');
+    });
+
+    it('should serialize structured claims to json strings', () => {
+        expect(normalizeAuthorityClaimOrThrow({
+            subscriptionType: 'high',
+            userId: 'user-1',
+        })).toBe(JSON.stringify({
+            subscriptionType: 'high',
+            userId: 'user-1',
+        }));
+    });
+
+    it('should reject unsupported claim values', () => {
+        expect(() => normalizeAuthorityClaimOrThrow(42)).toThrow(
+            'Network authority returned an invalid claim. Expected a string token or serializable object.',
+        );
+        expect(() => normalizeAuthorityClaimOrThrow(null)).toThrow(
+            'Network authority returned an invalid claim. Expected a string token or serializable object.',
+        );
     });
 });
 

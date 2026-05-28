@@ -161,6 +161,60 @@ describe('persistica-flux-mesh', () => {
             expect(fluxAgentNetworkConnection.readConnectedChannels()).toEqual(['channel-a', 'channel-b']);
         });
 
+        it('should serialize structured authority claims before channel authorization', async () => {
+            const networkId = 'json-claim-network';
+            const networkAccessToken = 'json-claim-network-access-token';
+            const authPayload = {
+                userId: 'user-1',
+                subscriptionType: 'high',
+            };
+
+            await seedNetworkTokens(
+                globalThis['infrastructureRedisURL'],
+                networkId,
+                [networkAccessToken],
+            );
+
+            const jsonClaimAuthority = new FluxAuthority(
+                networkId,
+                {
+                    domain: fluxDomain,
+                },
+            );
+
+            await jsonClaimAuthority.registerAuthority({
+                networkAccessToken,
+                // @ts-expect-error Intentionally simulating a legacy authority that returns a structured claim.
+                authorizeAgentConnection: () => Promise.resolve(authPayload),
+                authorizeChannelAccess: (
+                    _channelTopic: string,
+                    identification: string,
+                ): Promise<boolean> => {
+                    return Promise.resolve(
+                        identification === JSON.stringify(authPayload),
+                    );
+                },
+            });
+
+            const jsonClaimAgent = new FluxAgent(
+                networkId,
+                {
+                    domain: fluxDomain,
+                },
+            );
+
+            const jsonClaimConnection = await jsonClaimAgent.connect(
+                {
+                    code: 'allow',
+                },
+                'json-claim-agent',
+            );
+
+            await jsonClaimConnection.joinChannel('json-claim-channel');
+
+            expect(jsonClaimConnection.readConnectedChannels()).toEqual(['json-claim-channel']);
+        });
+
     });
 
     describe('authority-capabilities', async () => {

@@ -30,6 +30,36 @@ export const generateToken = (
 };
 
 /**
+ * Normalizes the authority claim to the string form used throughout mesh.
+ *
+ * Authorities may return either a ready-made string token or a structured
+ * payload object. Structured claims are serialized here so the WebSocket auth
+ * payload and downstream channel logic keep receiving a string.
+ */
+export const normalizeAuthorityClaimOrThrow = (
+    claim: unknown,
+): string => {
+    if (typeof claim === 'string') {
+        return claim;
+    }
+
+    if (!claim || (typeof claim !== 'object')) {
+        throw new Error('Network authority returned an invalid claim. Expected a string token or serializable object.');
+    }
+
+    try {
+        const normalizedClaim = JSON.stringify(claim);
+        if (!normalizedClaim) {
+            throw new Error('Network authority returned an invalid claim. Expected a string token or serializable object.');
+        }
+        return normalizedClaim;
+    } catch {
+        throw new Error('Network authority returned an invalid claim. The claim could not be serialized.');
+    }
+
+};
+
+/**
  * Verifies a JWT token and returns the payload or throws if invalid.
  * 
  * @param { unknown } token - The JWT token string to verify
