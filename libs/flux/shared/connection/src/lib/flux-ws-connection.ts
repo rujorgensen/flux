@@ -8,15 +8,12 @@ import {
     type TAuthorizeCallback,
     type TAddress,
     CONNECT_TO_CLIENT,
-    SUBSCRIBE_NETWORK_CHANNEL_NAME,
     RPC_REQUEST,
     RPC_RESPONSE,
-    SUBSCRIBED_NETWORK_CHANNEL_NAME,
     NETWORK_CHANNEL_PUBLISH,
     validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
     AUTHORITY_CHANNEL_SUBSCRIBE,
-    UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
     ERROR,
 } from '@flux/shared/types';
@@ -33,6 +30,7 @@ import { FluxNetworkChannel } from './flux-network-channel.class';
 import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { RECONNECTION_DELAY_ON_KICK_MS } from '../../../ws/src/lib/ws-client';
+import { ChannelStateManager } from './channel-state-manager';
 
 interface IOptions {
     domain: string; // Override the domain for self hosted Flux instances. Should include protocol, e.g. "https://my-flux-instance.com"
@@ -67,7 +65,6 @@ export const createWSConnection = (
     );
 };
 
-
 export class FluxWebSocketConnection {
     private readonly socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TMessageCallback> = new Set();
@@ -79,6 +76,8 @@ export class FluxWebSocketConnection {
 
     private webSocketClient: FluxWebSocketClientConnection | undefined;
     private first: boolean = true;
+
+    private readonly channelStateManager: ChannelStateManager = new ChannelStateManager();
 
     constructor(
         private readonly fluxInstanceId: string,
@@ -92,7 +91,7 @@ export class FluxWebSocketConnection {
             secretKey: this.options?.secretKey,
             retries: this.options?.retries ?? 10_000,
         };
-        const url = new URL(this.options?.domain ?? 'http://localhost:5100');
+        const url = new URL(this.options.domain);
 
         url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
         url.searchParams.set('token', this.token);
@@ -273,52 +272,25 @@ export class FluxWebSocketConnection {
     public async joinChannel(
         channelName: TChannelName,
     ): Promise<FluxNetworkChannel> {
-        if (this.webSocketClient) {
-            this.webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
-
-            return new Promise((resolve, reject) => {
-                const cb = (
-                    message: string,
-                ) => {
-                    // ! TODO implement timeout
-                    // Remove the interceptor
-                    this.removePackageTypeInterceptor(SUBSCRIBED_NETWORK_CHANNEL_NAME, cb);
-
-                    const receivedChannelName: TChannelName = message.substring(message.indexOf(':') + 1) as TChannelName;
-
-                    if (channelName !== receivedChannelName) {
-                        reject(new Error(`Channel name mismatch: "${channelName}" !== "${receivedChannelName}"`));
-                        return;
-                    }
-
-                    resolve(new FluxNetworkChannel(channelName, this));
-                };
-
-                this.interceptPackageTypeMessages(
-                    SUBSCRIBED_NETWORK_CHANNEL_NAME,
-                    cb,
-                );
-            });
-        }
-
-        return Promise.reject(new Error('Not connected'));
+        return this.channelStateManager
+            .joinChannel(
+                channelName,
+                this,
+                this.webSocketClient,
+            );
     }
 
     /**
-     * Leaves a channel.
+     * Leave a channel.
      */
     public async leaveChannel(
         channelName: TChannelName,
     ): Promise<void> {
-
-        if (this.webSocketClient) {
-            this.webSocketClient.send(`${UNSUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
-
-            // TODO wait for acknowledgment
-            return Promise.resolve(void 0);
-        }
-
-        return Promise.reject(new Error('Not connected'));
+        return this.channelStateManager
+            .leaveChannel(
+                channelName,
+                this.webSocketClient,
+            );
     }
 
     /**
