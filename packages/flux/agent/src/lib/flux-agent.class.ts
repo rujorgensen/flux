@@ -1,16 +1,3 @@
-// Make TypeScript happy
-declare global {
-    var agentLoadCount: number | null | undefined;
-}
-
-// Check env
-// const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;
-
-globalThis.agentLoadCount ??= 0;
-globalThis.agentLoadCount++;
-
-console.log(`[flux-agent] Reloaded ${globalThis.agentLoadCount} time(s)`);
-
 import {
     type TAgentOwnUId,
     type TNetworkId_S,
