@@ -92,6 +92,9 @@ describe('channel member limit', () => {
         expect(canChannelHaveMoreMembers(25)).toBe(false);
 
         expect(resolveSubscriptionTypeOrDefault('unknown-tier')).toBe('free');
+        expect(resolveSubscriptionTypeOrDefault({
+            tier: 'high',
+        })).toBe('free');
     });
 
     it('should parse subscription type from claim payloads', () => {
@@ -118,6 +121,9 @@ describe('channel member limit', () => {
         expect(readSubscriptionTypeFromClaim(JSON.stringify({
             subscriptionType: 'custom',
         }))).toBeUndefined();
+        expect(readSubscriptionTypeFromClaim({
+            subscriptionType: 'high',
+        })).toBeUndefined();
     });
 });
 

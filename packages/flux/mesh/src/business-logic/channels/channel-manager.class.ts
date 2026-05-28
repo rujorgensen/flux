@@ -24,9 +24,13 @@ export const MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE: {
 export const MAX_CHANNEL_MEMBERS = MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE.high;
 
 export const normalizeSubscriptionType = (
-    subscriptionType?: string,
+    subscriptionType?: unknown,
 ): TSubscription_S | undefined => {
-    const normalizedSubscriptionType = subscriptionType?.toLowerCase();
+    if (typeof subscriptionType !== 'string') {
+        return undefined;
+    }
+
+    const normalizedSubscriptionType = subscriptionType.toLowerCase();
 
     if ((normalizedSubscriptionType === 'lowest') ||
         (normalizedSubscriptionType === 'free')) {
@@ -42,19 +46,19 @@ export const normalizeSubscriptionType = (
 };
 
 export const resolveSubscriptionTypeOrDefault = (
-    subscriptionType?: string,
+    subscriptionType?: unknown,
 ): TSubscription_S => {
     return normalizeSubscriptionType(subscriptionType) ?? 'free';
 };
 
 export const readMaxChannelMembers = (
-    subscriptionType?: string,
+    subscriptionType?: unknown,
 ): number => MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE[resolveSubscriptionTypeOrDefault(subscriptionType)];
 
 export const readSubscriptionTypeFromClaim = (
-    claim?: string,
+    claim?: unknown,
 ): TSubscription_S | undefined => {
-    if (!claim) {
+    if (typeof claim !== 'string' || claim === '') {
         return undefined;
     }
 
