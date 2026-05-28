@@ -58,11 +58,11 @@ export class FluxAgent {
 
         this.stateManager.emitNetworkState('authorizing');
 
-        if (clientUId && !validateAgentUIDOrThrow(clientUId)) {
-            throw new Error('Will never be thrown');
-        }
-
         try {
+            if (clientUId && !validateAgentUIDOrThrow(clientUId)) {
+                throw new Error('Will never be thrown');
+            }
+
             const ticket = await retryOrThrow(
                 async () => {
                     return authenticateAgentOrThrow(
@@ -105,11 +105,10 @@ export class FluxAgent {
 
             this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
 
-            const fluxNetworkConnection: FluxAgentNetworkConnection = await this
+            return await this
                 .fluxWebSocketConnection
                 .connectToNetwork();
 
-            return fluxNetworkConnection;
         } catch (error) {
             this.stateManager.emitNetworkState('auth-error');
             return Promise.reject(error);
