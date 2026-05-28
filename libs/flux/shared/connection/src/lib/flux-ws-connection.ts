@@ -66,18 +66,43 @@ export const createWSConnection = (
 };
 
 export class FluxWebSocketConnection {
+    // ****************************************************************************
+    // *** State
+    // ****************************************************************************
+
     private readonly socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TMessageCallback> = new Set();
 
     private readonly channelCallbacks: Map<TChannelName, Set<TMessageCallback>> = new Map();
 
-    // Handles messages before the rest of the logic. Will not continue if there are interceptors
+    // Handles messages before the rest of the logic. Will not continue if there are interceptors.
     private readonly packageTypeInterceptorCallbacks: Map<string, Set<TMessageCallback>> = new Map();
 
     private webSocketClient: FluxWebSocketClientConnection | undefined;
+    private connectPromise: Promise<FluxWebSocketClientConnection> | undefined;
+    private connectPromiseResolver: ((socket: FluxWebSocketClientConnection) => void) | undefined;
     private first: boolean = true;
 
     private readonly channelStateManager: ChannelStateManager = new ChannelStateManager();
+
+    // ****************************************************************************
+    // *** Reused socket callbacks
+    // ****************************************************************************
+
+    private readonly readyInterceptor: TMessageCallback = () => {
+        this.resolveConnectedSocket();
+
+        if (this.first) {
+            this.first = false;
+            return;
+        }
+
+        this.onReconnectCallback();
+    };
+    private readonly socketMessageHandler: TMessageCallback = this.handleMessage.bind(this);
+    private readonly socketCloseHandler = (reason?: 'kicked'): void => this.handleSocketClose(reason);
+    private readonly socketConnectingHandler = (retryAttempt: number): void => this.handleSocketConnecting(retryAttempt);
+    private readonly socketErrorHandler = (error: Error): void => this.handleSocketError(error);
 
     constructor(
         private readonly fluxInstanceId: string,
@@ -103,8 +128,10 @@ export class FluxWebSocketConnection {
                 autoReconnect: true,
                 reconnectDelay: 2_000,
                 retries: this.options.retries,
-            }
+            },
         );
+
+        this.interceptPackageTypeMessages('isReady', this.readyInterceptor);
     }
 
     /**
@@ -154,64 +181,27 @@ export class FluxWebSocketConnection {
             return Promise.resolve(this.webSocketClient);
         }
 
-        return new Promise((resolve) => {
-            this.interceptPackageTypeMessages(
-                'isReady',
-                () => {
-                    this.stateManager.emitNetworkState('connected');
+        if (this.connectPromise) {
+            return this.connectPromise;
+        }
 
-                    this.webSocketClient = this.socket;
-
-                    resolve(this.socket);
-
-                    if (this.first) {
-                        this.first = false;
-                        return;
-                    }
-
-                    this.onReconnectCallback();
-                },
-            );
-
-            this.socket.clearEventSubscribers();
-
-            this.socket
-                .on('message', this.handleMessage.bind(this))
-
-                .on('close', (reason?: 'kicked') => {
-                    this.webSocketClient = undefined;
-
-                    PicoLogger.log(
-                        reason === 'kicked'
-                            ?
-                            `🔌🔴 Kicked, delaying reconnect ${RECONNECTION_DELAY_ON_KICK_MS / 60_000} minutes`
-                            :
-                            '🔌🔴 Disconnected',
-                        this.fluxInstanceId,
-                    );
-
-                    this.stateManager.emitNetworkState(reason === 'kicked' ? 'kicked' : 'disconnected');
-                })
-
-                .on('connecting', (retryAttempt: number) => {
-                    this.stateManager.emitNetworkState('disconnected');
-
-                    if (retryAttempt > 0) {
-                        PicoLogger.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options?.retries ?? 'none'}`, this.fluxInstanceId);
-                    } else {
-                        PicoLogger.log(`🔄 Connecting: ${this.fluxInstanceId}`);
-                    }
-                })
-
-                .on('error', (error: Error) => {
-                    PicoLogger.log(`❌ Error: "${error.message}".`, this.fluxInstanceId);
-                })
-                ;
-
-            this.stateManager.emitNetworkState('connecting');
-
-            this.socket.connect();
+        this.connectPromise = new Promise((resolve) => {
+            this.connectPromiseResolver = resolve;
         });
+
+        this.socket.clearEventSubscribers();
+
+        this.socket
+            .on('message', this.socketMessageHandler)
+            .on('close', this.socketCloseHandler)
+            .on('connecting', this.socketConnectingHandler)
+            .on('error', this.socketErrorHandler);
+
+        this.stateManager.emitNetworkState('connecting');
+
+        void this.socket.connect();
+
+        return this.connectPromise;
     }
 
     /**
@@ -220,6 +210,8 @@ export class FluxWebSocketConnection {
     public disconnect(
 
     ): void {
+        this.connectPromiseResolver = undefined;
+        this.connectPromise = undefined;
         this.socket.close();
         this.webSocketClient = undefined;
         this.stateManager.emitNetworkState('disconnected');
@@ -385,6 +377,53 @@ export class FluxWebSocketConnection {
     // ****************************************************************************
     // *** Internal Helpers
     // ****************************************************************************
+
+    private resolveConnectedSocket(
+    ): void {
+        this.stateManager.emitNetworkState('connected');
+        this.webSocketClient = this.socket;
+
+        const connectPromiseResolver = this.connectPromiseResolver;
+
+        this.connectPromiseResolver = undefined;
+        this.connectPromise = undefined;
+        connectPromiseResolver?.(this.socket);
+    }
+
+    private handleSocketClose(
+        reason?: 'kicked',
+    ): void {
+        this.webSocketClient = undefined;
+
+        PicoLogger.log(
+            reason === 'kicked'
+                ?
+                `🔌🔴 Kicked, delaying reconnect ${RECONNECTION_DELAY_ON_KICK_MS / 60_000} minutes`
+                :
+                '🔌🔴 Disconnected',
+            this.fluxInstanceId,
+        );
+
+        this.stateManager.emitNetworkState(reason === 'kicked' ? 'kicked' : 'disconnected');
+    }
+
+    private handleSocketConnecting(
+        retryAttempt: number,
+    ): void {
+        this.stateManager.emitNetworkState('disconnected');
+
+        if (retryAttempt > 0) {
+            PicoLogger.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options?.retries ?? 'none'}`, this.fluxInstanceId);
+        } else {
+            PicoLogger.log(`🔄 Connecting: ${this.fluxInstanceId}`);
+        }
+    }
+
+    private handleSocketError(
+        error: Error,
+    ): void {
+        PicoLogger.log(`❌ Error: "${error.message}".`, this.fluxInstanceId);
+    }
 
     /**
      * Handles incoming WebSocket messages.
