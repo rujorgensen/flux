@@ -396,12 +396,20 @@ export class FluxMeshServer {
                                 return;
                             }
 
+                            let networkAuthorityAddress: TAddress;
                             try {
-                                const networkAuthorityAddress: TAddress = await networkAuthorityRedisCache
+                                networkAuthorityAddress = await networkAuthorityRedisCache
                                     .resolveAuthorityAddressOrThrow(
                                         ws.data.networkId,
                                     );
+                            } catch (error) {
+                                PicoLogger.error(`Failed to resolve network authority address for networkId '${ws.data.networkId}': ${error instanceof Error ? error.message : 'Unknown error'}`, 'not-authorized');
 
+                                ws.send(`${ERROR}:${VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE}`);
+                                return;
+                            }
+
+                            try {
                                 const canHaveMembers = await this.channelManager.canHaveMembers(
                                     ws.data.networkId,
                                     channelName,
@@ -447,9 +455,12 @@ export class FluxMeshServer {
                                     ws.send(`${ERROR}:Unknown error`);
                                 }
                             } catch (error) {
-                                PicoLogger.error(`Failed to resolve network authority address for networkId '${ws.data.networkId}': ${error instanceof Error ? error.message : 'Unknown error'}`, 'not-authorized');
+                                const message = error instanceof Error
+                                    ? error.message
+                                    : 'Unknown error';
+                                PicoLogger.error(`Failed to authorize channel access for networkId '${ws.data.networkId}' and channel '${channelName}': ${message}`, 'not-authorized');
 
-                                ws.send(`${ERROR}:${VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE}`);
+                                ws.send(`${ERROR}:${message}`);
                                 return;
                             }
                             break;

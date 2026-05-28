@@ -67,18 +67,25 @@ export const authorizeAgentConnection = async (
     try {
         let networkAuthorityAddress: TAddress;
 
-        const authorizedJWT: string = await retryOrThrow<string>(
+        const authorizedJWT: string = await retryOrThrow(
             async () => {
                 networkAuthorityAddress = await networkAuthorityManager
                     .resolveAuthorityAddressOrThrow(
                         networkId,
                     );
 
-                return globalRPCClient.call(
+                const claim = await globalRPCClient.call(
                     networkAuthorityAddress,
                     'authorizeAgentConnection',
                     `${contentType === 'application/json' ? 'json' : 'text'}:${text}`
                 );
+
+                if (typeof claim !== 'string') {
+                    // 2026.05.28: Delete if never invoked
+                    throw new Error('Network authority returned an invalid claim. Expected a string token.');
+                }
+
+                return claim;
             },
             (error: unknown) => {
                 if (
