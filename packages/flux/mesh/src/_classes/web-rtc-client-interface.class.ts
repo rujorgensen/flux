@@ -14,7 +14,7 @@ export class WebRTCClient extends RPCClient<
         private readonly _originProcessAddress: TProcessAddress,
         private readonly _sendToRPCServer: (
             data: any, // ! Use 'unknown' or Bun.BufferSource (does not work)
-            compress?: boolean | undefined
+            compress?: boolean  
         ) => number,
 
         // Handle the response from the RPC server

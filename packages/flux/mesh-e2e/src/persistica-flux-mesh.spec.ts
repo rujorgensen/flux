@@ -1,9 +1,9 @@
-import { RedisClient } from 'bun';
 import {
     FluxMeshServer
 } from '@flux/mesh';
 import {
-    FluxAuthority
+    type FluxAuthorityNetworkConnection,
+    FluxAuthority,
 } from '@persistica/flux-authority';
 import {
     FluxAgent
@@ -18,7 +18,6 @@ import {
 import type {
     FluxAgentNetworkConnection,
 } from '@flux/shared/connection';
-import type { FluxAuthorityNetworkConnection, } from '@persistica/flux-authority';
 import {
     connectToRedisAndFlush,
     seedNetworkTokens,
@@ -31,11 +30,11 @@ const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network'; // Key to conne
 
 describe('persistica-flux-mesh', () => {
     let fluxMeshServer: FluxMeshServer;
-    let fluxServerPort: number = generateRandomSafePort();
-    let fluxDomain: string = `http://localhost:${fluxServerPort}`;
+    const fluxServerPort: number = generateRandomSafePort();
+    const fluxDomain: string = `http://localhost:${fluxServerPort}`;
 
     beforeAll(async () => {
-        const redisURL: string = globalThis['infrastructureRedisURL'];
+        const redisURL: string = globalThis['infrastructureRedisURL']!;
 
         // Modify env so the Flux Mesh connects to the test Redis container
         process.env.FLUX_MESH_REDIS_URL = redisURL;

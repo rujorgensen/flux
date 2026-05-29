@@ -45,7 +45,7 @@ export class AuthorityManager {
 
         // * Not on the same machine
         if (machineAddress !== this.machineAddress) {
-            this._globalClientManager
+            void this._globalClientManager
                 .kickClient(
                     'authority',
                     authorityAddress,
@@ -56,7 +56,7 @@ export class AuthorityManager {
         // * Not on the same process
         if (processId !== this.processAddress) {
             // ! Route through Redis for now, but change to direct process connection
-            this._globalClientManager
+            void this._globalClientManager
                 .kickClient(
                     'authority',
                     authorityAddress,
@@ -65,7 +65,7 @@ export class AuthorityManager {
         }
 
         // * This must be to local process
-        this._localAuthorityManager
+        void this._localAuthorityManager
             .kickAuthority(clientId);
     }
 }

@@ -56,9 +56,12 @@ export class NoNetworkPageComponent implements OnInit, OnDestroy {
         // Redirect to dashboard as soon as a network becomes selected
         this.networkSubscription = this.networksService.selectedNetwork$.pipe(
             filter((network) => network !== null),
-        ).subscribe(() => {
-            this.router.navigate(['/']);
-        });
+        )
+            .subscribe({
+                next: () => {
+                    void this.router.navigate(['/']);
+                },
+            });
     }
 
     public ngOnDestroy(

@@ -146,7 +146,10 @@ export class BunRedisClient extends EventEmitter<{
     private async retryReconnect(
 
     ) {
-        if (this.reconnecting || this.disconnected) return;
+        if (this.reconnecting || this.disconnected) {
+            return;
+        }
+
         this.reconnecting = true;
 
         while (!this.connected && !this.disconnected && (this.reconnectAttempts <= (this.maxReconnects ?? Number.POSITIVE_INFINITY))) {

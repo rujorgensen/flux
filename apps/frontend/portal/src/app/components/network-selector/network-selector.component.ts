@@ -16,7 +16,7 @@ import { NetworksService, INetwork } from '../../_services/networks.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NetworkSelectorComponent {
-    readonly createRequested = output<void>();
+    readonly createRequested = output();
     readonly deleteRequested = output<INetwork>();
 
     protected readonly vm$;

@@ -46,7 +46,7 @@ export class AgentManager {
 
         // * Not on the same machine
         if (machineAddress !== this.machineAddress) {
-            this._globalClientManager
+            void this._globalClientManager
                 .kickClient(
                     'agent',
                     agentAddress,
@@ -57,7 +57,7 @@ export class AgentManager {
         // * Not on the same process
         if (processId !== this.processAddress) {
             // ! Route through Redis for now, but change to direct process connection
-            this._globalClientManager
+            void this._globalClientManager
                 .kickClient(
                     'agent',
                     agentAddress,
@@ -66,7 +66,7 @@ export class AgentManager {
         }
 
         // * This must be to local process
-        this._localAgentManager
+        void this._localAgentManager
             .kickAgent(clientId);
     }
 }

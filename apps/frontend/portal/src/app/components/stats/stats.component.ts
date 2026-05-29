@@ -46,7 +46,7 @@ export class StatsComponent {
                     );
 
                 (await onDataUsageUpdate(fluxAgentNetworkConnection))(
-                    this.totalDataUsage.set,
+                    this.totalDataUsage.set.bind(this.totalDataUsage),
                 );
             } catch (error) {
                 console.error("Error connecting agent to network:", error);
@@ -57,13 +57,13 @@ export class StatsComponent {
             try {
                 const fluxAgentNetworkConnection: FluxAgentNetworkConnection =
                     await getFluxNetworkConnection(
-                        networkId as TNetworkId_S,
+                        networkId,
                         networkCode,
                         "portal-agent",
                     );
 
                 (await onActiveChannelCount(fluxAgentNetworkConnection))(
-                    this.activeChannelCount.set,
+                    this.activeChannelCount.set.bind(this.activeChannelCount),
                 );
             } catch (error) {
                 console.error("Error connecting agent to network:", error);
@@ -80,7 +80,7 @@ export class StatsComponent {
                     );
 
                 (await onConnectedAgentCount(fluxAgentNetworkConnection))(
-                    this.activeAgentCount.set,
+                    this.activeAgentCount.set.bind(this.activeAgentCount),
                 );
             } catch (error) {
                 console.error("Error connecting agent to network:", error);
@@ -97,7 +97,7 @@ export class StatsComponent {
                     );
 
                 (await onConnectedAuthoritiesCount(fluxAgentNetworkConnection))(
-                    this.connectedAuthoritiesCount.set,
+                    this.connectedAuthoritiesCount.set.bind(this.connectedAuthoritiesCount),
                 );
             } catch (error) {
                 console.error("Error connecting agent to network:", error);
@@ -112,10 +112,10 @@ export class StatsComponent {
                 return;
             }
 
-            updateDataUsage(networkId, networkCode);
-            updateNetworkConnections(networkId, networkCode);
-            updateAgentCount(networkId, networkCode);
-            updateAuthorities(networkId, networkCode);
+            void updateDataUsage(networkId, networkCode);
+            void updateNetworkConnections(networkId, networkCode);
+            void updateAgentCount(networkId, networkCode);
+            void updateAuthorities(networkId, networkCode);
         });
     }
 }

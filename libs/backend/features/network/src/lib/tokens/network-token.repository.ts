@@ -50,7 +50,7 @@ export class NetworkTokenRepository {
 
         return {
             ...token,
-            createdByUserName: token.createdByUser?.name ?? 'Unknown',
+            createdByUserName: token.createdByUser.name || 'Unknown',
         };
     }
 
@@ -80,7 +80,7 @@ export class NetworkTokenRepository {
 
         return token.map((t) => ({
             ...t,
-            createdByUserName: t.createdByUser?.name ?? 'Unknown',
+            createdByUserName: t.createdByUser.name || 'Unknown',
         }));
     }
 
@@ -139,7 +139,7 @@ export class NetworkTokenRepository {
 
         return {
             ...token,
-            createdByUserName: token.createdByUser?.name ?? 'Unknown',
+            createdByUserName: token.createdByUser.name || 'Unknown',
         };
     }
 

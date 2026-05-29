@@ -219,7 +219,7 @@ export const networkChannelController = new Elysia({
             }
 
             // Explicit return required by Elysia's beforeHandle type signature.
-            return;
+            return undefined;
         },
     })
 
