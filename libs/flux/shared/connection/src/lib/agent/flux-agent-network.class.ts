@@ -36,12 +36,7 @@ export class FluxAgentNetworkConnection {
                 this._fluxWebSocketClientConnection,
                 this._webRTCStateChange,
             );
-            console.log(this.iceConnection
-                ?
-                `RTCPeerConnection is available`
-                :
-                `RTCPeerConnection is not available`
-            );
+            console.log(`RTCPeerConnection is available`);
         } else {
             console.warn('❗WebRTC is not available in this environment.');
         }

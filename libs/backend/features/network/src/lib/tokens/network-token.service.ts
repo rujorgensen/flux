@@ -49,7 +49,7 @@ export class NetworkTokenService {
                 createdByUserId,
             );
 
-        this.publishAndStoreChangedTokens(
+        void this.publishAndStoreChangedTokens(
             networkId,
         );
 
@@ -144,7 +144,7 @@ export class NetworkTokenService {
                 now,
             );
 
-        this.publishAndStoreChangedTokens(
+        void this.publishAndStoreChangedTokens(
             networkId,
         );
     };
@@ -166,7 +166,7 @@ export class NetworkTokenService {
                 token,
             );
 
-        this.publishAndStoreChangedTokens(
+        void this.publishAndStoreChangedTokens(
             networkId,
         );
     };

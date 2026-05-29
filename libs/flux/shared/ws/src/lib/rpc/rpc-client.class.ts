@@ -19,7 +19,7 @@ export abstract class RPCClient<TMethods> {
     constructor(
         private readonly sendToRPCServer: (
             data: any, // ! Use 'unknown' or Bun.BufferSource (does not work)
-            compress?: boolean | undefined,
+            compress?: boolean,
         ) => number,
 
         // Handle the response from the RPC server

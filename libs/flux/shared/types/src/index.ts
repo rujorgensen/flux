@@ -68,7 +68,7 @@ export {
 } from './lib/network.type';
 export {
     type TClientId,
-    isNanoId,
+    isClientId,
 } from './lib/client-id.type';
 
 export type {

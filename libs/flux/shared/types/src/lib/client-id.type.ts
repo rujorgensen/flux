@@ -5,9 +5,9 @@ export const NANOID_LENGTH = 21;
 export const NANOID_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-';
 
 /**
- * Validates if the given id is a valid nanoid.
+ * Validates if the given id is a valid client ID.
  */
-export const isNanoId = (
+export const isClientId = (
     id: unknown,
 ): id is TClientId => {
     if (typeof id !== 'string') {

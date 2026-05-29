@@ -16,6 +16,7 @@ import {
     AUTHORITY_CHANNEL_SUBSCRIBE,
     AUTHORITY_DISCONNECT_AGENT,
     ERROR,
+    isClientId,
 } from '@flux/shared/types';
 import {
     type RPCRequest,
@@ -27,7 +28,6 @@ import { FluxAgentNetworkConnection } from './agent/flux-agent-network.class';
 import type { TChannnelAuthCallback } from '../../../../../../packages/flux/agent/src/lib/channel/channel.type';
 import type { StateManager } from '@flux/shared/utils';
 import { FluxNetworkChannel } from './flux-network-channel.class';
-import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { RECONNECTION_DELAY_ON_KICK_MS } from '../../../ws/src/lib/ws-client';
 import { ChannelStateManager } from './channel-state-manager';
@@ -59,8 +59,8 @@ export const createWSConnection = (
         ticket,
         {
             domain: options.domain,
-            secretKey: options?.secretKey,
-            retries: options?.retries,
+            secretKey: options.secretKey,
+            retries: options.retries,
         },
     );
 };
@@ -113,8 +113,8 @@ export class FluxWebSocketConnection {
     ) {
         this.options = {
             domain: this.options.domain,
-            secretKey: this.options?.secretKey,
-            retries: this.options?.retries ?? 10_000,
+            secretKey: this.options.secretKey,
+            retries: this.options.retries ?? 10_000,
         };
         const url = new URL(this.options.domain);
 
@@ -363,7 +363,7 @@ export class FluxWebSocketConnection {
     public disconnectAgent(
         id: TAddress,
     ): void {
-        if (!isNanoId(id)) {
+        if (!isClientId(id)) {
             throw new Error(`Invalid agent id: '${id}'`);
         }
 
@@ -413,7 +413,7 @@ export class FluxWebSocketConnection {
         this.stateManager.emitNetworkState('disconnected');
 
         if (retryAttempt > 0) {
-            PicoLogger.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options?.retries ?? 'none'}`, this.fluxInstanceId);
+            PicoLogger.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options.retries ?? 'none'}`, this.fluxInstanceId);
         } else {
             PicoLogger.log(`🔄 Connecting: ${this.fluxInstanceId}`);
         }
@@ -480,21 +480,21 @@ export class FluxWebSocketConnection {
                     }
                 }
 
-                break;
+                return;
             }
 
             case RPC_REQUEST: {
 
                 const payload: RPCRequest<any> = JSON.parse(message_.substring(message_.indexOf(':') + 1));
 
-                this.socket
+                void this.socket
                     .handleMessage(payload, (
                         data: RPCResponse,
                     ) => {
                         this.socket.send(`${RPC_RESPONSE}:${JSON.stringify(data)}`);
                     });
 
-                break;
+                return;
             }
 
             case RPC_RESPONSE: {
@@ -503,7 +503,7 @@ export class FluxWebSocketConnection {
                 PicoLogger.log("🔌 Unhandled type rpc response", 'ws-client');
                 PicoLogger.log(`payload: ${payload}`, 'ws-client');
 
-                break;
+                return;
             }
 
             default:
@@ -512,7 +512,7 @@ export class FluxWebSocketConnection {
                 }
 
                 PicoLogger.log(`🔌 Unhandled type: "${message_}"`, 'ws-client');
-                break;
+                return;
         }
     }
 }

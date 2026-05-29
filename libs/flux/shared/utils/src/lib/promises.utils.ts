@@ -32,7 +32,7 @@ export const retryOrThrow = async <T>(
             }
 
             if ((options.delayMs > 0) || (overrideDelay && (overrideDelay > 0))) {
-                let delay: number = overrideDelay ?? options.delayMs;
+                const delay: number = overrideDelay ?? options.delayMs;
 
                 await new Promise(res => setTimeout(
                     res,
