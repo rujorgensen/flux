@@ -31,7 +31,7 @@ export class AuthorityManager {
         );
 
         // Subscribe to global events
-        void this._globalClientManager
+        this._globalClientManager
             .onKickClient(
                 'authority',
                 this._localAuthorityManager.kickAuthority.bind(this._localAuthorityManager),

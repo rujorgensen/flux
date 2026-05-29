@@ -96,7 +96,7 @@ export class FluxAuthority {
                     delayMs: 500,
                     onRetry: (
                         attempt: number,
-                        retries: number,    ½
+                        retries: number,
                     ) => {
                         console.log(`[RegisterAuthority] Retrying... (attempt: ${attempt} of ${retries})`);
                     },

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import type { FluxAgentNetworkConnection } from '@persistica/flux-agent';
-import { FluxAgent } from '@persistica/flux-agent';
+import {
+    type FluxAgentNetworkConnection,
+    FluxAgent,
+} from '@persistica/flux-agent';
 
 @Injectable({
     providedIn: 'root',

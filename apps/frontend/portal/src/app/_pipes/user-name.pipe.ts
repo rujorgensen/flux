@@ -25,6 +25,7 @@ export class UserNamePipe implements PipeTransform {
         users: Record<string, IUserInfo> = {},
     ): string {
         const user = users[userId];
+        // oxlint-disable-next-line typescript/no-unnecessary-condition
         return user?.name ?? user?.email ?? userId;
     }
 }

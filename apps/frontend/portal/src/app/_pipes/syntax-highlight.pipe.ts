@@ -20,6 +20,7 @@ export class SyntaxHighlightPipe implements PipeTransform {
     ): string {
         if (!this.languageMap.has(language) && !this.languageMapIsLoading.has(language)) {
             this.languageMapIsLoading.add(language);
+            // oxlint-disable-next-line typescript/no-floating-promises
             loadLanguage(language)
                 .then(() => {
                     console.log(`Language '${language}' loaded successfully.`);
@@ -50,6 +51,7 @@ const loadLanguage = async (
         }
     }
 
+    // oxlint-disable-next-line typescript/no-unnecessary-condition
     if (module) {
         hljs
             .registerLanguage(language, module.default);

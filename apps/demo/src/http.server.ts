@@ -13,6 +13,7 @@ const clearAndBuild = async (
 };
 
 // type TWebsocketData = {};
+// oxlint-disable-next-line prefer-const
 let server: Bun.Server; // <TWebsocketData>;
 
 // Create a Set to store all connected WebSocket clients

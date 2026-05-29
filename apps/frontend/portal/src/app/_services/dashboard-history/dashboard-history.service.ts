@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, switchMap, map, catchError, of } from 'rxjs';
-import type { Observable } from 'rxjs';
+import {
+    type Observable,
+    BehaviorSubject,
+    from,
+    switchMap,
+    map,
+    catchError,
+    of,
+} from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { api } from '../api/api';
 import { NetworksService } from '../networks.service';

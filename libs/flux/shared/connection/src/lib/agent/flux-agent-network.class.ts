@@ -90,7 +90,7 @@ export class FluxAgentNetworkConnection {
     public connectToAgent(
         clientId: string,
     ): FluxRemoteClient {
-        this._fluxWebSocketConnection.connectToAgent(clientId as TAgentOwnUId);
+        void this._fluxWebSocketConnection.connectToAgent(clientId as TAgentOwnUId);
 
         return new FluxRemoteClient(this.iceConnection as ICEConnection);
     }

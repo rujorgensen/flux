@@ -15,10 +15,10 @@ import {
 } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
 import type { NetworkAuthorityRedisCache } from '../../register/network-authority-redis-cache.class';
-import { retryOrThrow } from '@flux/shared/utils';
 import {
     type TFluxClientUID,
     validateMachineUID,
+    retryOrThrow,
 } from '@flux/shared/utils';
 import { PicoLogger } from '@utils/pico-logger';
 

@@ -11,7 +11,7 @@ export class FluxInterface {
 
     constructor(
         private readonly socketConnection: FluxWebSocketConnection, // Connection to the flux platform
-    ) { }
+    ) {}
 
     public messageReport(
         packageStatus: Omit<IPackageStatus, 'txNode'>,

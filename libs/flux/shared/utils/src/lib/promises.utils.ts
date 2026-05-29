@@ -13,10 +13,9 @@ export const retryOrThrow = async <T>(
         ) => void | number;
     },
 ): Promise<T> => {
-    let attempt = 0;
     let overrideDelay: number | undefined;
 
-    while (true) {
+    for (let attempt = 0; attempt <= options.retries; attempt++) {
         try {
             if (attempt > 0) {
                 if (options.onRetry) {
@@ -26,8 +25,7 @@ export const retryOrThrow = async <T>(
 
             return await fn();
         } catch (err) {
-            attempt++;
-            if ((attempt > options.retries) || !shouldRetry(err)) {
+            if ((attempt >= options.retries) || !shouldRetry(err)) {
                 throw err;
             }
 
@@ -41,4 +39,6 @@ export const retryOrThrow = async <T>(
             }
         }
     }
+
+    throw new Error("Retry loop exited unexpectedly.");
 };

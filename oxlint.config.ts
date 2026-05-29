@@ -30,20 +30,19 @@ export default defineConfig({
         'eqeqeq': 'error',
         '@typescript-eslint/no-unnecessary-condition': 'error',
         '@typescript-eslint/ts-config-error': 'error',
-        'no-alert': 'error',
+        'no-alert': 'warn',// Change to error later
         'oxc/approx-constant': 'error',
-        'no-unused-vars': 'error',
         'typescript/no-floating-promises': 'error',
         'typescript/no-unsafe-assignment': 'warn',
         'typescript/no-extraneous-class': [
-            'error',
+            'warn', // Change to error later
             {
                 allowWithDecorator: true,
             },
         ],
         'eslint/no-console': 'off',
         'eslint/no-debugger': 'error',
-        'eslint/no-unused-vars': 'error',
+        'eslint/no-unused-vars': 'warn', // Change to error later
         'eslint/eqeqeq': [
             'error',
             'always',

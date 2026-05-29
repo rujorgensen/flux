@@ -76,7 +76,7 @@ export class GlobalClientManager {
         onKickCallback: (clientAddress: TClientId) => void,
     ): void {
         // Listen to remote
-        void this._redisConnection
+        this._redisConnection
             .subscribeToCustom(
                 `kick-client-${type}`,
                 this.processAddress,

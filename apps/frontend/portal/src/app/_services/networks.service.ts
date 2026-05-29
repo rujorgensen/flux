@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map } from 'rxjs';
-import type { Observable } from 'rxjs';
+import {
+    type Observable,
+    BehaviorSubject,
+    map,
+} from 'rxjs';
 import { api } from '../_services/api/api';
 
 export interface INetwork {
