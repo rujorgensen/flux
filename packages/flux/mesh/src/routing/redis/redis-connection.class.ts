@@ -3,7 +3,13 @@ import {
     BunRedisClient,
     BunRedisPubSub,
 } from '@core/redis/bun';
-import type { TAddress, TClientId, TNetworkId_S, TNetworkToken_S, TProcessAddress } from '@flux/shared/types';
+import type {
+    TAddress,
+    TClientId,
+    TNetworkId_S,
+    TNetworkToken_S,
+    TProcessAddress,
+} from '@flux/shared/types';
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
@@ -23,7 +29,7 @@ if (!process.env['FLUX_MESH_REDIS_URL']) {
  * @returns { RedisConnection } The singleton Redis connection
  */
 export const getMeshRedisConnection = (
-    connectionString?: string,
+    _connectionString?: string,
 ) => {
     // We have to read the env variable here, because otherwise it can't be modified in tests
     redisConnection ??= new RedisConnection(process.env['FLUX_MESH_REDIS_URL'] as string);
@@ -75,11 +81,11 @@ export class RedisConnection {
             },
         });
 
-        try {
-            this.cacheClient.connect();
-        } catch {
-            console.log('caught');
-        }
+        void this.cacheClient
+            .connect()
+            .catch(() => {
+                console.log('caught');
+            });
 
         this.cacheClient
             .on('error', (error) => {

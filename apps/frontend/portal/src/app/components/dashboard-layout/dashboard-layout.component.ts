@@ -106,7 +106,7 @@ export class DashboardLayoutComponent {
         );
 
         this.isDashboardItemsOpen = computed(() => {
-            const url = this.currentUrl() ?? '';
+            const url = this.currentUrl();
             return url === '/' || [
                 '/dashboard/connected-authorities',
                 '/dashboard/connected-agents',

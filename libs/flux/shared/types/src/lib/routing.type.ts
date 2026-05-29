@@ -20,6 +20,7 @@ export const splitAddressOrThrow = (
 
     const [machine, process, client] = address.split('/');
 
+    // oxlint-disable-next-line typescript/no-unnecessary-condition
     if (machine === undefined) {
         throw new Error('Machine address is undefined');
     }
@@ -28,6 +29,7 @@ export const splitAddressOrThrow = (
         throw new Error('Process ID is not a number');
     }
 
+    // oxlint-disable-next-line typescript/no-unnecessary-condition
     if (client === undefined) {
         throw new Error('Client ID is undefined');
     }
@@ -47,6 +49,7 @@ export const splitProcessAddress = (
 ): [TMachineAddress, TProcessId] => {
     const [machine, process] = address.split('/');
 
+    // oxlint-disable-next-line typescript/no-unnecessary-condition
     if (machine === undefined) {
         throw new Error('Machine address is undefined');
     }

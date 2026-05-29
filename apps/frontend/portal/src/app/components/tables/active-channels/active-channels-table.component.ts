@@ -348,7 +348,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
         page: number,
         pageSize: number,
     ): void {
-        api
+        void api
             .api
             .networks({
                 networkId: networkId,

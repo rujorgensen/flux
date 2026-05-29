@@ -66,7 +66,7 @@ export class NetworkAuthorityRedisCache {
             this.clientCache.delete(clientId);
         }
 
-        this.redisConnection
+        await this.redisConnection
             .networkAuthoritySet
             .unregisterAuthority(
                 clientId,

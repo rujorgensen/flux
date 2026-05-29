@@ -143,7 +143,7 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
     ): Promise<TNetworkAuthorityCountAt> {
         return {
-            count: await this._client.scard(`networks/${networkId}/authorities`) ?? 0,
+            count: await this._client.scard(`networks/${networkId}/authorities`),
             date: new Date(),
         };
     }

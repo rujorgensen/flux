@@ -49,14 +49,6 @@ const watcher = watch(
                 await client.write('data:reload\n\n');
                 await client.flush();
             }
-
-            // console.log('Restarting main...');
-            // try {
-            //     $`bun run ./apps/flux/agent/src/demo/dist/server-a/main.js`.then().catch();
-            // } catch {
-            //     console.log('caught');
-            // }
-
         }
     });
 

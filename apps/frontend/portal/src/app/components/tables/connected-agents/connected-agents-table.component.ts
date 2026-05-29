@@ -108,12 +108,12 @@ export class ConnectedAgentsTableComponent {
         this.page.set(1);
     }
 
-    private async fetchData(
+    private fetchData(
         networkId: string,
         page: number,
         pageSize: number,
-    ): Promise<void> {
-        await api
+    ): void {
+        void api
             .api
             .networks({
                 networkId,

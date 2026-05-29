@@ -42,20 +42,28 @@ export class GlobalClientManager {
 
         if (receivers === 0) {
             // We failed to find the owner process, we have to do the cleanup here
-            if (type === 'agent') {
-                await this._redisConnection
-                    .networkAgentRedisService
-                    .unregisterAgentOrThrow(
-                        clientId,
-                    );
-            } else if (type === 'authority') {
-                await this._redisConnection
-                    .networkAuthoritySet
-                    .unregisterAuthority(
-                        clientId,
-                    );
-            } else {
-                throw new Error(`Unknown client type: ${type}`);
+            switch (type) {
+                case 'agent': {
+                    await this._redisConnection
+                        .networkAgentRedisService
+                        .unregisterAgentOrThrow(
+                            clientId,
+                        );
+                    break;
+                }
+                case 'authority': {
+                    await this._redisConnection
+                        .networkAuthoritySet
+                        .unregisterAuthority(
+                            clientId,
+                        );
+                    break;
+                }
+                default: {
+                    // oxlint-disable-next-line typescript/restrict-template-expressions
+                    throw new Error(`Unknown client type: ${type}`);
+
+                }
             }
         }
     }

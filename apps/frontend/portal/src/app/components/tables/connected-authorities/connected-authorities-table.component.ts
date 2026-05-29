@@ -110,7 +110,7 @@ export class ConnectedAuthoritiesTableComponent {
         page: number,
         pageSize: number,
     ): void {
-        api
+        void api
             .api
             .networks({
                 networkId,

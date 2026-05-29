@@ -110,7 +110,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 
                     setTimeout(() => {
                         this.reconnectAttempts++;
-                        this.connect();
+                        void this.connect();
                     }, delay);
                 } else if (this.options.autoReconnect) {
                     this.emit('error', new Error('Connection failed: retries exhausted'));

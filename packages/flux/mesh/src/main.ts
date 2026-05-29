@@ -359,7 +359,7 @@ export class FluxMeshServer {
                             if (validateChannelNameOrThrow(channelName)) {
                                 if (ws.data.channelNames.has(channelName)) {
                                     // Don't publish to self
-                                    this.globalChannelPubsub.publish(
+                                    void this.globalChannelPubsub.publish(
                                         `networks/${ws.data.networkId}/channels/${channelName}`,
                                         `${ON_NETWORK_CHANNEL_PUBLISH}:${ws.data.id}:${channelName}:${data}`,
                                         ws,
@@ -490,7 +490,7 @@ export class FluxMeshServer {
                                 ws.data.channelNames.delete(channelName);
                                 console.log(`🚪 Client left channel name '${channelName}'`);
 
-                                this.channelManager
+                                await this.channelManager
                                     .leaveNetworkChannel(
                                         ws.data.networkId,
                                         channelName,
@@ -556,7 +556,7 @@ export class FluxMeshServer {
                             );
 
                             if (initiatingClient) {
-                                facilitateWebRTCConnection(
+                                void facilitateWebRTCConnection(
                                     initiatingClient,
                                     remoteClient,
                                 );
@@ -579,11 +579,12 @@ export class FluxMeshServer {
                     if (ws.data.isAuthority) {
                         PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
 
-                        networkAuthorityRedisCache
+                        void networkAuthorityRedisCache
                             .unregister(
                                 ws.data.id,
                                 ws.data.networkId,
-                            );
+                            )
+                            .catch();
                     } else {
                         PicoLogger.log(`🛑🤵 Agent socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
                         // Unsubscribe from topics
