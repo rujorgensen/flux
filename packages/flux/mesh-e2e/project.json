@@ -9,6 +9,9 @@
         "persistica-flux-authority"
     ],
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "e2e": {
             "executor": "nx:run-commands",
             "options": {

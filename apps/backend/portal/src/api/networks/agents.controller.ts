@@ -1,8 +1,11 @@
 import { Elysia, t } from 'elysia';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
-import type { TAddress, TClientId, TNetworkAgentCountAt } from '@flux/shared/types';
-import { isNanoId } from '@flux/shared/types';
+import {
+    type TAddress,
+    type TNetworkAgentCountAt,
+    isClientId,
+} from '@flux/shared/types';
 import { networkIdValidatorPlugin } from './plugins';
 import { kickSocket } from './kick-socket.util';
 
@@ -112,14 +115,14 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
         networkId,
         params: { agentId },
     }) => {
-        if (!isNanoId(agentId)) {
+        if (!isClientId(agentId)) {
             throw new InvalidAgentIdError();
         }
 
         const agent = await networkAgentRedisCacheService
             .readAgentByClientId(
                 networkId,
-                agentId as TClientId,
+                agentId,
             );
 
         if (agent?.address) {

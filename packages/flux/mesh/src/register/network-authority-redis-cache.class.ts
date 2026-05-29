@@ -66,41 +66,11 @@ export class NetworkAuthorityRedisCache {
             this.clientCache.delete(clientId);
         }
 
-        this.redisConnection
+        await this.redisConnection
             .networkAuthoritySet
             .unregisterAuthority(
                 clientId,
                 networkId,
-            );
-    }
-
-    /**
-     * Used for cleanup, in case of discovering an idle authority.
-     * 
-     * @param { TNetworkId_S } networkId - The network ID
-     * @param { TAddress } networkAuthorityAddress - The address of the authority to unregister globally
-     * 
-     * @returns { void }
-     */
-    public unregisterGlobal(
-        networkId: TNetworkId_S,
-        networkAuthorityAddress: TAddress,
-    ): void {
-        const cached: Set<TAddress> | undefined = this.cache.get(networkId);
-        if (cached) {
-            cached.delete(networkAuthorityAddress);
-            if (cached.size === 0) {
-                this.cache.delete(networkId);
-            }
-        }
-
-        const [_machineAddress, _processId, clientId] = splitAddressOrThrow(networkAuthorityAddress);
-        this.clientCache.delete(clientId);
-
-        this.redisConnection.networkAuthoritySet
-            .unregisterGlobal(
-                networkId,
-                networkAuthorityAddress,
             );
     }
 
@@ -153,7 +123,25 @@ export class NetworkAuthorityRedisCache {
     public removeUnresponsiveClient(
         networkId: TNetworkId_S,
         networkAuthorityAddress: TAddress,
-    ): void {
-        this.unregisterGlobal(networkId, networkAuthorityAddress);
+    ): Promise<boolean> {
+        const cached: Set<TAddress> | undefined = this.cache.get(networkId);
+        if (cached) {
+            cached.delete(networkAuthorityAddress);
+            if (cached.size === 0) {
+                this.cache.delete(networkId);
+            }
+        }
+
+        const [_machineAddress, _processId, clientId] = splitAddressOrThrow(networkAuthorityAddress);
+        this.clientCache.delete(clientId);
+
+        return this.redisConnection
+            .networkAuthoritySet
+            .unregisterGlobal(
+                networkId,
+                networkAuthorityAddress,
+            )
+            .then((count: number) => count === 1)
+            ;
     }
 }

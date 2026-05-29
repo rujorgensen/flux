@@ -42,7 +42,7 @@ export const networksController = apiRoutes
                 );
 
             // Create initial token for the network
-            serviceProviders
+            await serviceProviders
                 .networkTokenService
                 .createToken(
                     createdNetwork.id as TNetworkId_S,

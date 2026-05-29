@@ -158,7 +158,7 @@ export class NetworkChannelManager {
             for (const [channelName, usage] of this.channelUsageCount) {
 
                 if (usage.usage > 0) {
-                    this.networkChannelHash
+                    void this.networkChannelHash
                         .incrementUsage(
                             usage.networkId,
                             channelName,
@@ -195,17 +195,17 @@ export class NetworkChannelManager {
     /**
      * Joins a network channel.
      */
-    public joinNetworkChannel(
+    public async joinNetworkChannel(
         networkId: TNetworkId_S,
         channelName: TChannelName,
         clientAddress: TAddress,
-    ): void {
-        this.createNetworkChannelIfNotExist(
+    ): Promise<number> {
+        await this.createNetworkChannelIfNotExist(
             networkId,
             channelName,
         );
 
-        this.networkChannelHash.joinNetworkChannel(
+        return this.networkChannelHash.joinNetworkChannel(
             networkId,
             channelName,
             clientAddress,
@@ -228,7 +228,7 @@ export class NetworkChannelManager {
             );
 
         if (membersLeft === 0) {
-            this._globalChannelPubsub
+            void this._globalChannelPubsub
                 .publish(
                     `~/networks/${networkId}/channel-empty`,
                     `${AUTHORITY_ON_EMPTY_CHANNEL}:${channelName}`,
@@ -265,7 +265,7 @@ export class NetworkChannelManager {
             );
 
         if (wasCreated) {
-            this._globalChannelPubsub
+            void this._globalChannelPubsub
                 .publish(
                     `~/networks/${networkId}/channel-created`,
                     `${AUTHORITY_ON_CREATE_CHANNEL}:${channelName}`,

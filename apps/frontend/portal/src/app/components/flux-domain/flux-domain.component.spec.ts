@@ -122,7 +122,8 @@ describe('FluxDomainComponent', () => {
         await fixture.whenStable();
         fixture.detectChanges();
 
+        // oxlint-disable-next-line typescript/unbound-method
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith('http://localhost:5100');
-        expect(button.textContent?.trim()).toContain('Copied!');
+        expect(button.textContent.trim()).toContain('Copied!');
     });
 });

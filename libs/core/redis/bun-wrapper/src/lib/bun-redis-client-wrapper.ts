@@ -127,16 +127,13 @@ export class BunRedisClient extends EventEmitter<{
                 console.error('⬇️ Redis client disconnected:', error);
                 this.connected = false;
                 this.emit('end', void 0);
-                this.retryReconnect();
+                void this.retryReconnect();
             };
         } catch (error) {
-            if (this.disconnected) {
-                return;
-            }
             console.error('Initial Redis connection failed:', error);
             this.connected = false;
             this.emit('error', error instanceof Error ? error : new Error('Unknown error'));
-            this.retryReconnect();
+            void this.retryReconnect();
         }
     }
 
@@ -146,10 +143,14 @@ export class BunRedisClient extends EventEmitter<{
     private async retryReconnect(
 
     ) {
-        if (this.reconnecting || this.disconnected) return;
+        if (this.reconnecting || this.disconnected) {
+            return;
+        }
+
         this.reconnecting = true;
 
-        while (!this.connected && !this.disconnected && (this.reconnectAttempts <= (this.maxReconnects ?? Number.POSITIVE_INFINITY))) {
+        while (!this.connected && (this.reconnectAttempts <= (this.maxReconnects ?? Number.POSITIVE_INFINITY))) {
+            // oxlint-disable-next-line typescript/no-unnecessary-condition
             const delay: number = this.options.socket.reconnectStrategy(this.reconnectAttempts) ?? Math.min(this.baseDelayMilliseconds * 2 ** this.reconnectAttempts, this.maxDelayMilliseconds);
 
             this.emit('reconnecting', void 0);
@@ -180,7 +181,7 @@ export class BunRedisClient extends EventEmitter<{
             }
         }
 
-        if (!this.connected && !this.disconnected) {
+        if (!this.connected) {
             this.emit('error', new Error('Max reconnection attempts reached. Will not retry.'));
         }
 

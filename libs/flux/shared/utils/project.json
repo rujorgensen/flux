@@ -4,6 +4,9 @@
     "sourceRoot": "libs/flux/shared/utils/src",
     "projectType": "library",
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "build": {
             "executor": "@nx/esbuild:esbuild",
             "outputs": [

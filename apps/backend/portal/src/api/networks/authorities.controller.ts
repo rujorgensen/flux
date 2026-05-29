@@ -1,5 +1,10 @@
 import { Elysia, t } from 'elysia';
-import { type TClientId, type TNetworkAuthorityCountAt, type TNetworkId_S, isNanoId } from '@flux/shared/types';
+import {
+    type TClientId,
+    type TNetworkAuthorityCountAt,
+    type TNetworkId_S,
+    isClientId,
+} from '@flux/shared/types';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { networkIdValidatorPlugin } from './plugins';
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
@@ -133,7 +138,7 @@ export const networkAuthorityController = new Elysia({
         networkId,
         params: { authorityId },
     }) => {
-        if (!isNanoId(authorityId)) {
+        if (!isClientId(authorityId)) {
             throw new InvalidAuthorityIdError();
         }
 

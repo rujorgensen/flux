@@ -4,7 +4,7 @@ import { parseKeyspaceSection } from "./parsers.fn";
 
 describe('Redis info parsers', () => {
     describe('parseKeyspaceSection', () => {
-        it('should parse keyspace info correctly #1', () => {
+        void it('should parse keyspace info correctly #1', () => {
             const input = `# Keyspace
 db0:keys=100,expires=50,avg_ttl=5000
 db1:keys=200,expires=100,avg_ttl=10000`;
@@ -15,7 +15,7 @@ db1:keys=200,expires=100,avg_ttl=10000`;
             });
         });
 
-        it('should parse keyspace info correctly #2', () => {
+        void it('should parse keyspace info correctly #2', () => {
             const input = `db0:keys=100,expires=50,avg_ttl=5000
 db1:keys=200,expires=100,avg_ttl=10000`;
 
@@ -24,7 +24,7 @@ db1:keys=200,expires=100,avg_ttl=10000`;
             });
         });
 
-        it('should parse keyspace info correctly #3', () => {
+        void it('should parse keyspace info correctly #3', () => {
             const input = `# Keyspace
 db0:keys=18,expires=3,avg_ttl=-1`;
 
@@ -33,7 +33,7 @@ db0:keys=18,expires=3,avg_ttl=-1`;
             });
         });
 
-        it('should parse keyspace info correctly #4', () => {
+        void it('should parse keyspace info correctly #4', () => {
             const input = `# Replication
 role:master
 connected_slaves:0
@@ -60,7 +60,7 @@ used_cpu_user_main_thread:1649.380304
             });
         });
 
-        it('should parse keyspace info correctly #2', () => {
+        void it('should parse keyspace info correctly #2', () => {
             expect(parseKeyspaceSection('')).toEqual({
                 keys: undefined, expires: undefined, avgTtl: undefined,
             });

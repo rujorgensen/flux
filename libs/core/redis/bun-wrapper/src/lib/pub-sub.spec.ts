@@ -23,8 +23,8 @@ describe('BunRedisPubSub', () => {
     });
 
     afterAll(async () => {
-        await redisClient?.close();
-        await pubsub?.disconnect();
+        redisClient.close();
+        await pubsub.disconnect();
     });
 
     it('works', async () => {

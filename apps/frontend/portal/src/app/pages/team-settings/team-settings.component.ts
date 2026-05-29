@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { map } from 'rxjs';
-import type { Observable } from 'rxjs';
+import {
+    type Observable,
+    map,
+} from 'rxjs';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { NetworksService, type INetwork } from '../../_services/networks.service';

@@ -85,8 +85,8 @@ describe('FluxWebSocketConnection', () => {
 
         getReadyInterceptor(connection)('isReady');
 
-        await expect(firstConnect).resolves.toBe(socket);
-        await expect(secondConnect).resolves.toBe(socket);
+        expect(firstConnect).resolves.toBe(socket);
+        expect(secondConnect).resolves.toBe(socket);
     });
 
     it('keeps a single ready interceptor across reconnect cycles', async () => {

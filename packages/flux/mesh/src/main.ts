@@ -21,6 +21,7 @@ import {
     AUTHORITY_DISCONNECT_AGENT,
     TNetworkId_S,
     VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE,
+    isClientId,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
@@ -60,7 +61,6 @@ import {
     NetworkChannelManager,
     readSubscriptionTypeFromClaim,
 } from './business-logic/channels/channel-manager.class';
-import { isNanoId } from '@flux/shared/types';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
 import { AgentManager } from './_managers/agent.manager';
@@ -323,14 +323,14 @@ export class FluxMeshServer {
 
                             const agentAddress: TAddress = message_.substring(message_.indexOf(':') + 1) as TAddress;
 
-                            if (!isNanoId(agentAddress)) {
+                            if (!isClientId(agentAddress)) {
                                 ws.send(`${ERROR}:Invalid agent ID`);
                                 return;
                             }
 
                             this.agentManager.kick(agentAddress);
 
-                            break;
+                            return;
                         }
 
                         case AUTHORITY_CHANNEL_SUBSCRIBE: {
@@ -343,7 +343,7 @@ export class FluxMeshServer {
                             ws.subscribe(`~/networks/${ws.data.networkId}/channel-created`);
                             ws.subscribe(`~/networks/${ws.data.networkId}/channel-empty`);
 
-                            break;
+                            return;
                         }
 
                         case NETWORK_CHANNEL_PUBLISH: {
@@ -359,7 +359,7 @@ export class FluxMeshServer {
                             if (validateChannelNameOrThrow(channelName)) {
                                 if (ws.data.channelNames.has(channelName)) {
                                     // Don't publish to self
-                                    this.globalChannelPubsub.publish(
+                                    void this.globalChannelPubsub.publish(
                                         `networks/${ws.data.networkId}/channels/${channelName}`,
                                         `${ON_NETWORK_CHANNEL_PUBLISH}:${ws.data.id}:${channelName}:${data}`,
                                         ws,
@@ -375,7 +375,7 @@ export class FluxMeshServer {
                                 }
                             }
 
-                            break;
+                            return;
                         }
 
                         case SUBSCRIBE_NETWORK_CHANNEL_NAME: {
@@ -435,7 +435,7 @@ export class FluxMeshServer {
                                         ws.data.channelNames.add(channelName);
                                         PicoLogger.log(`🎉 Client was authorized on channel name '${channelName}'`, 'authorized');
 
-                                        this.channelManager
+                                        await this.channelManager
                                             .joinNetworkChannel(
                                                 ws.data.networkId,
                                                 channelName,
@@ -463,7 +463,7 @@ export class FluxMeshServer {
                                 ws.send(`${ERROR}:${message}`);
                                 return;
                             }
-                            break;
+                            return;
                         }
 
                         case UNSUBSCRIBE_NETWORK_CHANNEL_NAME: {
@@ -490,7 +490,7 @@ export class FluxMeshServer {
                                 ws.data.channelNames.delete(channelName);
                                 console.log(`🚪 Client left channel name '${channelName}'`);
 
-                                this.channelManager
+                                await this.channelManager
                                     .leaveNetworkChannel(
                                         ws.data.networkId,
                                         channelName,
@@ -507,7 +507,7 @@ export class FluxMeshServer {
                                 ws.send(`${ERROR}:Unknown error`);
                             }
 
-                            break;
+                            return;
                         }
 
                         case RPC_RESPONSE: {
@@ -529,7 +529,7 @@ export class FluxMeshServer {
                                 clientCallback(rpcResponseMessage);
                             }
 
-                            break;
+                            return;
                         }
 
                         case CONNECT_TO_CLIENT: {
@@ -549,29 +549,22 @@ export class FluxMeshServer {
                                     clientOwnUId
                                 );
 
-                            const remoteClient: GlobalWebRTCClient | undefined =
-                                new GlobalWebRTCClient(
-                                    networkClientAddress,
-                                    outgoingMessageRouter,
-                                    processMessageRouter
-                                );
+                            const remoteClient: GlobalWebRTCClient = new GlobalWebRTCClient(
+                                networkClientAddress,
+                                outgoingMessageRouter,
+                                processMessageRouter
+                            );
 
-                            if (!remoteClient) {
-                                console.warn('Remote client could not be resolved');
-                            }
-
-                            if (initiatingClient && remoteClient) {
-                                facilitateWebRTCConnection(
+                            if (initiatingClient) {
+                                void facilitateWebRTCConnection(
                                     initiatingClient,
                                     remoteClient,
                                 );
                             } else {
                                 ws.send(`${ERROR}:RPC clients could not be resolved`);
-
-                                return;
                             }
 
-                            break;
+                            return;
                         }
                     }
                 },
@@ -586,16 +579,17 @@ export class FluxMeshServer {
                     if (ws.data.isAuthority) {
                         PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
 
-                        networkAuthorityRedisCache
+                        void networkAuthorityRedisCache
                             .unregister(
                                 ws.data.id,
                                 ws.data.networkId,
-                            );
+                            )
+                            .catch();
                     } else {
                         PicoLogger.log(`🛑🤵 Agent socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
                         // Unsubscribe from topics
 
-                        for (const channelName of (ws.data.channelNames ?? [])) {
+                        for (const channelName of ws.data.channelNames) {
                             ws.unsubscribe(
                                 `networks/${ws.data.networkId}/channels/${channelName}`
                             );
@@ -647,7 +641,7 @@ export class FluxMeshServer {
             console.log(`🚀 Flux mesh server running on localhost:${port}`);
 
             setInterval(() => {
-                this.redisConnection.setConnected(`${machineAddress}/${processId}`);
+                void this.redisConnection.setConnected(`${machineAddress}/${processId}`);
             }, 3_000);
 
             for (const cb of this.onReadyListeners) {

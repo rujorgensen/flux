@@ -1,4 +1,3 @@
-import { RedisClient } from 'bun';
 import {
     FluxAuthority
 } from '@persistica/flux-authority';
@@ -11,7 +10,7 @@ import {
     beforeAll,
     expect,
 } from 'bun:test';
-import { isNanoId, TNetworkToken_S } from '@flux/shared/types';
+import { isClientId, TNetworkToken_S } from '@flux/shared/types';
 import { $ } from 'bun';
 import {
     waitUntilAvailable,
@@ -64,7 +63,7 @@ describe('persistica-flux-api-agents', () => {
 
         // Use bun run directly (not bun nx run) to avoid NX task deduplication
         // when @flux/portal-api is already running as an NX infrastructure task.
-        $`bun run --watch apps/backend/portal/src/main.ts --tsconfig-override=apps/backend/portal/tsconfig.app.json`.then().catch();
+        void $`bun run --watch apps/backend/portal/src/main.ts --tsconfig-override=apps/backend/portal/tsconfig.app.json`.then().catch();
 
         // 👉 Wait until the API is accepting connections
         await waitUntilAvailable(
@@ -149,7 +148,7 @@ describe('persistica-flux-api-agents', () => {
         const { data, total } = await res.json();
         expect(total).toBe(3);
         expect(data).toHaveLength(3);
-        expect(isNanoId(data.at(0)?.id)).toBeTruthy();
+        expect(isClientId(data.at(0)?.id)).toBeTruthy();
         expect(data.at(0)?.ip).toBeDefined();
         expect(data.at(0)?.address).toBeDefined();
         expect(data.at(0)?.bytes).toBeDefined();

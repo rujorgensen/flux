@@ -11,8 +11,10 @@ import type { TNetworkId_S } from '@flux/shared/types';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { StatsComponent } from '../../components/stats/stats.component';
 import { DashboardComponent } from '../../components/dashboard/dashboard.component';
-import { ChartComponent } from '../../components/chart/chart.component';
-import type { IChartDataset } from '../../components/chart/chart.component';
+import {
+    type IChartDataset,
+    ChartComponent,
+} from '../../components/chart/chart.component';
 import { NetworksService } from '../../_services/networks.service';
 import {
     DashboardHistoryService,
@@ -109,7 +111,7 @@ export class DashboardHomePageComponent implements OnInit {
         this.networkId$ = this.networksService
             .selectedNetwork$
             .pipe(
-                map((n) => (n?.id as TNetworkId_S) ?? null),
+                map((n) => (n?.id as (TNetworkId_S | null)) ?? null),
             );
 
         this.agentChartConfig$ = combineLatest([

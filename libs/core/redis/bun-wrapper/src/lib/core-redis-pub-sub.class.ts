@@ -41,10 +41,11 @@ export class BunRedisPubSub {
         };
 
         this.publisher.onclose = (error) => {
-            if (this._disconnected) return;
-            if (error) {
-                console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub publisher error:`, error);
+            if (this._disconnected) {
+                return;
             }
+
+            console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub publisher error:`, error);
             console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub publisher connection closed`);
         };
 
@@ -62,10 +63,11 @@ export class BunRedisPubSub {
         };
 
         this.subscriber.onclose = (error) => {
-            if (this._disconnected) return;
-            if (error) {
-                console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub subscriber error:`, error);
+            if (this._disconnected) {
+                return;
             }
+
+            console.error(`${this._options.name ? `[${this._options.name}]` : ''}❌ Redis pub/sub subscriber error:`, error);
             console.warn(`${this._options.name ? `[${this._options.name}]` : ''}🚫 Redis pub/sub subscriber connection closed`);
         };
     }
@@ -173,11 +175,10 @@ export class BunRedisPubSub {
         // Cleanly unsubscribe from every tracked channel so Bun's internal
         // subscription loop terminates gracefully before the connection drops.
         for (const channelId of this._subscribedChannels) {
-            try {
-                await this.subscriber.unsubscribe(channelId);
-            } catch {
+            void this.subscriber
+                .unsubscribe(channelId)
                 // Ignore errors — connection may already be closing
-            }
+                .catch();
         }
 
         this._subscribedChannels.clear();

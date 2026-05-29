@@ -14,7 +14,7 @@ export const PicoLogger = (() => {
             allowScopes: string[] | '*';
         },
     ) => {
-        allowScopes = ((typeof configuration.allowScopes === 'string') && (configuration.allowScopes === '*')) ? '*' : new Set(configuration.allowScopes);
+        allowScopes = (configuration.allowScopes === '*') ? '*' : new Set(configuration.allowScopes);
     };
 
     /**
@@ -28,7 +28,7 @@ export const PicoLogger = (() => {
             return;
         }
 
-        console.log(`[${scopes}]\t${message}`);
+        console.log(`[${scopes?.toString()}]\t${message}`);
     };
 
     /**
@@ -42,7 +42,7 @@ export const PicoLogger = (() => {
             return;
         }
 
-        console.warn(`[${scopes}]\t${message}`);
+        console.warn(`[${scopes?.toString()}]\t${message}`);
     };
 
     /**
@@ -56,7 +56,7 @@ export const PicoLogger = (() => {
             return;
         }
 
-        console.error(`[${scopes}]\t${message}`);
+        console.error(`[${scopes?.toString()}]\t${message}`);
     };
 
     return {

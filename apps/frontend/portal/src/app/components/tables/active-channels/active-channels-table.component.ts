@@ -264,7 +264,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
         tokenValue: string,
         abortController: AbortController,
     ): void {
-        (async () => {
+        void (async () => {
             try {
                 const sniffGet = api.api
                     .networks({ networkId })
@@ -343,12 +343,12 @@ export class ActiveChannelsTableComponent implements OnDestroy {
         }
     }
 
-    private async fetchData(
+    private fetchData(
         networkId: string,
         page: number,
         pageSize: number,
-    ): Promise<void> {
-        await api
+    ): void {
+        void api
             .api
             .networks({
                 networkId: networkId,

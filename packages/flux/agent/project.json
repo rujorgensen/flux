@@ -8,6 +8,9 @@
         "scope:any"
     ],
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "build": {
             "executor": "@nx/esbuild:esbuild",
             "outputs": [

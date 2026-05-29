@@ -1,9 +1,13 @@
 {
-  "name": "backend-features-network",
-  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/backend/features/network/src",
-  "projectType": "library",
-  "tags": [],
-  "// targets": "to see all targets run: nx show project backend-features-network --web",
-  "targets": {}
+    "name": "backend-features-network",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/backend/features/network/src",
+    "projectType": "library",
+    "tags": [],
+    "// targets": "to see all targets run: nx show project backend-features-network --web",
+    "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        }
+    }
 }

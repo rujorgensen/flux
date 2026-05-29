@@ -48,7 +48,7 @@ export class OutgoingMessageRouter {
         if (machineAddress !== this.machineAddress) {
             PicoLogger.log('🛣️ Routing message to machine', 'routing');
 
-            this.redisConnection.directPublish(address, message);
+            void this.redisConnection.directPublish(address, message);
 
             return;
         }
@@ -58,7 +58,7 @@ export class OutgoingMessageRouter {
             PicoLogger.log(`🛣️  Routing message from process ID '${this.processId}' to process ID: '${processId}'`, 'routing');
 
             // ! Route through Redis for now, but change to direct process connection
-            this.redisConnection.directPublish(address, message);
+            void this.redisConnection.directPublish(address, message);
 
             return;
         }

@@ -13,6 +13,7 @@ const clearAndBuild = async (
 };
 
 // type TWebsocketData = {};
+// oxlint-disable-next-line prefer-const
 let server: Bun.Server; // <TWebsocketData>;
 
 // Create a Set to store all connected WebSocket clients
@@ -44,19 +45,12 @@ const watcher = watch(
 
             // Send reload signal to clients
             console.log(`Refreshing ${clients.size} clients...`);
+            // oxlint-disable-next-line typescript/await-thenable
             for await (const client of clients) {
                 console.log('Emitting to client');
                 await client.write('data:reload\n\n');
                 await client.flush();
             }
-
-            // console.log('Restarting main...');
-            // try {
-            //     $`bun run ./apps/flux/agent/src/demo/dist/server-a/main.js`.then().catch();
-            // } catch {
-            //     console.log('caught');
-            // }
-
         }
     });
 

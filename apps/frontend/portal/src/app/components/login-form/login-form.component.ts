@@ -30,7 +30,7 @@ export class LoginFormComponent {
     ): void {
         const callbackURL = this.getCallbackURL();
 
-        this._userService
+        void this._userService
             .authClient
             .signIn
             .social(
@@ -68,7 +68,7 @@ export class LoginFormComponent {
 
         this.isSubmitting.set(true);
 
-        this._userService
+        void this._userService
             .authClient
             .signIn
             .email(

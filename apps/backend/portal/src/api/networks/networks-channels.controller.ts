@@ -67,7 +67,8 @@ async function* createChannelEventStream(
         }
     };
 
-    redisConnection_.subscribeToNetworkChannel(networkId, channelName, onPacket);
+    await redisConnection_
+        .subscribeToNetworkChannel(networkId, channelName, onPacket);
 
     try {
         yield sse(JSON.stringify({ type: 'connected', channelName, timestamp: new Date().toISOString() }));
@@ -219,7 +220,7 @@ export const networkChannelController = new Elysia({
             }
 
             // Explicit return required by Elysia's beforeHandle type signature.
-            return;
+            return undefined;
         },
     })
 

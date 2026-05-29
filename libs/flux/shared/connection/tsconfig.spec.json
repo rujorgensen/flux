@@ -3,7 +3,7 @@
     "compilerOptions": {
         "outDir": "../../../../dist/out-tsc",
         "types": [
-            "@bun/types",
+            "@types/bun",
             "node"
         ]
     },

@@ -27,7 +27,7 @@ export class GlobalChannelPubsub {
      */
     private subscribeWebsocketChannelEvent(
     ): void {
-        this.redisConnection
+        void this.redisConnection
             .subscribeWebsocketChannelEvent((
                 channel: TGlobalChannel,
                 skipProcessAddress: TProcessAddress,

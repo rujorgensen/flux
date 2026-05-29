@@ -91,7 +91,7 @@ export class DragonflyInfoPageComponent implements OnInit {
                     .onPublish((message) => {
                         this.portalRedisStatus = JSON.parse(message as string) as TDragonflyStatus;
 
-                        if (this.portalRedisStatus && this.meshRedisStatus) {
+                        if (this.meshRedisStatus) {
                             this.statuses.set([
                                 this.meshRedisStatus,
                                 this.portalRedisStatus,
@@ -106,7 +106,7 @@ export class DragonflyInfoPageComponent implements OnInit {
                     .onPublish((message) => {
                         this.meshRedisStatus = JSON.parse(message as string) as TDragonflyStatus;
 
-                        if (this.portalRedisStatus && this.meshRedisStatus) {
+                        if (this.portalRedisStatus) {
                             this.statuses.set([
                                 this.meshRedisStatus,
                                 this.portalRedisStatus,

@@ -84,10 +84,10 @@ export class NetworkChannelHash {
             if (createdAt && memberDistribution && usage) {
                 channels.push({
                     channelName,
-                    memberDistribution: memberDistribution as string,
-                    members: Number.parseInt((members as string | undefined) ?? '0', 10),
+                    memberDistribution: memberDistribution,
+                    members: Number.parseInt((members) ?? '0', 10),
                     bytes: Number.parseInt(usage || '0', 10),
-                    createdAt: new Date(createdAt as string),
+                    createdAt: new Date(createdAt),
                 });
             }
         }
@@ -121,7 +121,7 @@ export class NetworkChannelHash {
         networkId: TNetworkId_S,
     ): Promise<TNetworkChannelCountAt> {
         return {
-            count: await this._redisConnection.hash.scard(`networks/${networkId}/channels`) ?? 0,
+            count: await this._redisConnection.hash.scard(`networks/${networkId}/channels`),
             date: new Date(),
         };
     }

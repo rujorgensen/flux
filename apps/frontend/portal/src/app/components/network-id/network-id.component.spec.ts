@@ -57,7 +57,8 @@ describe('NetworkIdComponent', () => {
         await fixture.whenStable();
         fixture.detectChanges();
 
+        // oxlint-disable-next-line typescript/unbound-method
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith('my-network-id');
-        expect(button.textContent?.trim()).toContain('Copied!');
+        expect(button.textContent.trim()).toContain('Copied!');
     });
 });

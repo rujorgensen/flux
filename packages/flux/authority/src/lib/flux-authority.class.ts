@@ -38,7 +38,7 @@ import { FluxAuthorityNetworkConnection } from './flux-authority-network.class';
 const DEFAULT_FLUX_DOMAIN: string = 'https://mesh.persistica.io';
 
 interface IRegisterAuthorityConfiguration<T, M> {
-    networkAccessToken: TNetworkToken_S; // The key to authenticate with the network
+    networkAccessToken: string; // The key to authenticate with the network
     authorizeAgentConnection: TAuthorizeCallback<T>; // Callback to authorize agent connections
     authorizeChannelAccess: TChannnelAuthCallback<M>; // Callback to authorize channel connections
 }
@@ -107,14 +107,12 @@ export class FluxAuthority {
                 this.id,
                 ticket,
                 this.stateManager,
-                async () => {
-                    // For reconnection logic
-                    this.registerAuthority(
-                        {
-                            ...registerAuthorityConfiguration,
-                        },
-                    );
-                },
+                // For reconnection logic
+                async () =>
+                    this.registerAuthority({
+                        ...registerAuthorityConfiguration,
+                        networkAccessToken: registerAuthorityConfiguration.networkAccessToken as TNetworkToken_S
+                    }),
                 {
                     ...this.options,
                     domain,
