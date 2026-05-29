@@ -50,8 +50,7 @@
         }
     },
     "defaultBase": "main",
-    "plugins": [
-        {
+    "plugins": [{
             "plugin": "@nx/vite/plugin",
             "options": {
                 "buildTargetName": "build",
@@ -69,6 +68,13 @@
             "plugin": "@nx/playwright/plugin",
             "options": {
                 "targetName": "e2e"
+            }
+        },
+        {
+            "plugin": "nx-oxlint",
+            "options": {
+                "lintTargetName": "lint",
+                "quiet": true
             }
         }
     ],

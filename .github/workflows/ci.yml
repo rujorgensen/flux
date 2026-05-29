@@ -118,6 +118,9 @@ jobs:
       # - run: bun nx-cloud record -- echo Hello World
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
 
+      # Force oxlint to use the bun runtime rather than NodeJS
+      - run: bunx --bun oxlint --quiet --format=github
+
       - name: 🧪 Run unit tests
         timeout-minutes: 2
         run: bun nx affected -t bun-test test lint # --no-agents

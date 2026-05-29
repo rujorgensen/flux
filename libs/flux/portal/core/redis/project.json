@@ -9,6 +9,9 @@
     ],
     "// targets": "to see all targets run: nx show project flux-portal-core-redis --web",
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "build": {
             "executor": "nx:run-commands",
             "options": {

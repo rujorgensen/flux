@@ -9,6 +9,9 @@
         "scope:frontend"
     ],
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "open": {
             "executor": "nx:run-commands",
             "options": {

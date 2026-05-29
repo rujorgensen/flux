@@ -8,6 +8,9 @@
         "scope:any"
     ],
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "bun-serve": {
             "executor": "nx:run-commands",
             "options": {

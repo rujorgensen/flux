@@ -3,6 +3,9 @@
     "sourceRoot": "apps/backend/src",
     "projectType": "application",
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "build": {
             "executor": "nx:run-commands",
             "options": {

@@ -8,6 +8,9 @@
         "scope:backend"
     ],
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "bun-test": {
             "executor": "nx:run-commands",
             "options": {

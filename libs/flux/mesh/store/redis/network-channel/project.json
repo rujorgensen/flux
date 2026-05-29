@@ -8,5 +8,9 @@
         "scope:mesh"
     ],
     "// targets": "to see all targets run: nx show project network-channel-redis-store --web",
-    "targets": {}
+    "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        }
+    }
 }

@@ -8,6 +8,9 @@
         "scope:all"
     ],
     "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
         "serve": {
             "executor": "nx:run-commands",
             "options": {
