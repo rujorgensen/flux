@@ -93,7 +93,7 @@ Alpine.data('fluxActivityDemoApplication', () => ({
         channelName: string,
     ) {
         this.log('🚪 Disconnected from channel.');
-        fluxAgentNetworkConnection.leaveChannel(channelName);
+        void fluxAgentNetworkConnection.leaveChannel(channelName);
         this.channels.delete(channelName);
     },
 }));

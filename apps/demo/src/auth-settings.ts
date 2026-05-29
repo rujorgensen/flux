@@ -16,7 +16,7 @@ const AUTHORITY_OBJECT_KEY = 'flux_authority_object';
 const AUTHORITY_KEY_STORAGE_KEY = 'flux_authority_key';
 
 export const getAuthorityKey = (): TNetworkToken_S =>
-    (localStorage.getItem(AUTHORITY_KEY_STORAGE_KEY) as TNetworkToken_S) ?? DEFAULT_NETWORK_ACCESS_TOKEN;
+    (localStorage.getItem(AUTHORITY_KEY_STORAGE_KEY) as (TNetworkToken_S | null)) ?? DEFAULT_NETWORK_ACCESS_TOKEN;
 
 export const setAuthorityKey = (
     password: string,

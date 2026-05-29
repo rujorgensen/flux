@@ -45,6 +45,7 @@ const watcher = watch(
 
             // Send reload signal to clients
             console.log(`Refreshing ${clients.size} clients...`);
+            // oxlint-disable-next-line typescript/await-thenable
             for await (const client of clients) {
                 console.log('Emitting to client');
                 await client.write('data:reload\n\n');
