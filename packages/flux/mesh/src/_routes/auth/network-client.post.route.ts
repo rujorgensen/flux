@@ -20,6 +20,7 @@ import {
     type TFluxClientUID,
     validateMachineUID,
 } from '@flux/shared/utils';
+import { PicoLogger } from '@utils/pico-logger';
 
 /**
  * This route is used to authorize an agent connection.
@@ -90,11 +91,19 @@ export const authorizeAgentConnection = async (
                     (error instanceof UnknownClientError) ||
                     (error instanceof GlobalRPCTimeoutError)
                 ) {
-                    networkAuthorityManager
+                    void networkAuthorityManager
                         .removeUnresponsiveClient(
                             networkId,
                             networkAuthorityAddress,
-                        );
+                        )
+                        .catch((wasRemoved) => {
+                            if (wasRemoved) {
+                                PicoLogger.log('Successfully removed unresponsive client from network authority cache', 'authorizeAgentConnection');
+                            } else {
+                                PicoLogger.log('Failed to remove unresponsive client from network authority cache', 'authorizeAgentConnection');
+                            }
+                        })
+                        ;
 
                     return true;
                 }

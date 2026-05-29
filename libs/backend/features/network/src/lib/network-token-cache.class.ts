@@ -27,14 +27,15 @@ export class NetworkTokenCache {
         private readonly _redisConnection: RedisConnection,
         private readonly _networkTokenService: NetworkTokenService,
     ) {
-        this._redisConnection.subscribeToNetworkTokenEvents(
-            (
-                networkId: TNetworkId_S,
-                tokens: TNetworkToken_S[],
-            ) => {
-                this.cache.set(networkId, new Set(tokens));
-            },
-        );
+        this._redisConnection
+            .subscribeToNetworkTokenEvents(
+                (
+                    networkId: TNetworkId_S,
+                    tokens: TNetworkToken_S[],
+                ) => {
+                    this.cache.set(networkId, new Set(tokens));
+                },
+            );
     }
 
     /**

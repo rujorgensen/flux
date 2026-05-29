@@ -121,9 +121,12 @@ channel.publish({ text: 'Hello, Flux!' });`;
         snippetId: string,
         text: string,
     ): void {
-        navigator.clipboard.writeText(text).then(() => {
-            this.copiedSnippet.set(snippetId);
-            setTimeout(() => this.copiedSnippet.set(null), 2000);
-        });
+        void navigator
+            .clipboard
+            .writeText(text)
+            .then(() => {
+                this.copiedSnippet.set(snippetId);
+                setTimeout(() => this.copiedSnippet.set(null), 2000);
+            });
     }
 }

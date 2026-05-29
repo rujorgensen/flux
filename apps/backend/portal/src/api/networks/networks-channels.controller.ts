@@ -67,7 +67,8 @@ async function* createChannelEventStream(
         }
     };
 
-    redisConnection_.subscribeToNetworkChannel(networkId, channelName, onPacket);
+    await redisConnection_
+        .subscribeToNetworkChannel(networkId, channelName, onPacket);
 
     try {
         yield sse(JSON.stringify({ type: 'connected', channelName, timestamp: new Date().toISOString() }));

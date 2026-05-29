@@ -228,7 +228,7 @@ export class RedisConnection {
             tokens: TNetworkToken_S[],
         ) => void,
     ): void {
-        this.pubSub
+        void this.pubSub
             .subscribe(
                 `:flux:network-tokens`,
                 (message: string) => {
@@ -300,8 +300,7 @@ export class RedisConnection {
         destinationProcessAddress: TProcessAddress,
         callback: (data: string) => void,
     ): void {
-
-        this.pubSub
+        void this.pubSub
             .subscribe(
                 `~${subChannel}/${destinationProcessAddress}`,
                 callback,
@@ -333,13 +332,13 @@ export class RedisConnection {
         channelId: TProcessAddress | TClientId,
         callback: MessageCallback
     ): void {
-        try {
-            const redisCallback = (message: string) => callback(message);
+        const redisCallback = (message: string) => callback(message);
 
-            this.pubSub.subscribe(channelId, redisCallback);
-        } catch {
-            console.log('error caught #2');
-        }
+        void this.pubSub
+            .subscribe(channelId, redisCallback)
+            .catch(() => {
+                console.log('error caught #2');
+            });
     }
 
     /**
@@ -349,38 +348,39 @@ export class RedisConnection {
         channelId: string,
         callback: MessageCallback,
     ): void {
-        try {
-            this.pubSub.unsubscribe(channelId, callback);
-        } catch {
-            console.log('error caught #1');
-        }
+        void this.pubSub
+            .unsubscribe(channelId, callback)
+            .catch(() => {
+                console.log('error caught #1');
+            });
     }
 
     /**
      * Subscribes to data packets published on a specific network channel.
      * Invokes the callback with the raw data string from each packet.
      */
-    public subscribeToNetworkChannel(
+    public async subscribeToNetworkChannel(
         networkId: string,
         channelName: string,
         callback: (
             clientId: TClientId,
             data: string,
         ) => void,
-    ): void {
+    ): Promise<void> {
         try {
             const redisKey = `~networks/${networkId}/channels/${channelName}`;
 
-            this.pubSub.subscribe(redisKey, (message: string) => {
+            await this.pubSub
+                .subscribe(redisKey, (message: string) => {
 
-                // Message format: {processAddress}:nc-on-pub:{clientId}:{channelName}:{data}
-                const splitMessageResult: ISplitMessageResult = splitOrThrowMessage(message as TMessageConstruct);
+                    // Message format: {processAddress}:nc-on-pub:{clientId}:{channelName}:{data}
+                    const splitMessageResult: ISplitMessageResult = splitOrThrowMessage(message as TMessageConstruct);
 
-                callback(
-                    splitMessageResult.clientId,
-                    splitMessageResult.data,
-                );
-            });
+                    callback(
+                        splitMessageResult.clientId,
+                        splitMessageResult.data,
+                    );
+                });
         } catch (error) {
             console.error(`Failed to subscribe to network channel '${networkId}/${channelName}':`, error);
         }
@@ -397,13 +397,14 @@ export class RedisConnection {
             data: string,
         ) => void,
     ): void {
-        try {
-            const redisKey = `~networks/${networkId}/channels/${channelName}`;
+        const redisKey = `~networks/${networkId}/channels/${channelName}`;
 
-            this.pubSub.unsubscribe(redisKey, callback as MessageCallback);
-        } catch (error) {
-            console.error(`Failed to unsubscribe from network channel '${networkId}/${channelName}':`, error);
-        }
+        this.pubSub
+            .unsubscribe(redisKey, callback as MessageCallback)
+            .catch((error) => {
+                console.error(`Failed to unsubscribe from network channel '${networkId}/${channelName}':`, error);
+            })
+            ;
     }
 
     /**

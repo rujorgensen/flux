@@ -76,12 +76,13 @@ export class GlobalClientManager {
         onKickCallback: (clientAddress: TClientId) => void,
     ): void {
         // Listen to remote
-        this._redisConnection.subscribeToCustom(
-            `kick-client-${type}`,
-            this.processAddress,
-            (
-                clientId: string,
-            ) => onKickCallback(clientId as TClientId),
-        );
+        void this._redisConnection
+            .subscribeToCustom(
+                `kick-client-${type}`,
+                this.processAddress,
+                (
+                    clientId: string,
+                ) => onKickCallback(clientId as TClientId),
+            );
     }
 }
