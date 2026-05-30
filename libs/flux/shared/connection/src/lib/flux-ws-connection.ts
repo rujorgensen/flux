@@ -197,8 +197,6 @@ export class FluxWebSocketConnection {
             .on('connecting', this.socketConnectingHandler)
             .on('error', this.socketErrorHandler);
 
-        this.stateManager.emitNetworkState('connecting');
-
         void this.socket.connect();
 
         return this.connectPromise;
@@ -410,7 +408,7 @@ export class FluxWebSocketConnection {
     private handleSocketConnecting(
         retryAttempt: number,
     ): void {
-        this.stateManager.emitNetworkState('disconnected');
+        this.stateManager.emitNetworkState('connecting');
 
         if (retryAttempt > 0) {
             PicoLogger.log(`🔄 Connecting attempt: #${retryAttempt} of ${this.options.retries ?? 'none'}`, this.fluxInstanceId);
