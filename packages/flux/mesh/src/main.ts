@@ -294,8 +294,6 @@ export class FluxMeshServer {
                     }
                     // Let the client detect readyState. Regular ping cannot be detected by the WebSocket client in the browser 
                     _ws.send('isReady');
-                    // This will make the client retry: _ws.terminate();
-                    //       ws.close(1001, 'Client not validated'); // ! Check correct error code
                 },
 
                 message: async (
