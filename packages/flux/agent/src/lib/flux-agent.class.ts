@@ -29,17 +29,28 @@ export class FluxAgent {
 
     private readonly fluxClientData: FluxClientData = new FluxClientData();
     private readonly stateManager: StateManager = new StateManager();
+    private readonly networkId: TNetworkId_S;
+    private readonly options: {
+        domain?: string;
+        secretKey?: string;
+        retries?: number;
+    } | undefined;
 
     constructor(
-        private readonly networkId: string,
-        private readonly options?: {
+        networkId: string,
+        options?: {
             domain?: string;
             secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
             retries?: number; // Number of times to retry a failed message
         },
     ) {
         // Validate user input
-        validateNetworkIdOrThrow(this.networkId);
+        if (!validateNetworkIdOrThrow(networkId)) {
+            throw new Error('Will never be thrown');
+        }
+
+        this.networkId = networkId;
+        this.options = options;
     }
 
     /**
@@ -66,7 +77,7 @@ export class FluxAgent {
             const ticket = await retryOrThrow(
                 async () => {
                     return authenticateAgentOrThrow(
-                        this.networkId as TNetworkId_S,
+                        this.networkId,
                         domain,
                         identification,
                         {
