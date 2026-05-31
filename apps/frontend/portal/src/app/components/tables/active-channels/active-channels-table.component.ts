@@ -1,5 +1,15 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, input, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    Pipe,
+    PipeTransform,
+    computed,
+    effect,
+    input,
+    signal,
+} from '@angular/core';
+import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
 import type { INetworkChannel, INetworkChannelMembers } from '@flux/shared/types';
 import { api } from '$lib/app/_services/api/api';
 import { apiBaseUrl } from '$lib/app/_services/api/api-base';
@@ -7,8 +17,11 @@ import { NetworkTokensService } from '$lib/app/_services/network-tokens/network-
 import { toast } from 'ngx-sonner';
 import {
     deriveChannelFillPercent,
-    MAX_CHANNEL_MEMBERS,
 } from './channel-capacity.utils';
+import { NetworksService } from '$lib/app/_services/networks.service';
+import { filter, map, Observable } from 'rxjs';
+import type { INetwork_S } from '@flux/shared/features/networks';
+import { MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE } from '@flux/shared/features/channels';
 
 const MAX_SNIFF_PACKETS = 50;
 
@@ -45,10 +58,35 @@ type TChannelSniffFn = (opts: {
     fetch: RequestInit;
 }) => Promise<{ data: AsyncIterable<IChannelSSEEvent> | null; }>;
 
+@Pipe({
+    name: 'deriveChannelFillPercent$$',
+})
+export class DeriveChannelFillPercent implements PipeTransform {
+
+    constructor(
+        private readonly _networksService: NetworksService,
+    ) {}
+
+    public transform(
+        members: number,
+    ): Observable<number> {
+        return this._networksService.selectedNetwork$
+            .pipe(
+                filter((network) => network !== null),
+                map((network: INetwork_S) =>
+                    deriveChannelFillPercent(network.subscription, members),
+                ),
+            );
+    }
+}
+
 @Component({
     selector: 'app-active-channels-table',
     imports: [
-        CommonModule,
+        DatePipe,
+        AsyncPipe,
+        DecimalPipe,
+        DeriveChannelFillPercent,
     ],
     templateUrl: './active-channels-table.component.html',
     styleUrls: ['./active-channels-table.component.scss'],
@@ -66,8 +104,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
     protected readonly pageSize = signal<number>(25);
     protected readonly total = signal<number>(0);
     protected readonly totalPages = computed(() => Math.ceil(this.total() / this.pageSize()) || 1);
-    protected readonly deriveChannelFillPercent = deriveChannelFillPercent;
-    protected readonly maxChannelMembers = MAX_CHANNEL_MEMBERS;
+    protected readonly maxChannelMembers$$: Observable<number>;
 
     /** Set of channel names currently being sniffed. */
     protected readonly sniffingChannels = signal<Set<string>>(new Set());
@@ -83,6 +120,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
 
     constructor(
         private readonly _networkTokensService: NetworkTokensService,
+        private readonly _networksService: NetworksService,
     ) {
         effect(() => {
             const networkId = this.networkId();
@@ -92,6 +130,13 @@ export class ActiveChannelsTableComponent implements OnDestroy {
                 this.fetchData(networkId, page, pageSize);
             }
         });
+
+        this.maxChannelMembers$$ = this._networksService
+            .selectedNetwork$
+            .pipe(
+                filter((network) => network !== null),
+                map((network: INetwork_S) => MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE[network.subscription]),
+            );
     }
 
     public ngOnDestroy(
@@ -216,11 +261,15 @@ export class ActiveChannelsTableComponent implements OnDestroy {
             });
     }
 
-    protected nextPage(): void {
+    protected nextPage(
+
+    ): void {
         this.page.update((p) => p + 1);
     }
 
-    protected prevPage(): void {
+    protected prevPage(
+
+    ): void {
         this.page.update((p) => Math.max(1, p - 1));
     }
 

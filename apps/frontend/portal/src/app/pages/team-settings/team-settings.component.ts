@@ -6,9 +6,10 @@ import {
 } from 'rxjs';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
-import { NetworksService, type INetwork } from '../../_services/networks.service';
+import { NetworksService } from '../../_services/networks.service';
 import { UserNamePipe, type IUserInfo } from '../../_pipes/user-name.pipe';
 import { FormsModule } from '@angular/forms';
+import type { INetwork_S } from '@flux/shared/features/networks';
 
 interface UserSession {
     id?: string;
@@ -52,7 +53,7 @@ export const ORG_NAME = 'Acme Labs';
 export class TeamSettingsPageComponent implements OnInit {
     protected readonly ORG_NAME = ORG_NAME;
     protected readonly userSession = signal<UserSession | null>(null);
-    protected readonly networks$: Observable<INetwork[]>;
+    protected readonly networks$: Observable<INetwork_S[]>;
     protected readonly orgMembers$: Observable<IOrgMember[]>;
 
     /**
@@ -156,7 +157,7 @@ export class TeamSettingsPageComponent implements OnInit {
 
     protected openNetworkModal(
         member: IOrgMember,
-        allNetworks: INetwork[],
+        allNetworks: INetwork_S[],
     ): void {
         this.memberToManage.set(member);
         const state: Record<string, boolean> = {};

@@ -19,11 +19,14 @@ import {
 } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, startWith } from 'rxjs';
-import { NetworksService, INetwork, MAX_NETWORKS } from '../../_services/networks.service';
+import { NetworksService, MAX_NETWORKS } from '../../_services/networks.service';
 import { SidebarCountsService } from '../../_services/sidebar-counts/sidebar-counts.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 import { version } from '../../../../package.json';
 import { toast } from 'ngx-sonner';
+import type {
+    INetwork_S,
+} from '@flux/shared/features/networks';
 
 interface UserSession {
     id?: string;
@@ -60,7 +63,7 @@ export class DashboardLayoutComponent {
     // Modal state
     protected readonly showCreateModal = signal<boolean>(false);
     protected readonly newNetworkAlias = signal<string>('');
-    protected readonly pendingDeleteNetwork = signal<INetwork | null>(null);
+    protected readonly pendingDeleteNetwork = signal<INetwork_S | null>(null);
     protected readonly deleteConfirmText = signal<string>('');
 
     protected readonly selectedNetwork$;
@@ -164,7 +167,9 @@ export class DashboardLayoutComponent {
         }
     }
 
-    openDeleteModal(network: INetwork): void {
+    protected openDeleteModal(
+        network: INetwork_S,
+    ): void {
         this.deleteConfirmText.set('');
         this.pendingDeleteNetwork.set(network);
     }

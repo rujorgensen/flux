@@ -3,7 +3,7 @@ import {
     networkDecorator,
 } from '../../_decorators/network-service.decorator';
 import { betterAuth } from '../../_decorators/auth.decorator';
-import type { INetwork_S } from '../../repository/network.repository';
+import type { INetwork_S } from '@flux/shared/features/networks';
 import type { TNetworkId_S } from '@flux/shared/types';
 
 const createNetworkDTO = t.Object({
@@ -45,7 +45,7 @@ export const networksController = apiRoutes
             await serviceProviders
                 .networkTokenService
                 .createToken(
-                    createdNetwork.id as TNetworkId_S,
+                    createdNetwork.id,
                     user.id,
                 );
 

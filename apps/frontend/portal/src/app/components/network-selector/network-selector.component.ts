@@ -5,7 +5,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { combineLatest, map } from 'rxjs';
-import { NetworksService, INetwork } from '../../_services/networks.service';
+import { NetworksService } from '../../_services/networks.service';
+import type { INetwork_S } from '@flux/shared/features/networks';
 
 @Component({
     selector: 'app-network-selector',
@@ -17,7 +18,7 @@ import { NetworksService, INetwork } from '../../_services/networks.service';
 })
 export class NetworkSelectorComponent {
     readonly createRequested = output();
-    readonly deleteRequested = output<INetwork>();
+    readonly deleteRequested = output<INetwork_S>();
 
     protected readonly vm$;
 
@@ -35,7 +36,7 @@ export class NetworkSelectorComponent {
     }
 
     protected selectNetwork(
-        network: INetwork,
+        network: INetwork_S,
     ): void {
         this.networksService.selectNetwork(network);
     }
@@ -47,7 +48,7 @@ export class NetworkSelectorComponent {
     }
 
     protected requestDelete(
-        network: INetwork,
+        network: INetwork_S,
         event: Event,
     ): void {
         event.stopPropagation();

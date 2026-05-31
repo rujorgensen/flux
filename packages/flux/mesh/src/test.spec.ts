@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'bun:test';
 import {
-    MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE,
-    MAX_CHANNEL_MEMBERS,
     canChannelHaveMoreMembers,
     readSubscriptionTypeFromClaim,
     resolveSubscriptionTypeOrDefault,
-} from './business-logic/channels/channel-manager.class';
+} from './business-logic/channels/channel-manager.utils';
 import { normalizeAuthorityClaimOrThrow } from './auth/auth';
+import { MAX_CHANNEL_MEMBERS, MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE } from '@flux/shared/features/channels';
 
 const ONE_MILLION_MESSAGES = 1_000_000;
 

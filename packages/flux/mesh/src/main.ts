@@ -59,8 +59,10 @@ import {
 import { GlobalChannelPubsub } from './routing/global-channel/global-channel-pubsub.class';
 import {
     NetworkChannelManager,
-    readSubscriptionTypeFromClaim,
 } from './business-logic/channels/channel-manager.class';
+import {
+    readSubscriptionTypeFromClaim,
+} from './business-logic/channels/channel-manager.utils';
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
 import { AgentManager } from './_managers/agent.manager';

@@ -47,14 +47,14 @@
                             </button>
                         </td>
                         <td>
-                            @let fillPercent = deriveChannelFillPercent(row.members);
+                            @let fillPercent = ((row.members | deriveChannelFillPercent$$) | async);
                             <div class="flex items-center gap-2 min-w-44">
                                 <progress
                                     class="progress progress-primary w-24"
                                     [value]="fillPercent"
                                     max="100"
                                 ></progress>
-                                <span class="text-xs tabular-nums" [attr.title]="row.members + ' / ' + maxChannelMembers + ' members'">
+                                <span class="text-xs tabular-nums" [attr.title]="row.members + ' / ' + (maxChannelMembers$$ | async) + ' members'">
                                     {{ fillPercent | number:'1.0-2' }}%
                                 </span>
                             </div>

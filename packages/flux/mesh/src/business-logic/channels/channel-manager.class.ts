@@ -12,138 +12,13 @@ import {
     getMeshRedisConnection,
 } from '../../routing/redis/redis-connection.class';
 import type { GlobalChannelPubsub } from '../../routing/global-channel/global-channel-pubsub.class';
-
-export const MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE: {
-    [key in TSubscription_S]: number
-} = {
-    free: 25,
-    medium: 500,
-    high: 100_000,
-} as const;
-
-export const MAX_CHANNEL_MEMBERS = MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE.high;
-
-export const normalizeSubscriptionType = (
-    subscriptionType?: unknown,
-): TSubscription_S | undefined => {
-    if (typeof subscriptionType !== 'string') {
-        return undefined;
-    }
-
-    const normalizedSubscriptionType = subscriptionType.toLowerCase();
-
-    if ((normalizedSubscriptionType === 'lowest') ||
-        (normalizedSubscriptionType === 'free')) {
-        return 'free';
-    }
-
-    if ((normalizedSubscriptionType === 'medium') ||
-        (normalizedSubscriptionType === 'high')) {
-        return normalizedSubscriptionType;
-    }
-
-    return undefined;
-};
-
-export const resolveSubscriptionTypeOrDefault = (
-    subscriptionType?: unknown,
-): TSubscription_S => {
-    return normalizeSubscriptionType(subscriptionType) ?? 'free';
-};
-
-export const readMaxChannelMembers = (
-    subscriptionType?: unknown,
-): number => MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE[resolveSubscriptionTypeOrDefault(subscriptionType)];
-
-export const readSubscriptionTypeFromClaim = (
-    claim?: unknown,
-): TSubscription_S | undefined => {
-    if (typeof claim !== 'string' || claim === '') {
-        return undefined;
-    }
-
-    const normalizedClaim = normalizeSubscriptionType(claim);
-    if (normalizedClaim) {
-        return normalizedClaim;
-    }
-
-    const readSubscriptionTypeFromPayload = (
-        payload: unknown,
-    ): TSubscription_S | undefined => {
-        if (!payload || typeof payload !== 'object') {
-            return undefined;
-        }
-
-        const payloadRecord = payload as Record<string, unknown>;
-        const userCandidate = payloadRecord['user'];
-        const nestedUser = userCandidate && typeof userCandidate === 'object'
-            ? userCandidate as Record<string, unknown>
-            : undefined;
-
-        const candidates: unknown[] = [
-            payloadRecord['subscriptionType'],
-            payloadRecord['subscription'],
-            payloadRecord['tier'],
-            payloadRecord['plan'],
-            nestedUser?.['subscriptionType'],
-            nestedUser?.['subscription'],
-            nestedUser?.['tier'],
-            nestedUser?.['plan'],
-        ];
-
-        for (const candidate of candidates) {
-            if (typeof candidate !== 'string') {
-                continue;
-            }
-
-            const normalizedCandidate = normalizeSubscriptionType(candidate);
-            if (normalizedCandidate) {
-                return normalizedCandidate;
-            }
-        }
-
-        return undefined;
-    };
-
-    try {
-        const parsedClaim = JSON.parse(claim);
-        const subscriptionTypeFromJson = readSubscriptionTypeFromPayload(parsedClaim);
-
-        if (subscriptionTypeFromJson) {
-            return subscriptionTypeFromJson;
-        }
-    } catch {
-        // ignore non-json claim
-    }
-
-    const jwtParts = claim.split('.');
-    if (jwtParts.length < 2) {
-        return undefined;
-    }
-
-    try {
-        const payloadBuffer = Buffer.from(
-            jwtParts[1],
-            'base64url',
-        );
-        const payloadRaw = payloadBuffer.toString('utf8');
-        const payload = JSON.parse(payloadRaw);
-
-        return readSubscriptionTypeFromPayload(payload);
-    } catch {
-        return undefined;
-    }
-};
-
-export const canChannelHaveMoreMembers = (
-    memberCount: number,
-    subscriptionType?: TSubscription_S,
-): boolean => memberCount < readMaxChannelMembers(subscriptionType);
+import { canChannelHaveMoreMembers } from './channel-manager.utils';
 
 interface IUsageCache {
     networkId: TNetworkId_S;
     usage: number;
 };
+
 export class NetworkChannelManager {
     private readonly channelUsageCount: Map<TChannelName, IUsageCache> = new Map();
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
@@ -205,11 +80,13 @@ export class NetworkChannelManager {
             channelName,
         );
 
-        return this.networkChannelHash.joinNetworkChannel(
+        const memberCount = await this.networkChannelHash.joinNetworkChannel(
             networkId,
             channelName,
             clientAddress,
         );
+
+        return memberCount;
     }
 
     /**
@@ -251,28 +128,6 @@ export class NetworkChannelManager {
         );
     }
 
-    /**
-     * Creates a network channel if it does not exist.
-     */
-    private async createNetworkChannelIfNotExist(
-        networkId: TNetworkId_S,
-        channelName: TChannelName,
-    ): Promise<void> {
-        const wasCreated: boolean = await this.networkChannelHash
-            .createNetworkChannelIfNotExist(
-                networkId,
-                channelName,
-            );
-
-        if (wasCreated) {
-            void this._globalChannelPubsub
-                .publish(
-                    `~/networks/${networkId}/channel-created`,
-                    `${AUTHORITY_ON_CREATE_CHANNEL}:${channelName}`,
-                );
-        }
-    }
-
     // ****************************************************************************
     // *** Update
     // ****************************************************************************
@@ -301,4 +156,31 @@ export class NetworkChannelManager {
             },
         );
     }
+
+    // ****************************************************************************
+    // *** Internal Helpers
+    // ****************************************************************************
+
+    /**
+     * Creates a network channel if it does not exist.
+     */
+    private async createNetworkChannelIfNotExist(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<void> {
+        const wasCreated: boolean = await this.networkChannelHash
+            .createNetworkChannelIfNotExist(
+                networkId,
+                channelName,
+            );
+
+        if (wasCreated) {
+            void this._globalChannelPubsub
+                .publish(
+                    `~/networks/${networkId}/channel-created`,
+                    `${AUTHORITY_ON_CREATE_CHANNEL}:${channelName}`,
+                );
+        }
+    }
+
 }

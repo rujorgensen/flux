@@ -165,7 +165,7 @@ export class NetworkChannelHash {
     }
 
     /**
-     * Adds a client to a channel on a network.
+     * Adds a client to a channel on a network and returns the total number of members in the channel.
      */
     public async joinNetworkChannel(
         networkId: TNetworkId_S,
