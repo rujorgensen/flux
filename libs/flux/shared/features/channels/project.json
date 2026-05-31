@@ -1,0 +1,27 @@
+{
+    "name": "flux-shared-features-channels",
+    "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/flux/shared/features/channels/src",
+    "projectType": "library",
+    "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/libs/flux/shared/features/channels",
+                "main": "libs/flux/shared/features/channels/src/index.ts",
+                "tsConfig": "libs/flux/shared/features/channels/tsconfig.lib.json",
+                "assets": []
+            }
+        }
+    },
+    "tags": [
+        "feature:channels",
+        "scope:shared"
+    ]
+}
