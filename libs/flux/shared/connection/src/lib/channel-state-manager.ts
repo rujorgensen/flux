@@ -5,6 +5,7 @@ import {
     type TChannelName,
     SUBSCRIBE_NETWORK_CHANNEL_NAME,
     SUBSCRIBED_NETWORK_CHANNEL_NAME,
+    UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
 } from "@flux/shared/types";
 import { FluxNetworkChannel } from "./flux-network-channel.class";
@@ -16,6 +17,7 @@ const CONNECTION_TIMEOUT_MS = 2_000;
 export class ChannelStateManager {
 
     private readonly connectionTimeouts: Map<TChannelName, NodeJS.Timeout> = new Map();
+    private readonly joinedChannels: Map<TChannelName, { channel: FluxNetworkChannel, useCount: number; }> = new Map();
 
     /**
      * Join a channel.
@@ -26,6 +28,12 @@ export class ChannelStateManager {
         webSocketClient: FluxWebSocketClientConnection | undefined,
     ): Promise<FluxNetworkChannel> {
         if (webSocketClient) {
+            const existingChannel = this.joinedChannels.get(channelName);
+            if (existingChannel) {
+                existingChannel.useCount++;
+                return Promise.resolve(existingChannel.channel);
+            }
+
             return new Promise((resolve, reject) => {
                 const existingTimeout = this.connectionTimeouts.get(channelName);
                 if (existingTimeout) {
@@ -36,7 +44,7 @@ export class ChannelStateManager {
                 const cb = (
                     message: string,
                 ) => {
-                    const receivedChannelName: TChannelName = message.substring(message.indexOf(':') + 1) as TChannelName;
+                    const receivedChannelName: string = message.substring(message.indexOf(':') + 1);
 
                     if (channelName !== receivedChannelName) {
                         return;
@@ -53,7 +61,10 @@ export class ChannelStateManager {
                     fluxWebSocketConnection
                         .removePackageTypeInterceptor(SUBSCRIBED_NETWORK_CHANNEL_NAME, cb);
 
-                    resolve(new FluxNetworkChannel(channelName, fluxWebSocketConnection));
+                    const channel = new FluxNetworkChannel(channelName, fluxWebSocketConnection);
+                    this.joinedChannels.set(channelName, { channel, useCount: 1 });
+
+                    resolve(channel);
                 };
 
                 fluxWebSocketConnection
@@ -83,13 +94,62 @@ export class ChannelStateManager {
      */
     public async leaveChannel(
         channelName: TChannelName,
+        fluxWebSocketConnection: FluxWebSocketConnection,
         webSocketClient: FluxWebSocketClientConnection | undefined,
     ): Promise<void> {
+        const existingChannel = this.joinedChannels.get(channelName);
+
+        if (!existingChannel) {
+            return Promise.reject(new Error('No channel instance found'));
+        }
+
+        existingChannel.useCount--;
+
+        if (existingChannel.useCount <= 0) {
+            this.joinedChannels.delete(channelName);
+        }
+
+        if (webSocketClient && (existingChannel.useCount <= 0)) {
+            return new Promise((resolve, reject) => {
+                const cb = (
+                    message: string,
+                ) => {
+                    const receivedChannelName: string = message.substring(message.indexOf(':') + 1);
+
+                    if (channelName !== receivedChannelName) {
+                        return;
+                    }
+
+                    const timeout = this.connectionTimeouts.get(channelName);
+
+                    if (timeout) {
+                        clearTimeout(timeout);
+                        this.connectionTimeouts.delete(channelName);
+                    }
+
+                    fluxWebSocketConnection.removePackageTypeInterceptor(UNSUBSCRIBED_NETWORK_CHANNEL_NAME, cb);
+                    resolve(void 0);
+                };
+
+                fluxWebSocketConnection.interceptPackageTypeMessages(
+                    UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
+                    cb,
+                );
+
+                this.connectionTimeouts.set(
+                    channelName,
+                    setTimeout(() => {
+                        this.connectionTimeouts.delete(channelName);
+                        fluxWebSocketConnection.removePackageTypeInterceptor(UNSUBSCRIBED_NETWORK_CHANNEL_NAME, cb);
+                        reject(new Error(`Channel unsubscription timed out for channel "${channelName}"`));
+                    }, CONNECTION_TIMEOUT_MS),
+                );
+
+                webSocketClient.send(`${UNSUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
+            });
+        }
 
         if (webSocketClient) {
-            webSocketClient.send(`${UNSUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
-
-            // TODO wait for acknowledgment
             return Promise.resolve(void 0);
         }
 

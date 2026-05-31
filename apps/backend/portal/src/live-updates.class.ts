@@ -129,11 +129,9 @@ export class LiveUpdates {
                 const fluxConnectedAgentNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
                     .joinChannel('connected-agents');
 
-                let num2: number = 0;
                 setInterval(() => {
-                    num2++;
                     const networkAgentCountAt: TNetworkAgentCountAt = {
-                        count: num2,
+                        count: 0,
                         date: new Date(),
                     };
 
@@ -144,11 +142,9 @@ export class LiveUpdates {
                 const fluxActiveChannels: FluxNetworkChannel = await fluxNetworkConnection
                     .joinChannel('active-channels');
 
-                let num3: number = 0;
                 setInterval(() => {
-                    num3++;
                     const fluxActiveChannelsAt: TNetworkChannelCountAt = {
-                        count: num3,
+                        count: 0,
                         date: new Date(),
                     };
 
@@ -159,11 +155,9 @@ export class LiveUpdates {
                 const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
                     .joinChannel('connected-authorities');
 
-                let num4: number = 0;
                 setInterval(() => {
-                    num4++;
                     const fluxActiveChannelsAt: TNetworkChannelCountAt = {
-                        count: num4,
+                        count: 0,
                         date: new Date(),
                     };
 

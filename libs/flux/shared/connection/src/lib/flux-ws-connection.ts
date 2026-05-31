@@ -279,6 +279,7 @@ export class FluxWebSocketConnection {
         return this.channelStateManager
             .leaveChannel(
                 channelName,
+                this,
                 this.webSocketClient,
             );
     }

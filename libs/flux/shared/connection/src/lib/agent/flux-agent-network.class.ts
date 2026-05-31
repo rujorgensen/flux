@@ -59,7 +59,7 @@ export class FluxAgentNetworkConnection {
                 channelName,
             );
 
-        this.connectedChannelSet.add(fluxNetworkChannel.channelName);
+        this.connectedChannelSet.add(channelName);
 
         return fluxNetworkChannel;
     }

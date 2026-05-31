@@ -3,6 +3,9 @@
  */
 
 import {
+    type TFluxWebSocketClientMessage,
+} from '@flux/shared/types';
+import {
     RPCServer,
 } from '@flux/shared/ws';
 // import { decrypt } from '../../utils/obscuring/decrypt.utils';
@@ -172,8 +175,8 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
      * Sends a message over the WebSocket connection.
      */
     public send(
-        message: string,
-    ) {
+        message: TFluxWebSocketClientMessage,
+    ): void {
         if (this.ws?.readyState === WebSocket.OPEN) {
             this.ws.send(message);
         } else {
