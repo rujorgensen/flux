@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import {
+    type TChannelName,
     SUBSCRIBE_NETWORK_CHANNEL_NAME,
     SUBSCRIBED_NETWORK_CHANNEL_NAME,
 } from '@flux/shared/types';
@@ -25,19 +26,19 @@ describe('ChannelStateManager', () => {
                 expect(packageType).toBe(SUBSCRIBED_NETWORK_CHANNEL_NAME);
                 removedCallbacks.push(callback);
             },
-        } as any;
+        };
         const webSocketClient = {
             send: (message: string) => {
                 expect(message).toBe(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:general`);
                 subscribedCallback?.('general');
             },
-        } as any;
+        };
 
         const joinedChannel = await Promise.race([
             manager.joinChannel(
-                'general' as any,
-                fluxWebSocketConnection,
-                webSocketClient,
+                'general' as TChannelName,
+                fluxWebSocketConnection as any,
+                webSocketClient as any,
             ),
             new Promise<'timeout'>((resolve) => {
                 setTimeout(() => resolve('timeout'), 50);
@@ -46,7 +47,7 @@ describe('ChannelStateManager', () => {
 
         expect(joinedChannel).not.toBe('timeout');
         expect(joinedChannel).toMatchObject({
-            channelName: 'general',
+            _channelName: 'general',
         });
         expect(removedCallbacks).toHaveLength(1);
     });
@@ -71,22 +72,22 @@ describe('ChannelStateManager', () => {
                 expect(packageType).toBe(SUBSCRIBED_NETWORK_CHANNEL_NAME);
                 removedCallbacks.push(callback);
             },
-        } as any;
+        };
         const webSocketClient = {
             send: (message: string) => {
                 sentMessages.push(message);
             },
-        } as any;
+        };
 
         const alphaJoinPromise = manager.joinChannel(
-            'alpha' as any,
-            fluxWebSocketConnection,
-            webSocketClient,
+            'alpha' as TChannelName,
+            fluxWebSocketConnection as any,
+            webSocketClient as any,
         );
         const betaJoinPromise = manager.joinChannel(
-            'beta' as any,
-            fluxWebSocketConnection,
-            webSocketClient,
+            'beta' as TChannelName,
+            fluxWebSocketConnection as any,
+            webSocketClient as any,
         );
 
         expect(sentMessages).toEqual([
@@ -101,7 +102,7 @@ describe('ChannelStateManager', () => {
 
         const betaChannel = await betaJoinPromise;
         expect(betaChannel).toMatchObject({
-            channelName: 'beta',
+            _channelName: 'beta',
         });
         expect(removedCallbacks).toHaveLength(1);
 
@@ -111,7 +112,7 @@ describe('ChannelStateManager', () => {
 
         const alphaChannel = await alphaJoinPromise;
         expect(alphaChannel).toMatchObject({
-            channelName: 'alpha',
+            _channelName: 'alpha',
         });
         expect(removedCallbacks).toHaveLength(2);
     });
