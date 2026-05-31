@@ -183,7 +183,7 @@ describe('ChannelStateManager', () => {
 
         unsubscribedCallback?.(`${UNSUBSCRIBED_NETWORK_CHANNEL_NAME}:general`);
 
-        await expect(leavePromise).resolves.toBeUndefined();
+        expect(leavePromise).resolves.toBeUndefined();
 
         expect(removedInterceptors).toContain(UNSUBSCRIBED_NETWORK_CHANNEL_NAME);
     });
