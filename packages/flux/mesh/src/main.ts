@@ -429,16 +429,16 @@ export class FluxMeshServer {
 
                                     if (authorized) {
                                         ws.subscribe(`networks/${ws.data.networkId}/channels/${channelName}`);
-                                        ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
-                                        ws.data.channelNames.add(channelName);
-                                        PicoLogger.log(`🎉 Client was authorized on channel name '${channelName}'`, 'authorized');
-
                                         await this.channelManager
                                             .joinNetworkChannel(
                                                 ws.data.networkId,
                                                 channelName,
                                                 ws.data.address,
                                             );
+
+                                        ws.data.channelNames.add(channelName);
+                                        ws.send(`${SUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
+                                        PicoLogger.log(`🎉 Client was authorized on channel name '${channelName}'`, 'authorized');
                                     } else {
                                         console.error(`Client was not authorized to connect to channel name '${channelName}'`);
                                         ws.send(`${ERROR}:Not authorized`);
@@ -484,16 +484,16 @@ export class FluxMeshServer {
 
                             try {
                                 ws.unsubscribe(`networks/${ws.data.networkId}/channels/${channelName}`);
-                                ws.send(`${UNSUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
-                                ws.data.channelNames.delete(channelName);
-                                console.log(`🚪 Client left channel name '${channelName}'`);
-
                                 await this.channelManager
                                     .leaveNetworkChannel(
                                         ws.data.networkId,
                                         channelName,
                                         ws.data.address,
                                     );
+
+                                ws.data.channelNames.delete(channelName);
+                                ws.send(`${UNSUBSCRIBED_NETWORK_CHANNEL_NAME}:${channelName}`);
+                                console.log(`🚪 Client left channel name '${channelName}'`);
 
                             } catch (error) {
                                 if (error instanceof Error) {

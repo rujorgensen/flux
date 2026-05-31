@@ -5,6 +5,7 @@ import {
     type TChannelName,
     SUBSCRIBE_NETWORK_CHANNEL_NAME,
     SUBSCRIBED_NETWORK_CHANNEL_NAME,
+    UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
 } from "@flux/shared/types";
 import { FluxNetworkChannel } from "./flux-network-channel.class";
@@ -93,6 +94,7 @@ export class ChannelStateManager {
      */
     public async leaveChannel(
         channelName: TChannelName,
+        fluxWebSocketConnection: FluxWebSocketConnection,
         webSocketClient: FluxWebSocketClientConnection | undefined,
     ): Promise<void> {
         const existingChannel = this.joinedChannels.get(channelName);
@@ -108,11 +110,46 @@ export class ChannelStateManager {
         }
 
         if (webSocketClient && (existingChannel.useCount <= 0)) {
-            webSocketClient.send(`${UNSUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
+            return new Promise((resolve, reject) => {
+                const cb = (
+                    message: string,
+                ) => {
+                    const receivedChannelName: string = message.substring(message.indexOf(':') + 1);
+
+                    if (channelName !== receivedChannelName) {
+                        return;
+                    }
+
+                    const timeout = this.connectionTimeouts.get(channelName);
+
+                    if (timeout) {
+                        clearTimeout(timeout);
+                        this.connectionTimeouts.delete(channelName);
+                    }
+
+                    fluxWebSocketConnection.removePackageTypeInterceptor(UNSUBSCRIBED_NETWORK_CHANNEL_NAME, cb);
+                    resolve(void 0);
+                };
+
+                fluxWebSocketConnection.interceptPackageTypeMessages(
+                    UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
+                    cb,
+                );
+
+                this.connectionTimeouts.set(
+                    channelName,
+                    setTimeout(() => {
+                        this.connectionTimeouts.delete(channelName);
+                        fluxWebSocketConnection.removePackageTypeInterceptor(UNSUBSCRIBED_NETWORK_CHANNEL_NAME, cb);
+                        reject(new Error(`Channel unsubscription timed out for channel "${channelName}"`));
+                    }, CONNECTION_TIMEOUT_MS),
+                );
+
+                webSocketClient.send(`${UNSUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
+            });
         }
 
         if (webSocketClient) {
-            // TODO wait for acknowledgment
             return Promise.resolve(void 0);
         }
 
