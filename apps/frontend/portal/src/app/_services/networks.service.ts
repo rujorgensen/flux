@@ -5,15 +5,9 @@ import {
     map,
 } from 'rxjs';
 import { api } from '../_services/api/api';
-
-export interface INetwork {
-    id: string;
-    alias: string;
-    users: {
-        userId: string;
-        role: string;
-    }[];
-}
+import type {
+    INetwork_S,
+} from '@flux/shared/features/networks';
 
 const STORAGE_KEY = 'flux_selected_network_id';
 export const MAX_NETWORKS = 3;
@@ -22,18 +16,19 @@ export const MAX_NETWORKS = 3;
     providedIn: 'root',
 })
 export class NetworksService {
-    private readonly _networks$ = new BehaviorSubject<INetwork[]>([]);
-    private readonly _selectedNetwork$ = new BehaviorSubject<INetwork | null>(null);
+    private readonly _networks$ = new BehaviorSubject<INetwork_S[]>([]);
+    private readonly _selectedNetwork$ = new BehaviorSubject<INetwork_S | null>(null);
     private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
 
-    public readonly networks$: Observable<INetwork[]> = this._networks$.asObservable();
-    public readonly selectedNetwork$: Observable<INetwork | null> = this._selectedNetwork$.asObservable();
+    public readonly networks$: Observable<INetwork_S[]> = this._networks$.asObservable();
+    public readonly selectedNetwork$: Observable<INetwork_S | null> = this._selectedNetwork$.asObservable();
     public readonly isLoading$: Observable<boolean> = this._isLoading$.asObservable();
     public readonly canCreateNetwork$: Observable<boolean> = this._networks$.pipe(
         map((nets) => nets.length < MAX_NETWORKS),
     );
 
     constructor(
+
     ) {
         this.loadNetworks();
     }
@@ -104,7 +99,7 @@ export class NetworksService {
     }
 
     public selectNetwork(
-        network: INetwork | null,
+        network: INetwork_S | null,
     ): void {
         this._selectedNetwork$.next(network);
         if (network) {
@@ -115,7 +110,7 @@ export class NetworksService {
     }
 
     private restoreSelectedNetwork(
-        networks: INetwork[],
+        networks: INetwork_S[],
     ): void {
         const savedId = localStorage.getItem(STORAGE_KEY);
         if (savedId) {

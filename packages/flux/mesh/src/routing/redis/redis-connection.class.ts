@@ -13,7 +13,11 @@ import type {
 import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
-import { ISplitMessageResult, splitOrThrowMessage, TMessageConstruct } from './_utils/split-message.utils';
+import {
+    type ISplitMessageResult,
+    type TMessageConstruct,
+    splitOrThrowMessage,
+} from './_utils/split-message.utils';
 
 let redisConnection: RedisConnection | undefined;
 
@@ -53,14 +57,14 @@ export class RedisConnection {
     public readonly hash;
 
     constructor(
-        private readonly _optionsOrURL: string | {
+        optionsOrURL: string | {
             name?: string, // Optional name for the client to tell them apart in the logs
             url: string,
         },
     ) {
-        const url = typeof this._optionsOrURL === 'string'
-            ? this._optionsOrURL
-            : this._optionsOrURL.url;
+        const url = typeof optionsOrURL === 'string'
+            ? optionsOrURL
+            : optionsOrURL.url;
 
         this.cacheClient = new BunRedisClient({
             url,
@@ -110,7 +114,7 @@ export class RedisConnection {
         // *** Create Redis subscriber
         this.pubSub = new BunRedisPubSub(
             {
-                name: (typeof this._optionsOrURL === 'object') ? this._optionsOrURL.name : undefined,
+                name: (typeof optionsOrURL === 'object') ? optionsOrURL.name : undefined,
                 url,
                 socket: {
                     reconnectStrategy: (

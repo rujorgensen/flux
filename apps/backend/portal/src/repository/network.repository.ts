@@ -1,9 +1,11 @@
 import type {
     PrismaClient,
     Network,
+    ESubscriptionType,
 } from '@prisma-types/flux';
 import { nanoid } from 'nanoid';
-import type { TNetworkId_S } from '@flux/shared/types';
+import type { TNetworkId_S, TSubscription_S } from '@flux/shared/types';
+import type { INetwork_S } from '@flux/shared/features/networks';
 
 type NetworkWithUserNetworks = Network & {
     userNetworks: {
@@ -12,15 +14,6 @@ type NetworkWithUserNetworks = Network & {
         role: string;
     }[];
 };
-
-export interface INetwork_S {
-    id: string;
-    alias: string;
-    users: {
-        userId: string;
-        role: string;
-    }[];
-}
 
 interface IConnectionHistoryPoint {
     count: number;
@@ -265,6 +258,7 @@ export class NetworkRepository {
     ): INetwork_S {
         return {
             id: network.id as TNetworkId_S,
+            subscription: convertSubscriptionType(network.subscriptionType),
             alias: network.alias,
             users: network.userNetworks.map((userNetwork) => ({
                 userId: userNetwork.userId,
@@ -273,3 +267,19 @@ export class NetworkRepository {
         };
     }
 }
+
+const convertSubscriptionType = (
+    subscriptionType: ESubscriptionType,
+): TSubscription_S => {
+    switch (subscriptionType) {
+        case 'FREE':
+            return 'free';
+        case 'MEDIUM':
+            return 'medium';
+        case 'HIGH':
+            return 'high';
+        default:
+            // oxlint-disable-next-line typescript/restrict-template-expressions
+            throw new Error(`Unknown subscription type: ${subscriptionType}`);
+    };
+};

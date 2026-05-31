@@ -1,0 +1,15 @@
+{
+    "name": "shared-features-networks",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/shared/features/networks/src",
+    "projectType": "library",
+    "tags": [
+        "feature:networks",
+        "scope:shared"
+    ],
+    "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        }
+    }
+}

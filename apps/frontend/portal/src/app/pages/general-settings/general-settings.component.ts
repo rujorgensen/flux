@@ -4,7 +4,10 @@ import type { Observable } from 'rxjs';
 import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { NetworkTokensComponent } from '../../components/network-tokens/network-tokens.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
-import { NetworksService, type INetwork } from '../../_services/networks.service';
+import { NetworksService } from '../../_services/networks.service';
+import type {
+    INetwork_S,
+} from '@flux/shared/features/networks';
 
 interface UserSession {
     id?: string;
@@ -26,7 +29,7 @@ interface UserSession {
 })
 export class GeneralSettingsPageComponent implements OnInit {
     protected readonly userSession = signal<UserSession | null>(null);
-    protected readonly selectedNetwork$: Observable<INetwork | null>;
+    protected readonly selectedNetwork$: Observable<INetwork_S | null>;
 
     constructor(
         private readonly networksService: NetworksService,
