@@ -29,7 +29,6 @@ export default defineConfig({
         'no-console': 'error',
         'eqeqeq': 'error',
         '@typescript-eslint/no-unnecessary-condition': 'error',
-        '@typescript-eslint/ts-config-error': 'error',
         'no-alert': 'warn',// Change to error later
         'oxc/approx-constant': 'error',
         'typescript/no-floating-promises': 'error',
@@ -50,13 +49,6 @@ export default defineConfig({
         'eslint/no-var': 'error',
         'eslint/prefer-const': 'error',
         'eslint/no-duplicate-imports': 'error',
-        'eslint/quotes': [
-            'error',
-            'single',
-            {
-                avoidEscape: true,
-            },
-        ],
         'unicorn/filename-case': [
             'error',
             {
