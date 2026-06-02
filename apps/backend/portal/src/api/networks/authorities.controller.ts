@@ -7,11 +7,11 @@ import {
 } from '@flux/shared/types';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { networkIdValidatorPlugin } from './plugins';
-import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
+import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 import { kickSocket } from './kick-socket.util';
 
 const meshRedisConnection = await getMeshBunRedisConnection();
-const networkAuthorityService: NetworkAuthorityRedisSortedSet = new NetworkAuthorityRedisSortedSet(meshRedisConnection.getClient());
+const networkAuthorityRedisService: NetworkAuthorityRedisService = new NetworkAuthorityRedisService(meshRedisConnection.getClient());
 
 class InvalidAuthorityIdError extends Error {
     status = 400;
@@ -31,7 +31,7 @@ async function kickAuthoritySocket(
     networkId: TNetworkId_S,
     authorityId: TClientId,
 ): Promise<void> {
-    const authority = await networkAuthorityService
+    const authority = await networkAuthorityRedisService
         .readAuthorityByClientId(
             networkId,
             authorityId,
@@ -61,7 +61,7 @@ export const networkAuthorityController = new Elysia({
      */
     .get('/count', ({ networkId, query }): Promise<TNetworkAuthorityCountAt> => {
         if (query.when === 'now') {
-            return networkAuthorityService
+            return networkAuthorityRedisService
                 .readAuthorityCount(
                     networkId,
                 );
@@ -87,7 +87,7 @@ export const networkAuthorityController = new Elysia({
     }) => {
         const page = query.page ?? 1;
         const pageSize = Math.min(query.pageSize ?? 25, 100);
-        const all = await networkAuthorityService.readAuthorities(networkId);
+        const all = await networkAuthorityRedisService.readAuthorities(networkId);
         const total = all.length;
         const start = (page - 1) * pageSize;
 
@@ -114,7 +114,7 @@ export const networkAuthorityController = new Elysia({
     .delete('', async ({
         networkId,
     }) => {
-        const authorities = await networkAuthorityService
+        const authorities = await networkAuthorityRedisService
             .readAuthorities(
                 networkId,
             );

@@ -6,7 +6,7 @@ import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
 import { NetworkService } from '../_services/network.service';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
-import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
+import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 import { getNetworkTokenServiceInstance } from '@backend/features/network';
 
 export const networkRepository: NetworkRepository = new NetworkRepository(
@@ -16,12 +16,14 @@ export const networkRepository: NetworkRepository = new NetworkRepository(
 const redisConnection_: RedisConnection = getMeshRedisConnection();
 const meshRedisConnection = await getMeshBunRedisConnection();
 const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
-const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
+const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(
+    meshRedisConnection.getClient(),
+);
 
 export const networkService: NetworkService = new NetworkService(
     networkAgentRedisCacheService,
     networkChannelRedisCacheService,
-    new NetworkAuthorityRedisSortedSet(meshRedisConnection.getClient()),
+    new NetworkAuthorityRedisService(meshRedisConnection.getClient()),
 );
 
 export const networkDecorator = new Elysia()
