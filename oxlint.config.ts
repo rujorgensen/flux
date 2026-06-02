@@ -41,6 +41,7 @@ export default defineConfig({
         ],
         'eslint/no-console': 'off',
         'eslint/no-debugger': 'error',
+        'eslint/no-underscore-dangle': 'off',
         'eslint/no-unused-vars': 'warn', // Change to error later
         'eslint/eqeqeq': [
             'error',
