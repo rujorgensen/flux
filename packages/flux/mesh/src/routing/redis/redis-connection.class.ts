@@ -10,7 +10,7 @@ import type {
     TNetworkToken_S,
     TProcessAddress,
 } from '@flux/shared/types';
-import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
+import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
 import {
@@ -50,7 +50,7 @@ export class RedisConnection {
     // Dedicated clients for handling pub/sub
     private readonly pubSub: BunRedisPubSub;
 
-    public readonly networkAuthoritySet: NetworkAuthorityRedisSortedSet;
+    public readonly networkAuthoritySet: NetworkAuthorityRedisService;
     public readonly networkAgentRedisService: NetworkAgentRedisService;
 
     // Wrapper to not expose BunRedisClient functions
@@ -108,7 +108,7 @@ export class RedisConnection {
                 console.warn('🚫 Redis connection closed');
             });
 
-        this.networkAuthoritySet = new NetworkAuthorityRedisSortedSet(this.cacheClient.getClient());
+        this.networkAuthoritySet = new NetworkAuthorityRedisService(this.cacheClient.getClient());
         this.networkAgentRedisService = new NetworkAgentRedisService(this.cacheClient.getClient());
 
         // *** Create Redis subscriber

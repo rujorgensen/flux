@@ -1,14 +1,14 @@
 import { NetworkAgentRedisService } from "@flux/mesh/store/redis/network-agent";
 import { NetworkChannelHash } from "@flux/mesh/store/redis/network-channel";
 import { TNetworkId_S } from "@flux/shared/types";
-import { NetworkAuthorityRedisSortedSet } from '@flux/mesh/store/redis/network-authority';
+import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 
 export class NetworkService {
 
     constructor(
         private readonly _networkAgentRedisCacheService: NetworkAgentRedisService,
         private readonly _networkChannelRedisCacheService: NetworkChannelHash,
-        private readonly _networkAuthorityService: NetworkAuthorityRedisSortedSet,
+        private readonly _networkAuthorityRedisService: NetworkAuthorityRedisService,
     ) {}
 
     public async readConnectionStatus(
@@ -19,7 +19,7 @@ export class NetworkService {
         channels: number;
     }> {
         const allNetworkAgents = await this._networkAgentRedisCacheService.readAgents(networkId);
-        const allNetworkAuthorities = await this._networkAuthorityService.readAuthorities(networkId);
+        const allNetworkAuthorities = await this._networkAuthorityRedisService.readAuthorities(networkId);
         const allNetworkChannels = await this._networkChannelRedisCacheService
             .readNetworkChannelCount(
                 networkId,
