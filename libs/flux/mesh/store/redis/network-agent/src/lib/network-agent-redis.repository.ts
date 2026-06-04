@@ -13,11 +13,12 @@ import type { TNetworkAgent } from './network-agent-cache.type';
 import type {
     TFluxClientUID,
 } from '@flux/shared/utils';
+import { RedisConnection } from '@flux/mesh';
 
 export class NetworkAgentRedisRepository {
 
     constructor(
-        private readonly _client: RedisClient,
+        private readonly _redisConnection: RedisConnection,
     ) {}
 
     // ****************************************************************************
@@ -38,18 +39,18 @@ export class NetworkAgentRedisRepository {
         if (uid) {
             const key_: string = `networks/${networkId}/agent-uids`;
 
-            await this._client.hset(key_, {
+            await this._redisConnection.hash.hset(key_, {
                 [uid]: clientId,
             });
 
-            await this._client.expire(key_, 500);
+            await this._redisConnection.hash.expire(key_, 500);
         }
 
         // Add to network
-        await this._client.sadd(`networks/${networkId}/agents`, clientId);
+        await this._redisConnection.hash.sadd(`networks/${networkId}/agents`, clientId);
 
         // Add to global list
-        await this._client.hset(
+        await this._redisConnection.hash.hset(
             `~/agents`,
             {
                 [clientId]: networkId,
@@ -57,7 +58,7 @@ export class NetworkAgentRedisRepository {
         );
 
         // Add to agent info hash
-        await this._client.hset(
+        await this._redisConnection.hash.hset(
             `networks/${networkId}/agents/${clientId}`,
             {
                 ...(ip ? {
@@ -90,7 +91,7 @@ export class NetworkAgentRedisRepository {
         const key: string = `networks/${networkId}/agents/${clientId}`;
 
         // Consider if this should only be emitted via sockets, and not stored. Increase the total network usage though.
-        await this._client.hset(key, {
+        await this._redisConnection.hash.hset(key, {
             'bytes': `${bytes}`,
             'packets': `${packets}`,
         });
@@ -107,7 +108,7 @@ export class NetworkAgentRedisRepository {
         networkId: TNetworkId_S,
     ): Promise<TNetworkAgent[]> {
         // Add to network
-        const networkAgents = await this._client.smembers(`networks/${networkId}/agents`);
+        const networkAgents = await this._redisConnection.hash.smembers(`networks/${networkId}/agents`);
 
         // Add to agent
         const agentData: TNetworkAgent[] = [];
@@ -133,7 +134,7 @@ export class NetworkAgentRedisRepository {
         networkId: TNetworkId_S,
     ): Promise<TNetworkAgentCountAt> {
         return {
-            count: await this._client.scard(`networks/${networkId}/agents`),
+            count: await this._redisConnection.hash.scard(`networks/${networkId}/agents`),
             date: new Date(),
         };
     }
@@ -145,7 +146,7 @@ export class NetworkAgentRedisRepository {
         networkId: TNetworkId_S,
         clientOwnUId: TAgentOwnUId,
     ): Promise<TAddress> {
-        const [clientAddress] = await this._client.hmget(`networks/${networkId}/agent-uids`, [clientOwnUId]);
+        const [clientAddress] = await this._redisConnection.hash.hmget(`networks/${networkId}/agent-uids`, [clientOwnUId]);
 
         if (!clientAddress) {
             throw new Error(`Network agent not found for networkId: '${networkId}'`);
@@ -159,7 +160,8 @@ export class NetworkAgentRedisRepository {
         clientId: TClientId,
     ): Promise<TNetworkAgent | null> {
 
-        const [name, ip, address, bytes, packets, connectedAt] = await this._client
+        const [name, ip, address, bytes, packets, connectedAt] = await this._redisConnection
+            .hash
             .hmget(
                 `networks/${networkId}/agents/${clientId}`,
                 [
@@ -203,21 +205,22 @@ export class NetworkAgentRedisRepository {
         const networkId_: TNetworkId_S = networkId ?? await this.readAgentNetworkIdByClientIdOrThrow(clientId);
 
         if (uid) {
-            await this._client.hdel(`networks/${networkId_}/agent-uids`, uid);
+            await this._redisConnection.hash.hdel(`networks/${networkId_}/agent-uids`, uid);
         }
 
         // Remove from global
-        await this._client
+        await this._redisConnection
+            .hash
             .hdel(
                 `~/agents`,
                 clientId,
             );
 
         // Remove from network
-        await this._client.srem(`networks/${networkId_}/agents`, clientId);
+        await this._redisConnection.hash.srem(`networks/${networkId_}/agents`, clientId);
 
         // Remove from agent info hash
-        await this._client.del(`networks/${networkId_}/agents/${clientId}`);
+        await this._redisConnection.hash.del(`networks/${networkId_}/agents/${clientId}`);
     }
 
     // ****************************************************************************
@@ -226,7 +229,7 @@ export class NetworkAgentRedisRepository {
     private async readAgentNetworkIdByClientIdOrThrow(
         clientId: TClientId,
     ): Promise<TNetworkId_S> {
-        const networkId = await this._client.hget(`~/agents`, clientId);
+        const networkId = await this._redisConnection.hash.hget(`~/agents`, clientId);
 
         if (!networkId) {
             throw new Error(`Network agent not found for clientId: '${clientId}'`);

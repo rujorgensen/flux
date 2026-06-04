@@ -2,7 +2,7 @@ import {
     type RedisConnection,
     getMeshRedisConnection,
 } from '../routing/redis/redis-connection.class';
-import type {
+import {
     NetworkAgentRedisService,
 } from '@flux/mesh/store/redis/network-agent';
 import {
@@ -29,7 +29,7 @@ export class NetworkAgentRedisCache {
     constructor(
 
     ) {
-        this.networkAgentRedisService = this.redisConnection.networkAgentRedisService;
+        this.networkAgentRedisService = new NetworkAgentRedisService(this.redisConnection);
         this.networkUsageRedisCacheService = new NetworkUsageRedisCacheService(this.redisConnection['cacheClient'].getClient());
     }
 
@@ -146,8 +146,7 @@ export class NetworkAgentRedisCache {
             return cached;
         }
 
-        const address: TAddress = await this.redisConnection
-            .networkAgentRedisService
+        const address: TAddress = await this.networkAgentRedisService
             .readClientAddressByUIDOrThrow(
                 networkId,
                 clientOwnUId

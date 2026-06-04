@@ -10,8 +10,8 @@ import type {
     TNetworkToken_S,
     TProcessAddress,
 } from '@flux/shared/types';
-import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
-import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
+// import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
+// import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 import type { TGlobalChannel } from '../global-channel/global-channel-pubsub.class';
 import {
     type ISplitMessageResult,
@@ -49,9 +49,6 @@ export class RedisConnection {
 
     // Dedicated clients for handling pub/sub
     private readonly pubSub: BunRedisPubSub;
-
-    public readonly networkAuthoritySet: NetworkAuthorityRedisService;
-    public readonly networkAgentRedisService: NetworkAgentRedisService;
 
     // Wrapper to not expose BunRedisClient functions
     public readonly hash;
@@ -108,8 +105,8 @@ export class RedisConnection {
                 console.warn('🚫 Redis connection closed');
             });
 
-        this.networkAuthoritySet = new NetworkAuthorityRedisService(this.cacheClient.getClient());
-        this.networkAgentRedisService = new NetworkAgentRedisService(this.cacheClient.getClient());
+        // this.networkAuthoritySet = new NetworkAuthorityRedisService(this.cacheClient.getClient());
+        // this.networkAgentRedisService = new NetworkAgentRedisService(this.cacheClient.getClient());
 
         // *** Create Redis subscriber
         this.pubSub = new BunRedisPubSub(
@@ -138,6 +135,8 @@ export class RedisConnection {
         this.hash = {
             sadd: hashClient.sadd.bind(hashClient),
             hset: hashClient.hset.bind(hashClient),
+            hget: hashClient.hget.bind(hashClient),
+            hdel: hashClient.hdel.bind(hashClient),
             smembers: hashClient.smembers.bind(hashClient),
             srem: hashClient.srem.bind(hashClient),
             scard: hashClient.scard.bind(hashClient),
@@ -312,6 +311,55 @@ export class RedisConnection {
     }
 
     // ****************************************************************************
+    // *** Publish to anyone listening
+    // ****************************************************************************
+    public async publishGlobal(
+        networkId: TNetworkId_S,
+        channel:
+            'agent-count-change' |
+            `agent-throughput` |
+            'agent-created' |
+            'agent-deleted' |
+            'authority-count-change' |
+            'authority-created' |
+            'authority-deleted' |
+            'channel-created' |
+            'channel-usage' |
+            'channel-updated' |
+            'channel-deleted',
+        message: string,
+    ): Promise<number> {
+        return await this.pubSub
+            .publish(
+                `+/networks/${networkId}/${channel}`,
+                message,
+            );
+    }
+
+    public subscribeGlobal(
+        networkId: TNetworkId_S,
+        channel:
+            'agent-count-change' |
+            `agent-throughput` |
+            'agent-created' |
+            'agent-deleted' |
+            'authority-count-change' |
+            'authority-created' |
+            'authority-deleted' |
+            'channel-created' |
+            'channel-usage' |
+            'channel-updated' |
+            'channel-deleted',
+        callback: (data: string) => void,
+    ): Promise<void> {
+        return this.pubSub
+            .subscribe(
+                `+/networks/${networkId}/${channel}`,
+                callback,
+            );
+    }
+
+    // ****************************************************************************
     // *** Publish Directly to Address
     // ****************************************************************************
 
@@ -415,24 +463,24 @@ export class RedisConnection {
      * Marks the given address as connected in Redis.
      */
     public async setConnected(
-        address: string,
+        processAddress: TProcessAddress,
     ): Promise<void> {
         await this.hash.hset(
-            `machines/processes/${address}`,
+            `machines/processes/${processAddress}`,
             {
                 'status': 'connected',
                 'updatedAt': new Date().toISOString(),
             },
         );
 
-        await this.hash.expire(`machines/processes/${address}`, 5);
+        await this.hash.expire(`machines/processes/${processAddress}`, 5);
     }
 
     /**
      * Marks the given address as disconnected in Redis.
      */
     public async setDisconnected(
-        _address: string,
+        _processAddress: TProcessAddress,
     ): Promise<void> {
         // !TODO
     }

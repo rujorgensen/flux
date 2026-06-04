@@ -7,7 +7,7 @@ import {
     validateChannelNameOrThrow,
     InvaliChannelNameError,
 } from '@flux/shared/types';
-import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
+import { NetworkChannelService } from '@flux/mesh/store/redis/network-channel';
 import { getNetworkTokenServiceInstance, NetworkTokenCache } from '@backend/features/network';
 import {
     type RedisConnection,
@@ -16,7 +16,7 @@ import {
 import { networkIdValidatorPlugin } from './plugins';
 
 const redisConnection_: RedisConnection = getMeshRedisConnection();
-const networkChannelRedisCacheService: NetworkChannelHash = new NetworkChannelHash(redisConnection_);
+const networkChannelRedisCacheService: NetworkChannelService = new NetworkChannelService(redisConnection_);
 const networkTokenCache: NetworkTokenCache = new NetworkTokenCache(
     getMeshRedisConnection(),
     getNetworkTokenServiceInstance(),

@@ -11,13 +11,21 @@ import {
 } from '@flux/shared/types';
 import { RedisConnection } from '../../routing/redis/redis-connection.class';
 import { readProcessAddress } from '../../routing/addressing.utils';
+import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
+import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 
 export class GlobalClientManager {
     private readonly processAddress: TProcessAddress = readProcessAddress();
 
+    private readonly networkAgentRedisService: NetworkAgentRedisService;
+    private readonly networkAuthorityRedisService: NetworkAuthorityRedisService;
+
     constructor(
         private readonly _redisConnection: RedisConnection,
-    ) {}
+    ) {
+        this.networkAgentRedisService = new NetworkAgentRedisService(this._redisConnection);
+        this.networkAuthorityRedisService = new NetworkAuthorityRedisService(this._redisConnection);
+    }
 
     /**
      * Sends a global message to kick a client.
@@ -44,16 +52,14 @@ export class GlobalClientManager {
             // We failed to find the owner process, we have to do the cleanup here
             switch (type) {
                 case 'agent': {
-                    await this._redisConnection
-                        .networkAgentRedisService
+                    await this.networkAgentRedisService
                         .unregisterAgentOrThrow(
                             clientId,
                         );
                     break;
                 }
                 case 'authority': {
-                    await this._redisConnection
-                        .networkAuthoritySet
+                    await this.networkAuthorityRedisService
                         .unregisterAuthority(
                             clientId,
                         );

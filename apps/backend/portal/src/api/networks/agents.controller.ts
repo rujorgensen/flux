@@ -1,6 +1,4 @@
 import { Elysia, t } from 'elysia';
-import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
-import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import {
     type TAddress,
     type TNetworkAgentCountAt,
@@ -8,9 +6,7 @@ import {
 } from '@flux/shared/types';
 import { networkIdValidatorPlugin } from './plugins';
 import { kickSocket } from './kick-socket.util';
-
-const meshRedisConnection = await getMeshBunRedisConnection();
-const networkAgentRedisCacheService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection.getClient());
+import { networkDecorator } from '../../_decorators/network-service.decorator';
 
 class InvalidAgentIdError extends Error {
     status = 400;
@@ -27,15 +23,17 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
         InvalidAgentIdError,
     })
 
+    .use(networkDecorator)
+
     .use(networkIdValidatorPlugin)
 
     /**
      * '/api/networks/:networkId/agents/count?when={'now'}'
      * '/api/networks/:networkId/agents/count?startDate={startDate}&endDate={endDate}'
      */
-    .get('/count', ({ networkId, query }): Promise<TNetworkAgentCountAt> => {
+    .get('/count', ({ networkId, query, serviceProviders }): Promise<TNetworkAgentCountAt> => {
         if (query.when === 'now') {
-            return networkAgentRedisCacheService
+            return serviceProviders.networkAgentService
                 .readAgentCount(
                     networkId,
                 );
@@ -59,10 +57,11 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
         async ({
             networkId,
             query,
+            serviceProviders: { networkAgentService },
         }) => {
             const page = query.page ?? 1;
             const pageSize = Math.min(query.pageSize ?? 25, 100);
-            const all = await networkAgentRedisCacheService
+            const all = await networkAgentService
                 .readAgents(networkId);
             const total = all.length;
             const start = (page - 1) * pageSize;
@@ -89,8 +88,9 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
      */
     .delete('', async ({
         networkId,
+        serviceProviders: { networkAgentService },
     }) => {
-        const agents = await networkAgentRedisCacheService
+        const agents = await networkAgentService
             .readAgents(networkId);
 
         await Promise.all(
@@ -114,12 +114,13 @@ export const networkAgentController = new Elysia({ prefix: '/api/networks/:netwo
     .delete('/:agentId', async ({
         networkId,
         params: { agentId },
+        serviceProviders: { networkAgentService },
     }) => {
         if (!isClientId(agentId)) {
             throw new InvalidAgentIdError();
         }
 
-        const agent = await networkAgentRedisCacheService
+        const agent = await networkAgentService
             .readAgentByClientId(
                 networkId,
                 agentId,

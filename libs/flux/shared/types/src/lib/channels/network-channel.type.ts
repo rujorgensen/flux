@@ -6,10 +6,13 @@ export type TNetworkChannelCountAt = {
     date: Date;
 };
 
-export interface INetworkChannel {
+export interface INetworkChannelState {
     channelName: TChannelName;
     memberDistribution: string;
     members: number;
+}
+
+export interface INetworkChannel extends INetworkChannelState {
     bytes: number;
     createdAt: Date;
 }

@@ -5,15 +5,16 @@ import {
     splitAddressOrThrow,
 } from '@flux/shared/types';
 import {
-    type RedisConnection,
     getMeshRedisConnection,
 } from '../routing/redis/redis-connection.class';
 import type {
     TFluxClientUID,
 } from '@flux/shared/utils';
-
-export class NetworkAuthorityRedisCache {
-    private readonly redisConnection: RedisConnection = getMeshRedisConnection();
+import {
+    NetworkAuthorityRedisService
+} from '@flux/mesh/store/redis/network-authority';
+export class NetworkAuthorityCache {
+    private readonly redisConnection: NetworkAuthorityRedisService = new NetworkAuthorityRedisService(getMeshRedisConnection());
     private readonly cache: Map<TNetworkId_S, Set<TAddress>> = new Map();
     private readonly clientCache: Map<TClientId, { networkId: TNetworkId_S, address: TAddress; }> = new Map();
 
@@ -32,7 +33,6 @@ export class NetworkAuthorityRedisCache {
         machineUID?: TFluxClientUID,
     ): Promise<void> {
         await this.redisConnection
-            .networkAuthoritySet
             .registerAuthority(
                 networkId,
                 clientId,
@@ -67,7 +67,6 @@ export class NetworkAuthorityRedisCache {
         }
 
         await this.redisConnection
-            .networkAuthoritySet
             .unregisterAuthority(
                 clientId,
                 networkId,
@@ -96,7 +95,6 @@ export class NetworkAuthorityRedisCache {
         }
 
         const addresses: TAddress[] = await this.redisConnection
-            .networkAuthoritySet
             .resolveAuthorityAddressesOrThrow(
                 networkId,
             );
@@ -136,7 +134,6 @@ export class NetworkAuthorityRedisCache {
         this.clientCache.delete(clientId);
 
         return this.redisConnection
-            .networkAuthoritySet
             .unregisterGlobal(
                 networkId,
                 networkAuthorityAddress,

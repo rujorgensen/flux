@@ -5,13 +5,10 @@ import {
     type TNetworkId_S,
     isClientId,
 } from '@flux/shared/types';
-import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { networkIdValidatorPlugin } from './plugins';
-import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 import { kickSocket } from './kick-socket.util';
-
-const meshRedisConnection = await getMeshBunRedisConnection();
-const networkAuthorityRedisService: NetworkAuthorityRedisService = new NetworkAuthorityRedisService(meshRedisConnection.getClient());
+import { networkDecorator } from '../../_decorators/network-service.decorator';
+import type { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 
 class InvalidAuthorityIdError extends Error {
     status = 400;
@@ -30,8 +27,9 @@ class InvalidAuthorityIdError extends Error {
 async function kickAuthoritySocket(
     networkId: TNetworkId_S,
     authorityId: TClientId,
+    networkAuthorityService: NetworkAuthorityRedisService,
 ): Promise<void> {
-    const authority = await networkAuthorityRedisService
+    const authority = await networkAuthorityService
         .readAuthorityByClientId(
             networkId,
             authorityId,
@@ -53,15 +51,19 @@ export const networkAuthorityController = new Elysia({
     .error({
         InvalidAuthorityIdError,
     })
+
+    .use(networkDecorator)
+
     .use(networkIdValidatorPlugin)
 
     /**
      * '/api/networks/:networkId/authorities/count?when={'now'}'
      * '/api/networks/:networkId/authorities/count?startDate={startDate}&endDate={endDate}'
      */
-    .get('/count', ({ networkId, query }): Promise<TNetworkAuthorityCountAt> => {
+    .get('/count', ({ networkId, query, serviceProviders }): Promise<TNetworkAuthorityCountAt> => {
         if (query.when === 'now') {
-            return networkAuthorityRedisService
+            return serviceProviders
+                .networkAuthorityService
                 .readAuthorityCount(
                     networkId,
                 );
@@ -84,10 +86,13 @@ export const networkAuthorityController = new Elysia({
     .get('/connected', async ({
         networkId,
         query,
+        serviceProviders,
     }) => {
         const page = query.page ?? 1;
         const pageSize = Math.min(query.pageSize ?? 25, 100);
-        const all = await networkAuthorityRedisService.readAuthorities(networkId);
+        const all = await serviceProviders
+            .networkAuthorityService
+            .readAuthorities(networkId);
         const total = all.length;
         const start = (page - 1) * pageSize;
 
@@ -113,8 +118,10 @@ export const networkAuthorityController = new Elysia({
      */
     .delete('', async ({
         networkId,
+        serviceProviders,
     }) => {
-        const authorities = await networkAuthorityRedisService
+        const authorities = await serviceProviders
+            .networkAuthorityService
             .readAuthorities(
                 networkId,
             );
@@ -123,6 +130,7 @@ export const networkAuthorityController = new Elysia({
             authorities.map((authority) => kickAuthoritySocket(
                 networkId,
                 authority.id,
+                serviceProviders.networkAuthorityService,
             )),
         );
 
@@ -137,6 +145,7 @@ export const networkAuthorityController = new Elysia({
     .delete('/:authorityId', async ({
         networkId,
         params: { authorityId },
+        serviceProviders,
     }) => {
         if (!isClientId(authorityId)) {
             throw new InvalidAuthorityIdError();
@@ -145,6 +154,7 @@ export const networkAuthorityController = new Elysia({
         await kickAuthoritySocket(
             networkId,
             authorityId,
+            serviceProviders.networkAuthorityService,
         );
 
         return { message: `Authority ${authorityId} kicked successfully.` };

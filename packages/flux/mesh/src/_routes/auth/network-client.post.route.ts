@@ -14,7 +14,7 @@ import {
     normalizeAuthorityClaimOrThrow,
 } from '../../auth/auth';
 import type { GlobalRPCClient } from '../../routing/rpc/core/global-rpc-client.class';
-import type { NetworkAuthorityRedisCache } from '../../register/network-authority-redis-cache.class';
+import type { NetworkAuthorityCache } from '../../register/network-authority-cache.class';
 import {
     type TFluxClientUID,
     validateMachineUID,
@@ -26,14 +26,14 @@ import { PicoLogger } from '@utils/pico-logger';
  * This route is used to authorize an agent connection.
  * 
  * @param { BunRequest } request - The incoming HTTP request
- * @param { NetworkAuthorityRedisCache } networkAuthorityManager - The network authority manager
+ * @param { NetworkAuthorityCache } networkAuthorityManager - The network authority manager
  * @param { GlobalRPCClient<'authorizeAgentConnection'> } globalRPCClient - The global RPC client
  * 
  * @returns { Promise<Response> } The HTTP response with auth token or error
  */
 export const authorizeAgentConnection = async (
     request: BunRequest,
-    networkAuthorityManager: NetworkAuthorityRedisCache,
+    networkAuthorityManager: NetworkAuthorityCache,
     globalRPCClient: GlobalRPCClient<'authorizeAgentConnection'>,
 ) => {
     const urlWithParsedQuery: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);

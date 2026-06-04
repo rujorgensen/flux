@@ -1,23 +1,28 @@
-import type {
-    TAddress,
-    TClientId,
-    TNetworkId_S,
-    TNetworkAuthority,
-    TNetworkAuthorityCountAt,
+import {
+    type TAddress,
+    type TClientId,
+    type TNetworkId_S,
+    type TNetworkAuthority,
+    type TNetworkAuthorityCountAt,
+    splitAddressOrThrow,
 } from '@flux/shared/types';
 import type {
     TFluxClientUID,
 } from '@flux/shared/utils';
 import { NetworkAuthorityRedisSortedSet } from './network-authority.redis.sorted-set';
-import { RedisClient } from 'bun';
+import { NetworkAuthorityRedisEvents } from './network-authority-redis.events';
+import { RedisConnection } from '@flux/mesh';
 
 export class NetworkAuthorityRedisService {
 
     private readonly _networkAuthorityRedisSortedSet: NetworkAuthorityRedisSortedSet;
+    private readonly _networkAuthorityRedisEvents: NetworkAuthorityRedisEvents;
+
     constructor(
-        private readonly _client: RedisClient,
+        redisConnection: RedisConnection,
     ) {
-        this._networkAuthorityRedisSortedSet = new NetworkAuthorityRedisSortedSet(this._client);
+        this._networkAuthorityRedisSortedSet = new NetworkAuthorityRedisSortedSet(redisConnection);
+        this._networkAuthorityRedisEvents = new NetworkAuthorityRedisEvents(redisConnection);
     }
 
     // ****************************************************************************
@@ -32,11 +37,23 @@ export class NetworkAuthorityRedisService {
         clientId: TClientId,
         machineUID?: TFluxClientUID,
     ): Promise<void> {
-        return this._networkAuthorityRedisSortedSet
+        await this._networkAuthorityRedisSortedSet
             .registerAuthority(
                 networkId,
                 clientId,
                 machineUID,
+            );
+
+        await this._networkAuthorityRedisEvents
+            .advertiseAuthorityCreated(
+                networkId,
+                clientId,
+            );
+
+        await this._networkAuthorityRedisEvents
+            .advertiseAuthorityCountChange(
+                networkId,
+                await this.readAuthorityCount(networkId).then(c => c.count),
             );
     }
 
@@ -98,10 +115,22 @@ export class NetworkAuthorityRedisService {
         clientId: TClientId,
         networkId?: TNetworkId_S,
     ): Promise<void> {
-        return this._networkAuthorityRedisSortedSet
+        const ret: { networkId: TNetworkId_S; } = await this._networkAuthorityRedisSortedSet
             .unregisterAuthority(
                 clientId,
                 networkId,
+            );
+
+        await this._networkAuthorityRedisEvents
+            .advertiseAuthorityDeleted(
+                ret.networkId,
+                clientId,
+            );
+
+        await this._networkAuthorityRedisEvents
+            .advertiseAuthorityCountChange(
+                ret.networkId,
+                await this.readAuthorityCount(ret.networkId).then(c => c.count),
             );
     }
 
@@ -112,11 +141,26 @@ export class NetworkAuthorityRedisService {
         networkId: TNetworkId_S,
         address: TAddress,
     ): Promise<number> {
-        return this._networkAuthorityRedisSortedSet
+        const result = await this._networkAuthorityRedisSortedSet
             .unregisterGlobal(
                 networkId,
                 address,
             );
+
+        const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address);
+        await this._networkAuthorityRedisEvents
+            .advertiseAuthorityDeleted(
+                networkId,
+                clientId,
+            );
+
+        await this._networkAuthorityRedisEvents
+            .advertiseAuthorityCountChange(
+                networkId,
+                await this.readAuthorityCount(networkId).then(c => c.count),
+            );
+
+        return result;
     }
 
 }

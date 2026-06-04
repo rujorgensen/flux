@@ -4,7 +4,7 @@
 import type { TClientId, TNetworkId_S } from '@flux/shared/types';
 import type { RedisConnection } from '@flux/mesh';
 
-export class NetworkAgentRedisEvents {
+export class NetworkAuthorityRedisEvents {
 
     constructor(
         private readonly _redisConnection: RedisConnection,
@@ -13,56 +13,38 @@ export class NetworkAgentRedisEvents {
     // ****************************************************************************
     // * Advertise Events
     // ****************************************************************************
-    public advertiseAgentCountChange(
+    public advertiseAuthorityCountChange(
         networkId: TNetworkId_S,
-        agentCount: number,
+        authorityCount: number,
     ): Promise<number> {
         return this._redisConnection
             .publishGlobal(
                 networkId,
-                `agent-count-change`,
-                `${agentCount}`,
+                `authority-count-change`,
+                `${authorityCount}`,
             );
     }
 
-    public advertiseAgentCreated(
+    public advertiseAuthorityCreated(
         networkId: TNetworkId_S,
         clientId: TClientId,
     ): Promise<number> {
         return this._redisConnection
             .publishGlobal(
                 networkId,
-                `agent-created`,
+                `authority-created`,
                 clientId,
             );
     }
 
-    public advertiseAgentThroughput(
-        networkId: TNetworkId_S,
-        clientId: TClientId,
-        bytes: number,
-        packets: number,
-    ): Promise<number> {
-        return this._redisConnection
-            .publishGlobal(
-                networkId,
-                `agent-throughput`,
-                JSON.stringify({
-                    clientId,
-                    bytes,
-                    packets,
-                }),
-            );
-    }
-
-    public advertiseAgentDeleted(
+    public advertiseAuthorityDeleted(
         networkId: TNetworkId_S,
         clientId: TClientId,
     ): Promise<number> {
         return this._redisConnection
             .publishGlobal(
                 networkId,
-                `agent-deleted`,
+                `authority-deleted`,
                 clientId,
             );
     }
@@ -70,49 +52,26 @@ export class NetworkAgentRedisEvents {
     // ****************************************************************************
     // * Listen to Events
     // ****************************************************************************
-    public onAgentCountChange(
+    public onAuthorityCountChange(
         networkId: TNetworkId_S,
         callback: (
-            agentCount: number,
+            authorityCount: number,
         ) => void,
     ): Promise<void> {
         return this._redisConnection
             .subscribeGlobal(
                 networkId,
-                `agent-count-change`,
+                `authority-count-change`,
                 (message) => {
-                    const agentCount = Number.parseInt(message);
-                    if (!Number.isNaN(agentCount)) {
-                        callback(agentCount);
+                    const authorityCount = Number.parseInt(message);
+                    if (!Number.isNaN(authorityCount)) {
+                        callback(authorityCount);
                     }
                 },
             );
     }
 
-    public onAgentThroughput(
-        networkId: TNetworkId_S,
-        callback: (
-            clientId: TClientId,
-            bytes: number,
-            packets: number,
-        ) => void,
-    ): Promise<void> {
-        return this._redisConnection
-            .subscribeGlobal(
-                networkId,
-                `agent-throughput`,
-                (message) => {
-                    try {
-                        const parsed = JSON.parse(message) as { clientId: TClientId; bytes: number; packets: number; };
-                        callback(parsed.clientId, parsed.bytes, parsed.packets);
-                    } catch (error) {
-                        console.error('Failed to parse agent throughput event:', message, error);
-                    }
-                },
-            );
-    }
-
-    public onAgentCreated(
+    public onAuthorityCreated(
         networkId: TNetworkId_S,
         callback: (
             clientId: TClientId,
@@ -121,14 +80,14 @@ export class NetworkAgentRedisEvents {
         return this._redisConnection
             .subscribeGlobal(
                 networkId,
-                `agent-created`,
+                `authority-created`,
                 (message) => {
                     callback(message as TClientId);
                 },
             );
     }
 
-    public onAgentDeleted(
+    public onAuthorityDeleted(
         networkId: TNetworkId_S,
         callback: (
             clientId: TClientId,
@@ -137,7 +96,7 @@ export class NetworkAgentRedisEvents {
         return this._redisConnection
             .subscribeGlobal(
                 networkId,
-                `agent-deleted`,
+                `authority-deleted`,
                 (message) => {
                     callback(message as TClientId);
                 },

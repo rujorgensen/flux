@@ -4,13 +4,13 @@
 import type { TClientId } from '@flux/shared/types';
 import type { TConnectedClientSocket } from '../../connected-client-socket.types';
 import { PicoLogger } from '@utils/pico-logger';
-import { NetworkAuthorityRedisCache } from '../../register/network-authority-redis-cache.class';
+import { NetworkAuthorityCache } from '../../register/network-authority-cache.class';
 
 export class LocalAuthorityManager {
 
     constructor(
         private readonly _clientMap: Map<TClientId, TConnectedClientSocket>,
-        private readonly _networkAuthorityRedisCache: NetworkAuthorityRedisCache,
+        private readonly _networkAuthorityRedisCache: NetworkAuthorityCache,
     ) {}
 
     public async kickAuthority(
