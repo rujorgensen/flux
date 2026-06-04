@@ -14,7 +14,7 @@ import type {
 } from '@flux/shared/utils';
 import { NetworkAgentRedisRepository } from './network-agent-redis.repository';
 import { NetworkAgentRedisEvents } from './network-agent-redis.events';
-import { RedisClient } from 'bun';
+import { RedisConnection } from '@flux/mesh';
 
 export class NetworkAgentRedisService {
 
@@ -22,10 +22,10 @@ export class NetworkAgentRedisService {
     private readonly _networkAgentRedisEvents: NetworkAgentRedisEvents;
 
     constructor(
-        private readonly _client: RedisClient,
+        private readonly _redisConnection: RedisConnection,
     ) {
-        this._networkAgentRedisRepository = new NetworkAgentRedisRepository(this._client);
-        this._networkAgentRedisEvents = new NetworkAgentRedisEvents(this._client);
+        this._networkAgentRedisRepository = new NetworkAgentRedisRepository(this._redisConnection);
+        this._networkAgentRedisEvents = new NetworkAgentRedisEvents(this._redisConnection);
     }
 
     // ****************************************************************************
@@ -43,7 +43,7 @@ export class NetworkAgentRedisService {
         uid?: TAgentOwnUId,
         machineUID?: TFluxClientUID,
     ): Promise<void> {
-        return this._networkAgentRedisRepository
+        await this._networkAgentRedisRepository
             .registerAgent(
                 networkId,
                 clientId,
@@ -51,6 +51,18 @@ export class NetworkAgentRedisService {
                 address,
                 uid,
                 machineUID,
+            );
+
+        await this._networkAgentRedisEvents
+            .advertiseAgentCreated(
+                networkId,
+                clientId,
+            );
+
+        await this._networkAgentRedisEvents
+            .advertiseAgentCountChange(
+                networkId,
+                await this.readAgentCount(networkId).then(c => c.count),
             );
     }
 
@@ -63,8 +75,16 @@ export class NetworkAgentRedisService {
         bytes: number,
         packets: number,
     ): Promise<void> {
-        return this._networkAgentRedisRepository
+        await this._networkAgentRedisRepository
             .registerAgentThroughput(
+                networkId,
+                clientId,
+                bytes,
+                packets,
+            );
+
+        await this._networkAgentRedisEvents
+            .advertiseAgentThroughput(
                 networkId,
                 clientId,
                 bytes,
@@ -135,11 +155,25 @@ export class NetworkAgentRedisService {
         networkId?: TNetworkId_S,
         uid?: TAgentOwnUId,
     ): Promise<void> {
-        return this._networkAgentRedisRepository
+        await this._networkAgentRedisRepository
             .unregisterAgentOrThrow(
                 clientId,
                 networkId,
                 uid,
             );
+
+        await this._networkAgentRedisEvents
+            .advertiseAgentDeleted(
+                networkId!,
+                clientId,
+            );
+
+        if (networkId) {
+            await this._networkAgentRedisEvents
+                .advertiseAgentCountChange(
+                    networkId,
+                    await this.readAgentCount(networkId).then(c => c.count),
+                );
+        }
     }
 }

@@ -26,7 +26,7 @@ import {
 import * as Bun from 'bun';
 import { nanoid } from 'nanoid';
 import { OutgoingMessageRouter } from './routing/outgoing-message-router.class';
-import { NetworkAuthorityRedisCache } from './register/network-authority-redis-cache.class';
+import { NetworkAuthorityCache } from './register/network-authority-cache.class';
 import { NetworkAgentRedisCache } from './register/network-agent-redis-cache.class';
 import {
     type TTokenPayload,
@@ -114,7 +114,7 @@ export class FluxMeshServer {
     ) {
         const port: number = typeof this.optionsOrPort === 'number' ? this.optionsOrPort : (this.optionsOrPort?.port ?? 5_100);
 
-        const networkAuthorityRedisCache: NetworkAuthorityRedisCache = new NetworkAuthorityRedisCache();
+        const networkAuthorityRedisCache: NetworkAuthorityCache = new NetworkAuthorityCache();
         const networkAgentRedisCache: NetworkAgentRedisCache = new NetworkAgentRedisCache();
 
         const outgoingMessageRouter: OutgoingMessageRouter = new OutgoingMessageRouter(

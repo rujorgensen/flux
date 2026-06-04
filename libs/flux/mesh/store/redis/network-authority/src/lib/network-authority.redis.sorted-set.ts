@@ -17,6 +17,7 @@ import {
 import type {
     TFluxClientUID,
 } from '@flux/shared/utils';
+import { RedisConnection } from '@flux/mesh';
 
 export class NetworkAuthorityRedisSortedSet {
     private readonly processId: TProcessId = readProcessId();
@@ -25,12 +26,12 @@ export class NetworkAuthorityRedisSortedSet {
     private readonly refreshNetworkExpiry: Map<TNetworkId_S, Set<TClientId>> = new Map();
 
     constructor(
-        private readonly _client: RedisClient,
+        private readonly _redisConnection: RedisConnection,
     ) {
         setInterval(async () => {
             for (const networkId of this.refreshNetworkExpiry.keys()) {
                 const key: string = `networks/${networkId}/authorities`;
-                await this._client.expire(key, 500);
+                await this._redisConnection.hash.expire(key, 500);
             }
         }, 35_000);
     }
@@ -50,12 +51,12 @@ export class NetworkAuthorityRedisSortedSet {
         const key: string = `networks/${networkId}/authorities`;
         const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
 
-        await this._client.sadd(key, address);
+        await this._redisConnection.hash.sadd(key, address);
 
-        await this._client.expire(key, 500);
+        await this._redisConnection.hash.expire(key, 500);
 
         // Add to global list
-        await this._client.hset(
+        await this._redisConnection.hash.hset(
             `~/authorities`,
             {
                 [clientId]: networkId,
@@ -63,7 +64,7 @@ export class NetworkAuthorityRedisSortedSet {
         );
 
         // Add to authority
-        await this._client.hset(
+        await this._redisConnection.hash.hset(
             `networks/${networkId}/authorities/${clientId}`,
             {
                 ...(machineUID ? {
@@ -94,7 +95,7 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
     ): Promise<TNetworkAuthority[]> {
         // Add to network
-        const networkAuthorities: TAddress[] = await this._client.smembers(`networks/${networkId}/authorities`) as TAddress[];
+        const networkAuthorities: TAddress[] = await this._redisConnection.hash.smembers(`networks/${networkId}/authorities`) as TAddress[];
 
         // Add to authorities
         const authorities: TNetworkAuthority[] = [];
@@ -121,13 +122,15 @@ export class NetworkAuthorityRedisSortedSet {
     public async resolveAuthorityAddressesOrThrow(
         networkId: TNetworkId_S,
     ): Promise<TAddress[]> {
-        if (!this._client.connected) {
+        let list: string[] = [];
+        try {
+            list = await this._redisConnection.hash.smembers(
+                `networks/${networkId}/authorities`,
+            );
+        } catch {
             throw new Error('Redis client is not connected');
         }
 
-        const list: string[] = await this._client.smembers(
-            `networks/${networkId}/authorities`,
-        );
 
         if (list.length === 0) {
             throw new NetworkAuthorityNotFoundError(networkId);
@@ -143,7 +146,7 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
     ): Promise<TNetworkAuthorityCountAt> {
         return {
-            count: await this._client.scard(`networks/${networkId}/authorities`),
+            count: await this._redisConnection.hash.scard(`networks/${networkId}/authorities`),
             date: new Date(),
         };
     }
@@ -154,7 +157,7 @@ export class NetworkAuthorityRedisSortedSet {
     ): Promise<TNetworkAuthority | null> {
         const key: string = `networks/${networkId}/authorities/${clientId}`;
 
-        const [address, connectedAt] = await this._client.hmget(key, [
+        const [address, connectedAt] = await this._redisConnection.hash.hmget(key, [
             'address',
             'connectedAt',
         ]);
@@ -184,20 +187,21 @@ export class NetworkAuthorityRedisSortedSet {
     public async unregisterAuthority(
         clientId: TClientId,
         networkId?: TNetworkId_S,
-    ): Promise<void> {
+    ): Promise<{ networkId: TNetworkId_S; }> {
         const networkId_ = networkId ?? await this.readNetworkIdByClientIdOrThrow(clientId);
 
         const key: string = `networks/${networkId_}/authorities`;
 
         // Remove from global
-        await this._client
+        await this._redisConnection
+            .hash
             .hdel(
                 `~/authorities`,
                 clientId,
             );
 
         // Remove from network
-        await this._client.srem(key, clientId);
+        await this._redisConnection.hash.srem(key, clientId);
 
         // Update the refresh interval cache
         const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId_);
@@ -211,10 +215,12 @@ export class NetworkAuthorityRedisSortedSet {
         const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
 
         // Remove from network
-        await this._client.srem(
+        await this._redisConnection.hash.srem(
             key,
             address,
         );
+
+        return { networkId: networkId_ };
     }
 
     /**
@@ -239,13 +245,15 @@ export class NetworkAuthorityRedisSortedSet {
         }
 
         // Remove from global
-        await this._client
+        await this._redisConnection
+            .hash
             .hdel(
                 `~/authorities`,
                 clientId,
             );
 
-        return await this._client
+        return await this._redisConnection
+            .hash
             .srem(
                 `networks/${networkId}/authorities`,
                 address,
@@ -258,7 +266,7 @@ export class NetworkAuthorityRedisSortedSet {
     private async readNetworkIdByClientIdOrThrow(
         clientId: TClientId,
     ): Promise<TNetworkId_S> {
-        const networkId = await this._client.hget(`~/authorities`, clientId);
+        const networkId = await this._redisConnection.hash.hget(`~/authorities`, clientId);
 
         if (!networkId) {
             throw new Error(`Network authority not found for clientId: '${clientId}'`);

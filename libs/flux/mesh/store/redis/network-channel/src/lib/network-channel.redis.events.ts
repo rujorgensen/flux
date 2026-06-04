@@ -1,10 +1,10 @@
+import type { INetworkChannelState, TChannelName, TNetworkId_S } from "@flux/shared/types";
+import type { RedisConnection } from '@flux/mesh';
+
 /**
  * Emitting events on the Redis client.
  */
-import type { TClientId, TNetworkId_S } from '@flux/shared/types';
-import type { RedisConnection } from '@flux/mesh';
-
-export class NetworkAgentRedisEvents {
+export class NetworkChannelRedisEvents {
 
     constructor(
         private readonly _redisConnection: RedisConnection,
@@ -13,133 +13,129 @@ export class NetworkAgentRedisEvents {
     // ****************************************************************************
     // * Advertise Events
     // ****************************************************************************
-    public advertiseAgentCountChange(
+    public advertiseChannelCreate(
         networkId: TNetworkId_S,
-        agentCount: number,
+        channelName: TChannelName,
     ): Promise<number> {
         return this._redisConnection
             .publishGlobal(
                 networkId,
-                `agent-count-change`,
-                `${agentCount}`,
+                `channel-created`,
+                channelName,
             );
     }
 
-    public advertiseAgentCreated(
+    public advertiseChannelUsage(
         networkId: TNetworkId_S,
-        clientId: TClientId,
+        channelName: TChannelName,
+        usageBytes: number,
     ): Promise<number> {
         return this._redisConnection
             .publishGlobal(
                 networkId,
-                `agent-created`,
-                clientId,
+                `channel-usage`,
+                JSON.stringify({ channelName, usageBytes }),
             );
     }
 
-    public advertiseAgentThroughput(
+    public advertiseChannelStateChange(
         networkId: TNetworkId_S,
-        clientId: TClientId,
-        bytes: number,
-        packets: number,
+        channelState: INetworkChannelState,
     ): Promise<number> {
         return this._redisConnection
             .publishGlobal(
                 networkId,
-                `agent-throughput`,
-                JSON.stringify({
-                    clientId,
-                    bytes,
-                    packets,
-                }),
+                `channel-updated`,
+                JSON.stringify(channelState),
             );
     }
 
-    public advertiseAgentDeleted(
+    public advertiseChannelDelete(
         networkId: TNetworkId_S,
-        clientId: TClientId,
+        channelName: TChannelName,
     ): Promise<number> {
         return this._redisConnection
             .publishGlobal(
                 networkId,
-                `agent-deleted`,
-                clientId,
+                `channel-deleted`,
+                channelName,
             );
     }
 
     // ****************************************************************************
     // * Listen to Events
     // ****************************************************************************
-    public onAgentCountChange(
+    public onChannelCreate(
         networkId: TNetworkId_S,
         callback: (
-            agentCount: number,
+            channelName: TChannelName,
         ) => void,
     ): Promise<void> {
         return this._redisConnection
             .subscribeGlobal(
                 networkId,
-                `agent-count-change`,
+                `channel-created`,
                 (message) => {
-                    const agentCount = Number.parseInt(message);
-                    if (!Number.isNaN(agentCount)) {
-                        callback(agentCount);
-                    }
+                    callback(message as TChannelName);
                 },
             );
     }
 
-    public onAgentThroughput(
+    public onChannelUsage(
         networkId: TNetworkId_S,
         callback: (
-            clientId: TClientId,
-            bytes: number,
-            packets: number,
+            channelName: TChannelName,
+            usageBytes: number,
         ) => void,
     ): Promise<void> {
         return this._redisConnection
             .subscribeGlobal(
                 networkId,
-                `agent-throughput`,
+                `channel-usage`,
                 (message) => {
                     try {
-                        const parsed = JSON.parse(message) as { clientId: TClientId; bytes: number; packets: number; };
-                        callback(parsed.clientId, parsed.bytes, parsed.packets);
+                        const parsed = JSON.parse(message) as { channelName: TChannelName; usageBytes: number; };
+                        callback(parsed.channelName, parsed.usageBytes);
                     } catch (error) {
-                        console.error('Failed to parse agent throughput event:', message, error);
+                        console.error('Failed to parse channel usage message:', error);
                     }
                 },
             );
     }
 
-    public onAgentCreated(
+    public onChannelStateChange(
         networkId: TNetworkId_S,
         callback: (
-            clientId: TClientId,
+            channelState: INetworkChannelState,
         ) => void,
     ): Promise<void> {
         return this._redisConnection
             .subscribeGlobal(
                 networkId,
-                `agent-created`,
+                `channel-updated`,
                 (message) => {
-                    callback(message as TClientId);
+                    try {
+                        const channelState = JSON.parse(message) as INetworkChannelState;
+                        callback(channelState);
+                    } catch (error) {
+                        console.error('Failed to parse channel state change message:', error);
+                    }
                 },
             );
     }
 
-    public onAgentDeleted(
+    public onChannelDelete(
         networkId: TNetworkId_S,
         callback: (
-            clientId: TClientId,
+            channelName: TChannelName,
         ) => void,
     ): Promise<void> {
         return this._redisConnection
             .subscribeGlobal(
                 networkId,
-                `agent-deleted`,
+                `channel-deleted`,
                 (message) => {
-                    callback(message as TClientId);
+                    callback(message as TChannelName);
                 },
             );
     }

@@ -1,5 +1,5 @@
 import { NetworkAgentRedisService } from "@flux/mesh/store/redis/network-agent";
-import { NetworkChannelHash } from "@flux/mesh/store/redis/network-channel";
+import { NetworkChannelService } from "@flux/mesh/store/redis/network-channel";
 import { TNetworkId_S } from "@flux/shared/types";
 import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 
@@ -7,7 +7,7 @@ export class NetworkService {
 
     constructor(
         private readonly _networkAgentRedisCacheService: NetworkAgentRedisService,
-        private readonly _networkChannelRedisCacheService: NetworkChannelHash,
+        private readonly _networkChannelRedisCacheService: NetworkChannelService,
         private readonly _networkAuthorityRedisService: NetworkAuthorityRedisService,
     ) {}
 

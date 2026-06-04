@@ -57,7 +57,7 @@ export class NetworkChannelHash {
 
     // ****************************************************************************
     // * Read
-    // ***************************************************************************
+    // ****************************************************************************
 
     /**
      * Reads all channels on a network.
@@ -153,25 +153,13 @@ export class NetworkChannelHash {
     }
 
     /**
-     * Deletes a channel on a network.
-     */
-    public async deleteNetworkChannel(
-        networkId: TNetworkId_S,
-        channelName: TChannelName,
-    ): Promise<void> {
-        await this._redisConnection.hash.srem(`networks/${networkId}/channels`, channelName);
-        await this._redisConnection.hash.del(`networks/${networkId}/channels/${channelName}`);
-        await this._redisConnection.hash.del(`networks/${networkId}/channels/${channelName}/members`);
-    }
-
-    /**
      * Adds a client to a channel on a network and returns the total number of members in the channel.
      */
     public async joinNetworkChannel(
         networkId: TNetworkId_S,
         channelName: TChannelName,
         clientAddress: TAddress,
-    ): Promise<number> {
+    ): Promise<{ memberCount: number; memberDistribution: TMemberDistribution; }> {
         // * Add member
         const membersAdded = await this._redisConnection.hash.sadd(
             `networks/${networkId}/channels/${channelName}/members`,
@@ -179,7 +167,7 @@ export class NetworkChannelHash {
         );
 
         // * Check member distribution
-        await this.checkAndUpdateChannelMemberDistribution(
+        const memberDistribution = await this.checkAndUpdateChannelMemberDistribution(
             networkId,
             channelName,
         );
@@ -192,11 +180,13 @@ export class NetworkChannelHash {
         }
 
         // * Increment channel member count
-        return await this._redisConnection.hash.hincrby(
+        const memberCount = await this._redisConnection.hash.hincrby(
             `networks/${networkId}/channels/${channelName}`,
             'members',
             1,
         );
+
+        return { memberCount, memberDistribution };
     }
 
     /**
@@ -207,7 +197,7 @@ export class NetworkChannelHash {
         networkId: TNetworkId_S,
         channelName: TChannelName,
         clientAddress: TAddress,
-    ): Promise<number> {
+    ): Promise<{ memberCount: number; memberDistribution?: TMemberDistribution; }> {
         // * Remove member
         const membersRemoved = await this._redisConnection.hash.srem(
             `networks/${networkId}/channels/${channelName}/members`,
@@ -232,32 +222,12 @@ export class NetworkChannelHash {
         if (membersLeft === 0) {
             PicoLogger.log(`Network channel "${channelName}" has no more members. Deleting...`, 'network-channel');
             await this.deleteNetworkChannel(networkId, channelName);
+            return { memberCount: 0 };
         } else {
             // * Check member distribution, but don't bother if there are no members left.
-            await this.checkAndUpdateChannelMemberDistribution(networkId, channelName);
+            const memberDistribution = await this.checkAndUpdateChannelMemberDistribution(networkId, channelName);
+            return { memberCount: membersLeft, memberDistribution };
         }
-
-        return membersLeft;
-    }
-
-    /**
-     * Leaves all network channels.
-     */
-    public async leaveAllNetworkChannels(
-        networkId: TNetworkId_S,
-        clientAddress: TAddress,
-        channelNames: Set<TChannelName>,
-    ): Promise<void> {
-        return Promise.all(
-            [...channelNames].map(async (channelName) => {
-                await this.leaveNetworkChannel(
-                    networkId,
-                    channelName,
-                    clientAddress,
-                );
-            }),
-        )
-            .then(() => void 0);
     }
 
     // ****************************************************************************
@@ -276,6 +246,22 @@ export class NetworkChannelHash {
     }
 
     // ****************************************************************************
+    // * Delete
+    // ****************************************************************************
+
+    /**
+     * Deletes a channel on a network.
+     */
+    public async deleteNetworkChannel(
+        networkId: TNetworkId_S,
+        channelName: TChannelName,
+    ): Promise<void> {
+        await this._redisConnection.hash.srem(`networks/${networkId}/channels`, channelName);
+        await this._redisConnection.hash.del(`networks/${networkId}/channels/${channelName}`);
+        await this._redisConnection.hash.del(`networks/${networkId}/channels/${channelName}/members`);
+    }
+
+    // ****************************************************************************
     // * Internal Helpers
     // ****************************************************************************
 
@@ -287,7 +273,7 @@ export class NetworkChannelHash {
     private async checkAndUpdateChannelMemberDistribution(
         networkId: TNetworkId_S,
         channelName: TChannelName,
-    ): Promise<void> {
+    ): Promise<TMemberDistribution> {
         const memberAddresses: TAddress[] = await this.readNetworkChannelMemberAddresses(networkId, channelName);
 
         const memberDistribution: TMemberDistribution = checkMemberDistribution(memberAddresses);
@@ -298,5 +284,7 @@ export class NetworkChannelHash {
                 'memberDistribution': memberDistribution,
             },
         );
+
+        return memberDistribution;
     }
 }

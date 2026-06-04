@@ -6,7 +6,7 @@ import {
     AUTHORITY_ON_CREATE_CHANNEL,
     AUTHORITY_ON_EMPTY_CHANNEL,
 } from '@flux/shared/types';
-import { NetworkChannelHash } from '@flux/mesh/store/redis/network-channel';
+import { NetworkChannelService } from '@flux/mesh/store/redis/network-channel';
 import {
     type RedisConnection,
     getMeshRedisConnection,
@@ -22,7 +22,7 @@ interface IUsageCache {
 export class NetworkChannelManager {
     private readonly channelUsageCount: Map<TChannelName, IUsageCache> = new Map();
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
-    private readonly networkChannelHash: NetworkChannelHash = new NetworkChannelHash(
+    private readonly networkChannelHash: NetworkChannelService = new NetworkChannelService(
         this.redisConnection,
     );
 
@@ -97,16 +97,17 @@ export class NetworkChannelManager {
         channelName: TChannelName,
         clientAddress: TAddress,
     ): Promise<void> {
-        const membersLeft: number = await this.networkChannelHash
+        const state = await this.networkChannelHash
             .leaveNetworkChannel(
                 networkId,
                 channelName,
                 clientAddress,
             );
 
-        if (membersLeft === 0) {
+        if (state.memberCount === 0) {
             void this._globalChannelPubsub
                 .publish(
+                    // Theres another event for this now, should this be replaced?
                     `~/networks/${networkId}/channel-empty`,
                     `${AUTHORITY_ON_EMPTY_CHANNEL}:${channelName}`,
                 );

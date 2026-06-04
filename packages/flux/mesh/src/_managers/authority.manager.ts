@@ -10,7 +10,7 @@ import { GlobalClientManager } from './global/global-client.manager';
 import { LocalAuthorityManager } from './local/local-authority.manager';
 import { readMachineAddress, readProcessId } from '../routing/addressing.utils';
 import { TConnectedClientSocket } from '../connected-client-socket.types';
-import { NetworkAuthorityRedisCache } from '../register/network-authority-redis-cache.class';
+import { NetworkAuthorityCache } from '../register/network-authority-cache.class';
 
 export class AuthorityManager {
     private readonly machineAddress: TMachineAddress = readMachineAddress();
@@ -22,7 +22,7 @@ export class AuthorityManager {
     constructor(
         private readonly _redisConnection: RedisConnection,
         private readonly _clientMap: Map<TClientId, TConnectedClientSocket>,
-        private readonly _networkAuthorityRedisCache: NetworkAuthorityRedisCache,
+        private readonly _networkAuthorityRedisCache: NetworkAuthorityCache,
     ) {
         this._globalClientManager = new GlobalClientManager(this._redisConnection);
         this._localAuthorityManager = new LocalAuthorityManager(
