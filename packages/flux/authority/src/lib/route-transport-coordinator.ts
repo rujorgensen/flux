@@ -9,7 +9,7 @@ export class RouteCoordinator {
         fluxInterface: any, // Connection to the flux platform
     ) {
         fluxInterface
-            .onChange('route', (route: any) => {
+            .onChange('route', (_route: any) => {
 
             });
     }

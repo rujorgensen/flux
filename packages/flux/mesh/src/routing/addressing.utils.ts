@@ -15,12 +15,15 @@ export const readProcessId = (): TProcessId => {
 };
 
 let machineAddress: TMachineAddress | undefined;
+
 /**
  * Returns the current machine's network address.
  * 
  * @returns { TMachineAddress } The current machine's network address
  */
-export const readMachineAddress = (): TMachineAddress => {
+export const readMachineAddress = (
+
+): TMachineAddress => {
     if (machineAddress) {
         return machineAddress;
     }
@@ -39,6 +42,8 @@ export const readMachineAddress = (): TMachineAddress => {
  * 
  * @returns { TProcessAddress } The current process address
  */
-export const readProcessAddress = (): TProcessAddress => {
+export const readProcessAddress = (
+
+): TProcessAddress => {
     return `${readMachineAddress()}/${readProcessId()}`;
 };

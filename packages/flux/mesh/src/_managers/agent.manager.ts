@@ -2,7 +2,6 @@ import {
     type TAddress,
     type TClientId,
     type TProcessId,
-    type TNetworkId_S,
     type TMachineAddress,
     splitAddressOrThrow,
 } from '@flux/shared/types';
