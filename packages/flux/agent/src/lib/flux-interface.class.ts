@@ -14,7 +14,7 @@ export class FluxInterface {
     ) {}
 
     public messageReport(
-        packageStatus: Omit<IPackageStatus, 'txNode'>,
+        _packageStatus: Omit<IPackageStatus, 'txNode'>,
     ): void {
         // this.socketConnection.reportMessage(packageStatus);
     }

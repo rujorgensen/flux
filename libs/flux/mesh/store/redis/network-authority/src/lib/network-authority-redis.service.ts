@@ -163,4 +163,46 @@ export class NetworkAuthorityRedisService {
         return result;
     }
 
+    // ****************************************************************************
+    // * Events
+    // ****************************************************************************
+    public onAuthorityCountChange(
+        networkId: TNetworkId_S,
+        callback: (
+            authorityCount: number,
+        ) => void,
+    ): Promise<void> {
+        return this._networkAuthorityRedisEvents
+            .onAuthorityCountChange(
+                networkId,
+                callback,
+            );
+    }
+
+    public onAuthorityCreated(
+        networkId: TNetworkId_S,
+        callback: (
+            clientId: TClientId,
+        ) => void,
+    ): Promise<void> {
+        return this._networkAuthorityRedisEvents
+            .onAuthorityCreated(
+                networkId,
+                callback,
+            );
+    }
+
+    public onAuthorityDeleted(
+        networkId: TNetworkId_S,
+        callback: (
+            clientId: TClientId,
+        ) => void,
+    ): Promise<void> {
+        return this._networkAuthorityRedisEvents
+            .onAuthorityDeleted(
+                networkId,
+                callback,
+            );
+    }
+
 }

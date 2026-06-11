@@ -2,12 +2,13 @@
  * Store data related to network channels
  */
 
-import {
-    type INetworkChannel,
-    type TAddress,
-    type TChannelName,
-    type TNetworkChannelCountAt,
-    type TNetworkId_S,
+import type {
+    TAddress,
+    TNetworkId_S,
+    TChannelName,
+    INetworkChannel,
+    INetworkChannelState,
+    TNetworkChannelCountAt,
 } from '@flux/shared/types';
 import { NetworkChannelHash } from './network-channel.redis.hash';
 import { RedisConnection } from '../../../../../../../../packages/flux/mesh/src/routing/redis/redis-connection.class';
@@ -51,6 +52,12 @@ export class NetworkChannelService {
                 .advertiseChannelCreate(
                     networkId,
                     channelName,
+                );
+
+            await this._networkChannelRedisEvents
+                .advertiseChannelCount(
+                    networkId,
+                    await this._networkChannelHash.readNetworkChannelCount(networkId),
                 );
         }
 
@@ -204,14 +211,16 @@ export class NetworkChannelService {
         clientAddress: TAddress,
         channelNames: Set<TChannelName>,
     ): Promise<void> {
-        for (const channelName of channelNames) {
-            await this._networkChannelHash
-                .leaveNetworkChannel(
-                    networkId,
-                    channelName,
-                    clientAddress,
-                );
-        }
+        await Promise.all(
+            [...channelNames]
+                .map((channelName) =>
+                    this.leaveNetworkChannel(
+                        networkId,
+                        channelName,
+                        clientAddress,
+                    ),
+                ),
+        );
     }
 
     /**
@@ -264,6 +273,81 @@ export class NetworkChannelService {
                 channelName,
             );
 
+        await this._networkChannelRedisEvents
+            .advertiseChannelCount(
+                networkId,
+                await this._networkChannelHash.readNetworkChannelCount(networkId),
+            );
+
         return deletedChannel;
+    }
+
+    // ****************************************************************************
+    // * Events
+    // ****************************************************************************
+    public onChannelCreate(
+        networkId: TNetworkId_S,
+        callback: (
+            channelName: TChannelName,
+        ) => void,
+    ): Promise<void> {
+        return this._networkChannelRedisEvents
+            .onChannelCreate(
+                networkId,
+                callback,
+            );
+    }
+
+    public onChannelUsage(
+        networkId: TNetworkId_S,
+        callback: (
+            channelName: TChannelName,
+            usageBytes: number,
+        ) => void,
+    ): Promise<void> {
+        return this._networkChannelRedisEvents
+            .onChannelUsage(
+                networkId,
+                callback,
+            );
+    }
+
+    public onChannelCount(
+        networkId: TNetworkId_S,
+        callback: (
+            channelCount: TNetworkChannelCountAt,
+        ) => void,
+    ): Promise<void> {
+        return this._networkChannelRedisEvents
+            .onChannelCount(
+                networkId,
+                callback,
+            );
+    }
+
+    public onChannelStateChange(
+        networkId: TNetworkId_S,
+        callback: (
+            channelState: INetworkChannelState,
+        ) => void,
+    ): Promise<void> {
+        return this._networkChannelRedisEvents
+            .onChannelStateChange(
+                networkId,
+                callback,
+            );
+    }
+
+    public onChannelDelete(
+        networkId: TNetworkId_S,
+        callback: (
+            channelName: TChannelName,
+        ) => void,
+    ): Promise<void> {
+        return this._networkChannelRedisEvents
+            .onChannelDelete(
+                networkId,
+                callback,
+            );
     }
 }

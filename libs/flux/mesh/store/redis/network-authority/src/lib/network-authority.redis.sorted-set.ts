@@ -1,4 +1,3 @@
-import type { RedisClient } from 'bun';
 import {
     type TAddress,
     type TClientId,

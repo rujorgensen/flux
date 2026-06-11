@@ -78,7 +78,6 @@ export type {
 export type {
     INetworkChannel,
     INetworkChannelState,
-    INetworkChannelMembers,
     TNetworkChannelCountAt,
 } from './lib/channels/network-channel.type';
 

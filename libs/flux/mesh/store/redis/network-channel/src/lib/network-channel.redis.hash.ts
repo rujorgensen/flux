@@ -85,7 +85,7 @@ export class NetworkChannelHash {
                 channels.push({
                     channelName,
                     memberDistribution: memberDistribution,
-                    members: Number.parseInt((members) ?? '0', 10),
+                    members: Number.parseInt(members || '0', 10),
                     bytes: Number.parseInt(usage || '0', 10),
                     createdAt: new Date(createdAt),
                 });
@@ -149,8 +149,14 @@ export class NetworkChannelHash {
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<TAddress[]> {
-        return await this._redisConnection.hash.smembers(`networks/${networkId}/channels/${channelName}/members`) as TAddress[];
+        return this._redisConnection
+            .hash
+            .smembers(`networks/${networkId}/channels/${channelName}/members`) as Promise<TAddress[]>;
     }
+
+    // ****************************************************************************
+    // * Update
+    // ****************************************************************************
 
     /**
      * Adds a client to a channel on a network and returns the total number of members in the channel.
@@ -180,11 +186,13 @@ export class NetworkChannelHash {
         }
 
         // * Increment channel member count
-        const memberCount = await this._redisConnection.hash.hincrby(
-            `networks/${networkId}/channels/${channelName}`,
-            'members',
-            1,
-        );
+        const memberCount = await this._redisConnection
+            .hash
+            .hincrby(
+                `networks/${networkId}/channels/${channelName}`,
+                'members',
+                1,
+            );
 
         return { memberCount, memberDistribution };
     }
@@ -206,9 +214,9 @@ export class NetworkChannelHash {
 
         if (membersRemoved === 0) {
             // The member must not be a member of this channel
-            PicoLogger.warn(`Unexpected non-existing member on network / channel "${networkId}"/"${channelName}". The client does not appear to be a member of the channel and can not be removed.`, 'network-channel');
+            PicoLogger.warn(`Unexpected non-existing member on network / channel '${networkId}'/'${channelName}'. The client does not appear to be a member of the channel and can not be removed.`, 'network-channel');
 
-            return Promise.reject(new Error(`Client ${clientAddress} is not a member of channel "${channelName}" on network "${networkId}".`));
+            return Promise.reject(new Error(`Client ${clientAddress} is not a member of channel '${channelName}' on network '${networkId}'.`));
         }
 
         // * Decrement channel member count
@@ -230,9 +238,6 @@ export class NetworkChannelHash {
         }
     }
 
-    // ****************************************************************************
-    // * Update
-    // ****************************************************************************
     /**
      * Increments the usage counter of a channel.
      */
