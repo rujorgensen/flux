@@ -325,6 +325,7 @@ export class RedisConnection {
             'authority-deleted' |
             'channel-created' |
             'channel-usage' |
+            'channel-count' |
             'channel-updated' |
             'channel-deleted',
         message: string,
@@ -348,6 +349,7 @@ export class RedisConnection {
             'authority-deleted' |
             'channel-created' |
             'channel-usage' |
+            'channel-count' |
             'channel-updated' |
             'channel-deleted',
         callback: (data: string) => void,
@@ -457,32 +459,6 @@ export class RedisConnection {
                 console.error(`Failed to unsubscribe from network channel '${networkId}/${channelName}':`, error);
             })
             ;
-    }
-
-    /**
-     * Marks the given address as connected in Redis.
-     */
-    public async setConnected(
-        processAddress: TProcessAddress,
-    ): Promise<void> {
-        await this.hash.hset(
-            `machines/processes/${processAddress}`,
-            {
-                'status': 'connected',
-                'updatedAt': new Date().toISOString(),
-            },
-        );
-
-        await this.hash.expire(`machines/processes/${processAddress}`, 5);
-    }
-
-    /**
-     * Marks the given address as disconnected in Redis.
-     */
-    public async setDisconnected(
-        _processAddress: TProcessAddress,
-    ): Promise<void> {
-        // !TODO
     }
 
     /**
