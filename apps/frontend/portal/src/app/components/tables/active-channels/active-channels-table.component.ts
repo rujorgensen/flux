@@ -10,7 +10,9 @@ import {
     signal,
 } from '@angular/core';
 import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
-import type { INetworkChannel, INetworkChannelMembers } from '@flux/shared/types';
+import type {
+    INetworkChannel,
+} from '@flux/shared/types';
 import { api } from '$lib/app/_services/api/api';
 import { apiBaseUrl } from '$lib/app/_services/api/api-base';
 import { NetworkTokensService } from '$lib/app/_services/network-tokens/network-tokens.service';
@@ -19,14 +21,14 @@ import {
     deriveChannelFillPercent,
 } from './channel-capacity.utils';
 import { NetworksService } from '$lib/app/_services/networks.service';
-import { filter, map, Observable } from 'rxjs';
+import { filter, map, type Observable } from 'rxjs';
 import type { INetwork_S } from '@flux/shared/features/networks';
 import { MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE } from '@flux/shared/features/channels';
 
 const MAX_SNIFF_PACKETS = 50;
 
 export interface ISniffPacket {
-    timestamp: string;
+    at: string;
     data: string;
     formattedData: string;
     agentId: string;
@@ -44,7 +46,7 @@ interface IChannelSSEEvent {
         /** Sender agent ID */
         agentId: string;
         channelName?: string;
-        timestamp?: string;
+        at?: string;
     };
 }
 
@@ -179,8 +181,8 @@ export class ActiveChannelsTableComponent implements OnDestroy {
             .members
             .get()
             .then((response) => {
-                const memberData = response.data as INetworkChannelMembers | null;
-                this.selectedMemberAddresses.set(memberData?.memberAddresses ?? []);
+                const memberData = response.data;
+                this.selectedMemberAddresses.set(memberData);
             })
             .catch((error: unknown) => {
                 console.error('Error fetching channel members:', error);
@@ -334,7 +336,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
                     if (!payload || payload.type !== 'packet' || payload.data === undefined) continue;
 
                     const packet: ISniffPacket = {
-                        timestamp: payload.timestamp ?? new Date().toISOString(),
+                        at: payload.at ?? new Date().toISOString(),
                         data: payload.data,
                         formattedData: this.tryFormatJson(payload.data),
                         agentId: payload.agentId,

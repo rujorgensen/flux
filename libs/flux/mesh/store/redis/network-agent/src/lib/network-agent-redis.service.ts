@@ -41,7 +41,7 @@ export class NetworkAgentRedisService {
         ip: Bun.SocketAddress | null,
         address: TAddress,
         uid?: TAgentOwnUId,
-        machineUID?: TFluxClientUID,
+        fluxClientUID?: TFluxClientUID,
     ): Promise<void> {
         await this._networkAgentRedisRepository
             .registerAgent(
@@ -50,7 +50,7 @@ export class NetworkAgentRedisService {
                 ip,
                 address,
                 uid,
-                machineUID,
+                fluxClientUID,
             );
 
         await this._networkAgentRedisEvents
@@ -175,5 +175,62 @@ export class NetworkAgentRedisService {
                     await this.readAgentCount(networkId).then(c => c.count),
                 );
         }
+    }
+
+    // ****************************************************************************
+    // * Events
+    // ****************************************************************************
+    public onAgentCountChange(
+        networkId: TNetworkId_S,
+        callback: (
+            agentCount: number,
+        ) => void,
+    ): Promise<void> {
+        return this._networkAgentRedisEvents
+            .onAgentCountChange(
+                networkId,
+                callback,
+            );
+    }
+
+    public onAgentThroughput(
+        networkId: TNetworkId_S,
+        callback: (
+            clientId: TClientId,
+            bytes: number,
+            packets: number,
+        ) => void,
+    ): Promise<void> {
+        return this._networkAgentRedisEvents
+            .onAgentThroughput(
+                networkId,
+                callback,
+            );
+    }
+
+    public onAgentCreated(
+        networkId: TNetworkId_S,
+        callback: (
+            clientId: TClientId,
+        ) => void,
+    ): Promise<void> {
+        return this._networkAgentRedisEvents
+            .onAgentCreated(
+                networkId,
+                callback,
+            );
+    }
+
+    public onAgentDeleted(
+        networkId: TNetworkId_S,
+        callback: (
+            clientId: TClientId,
+        ) => void,
+    ): Promise<void> {
+        return this._networkAgentRedisEvents
+            .onAgentDeleted(
+                networkId,
+                callback,
+            );
     }
 }

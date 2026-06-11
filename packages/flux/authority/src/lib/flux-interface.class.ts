@@ -11,10 +11,10 @@ export class FluxInterface {
 
     constructor(
         private readonly socketConnection: FluxWebSocketConnection, // Connection to the flux platform
-    ) { }
+    ) {}
 
     public messageReport(
-        packageStatus: Omit<IPackageStatus, 'txNode'>,
+        _packageStatus: Omit<IPackageStatus, 'txNode'>,
     ): void {
         // this.socketConnection.reportMessage(packageStatus);
     }

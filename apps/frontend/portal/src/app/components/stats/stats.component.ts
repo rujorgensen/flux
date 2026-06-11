@@ -19,7 +19,7 @@ import { onActiveChannelCount } from '../../data/flux/channels.service.fn';
         ConnectedAgentsComponent,
         ActiveChannelsComponent,
     ],
-    styleUrl: './stats.component.css',
+    styleUrl: './stats.component.scss',
     templateUrl: './stats.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

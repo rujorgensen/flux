@@ -19,8 +19,8 @@ Alpine.data('fluxAuthority', () => ({
     log(
         message: string,
     ) {
-        const timestamp: string = new Date().toISOString();
-        this.authorityLog.unshift(`[${timestamp}] ${message}`);
+        const at: string = new Date().toISOString();
+        this.authorityLog.unshift(`[${at}] ${message}`);
 
         if (this.authorityLog.length > 100) {
             this.authorityLog.length = 100;

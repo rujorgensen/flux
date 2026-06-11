@@ -5,7 +5,7 @@ import { Elysia, NotFoundError } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
-import { LiveUpdates } from './live-updates.class';
+import { liveUpdates } from './live-updates.class';
 import { networkChannelController } from './api/networks/networks-channels.controller';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
@@ -65,7 +65,7 @@ const fluxMeshServerPort: number = Bun.env['PORTAL_MESH_SERVER_PORT'] ?
     :
     5_101;
 
-new LiveUpdates(
+liveUpdates(
     fluxMeshServerPort,
     portalRedisStatusService,
     meshRedisStatusService,

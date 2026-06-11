@@ -1,4 +1,4 @@
-import type { INetworkChannelState, TChannelName, TNetworkId_S } from "@flux/shared/types";
+import type { INetworkChannelState, TChannelName, TNetworkChannelCountAt, TNetworkId_S } from "@flux/shared/types";
 import type { RedisConnection } from '@flux/mesh';
 
 /**
@@ -35,6 +35,18 @@ export class NetworkChannelRedisEvents {
                 networkId,
                 `channel-usage`,
                 JSON.stringify({ channelName, usageBytes }),
+            );
+    }
+
+    public advertiseChannelCount(
+        networkId: TNetworkId_S,
+        channelCount: TNetworkChannelCountAt,
+    ): Promise<number> {
+        return this._redisConnection
+            .publishGlobal(
+                networkId,
+                `channel-count`,
+                JSON.stringify(channelCount),
             );
     }
 
@@ -98,6 +110,27 @@ export class NetworkChannelRedisEvents {
                         callback(parsed.channelName, parsed.usageBytes);
                     } catch (error) {
                         console.error('Failed to parse channel usage message:', error);
+                    }
+                },
+            );
+    }
+
+    public onChannelCount(
+        networkId: TNetworkId_S,
+        callback: (
+            channelCount: TNetworkChannelCountAt,
+        ) => void,
+    ): Promise<void> {
+        return this._redisConnection
+            .subscribeGlobal(
+                networkId,
+                `channel-count`,
+                (message) => {
+                    try {
+                        const parsed = JSON.parse(message) as TNetworkChannelCountAt;
+                        callback(parsed);
+                    } catch (error) {
+                        console.error('Failed to parse channel count message:', error);
                     }
                 },
             );

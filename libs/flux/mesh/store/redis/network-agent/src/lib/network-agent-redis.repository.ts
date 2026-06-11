@@ -1,13 +1,12 @@
 /**
  * Loopkup a client address by UID
  */
-import type { RedisClient } from 'bun';
-import type {
-    TAddress,
-    TClientId,
-    TAgentOwnUId,
-    TNetworkId_S,
-    TNetworkAgentCountAt,
+import {
+    type TAddress,
+    type TClientId,
+    type TAgentOwnUId,
+    type TNetworkId_S,
+    type TNetworkAgentCountAt,
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
 import type {
@@ -34,13 +33,13 @@ export class NetworkAgentRedisRepository {
         ip: Bun.SocketAddress | null,
         address: TAddress,
         uid?: TAgentOwnUId,
-        machineUID?: TFluxClientUID,
+        fluxClientUID?: TFluxClientUID,
     ): Promise<void> {
         if (uid) {
             const key_: string = `networks/${networkId}/agent-uids`;
 
             await this._redisConnection.hash.hset(key_, {
-                [uid]: clientId,
+                [uid]: address,
             });
 
             await this._redisConnection.hash.expire(key_, 500);
@@ -69,8 +68,8 @@ export class NetworkAgentRedisRepository {
                     'name': typeof uid === 'string' ? uid : '',
                 } : {}),
 
-                ...(machineUID ? {
-                    'machineUID': typeof machineUID === 'string' ? machineUID : '',
+                ...(fluxClientUID ? {
+                    'machineUID': typeof fluxClientUID === 'string' ? fluxClientUID : '',
                 } : {}),
 
                 'address': address,
@@ -146,7 +145,12 @@ export class NetworkAgentRedisRepository {
         networkId: TNetworkId_S,
         clientOwnUId: TAgentOwnUId,
     ): Promise<TAddress> {
-        const [clientAddress] = await this._redisConnection.hash.hmget(`networks/${networkId}/agent-uids`, [clientOwnUId]);
+        const [clientAddress] = await this._redisConnection
+            .hash
+            .hmget(
+                `networks/${networkId}/agent-uids`,
+                [clientOwnUId],
+            );
 
         if (!clientAddress) {
             throw new Error(`Network agent not found for networkId: '${networkId}'`);

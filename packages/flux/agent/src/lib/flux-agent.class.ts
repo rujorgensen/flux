@@ -24,12 +24,12 @@ const DEFAULT_FLUX_DOMAIN: string = 'https://mesh.persistica.io';
 
 export class FluxAgent {
     public readonly id: string = nanoid();
+    public readonly networkId: TNetworkId_S;
 
     private fluxWebSocketConnection: FluxWebSocketConnection | undefined;
 
     private readonly fluxClientData: FluxClientData = new FluxClientData();
     private readonly stateManager: StateManager = new StateManager();
-    private readonly networkId: TNetworkId_S;
     private readonly options: {
         domain?: string;
         secretKey?: string;

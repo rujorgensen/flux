@@ -22,7 +22,7 @@ interface IUsageCache {
 export class NetworkChannelManager {
     private readonly channelUsageCount: Map<TChannelName, IUsageCache> = new Map();
     private readonly redisConnection: RedisConnection = getMeshRedisConnection();
-    private readonly networkChannelHash: NetworkChannelService = new NetworkChannelService(
+    private readonly networkChannelService: NetworkChannelService = new NetworkChannelService(
         this.redisConnection,
     );
 
@@ -33,7 +33,7 @@ export class NetworkChannelManager {
             for (const [channelName, usage] of this.channelUsageCount) {
 
                 if (usage.usage > 0) {
-                    void this.networkChannelHash
+                    void this.networkChannelService
                         .incrementUsage(
                             usage.networkId,
                             channelName,
@@ -56,7 +56,7 @@ export class NetworkChannelManager {
         channelName: TChannelName,
         subscriptionType?: TSubscription_S,
     ): Promise<boolean> {
-        const count: number = await this.networkChannelHash.readNetworkMemberCount(
+        const count: number = await this.networkChannelService.readNetworkMemberCount(
             networkId,
             channelName,
         );
@@ -80,7 +80,7 @@ export class NetworkChannelManager {
             channelName,
         );
 
-        const memberCount = await this.networkChannelHash.joinNetworkChannel(
+        const memberCount = await this.networkChannelService.joinNetworkChannel(
             networkId,
             channelName,
             clientAddress,
@@ -97,7 +97,7 @@ export class NetworkChannelManager {
         channelName: TChannelName,
         clientAddress: TAddress,
     ): Promise<void> {
-        const state = await this.networkChannelHash
+        const state = await this.networkChannelService
             .leaveNetworkChannel(
                 networkId,
                 channelName,
@@ -117,16 +117,17 @@ export class NetworkChannelManager {
     /**
      * Leaves all network channels.
      */
-    public async leaveAllNetworkChannels(
+    public leaveAllNetworkChannels(
         networkId: TNetworkId_S,
         clientAddress: TAddress,
         channelNames: Set<TChannelName>,
     ): Promise<void> {
-        return await this.networkChannelHash.leaveAllNetworkChannels(
-            networkId,
-            clientAddress,
-            channelNames,
-        );
+        return this.networkChannelService
+            .leaveAllNetworkChannels(
+                networkId,
+                clientAddress,
+                channelNames,
+            );
     }
 
     // ****************************************************************************
@@ -169,7 +170,7 @@ export class NetworkChannelManager {
         networkId: TNetworkId_S,
         channelName: TChannelName,
     ): Promise<void> {
-        const wasCreated: boolean = await this.networkChannelHash
+        const wasCreated: boolean = await this.networkChannelService
             .createNetworkChannelIfNotExist(
                 networkId,
                 channelName,

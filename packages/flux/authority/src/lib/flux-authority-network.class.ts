@@ -2,12 +2,14 @@
  * This is the class exposed to the user. It represents an authority connection to the network
  */
 import {
+    FluxNetworkChannel,
     type FluxWebSocketConnection,
     NetworkChannelEventEmitter,
 } from '@flux/shared/connection';
-import type {
-    TAddress,
-    TChannelName,
+import {
+    type TAddress,
+    type TChannelName,
+    validateChannelNameOrThrow,
 } from '@flux/shared/types';
 
 export class FluxAuthorityNetworkConnection {
@@ -35,5 +37,21 @@ export class FluxAuthorityNetworkConnection {
     ): void {
         this._fluxWebSocketConnection
             .disconnectAgent(id);
+    }
+
+    /**
+     * Joins a channel on the network.
+     */
+    public getChannel(
+        channelName: string,
+    ): FluxNetworkChannel {
+        if (!validateChannelNameOrThrow(channelName)) {
+            throw new Error('Will not actually be thrown');
+        }
+
+        return new FluxNetworkChannel(
+            channelName,
+            this._fluxWebSocketConnection,
+        );
     }
 }

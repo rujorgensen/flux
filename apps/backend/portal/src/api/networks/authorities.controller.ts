@@ -60,7 +60,7 @@ export const networkAuthorityController = new Elysia({
      * '/api/networks/:networkId/authorities/count?when={'now'}'
      * '/api/networks/:networkId/authorities/count?startDate={startDate}&endDate={endDate}'
      */
-    .get('/count', ({ networkId, query, serviceProviders }): Promise<TNetworkAuthorityCountAt> => {
+    .get('count', ({ networkId, query, serviceProviders }): Promise<TNetworkAuthorityCountAt> => {
         if (query.when === 'now') {
             return serviceProviders
                 .networkAuthorityService
@@ -83,7 +83,7 @@ export const networkAuthorityController = new Elysia({
      * '/api/networks/:networkId/authorities/connected?page={page}&pageSize={pageSize}'
      */
 
-    .get('/connected', async ({
+    .get('connected', async ({
         networkId,
         query,
         serviceProviders,
@@ -142,7 +142,7 @@ export const networkAuthorityController = new Elysia({
      *
      * Kicks (removes) a connected authority from the network.
      */
-    .delete('/:authorityId', async ({
+    .delete(':authorityId', async ({
         networkId,
         params: { authorityId },
         serviceProviders,

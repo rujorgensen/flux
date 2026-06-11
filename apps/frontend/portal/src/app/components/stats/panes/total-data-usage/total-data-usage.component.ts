@@ -5,7 +5,9 @@ import { DecimalPipe } from '@angular/common';
     selector: 'app-total-data-usage',
     templateUrl: './total-data-usage.component.html',
     styleUrls: ['./total-data-usage.component.css'],
-    imports: [DecimalPipe],
+    imports: [
+        DecimalPipe,
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TotalDataUsageComponent {

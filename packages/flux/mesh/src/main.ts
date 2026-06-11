@@ -68,6 +68,7 @@ import { TConnectedClientSocket } from './connected-client-socket.types';
 import { AgentManager } from './_managers/agent.manager';
 import { interactWithNpc } from './_routes/npc-interact.get.route';
 import { truncateString } from '@flux/shared/utils';
+import { ProcessClass } from './business-logic/processes/process.class';
 
 PicoLogger.configure({
     allowScopes: '*',
@@ -77,6 +78,8 @@ const clientMap: Map<TClientId, TConnectedClientSocket> = new Map();
 const processId: TProcessId = readProcessId();
 const machineAddress: TMachineAddress = readMachineAddress();
 const processAddress: TProcessAddress = readProcessAddress();
+
+const UPDATE_INTERVAL = 3_000;
 
 const clientRPCResponseCallbacks: Map<
     TClientId,
@@ -108,6 +111,7 @@ export class FluxMeshServer {
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
     private readonly agentManager: AgentManager;
+    private readonly processClass: ProcessClass;
 
     constructor(
         private readonly optionsOrPort?: TOptions | number,
@@ -142,6 +146,10 @@ export class FluxMeshServer {
             this.redisConnection,
             clientMap,
             networkAgentRedisCache,
+        );
+
+        this.processClass = new ProcessClass(
+            this.redisConnection,
         );
 
         this.bunServer = Bun.serve({
@@ -422,7 +430,7 @@ export class FluxMeshServer {
                                 }
 
                                 try {
-                                    const authorized: boolean = await globalRPCClient.call(
+                                    const authorized: unknown = await globalRPCClient.call(
                                         networkAuthorityAddress,
                                         'authorizeChannelAccess',
                                         channelName,
@@ -543,8 +551,8 @@ export class FluxMeshServer {
                             const clientOwnUId: TAgentOwnUId = message_.substring(
                                 message_.indexOf(':') + 1
                             ) as TAgentOwnUId;
-                            const networkClientAddress: TAddress =
-                                await networkAgentRedisCache.resolveClientAddressByUid(
+                            const networkClientAddress: TAddress = await networkAgentRedisCache
+                                .resolveClientAddressByUid(
                                     ws.data.networkId,
                                     clientOwnUId
                                 );
@@ -641,8 +649,9 @@ export class FluxMeshServer {
             console.log(`🚀 Flux mesh server running on localhost:${port}`);
 
             setInterval(() => {
-                void this.redisConnection.setConnected(`${machineAddress}/${processId}`);
-            }, 3_000);
+                void this.processClass
+                    .setConnected(`${machineAddress}/${processId}`);
+            }, UPDATE_INTERVAL);
 
             for (const cb of this.onReadyListeners) {
                 cb();
@@ -665,7 +674,7 @@ export class FluxMeshServer {
 
         // 'true': Force stop and close all active connections
         await this.bunServer.stop(true);
-        await this.redisConnection.setDisconnected(`${machineAddress}/${processId}`);
+        await this.processClass.setDisconnected(`${machineAddress}/${processId}`);
         await this.redisConnection.disconnect();
     }
 }

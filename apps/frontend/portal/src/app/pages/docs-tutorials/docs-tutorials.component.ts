@@ -105,15 +105,15 @@ const generalChannel = await connection.joinChannel('general');
 
 // Listen for messages
 generalChannel.subscribe((message) => {
-    const { from, text, timestamp } = message as ChatMessage;
-    console.log(\`[\${timestamp}] \${from}: \${text}\`);
+    const { from, text, at } = message as ChatMessage;
+    console.log(\`[\${at}] \${from}: \${text}\`);
 });
 
 // Send a message
 generalChannel.publish({
     from: 'alice',
     text: 'Hey everyone! 👋',
-    timestamp: new Date().toISOString(),
+    at: new Date().toISOString(),
 });`;
 
     constructor(

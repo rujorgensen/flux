@@ -42,7 +42,6 @@ Alpine.data('fluxActivityDemoApplication', () => ({
                 this.networkConnections.add(fluxNetworkConnection);
                 this.agents.add(fluxAgent);
 
-
                 mayBeMaybeNot(() => {
                     callRandomly(() => this.disconnectFromNetwork(fluxAgent));
                 });
@@ -58,8 +57,8 @@ Alpine.data('fluxActivityDemoApplication', () => ({
     log(
         message: string,
     ) {
-        const timestamp: string = new Date().toISOString();
-        this.clientLog.push(`[${timestamp}] ${message}`);
+        const at: string = new Date().toISOString();
+        this.clientLog.push(`[${at}] ${message}`);
     },
 
     async connectToChannel(

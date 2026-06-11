@@ -2,7 +2,7 @@
 /**
  * Creates a reverse proxy handler to the given target URL.
  */
-const proxy = (
+export const proxy = (
     proxyTo: string = 'http://localhost:3001',
 ) => async ({ request }: {
     request: Bun.BunRequest,
