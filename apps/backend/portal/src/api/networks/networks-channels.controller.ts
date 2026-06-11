@@ -71,7 +71,7 @@ async function* createChannelEventStream(
         .subscribeToNetworkChannel(networkId, channelName, onPacket);
 
     try {
-        yield sse(JSON.stringify({ type: 'connected', channelName, timestamp: new Date().toISOString() }));
+        yield sse(JSON.stringify({ type: 'connected', channelName, at: new Date().toISOString() }));
 
         while (!signal.aborted) {
             if (queue.length > 0) {
@@ -85,7 +85,7 @@ async function* createChannelEventStream(
                     type: 'packet',
                     data: item.data,
                     clientId: item.clientId,
-                    timestamp: new Date().toISOString(),
+                    at: new Date().toISOString(),
                 }));
             } else {
                 await new Promise<void>((resolve) => {
