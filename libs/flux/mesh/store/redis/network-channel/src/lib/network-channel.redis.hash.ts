@@ -3,12 +3,14 @@
  */
 
 import {
-    type INetworkChannel,
     type TAddress,
+    type TClientId,
     type TChannelName,
-    type TNetworkChannelCountAt,
     type TNetworkId_S,
+    type INetworkChannel,
+    type TNetworkChannelCountAt,
     validateChannelNameOrThrow,
+    splitAddressOrThrow,
 } from '@flux/shared/types';
 import type {
     RedisConnection,
@@ -58,6 +60,32 @@ export class NetworkChannelHash {
     // ****************************************************************************
     // * Read
     // ****************************************************************************
+
+    public async readChannelNamesForClientId(
+        networkId: TNetworkId_S,
+        clientId: TClientId,
+    ): Promise<Set<TChannelName>> {
+        const networkChannelNames = await this.readNetworkChannelNames(
+            networkId,
+        );
+
+        const channelNameSet: Set<TChannelName> = new Set();
+
+        for (const networkChannelName of networkChannelNames) {
+            const memberAddresses: TAddress[] = await this.readNetworkChannelMemberAddresses(
+                networkId,
+                networkChannelName,
+            );
+
+            const memberClientIds = memberAddresses.map(splitAddressOrThrow).map((spl) => spl[2]);
+
+            if (memberClientIds.includes(clientId)) {
+                channelNameSet.add(networkChannelName);
+            }
+        }
+
+        return channelNameSet;
+    }
 
     /**
      * Reads all channels on a network.
