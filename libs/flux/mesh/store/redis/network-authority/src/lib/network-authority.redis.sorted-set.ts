@@ -56,7 +56,7 @@ export class NetworkAuthorityRedisSortedSet {
 
         // Add to global list
         await this._redisConnection.hash.hset(
-            `~/authorities`,
+            `~/clients`,
             {
                 [clientId]: networkId,
             }
@@ -195,7 +195,7 @@ export class NetworkAuthorityRedisSortedSet {
         await this._redisConnection
             .hash
             .hdel(
-                `~/authorities`,
+                `~/clients`,
                 clientId,
             );
 
@@ -247,7 +247,7 @@ export class NetworkAuthorityRedisSortedSet {
         await this._redisConnection
             .hash
             .hdel(
-                `~/authorities`,
+                `~/clients`,
                 clientId,
             );
 

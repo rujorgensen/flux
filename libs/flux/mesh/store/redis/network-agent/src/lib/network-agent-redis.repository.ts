@@ -50,7 +50,7 @@ export class NetworkAgentRedisRepository {
 
         // Add to global list
         await this._redisConnection.hash.hset(
-            `~/agents`,
+            `~/clients`,
             {
                 [clientId]: networkId,
             }
@@ -61,7 +61,7 @@ export class NetworkAgentRedisRepository {
             `networks/${networkId}/agents/${clientId}`,
             {
                 ...(ip ? {
-                    'ip': typeof ip === 'string' ? ip : '',
+                    'ip': ip.address,
                 } : {}),
 
                 ...(uid ? {
@@ -182,7 +182,7 @@ export class NetworkAgentRedisRepository {
                 id: clientId,
                 uid: name ? (name as TAgentOwnUId) : undefined,
                 ip: ip || null,
-                address: address as string,
+                address: address as TAddress,
                 bytes: Number.parseInt(bytes || '0', 10),
                 packets: Number.parseInt(packets || '0', 10),
                 connectedAt: new Date(connectedAt as unknown as Date),
@@ -216,7 +216,7 @@ export class NetworkAgentRedisRepository {
         await this._redisConnection
             .hash
             .hdel(
-                `~/agents`,
+                `~/clients`,
                 clientId,
             );
 
