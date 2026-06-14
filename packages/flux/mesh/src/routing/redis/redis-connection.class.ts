@@ -52,6 +52,7 @@ export class RedisConnection {
 
     // Wrapper to not expose BunRedisClient functions
     public readonly hash;
+    public readonly sortedSet;
 
     constructor(
         optionsOrURL: string | {
@@ -131,6 +132,14 @@ export class RedisConnection {
 
         // Dedicated client
         const hashClient = this.cacheClient.getClient();
+
+        this.sortedSet = {
+            zadd: hashClient.zadd.bind(hashClient),
+            zrem: hashClient.zrem.bind(hashClient),
+            zscore: hashClient.zscore.bind(hashClient),
+            zrangebylex: hashClient.zrangebylex.bind(hashClient),
+            zrangebyscore: hashClient.zrangebyscore.bind(hashClient),
+        };
 
         this.hash = {
             sadd: hashClient.sadd.bind(hashClient),
