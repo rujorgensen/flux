@@ -7,6 +7,7 @@ import {
     type TAgentOwnUId,
     type TNetworkId_S,
     type TNetworkAgentCountAt,
+    splitProcessAddress,
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
 import type {
@@ -48,9 +49,17 @@ export class NetworkAgentRedisRepository {
         // Add to network
         await this._redisConnection.hash.sadd(`networks/${networkId}/agents`, clientId);
 
+        // Add to machine list
+        const [machineAddress, processAddress] = splitProcessAddress(address);
+
+        await this._redisConnection.hash.sadd(
+            `~/machines/processes/${machineAddress}/${processAddress}/clients`,
+            clientId,
+        );
+
         // Add to global list
         await this._redisConnection.hash.hset(
-            `~/agents`,
+            `~/clients`,
             {
                 [clientId]: networkId,
             }
@@ -61,7 +70,7 @@ export class NetworkAgentRedisRepository {
             `networks/${networkId}/agents/${clientId}`,
             {
                 ...(ip ? {
-                    'ip': typeof ip === 'string' ? ip : '',
+                    'ip': ip.address,
                 } : {}),
 
                 ...(uid ? {
@@ -182,7 +191,7 @@ export class NetworkAgentRedisRepository {
                 id: clientId,
                 uid: name ? (name as TAgentOwnUId) : undefined,
                 ip: ip || null,
-                address: address as string,
+                address: address as TAddress,
                 bytes: Number.parseInt(bytes || '0', 10),
                 packets: Number.parseInt(packets || '0', 10),
                 connectedAt: new Date(connectedAt as unknown as Date),
@@ -212,11 +221,23 @@ export class NetworkAgentRedisRepository {
             await this._redisConnection.hash.hdel(`networks/${networkId_}/agent-uids`, uid);
         }
 
+        // Remove from machine list
+        const agent = await this.readAgentByClientId(networkId_, clientId);
+
+        if (agent) {
+            const [machineAddress, processAddress] = splitProcessAddress(agent.address as TAddress);
+
+            await this._redisConnection.hash.srem(
+                `~/machines/processes/${machineAddress}/${processAddress}/clients`,
+                clientId,
+            );
+        }
+
         // Remove from global
         await this._redisConnection
             .hash
             .hdel(
-                `~/agents`,
+                `~/clients`,
                 clientId,
             );
 

@@ -148,10 +148,6 @@ export class FluxMeshServer {
             networkAgentRedisCache,
         );
 
-        this.processClass = new ProcessClass(
-            this.redisConnection,
-        );
-
         this.bunServer = Bun.serve({
             port,
             idleTimeout: 0, // deactivate timeout
@@ -630,9 +626,10 @@ export class FluxMeshServer {
                     }
                 },
 
-                drain(_ws: Bun.ServerWebSocket<unknown>) {
-                    console.log('drain');
-                }, // the socket is ready to receive more data
+                // The socket is ready to receive more data
+                drain() {
+                    PicoLogger.log('Socket drained', 'ws-connection');
+                },
             },
         });
 
@@ -643,6 +640,28 @@ export class FluxMeshServer {
         );
 
         this.channelManager = new NetworkChannelManager(this.globalChannelPubsub);
+
+        this.processClass = new ProcessClass(
+            this.redisConnection,
+            this.channelManager,
+        );
+
+        // Check if there is any cleanup to do from previous run in case of crash
+        setTimeout(() => {
+            void this.processClass
+                .cleanupOrphans(machineAddress)
+                .then(() => PicoLogger.log('Cleanup complete', 'startup'))
+                .catch(() => PicoLogger.error('Cleanup failed', 'startup'))
+                ;
+        }, UPDATE_INTERVAL + 100);
+
+        setInterval(() => {
+            void this.processClass
+                .cleanupOrphans(machineAddress)
+                .then(() => PicoLogger.log('Cleanup complete', 'startup'))
+                .catch(() => PicoLogger.error('Cleanup failed', 'startup'))
+                ;
+        }, 300_000); // Every 5 minutes
 
         // TODO: DETECT WHEN READY
         setTimeout(() => {

@@ -1,10 +1,14 @@
-import type { TAgentOwnUId, TClientId } from '@flux/shared/types';
+import type {
+    TAddress,
+    TAgentOwnUId,
+    TClientId,
+} from '@flux/shared/types';
 
 export type TNetworkAgent = {
     id: TClientId;
     uid?: TAgentOwnUId;
     ip: string | null;
-    address: string;
+    address: TAddress;
     bytes: number;
     packets: number;
     connectedAt: Date;

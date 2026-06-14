@@ -135,6 +135,15 @@ export class FluxAuthority {
     }
 
     /**
+     * Disconnects the authority from the network.
+     */
+    public disconnect(
+
+    ): void {
+        this.fluxWebSocketConnection?.disconnect();
+    }
+
+    /**
      * Attaches a listener for network connection state changes.
      */
     public readonly onNetworkState = this.stateManager.attachNetworkStateListener.bind(this.stateManager);

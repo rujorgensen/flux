@@ -32,7 +32,7 @@ export const validateMachineUID = (
 /**
  * Returns the machine UID or NULL.
  * 
- * NB! node-machine-id' turned out to fail catastrophically on non-bun/node environments.
+ * NB! node-machine-id turned out to fail catastrophically on non-bun/node environments.
  */
 export const getMachineUID = async (
 ): Promise<TFluxClientUID | null> => {

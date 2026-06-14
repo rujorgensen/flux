@@ -4,6 +4,7 @@
 
 import type {
     TAddress,
+    TClientId,
     TNetworkId_S,
     TChannelName,
     INetworkChannel,
@@ -67,6 +68,21 @@ export class NetworkChannelService {
     // ****************************************************************************
     // * Read
     // ****************************************************************************
+
+    /**
+     * Reads all channel names a client is subscribed to.
+     */
+    public async readChannelNamesForClientId(
+        networkId: TNetworkId_S,
+        clientId: TClientId,
+    ): Promise<Set<TChannelName>> {
+        return this
+            ._networkChannelHash
+            .readChannelNamesForClientId(
+                networkId,
+                clientId,
+            );
+    }
 
     /**
      * Reads all channels on a network.
