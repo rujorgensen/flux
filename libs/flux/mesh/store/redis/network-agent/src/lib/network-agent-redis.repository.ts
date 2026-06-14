@@ -7,6 +7,7 @@ import {
     type TAgentOwnUId,
     type TNetworkId_S,
     type TNetworkAgentCountAt,
+    splitProcessAddress,
 } from '@flux/shared/types';
 import type { TNetworkAgent } from './network-agent-cache.type';
 import type {
@@ -47,6 +48,14 @@ export class NetworkAgentRedisRepository {
 
         // Add to network
         await this._redisConnection.hash.sadd(`networks/${networkId}/agents`, clientId);
+
+        // Add to machine list
+        const [machineAddress, processAddress] = splitProcessAddress(address);
+
+        await this._redisConnection.hash.sadd(
+            `~/machines/processes/${machineAddress}/${processAddress}/clients`,
+            clientId,
+        );
 
         // Add to global list
         await this._redisConnection.hash.hset(
@@ -210,6 +219,18 @@ export class NetworkAgentRedisRepository {
 
         if (uid) {
             await this._redisConnection.hash.hdel(`networks/${networkId_}/agent-uids`, uid);
+        }
+
+        // Remove from machine list
+        const agent = await this.readAgentByClientId(networkId_, clientId);
+
+        if (agent) {
+            const [machineAddress, processAddress] = splitProcessAddress(agent.address as TAddress);
+
+            await this._redisConnection.hash.srem(
+                `~/machines/processes/${machineAddress}/${processAddress}/clients`,
+                clientId,
+            );
         }
 
         // Remove from global
