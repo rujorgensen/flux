@@ -1,6 +1,6 @@
 {
     "name": "@persistica/flux-agent",
-    "version": "0.0.26",
+    "version": "0.0.27",
     "description": "Persistica Flux Agent",
     "type": "module",
     "keywords": [],
