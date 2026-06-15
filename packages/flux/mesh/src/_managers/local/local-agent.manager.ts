@@ -3,14 +3,14 @@
  */
 import type { TClientId } from '@flux/shared/types';
 import { TConnectedClientSocket } from '../../connected-client-socket.types';
-import { NetworkAgentRedisCache } from '../../register/network-agent-redis-cache.class';
 import { PicoLogger } from '@utils/pico-logger';
+import { NetworkAgentService } from '../../register/network-agent.service';
 
 export class LocalAgentManager {
 
     constructor(
         private readonly _clientMap: Map<TClientId, TConnectedClientSocket>,
-        private readonly _networkAgentRedisCache: NetworkAgentRedisCache,
+        private readonly _networkAgentService: NetworkAgentService,
     ) {}
 
     public async kickAgent(
@@ -33,9 +33,10 @@ export class LocalAgentManager {
         }
 
         // Cleanup redis
-        await this._networkAgentRedisCache
+        await this._networkAgentService
             .unregister(
                 clientId,
+                client?.data.address,
                 client?.data.networkId,
             );
     }

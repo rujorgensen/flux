@@ -207,22 +207,19 @@ export class NetworkAgentRedisRepository {
 
     /**
      * Unregisters a network agent UID and address in the Redis hash.
-     * 
-     * @throws 'Network agent not found for clientId ...'
      */
-    public async unregisterAgentOrThrow(
+    public async unregisterAgent(
         clientId: TClientId,
-        networkId?: TNetworkId_S,
+        networkId: TNetworkId_S,
         uid?: TAgentOwnUId,
     ): Promise<void> {
-        const networkId_: TNetworkId_S = networkId ?? await this.readAgentNetworkIdByClientIdOrThrow(clientId);
 
         if (uid) {
-            await this._redisConnection.hash.hdel(`networks/${networkId_}/agent-uids`, uid);
+            await this._redisConnection.hash.hdel(`networks/${networkId}/agent-uids`, uid);
         }
 
         // Remove from machine list
-        const agent = await this.readAgentByClientId(networkId_, clientId);
+        const agent = await this.readAgentByClientId(networkId, clientId);
 
         if (agent) {
             const [machineAddress, processAddress] = splitProcessAddress(agent.address as TAddress);
@@ -242,16 +239,16 @@ export class NetworkAgentRedisRepository {
             );
 
         // Remove from network
-        await this._redisConnection.hash.srem(`networks/${networkId_}/agents`, clientId);
+        await this._redisConnection.hash.srem(`networks/${networkId}/agents`, clientId);
 
         // Remove from agent info hash
-        await this._redisConnection.hash.del(`networks/${networkId_}/agents/${clientId}`);
+        await this._redisConnection.hash.del(`networks/${networkId}/agents/${clientId}`);
     }
 
     // ****************************************************************************
     // * Internal Helpers
     // ****************************************************************************
-    private async readAgentNetworkIdByClientIdOrThrow(
+    public async readAgentNetworkIdByClientIdOrThrow(
         clientId: TClientId,
     ): Promise<TNetworkId_S> {
         const networkId = await this._redisConnection.hash.hget(`~/agents`, clientId);
