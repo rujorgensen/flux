@@ -45,6 +45,7 @@ export class NetworkAuthorityRedisSortedSet {
     public async registerAuthority(
         networkId: TNetworkId_S,
         clientId: TClientId,
+        ip: Bun.SocketAddress | null,
         machineUID?: TFluxClientUID,
     ): Promise<void> {
         const key: string = `networks/${networkId}/authorities`;
@@ -66,6 +67,9 @@ export class NetworkAuthorityRedisSortedSet {
         await this._redisConnection.hash.hset(
             `networks/${networkId}/authorities/${clientId}`,
             {
+                ...(ip ? {
+                    'ip': ip.address,
+                } : {}),
                 ...(machineUID ? {
                     'machineUID': typeof machineUID === 'string' ? machineUID : '',
                 } : {}),

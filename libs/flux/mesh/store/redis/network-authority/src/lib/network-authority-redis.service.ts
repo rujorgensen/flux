@@ -35,12 +35,14 @@ export class NetworkAuthorityRedisService {
     public async registerAuthority(
         networkId: TNetworkId_S,
         clientId: TClientId,
+        ip: Bun.SocketAddress | null,
         machineUID?: TFluxClientUID,
     ): Promise<void> {
         await this._networkAuthorityRedisSortedSet
             .registerAuthority(
                 networkId,
                 clientId,
+                ip,
                 machineUID,
             );
 

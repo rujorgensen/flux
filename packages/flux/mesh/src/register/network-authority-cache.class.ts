@@ -13,6 +13,7 @@ import type {
 import {
     NetworkAuthorityRedisService
 } from '@flux/mesh/store/redis/network-authority';
+
 export class NetworkAuthorityCache {
     private readonly redisConnection: NetworkAuthorityRedisService = new NetworkAuthorityRedisService(getMeshRedisConnection());
     private readonly cache: Map<TNetworkId_S, Set<TAddress>> = new Map();
@@ -23,6 +24,7 @@ export class NetworkAuthorityCache {
      * 
      * @param { TNetworkId_S } networkId - The network ID to register on
      * @param { TClientId } clientId - The socket ID of the authority
+     * @param { Bun.SocketAddress | null } ip - The client IP address
      * @param { TFluxClientUID } [machineUID] - Optional machine UID
      * 
      * @returns { Promise<void> }
@@ -30,12 +32,14 @@ export class NetworkAuthorityCache {
     public async register(
         networkId: TNetworkId_S,
         clientId: TClientId,
+        ip: Bun.SocketAddress | null,
         machineUID?: TFluxClientUID,
     ): Promise<void> {
         await this.redisConnection
             .registerAuthority(
                 networkId,
                 clientId,
+                ip,
                 machineUID,
             );
     }
