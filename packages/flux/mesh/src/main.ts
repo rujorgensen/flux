@@ -145,12 +145,6 @@ export class FluxMeshServer {
             'authorizeAgentConnection' | 'authorizeChannelAccess'
         > = new GlobalRPCClient(outgoingMessageRouter, processMessageRouter);
 
-        this.agentManager = new AgentManager(
-            this.redisConnection,
-            clientMap,
-            networkAgentRedisCache,
-        );
-
         this.bunServer = Bun.serve({
             port,
             idleTimeout: 0, // deactivate timeout
@@ -596,12 +590,16 @@ export class FluxMeshServer {
             this.bunServer,
             processAddress,
         );
-
         this.channelManager = new NetworkChannelManager(this.globalChannelPubsub);
         this.networkAgentService = new NetworkAgentService(
             networkAgentRedisCache,
             this.redisConnection,
             this.channelManager,
+        );
+        this.agentManager = new AgentManager(
+            this.redisConnection,
+            clientMap,
+            this.networkAgentService,
         );
         this.processClass = new ProcessClass(
             this.redisConnection,

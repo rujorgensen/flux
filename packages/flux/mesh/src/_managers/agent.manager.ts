@@ -10,7 +10,7 @@ import { GlobalClientManager } from './global/global-client.manager';
 import { LocalAgentManager } from './local/local-agent.manager';
 import { readMachineAddress, readProcessId } from '../routing/addressing.utils';
 import { TConnectedClientSocket } from '../connected-client-socket.types';
-import { NetworkAgentRedisCache } from '../register/network-agent-redis-cache.class';
+import { NetworkAgentService } from '../register/network-agent.service';
 
 export class AgentManager {
     private readonly machineAddress: TMachineAddress = readMachineAddress();
@@ -22,12 +22,12 @@ export class AgentManager {
     constructor(
         private readonly _redisConnection: RedisConnection,
         private readonly _clientMap: Map<TClientId, TConnectedClientSocket>,
-        private readonly _networkAgentRedisCache: NetworkAgentRedisCache,
+        private readonly _networkAgentService: NetworkAgentService,
     ) {
         this._globalClientManager = new GlobalClientManager(this._redisConnection);
         this._localAgentManager = new LocalAgentManager(
             this._clientMap,
-            this._networkAgentRedisCache,
+            this._networkAgentService,
         );
 
         // Subscribe to global events
