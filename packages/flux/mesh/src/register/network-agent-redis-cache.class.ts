@@ -37,7 +37,7 @@ export class NetworkAgentRedisCache {
      * Register an agent.
      * 
      * @param { TNetworkId_S } networkId - The network ID
-     * @param { TClientId } id - The client socket ID
+     * @param { TClientId } clientId - The client socket ID
      * @param { Bun.SocketAddress | null } ip - The client IP address
      * @param { TAddress } address - The client address
      * @param { object } throughput - The throughput tracking object
@@ -48,7 +48,7 @@ export class NetworkAgentRedisCache {
      */
     public registerAgent(
         networkId: TNetworkId_S,
-        id: TClientId,
+        clientId: TClientId,
         ip: Bun.SocketAddress | null,
         address: TAddress,
         throughput: {
@@ -59,12 +59,12 @@ export class NetworkAgentRedisCache {
         machineUID?: TFluxClientUID,
     ): Promise<void> {
         this.timers.set(
-            id,
+            clientId,
             setInterval(async () => {
                 await this.networkAgentRedisService
                     .registerAgentThroughput(
                         networkId,
-                        id,
+                        clientId,
                         throughput.bytes,
                         throughput.packets,
                     );
@@ -86,7 +86,7 @@ export class NetworkAgentRedisCache {
         return this.networkAgentRedisService
             .registerAgent(
                 networkId,
-                id,
+                clientId,
                 ip,
                 address,
                 uid,

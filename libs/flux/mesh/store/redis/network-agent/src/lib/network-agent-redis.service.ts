@@ -155,26 +155,27 @@ export class NetworkAgentRedisService {
         networkId?: TNetworkId_S,
         uid?: TAgentOwnUId,
     ): Promise<void> {
+        const networkId_: TNetworkId_S = networkId ?? await this._networkAgentRedisRepository
+            .readAgentNetworkIdByClientIdOrThrow(clientId);
+
         await this._networkAgentRedisRepository
-            .unregisterAgentOrThrow(
+            .unregisterAgent(
                 clientId,
-                networkId,
+                networkId_,
                 uid,
             );
 
         await this._networkAgentRedisEvents
             .advertiseAgentDeleted(
-                networkId!,
+                networkId_,
                 clientId,
             );
 
-        if (networkId) {
-            await this._networkAgentRedisEvents
-                .advertiseAgentCountChange(
-                    networkId,
-                    await this.readAgentCount(networkId).then(c => c.count),
-                );
-        }
+        await this._networkAgentRedisEvents
+            .advertiseAgentCountChange(
+                networkId_,
+                await this.readAgentCount(networkId_).then(c => c.count),
+            );
     }
 
     // ****************************************************************************

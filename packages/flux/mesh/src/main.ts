@@ -69,6 +69,8 @@ import { AgentManager } from './_managers/agent.manager';
 import { interactWithNpc } from './_routes/npc-interact.get.route';
 import { truncateString } from '@flux/shared/utils';
 import { ProcessClass } from './business-logic/processes/process.class';
+import { onSocketClosed } from './_ws-handlers/ws-socket-close';
+import { NetworkAgentService } from './register/network-agent.service';
 
 PicoLogger.configure({
     allowScopes: '*',
@@ -112,6 +114,7 @@ export class FluxMeshServer {
     private readonly channelManager: NetworkChannelManager;
     private readonly agentManager: AgentManager;
     private readonly processClass: ProcessClass;
+    private readonly networkAgentService: NetworkAgentService;
 
     constructor(
         private readonly optionsOrPort?: TOptions | number,
@@ -265,6 +268,7 @@ export class FluxMeshServer {
                             .register(
                                 _ws.data.networkId,
                                 _ws.data.id,
+                                _ws.data.ip,
                                 _ws.data.machineUID,
                             );
                     } else {
@@ -574,57 +578,11 @@ export class FluxMeshServer {
                 },
 
                 // A socket is closed
-                close: async (
-                    ws: TConnectedClientSocket,
-                    code: number,
-                ) => {
-                    clientMap.delete(ws.data.id);
-
-                    if (ws.data.isAuthority) {
-                        PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
-
-                        void networkAuthorityRedisCache
-                            .unregister(
-                                ws.data.id,
-                                ws.data.networkId,
-                            )
-                            .catch();
-                    } else {
-                        PicoLogger.log(`🛑🤵 Agent socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
-                        // Unsubscribe from topics
-
-                        for (const channelName of ws.data.channelNames) {
-                            ws.unsubscribe(
-                                `networks/${ws.data.networkId}/channels/${channelName}`
-                            );
-                        }
-
-                        //  * Leave all channels
-                        if (ws.data.channelNames.size > 0) {
-                            await this.channelManager
-                                .leaveAllNetworkChannels(
-                                    ws.data.networkId,
-                                    ws.data.address,
-                                    ws.data.channelNames,
-                                ).catch(() => {
-                                    PicoLogger.error(`Caught error while leaving network channels.`, 'ws-disconnect');
-                                });
-                        }
-
-                        await networkAgentRedisCache
-                            .unregister(
-                                ws.data.id,
-                                ws.data.networkId,
-                                ws.data.uid ? {
-                                    clientOwnUId: ws.data.uid,
-                                    networkId: ws.data.networkId,
-                                } : undefined,
-                            )
-                            .catch(() => {
-                                PicoLogger.error(`Caught error while unregistering agent.`, 'ws-disconnect');
-                            });
-                    }
-                },
+                close: onSocketClosed(
+                    clientMap,
+                    networkAuthorityRedisCache,
+                    () => this.networkAgentService,
+                ),
 
                 // The socket is ready to receive more data
                 drain() {
@@ -640,7 +598,11 @@ export class FluxMeshServer {
         );
 
         this.channelManager = new NetworkChannelManager(this.globalChannelPubsub);
-
+        this.networkAgentService = new NetworkAgentService(
+            networkAgentRedisCache,
+            this.redisConnection,
+            this.channelManager,
+        );
         this.processClass = new ProcessClass(
             this.redisConnection,
             this.channelManager,

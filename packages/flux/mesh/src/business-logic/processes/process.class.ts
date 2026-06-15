@@ -6,7 +6,6 @@ import {
     splitProcessAddress,
 } from '@flux/shared/types';
 import { RedisConnection } from '../../routing/redis/redis-connection.class';
-import { NetworkAgentRedisRepository } from '../../../../../../libs/flux/mesh/store/redis/network-agent/src/lib/network-agent-redis.repository';
 import { NetworkChannelManager } from '../channels/channel-manager.class';
 import { PicoLogger } from '@utils/pico-logger';
 import { NetworkChannelService } from '@flux/mesh/store/redis/network-channel';
@@ -14,7 +13,6 @@ import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
 
 export class ProcessClass {
 
-    private readonly networkAgentRedisRepository: NetworkAgentRedisRepository;
     private readonly networkChannelService: NetworkChannelService;
     private readonly networkAgentRedisService: NetworkAgentRedisService;
 
@@ -22,7 +20,6 @@ export class ProcessClass {
         private readonly _redisConnection: RedisConnection,
         private readonly _networkChannelManager: NetworkChannelManager,
     ) {
-        this.networkAgentRedisRepository = new NetworkAgentRedisRepository(this._redisConnection);
         this.networkChannelService = new NetworkChannelService(this._redisConnection);
         this.networkAgentRedisService = new NetworkAgentRedisService(this._redisConnection);
     }
@@ -43,7 +40,7 @@ export class ProcessClass {
 
             for (const clientId of disconnectedProcessClientIds) {
                 try {
-                    await this.networkAgentRedisRepository
+                    await this.networkAgentRedisService
                         .unregisterAgentOrThrow(clientId as TClientId);
 
                     const networkId = await this._redisConnection
