@@ -3,6 +3,7 @@ import {
     type TChannelName,
     type TNetworkId_S,
     type TSubscription_S,
+    type TClientId,
     AUTHORITY_ON_CREATE_CHANNEL,
     AUTHORITY_ON_EMPTY_CHANNEL,
 } from '@flux/shared/types';
@@ -127,6 +128,20 @@ export class NetworkChannelManager {
                 networkId,
                 clientAddress,
                 channelNames,
+            );
+    }
+
+    // ****************************************************************************
+    // *** Read
+    // ****************************************************************************
+    public readChannelNamesForClientId(
+        networkId: TNetworkId_S,
+        clientId: TClientId,
+    ): Promise<Set<TChannelName>> {
+        return this.networkChannelService
+            .readChannelNamesForClientId(
+                networkId,
+                clientId,
             );
     }
 

@@ -18,11 +18,11 @@ export class NetworkAgentService {
 
     constructor(
         private readonly networkAgentRedisCache: NetworkAgentRedisCache,
-        private readonly redisConnectionService: RedisConnection,
-        private readonly channelManager: NetworkChannelManager,
+        private readonly redisConnection: RedisConnection,
+        private readonly networkChannelManager: NetworkChannelManager,
     ) {
         this.networkAgentRedisRepository = new NetworkAgentRedisRepository(
-            this.redisConnectionService,
+            this.redisConnection,
         );
     }
 
@@ -73,19 +73,21 @@ export class NetworkAgentService {
                 clientOwnUId,
             );
 
-        if (!networkChannels) {
-            throw new Error('Resolve network channels if not provided.');
-        }
+        const channelNames_ = networkChannels ?? await this.networkChannelManager
+            .readChannelNamesForClientId(
+                networkId_,
+                clientId,
+            );
 
         if (!clientAddress) {
             throw new Error('Resolve client address if not provided.');
         }
 
-        await this.channelManager
+        await this.networkChannelManager
             .leaveAllNetworkChannels(
                 networkId_,
                 clientAddress,
-                networkChannels,
+                channelNames_,
             );
     }
 

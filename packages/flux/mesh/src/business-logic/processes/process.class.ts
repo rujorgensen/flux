@@ -1,28 +1,18 @@
 import {
     type TClientId,
-    type TNetworkId_S,
     type TProcessAddress,
     type TMachineAddress,
     splitProcessAddress,
 } from '@flux/shared/types';
 import { RedisConnection } from '../../routing/redis/redis-connection.class';
-import { NetworkChannelManager } from '../channels/channel-manager.class';
-import { PicoLogger } from '@utils/pico-logger';
-import { NetworkChannelService } from '@flux/mesh/store/redis/network-channel';
-import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
+import { NetworkAgentService } from '../../register/network-agent.service';
 
 export class ProcessClass {
 
-    private readonly networkChannelService: NetworkChannelService;
-    private readonly networkAgentRedisService: NetworkAgentRedisService;
-
     constructor(
         private readonly _redisConnection: RedisConnection,
-        private readonly _networkChannelManager: NetworkChannelManager,
-    ) {
-        this.networkChannelService = new NetworkChannelService(this._redisConnection);
-        this.networkAgentRedisService = new NetworkAgentRedisService(this._redisConnection);
-    }
+        private readonly _networkAgentService: NetworkAgentService,
+    ) {}
 
     /**
      * 
@@ -40,43 +30,11 @@ export class ProcessClass {
 
             for (const clientId of disconnectedProcessClientIds) {
                 try {
-                    await this.networkAgentRedisService
-                        .unregisterAgentOrThrow(clientId as TClientId);
-
-                    const networkId = await this._redisConnection
-                        .hash
-                        .hget(`~/clients`, clientId) as TNetworkId_S | null;
-
-                    if (!networkId) {
-                        continue;
-                    }
-
-                    // Leave all network channels
-                    const channelNames = await this.networkChannelService
-                        .readChannelNamesForClientId(
-                            networkId,
+                    await this._networkAgentService
+                        .unregister(
                             clientId as TClientId,
                         );
 
-                    const agent = await this.networkAgentRedisService
-                        .readAgentByClientId(
-                            networkId,
-                            clientId as TClientId,
-                        );
-
-                    // This could be an authority, or just not be available anymore
-                    if (!agent) {
-                        continue;
-                    }
-
-                    await this._networkChannelManager
-                        .leaveAllNetworkChannels(
-                            networkId,
-                            agent.address,
-                            channelNames,
-                        ).catch(() => {
-                            PicoLogger.error(`Caught error while leaving network channels.`, 'ws-disconnect');
-                        });
 
                 } catch (err) {
                     console.error(`Error unregistering agent ${clientId} for process ${disconnectedProcess}:`, err);
