@@ -11,6 +11,7 @@ import { getNetworkId } from '../network-id';
 
 // Define observable component
 Alpine.data('fluxApplicationA', () => ({
+    channelName: 'channel-abc',
     flux: new FluxAgent(
         getNetworkId(),
         {
@@ -23,7 +24,31 @@ Alpine.data('fluxApplicationA', () => ({
     fluxNetworkConnection: <undefined | FluxAgentNetworkConnection>undefined,
     networkState: <string | null>null,
     clientLog: ['empty'],
+    joinedChannelName: <string | null>null,
     remoteClient: <FluxRemoteClient | undefined>undefined,
+    rtcMessageInterval: <ReturnType<typeof setInterval> | undefined>undefined,
+    log(
+        message: string,
+    ) {
+        this.clientLog.unshift(message);
+    },
+    stopRTCMessageLoop() {
+        if (!this.rtcMessageInterval) {
+            return;
+        }
+
+        clearInterval(this.rtcMessageInterval);
+        this.rtcMessageInterval = undefined;
+    },
+    startRTCMessageLoop() {
+        if (this.rtcMessageInterval) {
+            return;
+        }
+
+        this.rtcMessageInterval = setInterval(() => {
+            this.sendRTCMessage('WEB RTC IS WORKING 🥳🎉🎊');
+        }, 200);
+    },
     async init() {
         console.log('🚀 Flux Application is live');
 
@@ -31,7 +56,7 @@ Alpine.data('fluxApplicationA', () => ({
             .onMessage((
                 message: string,
             ) => {
-                this.clientLog.unshift(message);
+                this.log(message);
             });
 
         this.flux
@@ -42,11 +67,11 @@ Alpine.data('fluxApplicationA', () => ({
                 this.webRTCConncetionState = webRTCConncetionState;
 
                 if (webRTCConncetionState === 'connected') {
-                    // Start sending messages
-                    setInterval(() => {
-                        this.sendRTCMessage('WEB RTC IS WORKING 🥳🎉🎊');
-                    }, 200);
+                    this.startRTCMessageLoop();
+                    return;
                 }
+
+                this.stopRTCMessageLoop();
             });
 
         this.flux
@@ -54,7 +79,13 @@ Alpine.data('fluxApplicationA', () => ({
                 networkState: TNetworkConnectionState,
             ) => {
                 this.networkState = networkState;
-                this.clientLog.unshift(`📡 Network state changed to '${networkState}'`);
+                this.log(`📡 Network state changed to '${networkState}'`);
+
+                if (networkState === 'disconnected') {
+                    this.stopRTCMessageLoop();
+                    this.remoteClient = undefined;
+                    this.joinedChannelName = null;
+                }
             });
 
         try {
@@ -66,7 +97,7 @@ Alpine.data('fluxApplicationA', () => ({
                     'client-a-unique-identification-token',
                 );
         } catch (error) {
-            this.clientLog.unshift(`❌ Client A failed to connect: ${(error as Error).message}`);
+            this.log(`❌ Client A failed to connect: ${(error as Error).message}`);
             return;
         }
 
@@ -78,6 +109,7 @@ Alpine.data('fluxApplicationA', () => ({
     ) {
         console.log('Conneting to remo');
         this.remoteClient = this.fluxNetworkConnection?.connectToAgent(clientName);
+        this.log(`🔗 Connecting to '${clientName}'`);
     },
 
     // Send message over DataChannel
@@ -108,14 +140,50 @@ Alpine.data('fluxApplicationA', () => ({
             throw new Error('No network connection');
         }
 
+        if (this.joinedChannelName === channelTopic) {
+            return;
+        }
+
         await this.fluxNetworkConnection
             .joinChannel(
                 channelTopic,
             );
+
+        this.joinedChannelName = channelTopic;
+        this.log(`🟢 Joined '${channelTopic}'`);
+    },
+
+    async leaveChannel(
+        channelTopic: string,
+    ) {
+        if (!this.fluxNetworkConnection) {
+            throw new Error('No network connection');
+        }
+
+        if (this.joinedChannelName !== channelTopic) {
+            return;
+        }
+
+        await this.fluxNetworkConnection
+            .leaveChannel(
+                channelTopic,
+            );
+
+        this.joinedChannelName = null;
+        this.log(`🚪 Left '${channelTopic}'`);
+    },
+
+    async disconnect() {
+        if (this.joinedChannelName && this.fluxNetworkConnection) {
+            await this.fluxNetworkConnection.leaveChannel(this.joinedChannelName);
+            this.log(`🚪 Left '${this.joinedChannelName}'`);
+            this.joinedChannelName = null;
+        }
+
+        this.stopRTCMessageLoop();
+        this.remoteClient = undefined;
+        this.flux.disconnect();
+        this.log('🚪 Client A disconnected from network');
     },
 
 }));
-
-console.log('⚙️ Starting alpine');
-// Start Alpine.js
-// Alpine.start();

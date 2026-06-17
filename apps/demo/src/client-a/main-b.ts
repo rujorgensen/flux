@@ -8,6 +8,7 @@ import { getNetworkId } from '../network-id';
 
 // Define observable component
 Alpine.data('fluxApplicationB', () => ({
+    channelName: 'channel-abc',
     flux: new FluxAgent(
         getNetworkId(),
         {
@@ -20,6 +21,23 @@ Alpine.data('fluxApplicationB', () => ({
     fluxNetworkConnection: <undefined | FluxAgentNetworkConnection>undefined,
     networkState: <string | null>null,
     clientLog: ['empty'],
+    joinedChannelName: <string | null>null,
+    broadcastChannel: <FluxNetworkChannel | undefined>undefined,
+    broadcastInterval: <ReturnType<typeof setInterval> | undefined>undefined,
+    broadcastCounter: 0,
+    log(
+        message: string,
+    ) {
+        this.clientLog.unshift(message);
+    },
+    stopBroadcasting() {
+        if (!this.broadcastInterval) {
+            return;
+        }
+
+        clearInterval(this.broadcastInterval);
+        this.broadcastInterval = undefined;
+    },
     async init() {
         console.log('🚀 Flux Application is live');
 
@@ -27,7 +45,7 @@ Alpine.data('fluxApplicationB', () => ({
             .onMessage((
                 message: string,
             ) => {
-                this.clientLog.unshift(message);
+                this.log(message);
             });
 
         this.flux
@@ -42,7 +60,14 @@ Alpine.data('fluxApplicationB', () => ({
             .onNetworkState(
                 (networkState: TNetworkConnectionState) => {
                     this.networkState = networkState;
-                    this.clientLog.unshift(`📡 Network state changed to '${networkState}'`);
+                    this.log(`📡 Network state changed to '${networkState}'`);
+
+                    if (networkState === 'disconnected') {
+                        this.stopBroadcasting();
+                        this.broadcastChannel = undefined;
+                        this.joinedChannelName = null;
+                        this.broadcastCounter = 0;
+                    }
                 },
             );
 
@@ -54,7 +79,7 @@ Alpine.data('fluxApplicationB', () => ({
                 'client-b-unique-identification-token',
             );
         } catch (error) {
-            this.clientLog.unshift(`❌ Client B failed to connect: ${(error as Error).message}`);
+            this.log(`❌ Client B failed to connect: ${(error as Error).message}`);
             return;
         }
 
@@ -67,20 +92,50 @@ Alpine.data('fluxApplicationB', () => ({
             throw new Error('No network connection');
         }
 
-        const fluxNetworkChannel: FluxNetworkChannel = await this.fluxNetworkConnection
+        if (this.joinedChannelName === channelTopic) {
+            return;
+        }
+
+        this.broadcastChannel = await this.fluxNetworkConnection
             .joinChannel(
                 channelTopic,
             );
 
-        let i = 0;
-        fluxNetworkChannel.publish(`${i++} - Hello from client`);
+        this.joinedChannelName = channelTopic;
+        this.broadcastCounter = 0;
+        this.log(`🟢 Joined '${channelTopic}'`);
+        this.broadcastChannel.publish(`${this.broadcastCounter++} - Hello from client`);
 
-        setInterval(() => {
-            fluxNetworkChannel.publish(`${i++} - Hello from client`);
+        this.broadcastInterval = setInterval(() => {
+            this.broadcastChannel?.publish(`${this.broadcastCounter++} - Hello from client`);
         }, 1_000);
     },
-}));
+    async leaveChannel(
+        channelTopic: string,
+    ) {
+        if (!this.fluxNetworkConnection) {
+            throw new Error('No network connection');
+        }
 
-console.log('⚙️ Starting alpine');
-// Start Alpine.js
-// Alpine.start();
+        if (this.joinedChannelName !== channelTopic) {
+            return;
+        }
+
+        this.stopBroadcasting();
+        await this.fluxNetworkConnection.leaveChannel(channelTopic);
+        this.broadcastChannel = undefined;
+        this.joinedChannelName = null;
+        this.broadcastCounter = 0;
+        this.log(`🚪 Left '${channelTopic}'`);
+    },
+    async disconnect() {
+        if (this.joinedChannelName && this.fluxNetworkConnection) {
+            await this.leaveChannel(this.joinedChannelName);
+        } else {
+            this.stopBroadcasting();
+        }
+
+        this.flux.disconnect();
+        this.log('🚪 Client B disconnected from network');
+    },
+}));

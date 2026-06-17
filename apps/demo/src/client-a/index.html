@@ -123,6 +123,11 @@
                             <p x-text="log"></p>
                         </template>
                     </code>
+                    <div class="panel-actions">
+                        <button class="btn btn-secondary" @click="disconnect()" x-show="networkState === 'connected'">
+                            Disconnect Authority
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -153,8 +158,14 @@
                         <button class="btn btn-secondary" @click="connectToNamedAgent('client-b-unique-identification-token')">
                             Connect to Client B
                         </button>
-                        <button class="btn btn-secondary" @click="joinChannel('channel-abc')">
+                        <button class="btn btn-secondary" @click="joinChannel(channelName)" x-show="joinedChannelName !== channelName">
                             Join 'channel-abc'
+                        </button>
+                        <button class="btn btn-secondary" @click="leaveChannel(channelName)" x-show="joinedChannelName === channelName">
+                            Leave 'channel-abc'
+                        </button>
+                        <button class="btn btn-secondary" @click="disconnect()" x-show="networkState === 'connected'">
+                            Disconnect Client A
                         </button>
                     </div>
                 </div>
@@ -184,8 +195,14 @@
                         </template>
                     </code>
                     <div class="panel-actions">
-                        <button class="btn btn-secondary" @click="joinChannel('channel-abc')">
+                        <button class="btn btn-secondary" @click="joinChannel(channelName)" x-show="joinedChannelName !== channelName">
                             Join 'channel-abc' &amp; broadcast
+                        </button>
+                        <button class="btn btn-secondary" @click="leaveChannel(channelName)" x-show="joinedChannelName === channelName">
+                            Leave 'channel-abc'
+                        </button>
+                        <button class="btn btn-secondary" @click="disconnect()" x-show="networkState === 'connected'">
+                            Disconnect Client B
                         </button>
                     </div>
                 </div>
