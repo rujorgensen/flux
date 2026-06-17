@@ -35,7 +35,6 @@ export class ProcessClass {
                             clientId as TClientId,
                         );
 
-
                 } catch (err) {
                     console.error(`Error unregistering agent ${clientId} for process ${disconnectedProcess}:`, err);
                 }

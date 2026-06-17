@@ -22,7 +22,7 @@ import {
 } from '../../_services/dashboard-history/dashboard-history.service';
 import { NetworkIdComponent } from '../../components/network-id/network-id.component';
 import { FluxDomainComponent, resolveFluxDomain } from '../../components/flux-domain/flux-domain.component';
-import { SidebarCountsService } from '../../_services/sidebar-counts/sidebar-counts.service';
+import { NetworkStatsService } from '../../_services/sidebar-counts/sidebar-counts.service';
 
 interface UserSession {
     id?: string;
@@ -106,7 +106,7 @@ export class DashboardHomePageComponent implements OnInit {
         private readonly networksService: NetworksService,
         private readonly _userService: UserService,
         private readonly dashboardHistoryService: DashboardHistoryService,
-        private readonly sidebarCountsService: SidebarCountsService,
+        private readonly sidebarCountsService: NetworkStatsService,
     ) {
         this.networkId$ = this.networksService
             .selectedNetwork$
@@ -116,11 +116,11 @@ export class DashboardHomePageComponent implements OnInit {
 
         this.agentChartConfig$ = combineLatest([
             this.dashboardHistoryService.agentHistory$,
-            this.sidebarCountsService.agentCount$,
+            this.sidebarCountsService.agentCount$$,
         ]).pipe(
             map(([history, liveCount]) => buildChartConfig(
                 history,
-                liveCount,
+                liveCount.count,
                 'Agents',
                 '#6366f1',
                 'rgba(99, 102, 241, 0.08)',
@@ -129,11 +129,11 @@ export class DashboardHomePageComponent implements OnInit {
 
         this.authorityChartConfig$ = combineLatest([
             this.dashboardHistoryService.authorityHistory$,
-            this.sidebarCountsService.authorityCount$,
+            this.sidebarCountsService.authorityCount$$,
         ]).pipe(
             map(([history, liveCount]) => buildChartConfig(
                 history,
-                liveCount,
+                liveCount.count,
                 'Authorities',
                 '#10b981',
                 'rgba(16, 185, 129, 0.08)',
@@ -142,11 +142,11 @@ export class DashboardHomePageComponent implements OnInit {
 
         this.channelChartConfig$ = combineLatest([
             this.dashboardHistoryService.channelHistory$,
-            this.sidebarCountsService.channelCount$,
+            this.sidebarCountsService.channelCount$$,
         ]).pipe(
             map(([history, liveCount]) => buildChartConfig(
                 history,
-                liveCount,
+                liveCount.count,
                 'Channels',
                 '#f59e0b',
                 'rgba(245, 158, 11, 0.08)',

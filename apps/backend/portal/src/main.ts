@@ -19,6 +19,7 @@ import { networkRepository, networkService } from './_decorators/network-service
 import { ConnectionHistorySnapshotService } from './_services/connection-history-snapshot.service';
 import { getPortalPgRepository } from '@backend/core/prisma';
 import { staticPlugin } from '@elysiajs/static';
+import { getMeshRedisConnection } from '@flux/mesh';
 
 // Resolve path to the frontend's browser output, which we will serve as static assets
 const browserDistFolder = resolveBrowserDistFolder();
@@ -49,6 +50,7 @@ function isClientSideRoute(
 // ****************************************************************************
 const portalRedis = await getPortalRedisConnection();
 const meshRedis = await getMeshBunRedisConnection();
+const meshRedisConnection = getMeshRedisConnection();
 
 // ****************************************************************************
 // * Setup Services
@@ -69,6 +71,7 @@ liveUpdates(
     fluxMeshServerPort,
     portalRedisStatusService,
     meshRedisStatusService,
+    meshRedisConnection,
 );
 
 // ****************************************************************************

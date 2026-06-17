@@ -20,7 +20,7 @@ import {
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, startWith } from 'rxjs';
 import { NetworksService, MAX_NETWORKS } from '../../_services/networks.service';
-import { SidebarCountsService } from '../../_services/sidebar-counts/sidebar-counts.service';
+import { NetworkStatsService } from '../../_services/sidebar-counts/sidebar-counts.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 import { version } from '../../../../package.json';
 import { toast } from 'ngx-sonner';
@@ -89,13 +89,13 @@ export class DashboardLayoutComponent {
     constructor(
         protected readonly networksService: NetworksService,
         private readonly router: Router,
-        private readonly sidebarCountsService: SidebarCountsService,
+        private readonly networkStatsService: NetworkStatsService,
         private readonly injector: Injector,
     ) {
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
-        this.agentCount$ = this.sidebarCountsService.agentCount$;
-        this.authorityCount$ = this.sidebarCountsService.authorityCount$;
-        this.channelCount$ = this.sidebarCountsService.channelCount$;
+        this.agentCount$ = this.networkStatsService.agentCount$$;
+        this.authorityCount$ = this.networkStatsService.authorityCount$$;
+        this.channelCount$ = this.networkStatsService.channelCount$$;
 
         this.currentUrl = toSignal(
             this.router.events.pipe(

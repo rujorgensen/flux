@@ -1,16 +1,22 @@
 import type { FluxAgentNetworkConnection, FluxNetworkChannel } from '@flux/shared/connection';
-import { TNetworkId_S } from '@flux/shared/types';
+import type {
+    TNetworkChannelCountAt,
+    TNetworkId_S,
+} from '@flux/shared/types';
 import { Observable } from 'rxjs';
 
-export const onDataUsageUpdate$$ = (
+export const onChannelUpdate$$ = (
     networkId: TNetworkId_S,
     fluxAgentNetworkConnection: FluxAgentNetworkConnection,
-): Observable<number> => {
-    return new Observable<number>((subscriber) => {
-        fluxAgentNetworkConnection.joinChannel(`networks-${networkId}-total-data-usage`)
+): Observable<TNetworkChannelCountAt> => {
+    return new Observable<TNetworkChannelCountAt>((subscriber) => {
+        fluxAgentNetworkConnection.joinChannel(`networks-${networkId}-channel-count-update`)
             .then((fluxNetworkChannel: FluxNetworkChannel) => {
-                const handler = (networkTotalUsage: number) => {
-                    subscriber.next(networkTotalUsage);
+                const handler = (networkAuthorityCountAt: number) => {
+                    subscriber.next({
+                        count: networkAuthorityCountAt,
+                        date: new Date(),
+                    });
                 };
                 fluxNetworkChannel.onPublish<number>(handler);
 

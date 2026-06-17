@@ -1,15 +1,19 @@
-import { FluxMeshServer } from '@flux/mesh';
-import { FluxAuthority } from '@persistica/flux-authority';
+import { FluxMeshServer, RedisConnection } from '@flux/mesh';
+import { FluxAuthority, type FluxAuthorityNetworkConnection } from '@persistica/flux-authority';
 import * as jwt from 'jsonwebtoken';
-import { FluxAgent } from '@persistica/flux-agent';
 import type {
-    FluxNetworkChannel,
     FluxAgentNetworkConnection,
+    FluxNetworkChannel,
 } from '@flux/shared/connection';
 import type { RedisStatusService } from './_services/redis-status.service';
 import type { TNetworkAgentCountAt, TNetworkChannelCountAt, TNetworkId_S, TNetworkToken_S } from '@flux/shared/types';
 import { randomUUIDv7 } from 'bun';
-
+import { NetworkChannelService } from '@flux/mesh/store/redis/network-channel';
+import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
+import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
+import {
+    FluxAgent,
+} from '@persistica/flux-agent';
 interface IAgentJWTPayload extends jwt.JwtPayload {
     user: {
         allowAllChannels: boolean;
@@ -20,6 +24,8 @@ const NETWORK_ID: TNetworkId_S = 'internal-network' as TNetworkId_S; // Key to r
 const NETWORK_ACCESS_TOKEN: TNetworkToken_S = randomUUIDv7() as TNetworkToken_S; // Key to register an authority, known to flux
 const FLUX_AUTHORITY_JWT_SECRET: string = randomUUIDv7(); // The authority uses this to sign the success payload
 
+const subscribedNetworkChannels: Set<TNetworkId_S> = new Set();
+
 // ****************************************************************************
 // * Setup Mesh Server 
 // ****************************************************************************
@@ -27,7 +33,11 @@ export const liveUpdates = (
     localMeshServerPort: number,
     portalRedisStatusService: RedisStatusService,
     meshRedisStatusService: RedisStatusService,
+    meshRedisConnection: RedisConnection,
 ): void => {
+    const networkChannelService: NetworkChannelService = new NetworkChannelService(meshRedisConnection);
+    const networkAuthorityRedisService: NetworkAuthorityRedisService = new NetworkAuthorityRedisService(meshRedisConnection);
+    const networkAgentRedisService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection);
 
     new FluxMeshServer({
         port: localMeshServerPort,
@@ -53,7 +63,7 @@ export const liveUpdates = (
                 },
             );
 
-            await fluxAuthority
+            const fluxAuthorityNetworkConnection: FluxAuthorityNetworkConnection = await fluxAuthority
                 .registerAuthority({
                     networkAccessToken: NETWORK_ACCESS_TOKEN,
 
@@ -103,6 +113,12 @@ export const liveUpdates = (
                             return Promise.resolve(false);
                         }
 
+                        const networkIdMatch = channelTopic.match(/^networks-(.+)-(agent|authority|channel)-count-update$/);
+                        if (networkIdMatch) {
+                            console.log('TODO: pass the real network ID, and proof of association');
+                            manageChannelSubscriptions(networkIdMatch[1] as TNetworkId_S);
+                        }
+
                         return Promise.resolve(true);
                     },
                 })
@@ -131,8 +147,8 @@ export const liveUpdates = (
             console.log(`✅ Agent connected to network ID: '${NETWORK_ID}'`);
 
             // * Emit connected agents
-            const fluxConnectedAgentNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('connected-agents');
+            const fluxConnectedAgentNetworkChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
+                .getChannel('connected-agents');
 
             setInterval(() => {
                 const networkAgentCountAt: TNetworkAgentCountAt = {
@@ -144,8 +160,8 @@ export const liveUpdates = (
             }, 3_000);
 
             // * Emit active channels
-            const fluxActiveChannels: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('active-channels');
+            const fluxActiveChannels: FluxNetworkChannel = fluxAuthorityNetworkConnection
+                .getChannel('active-channels');
 
             setInterval(() => {
                 const fluxActiveChannelsAt: TNetworkChannelCountAt = {
@@ -157,22 +173,19 @@ export const liveUpdates = (
             }, 3_000);
 
             // * Emit connected authorities
-            const fluxNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('connected-authorities');
+            const fluxNetworkChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
+                .getChannel('connected-authorities');
 
             setInterval(() => {
-                const fluxActiveChannelsAt: TNetworkChannelCountAt = {
+                fluxNetworkChannel.publish({
                     count: 0,
                     date: new Date(),
-                };
-
-                fluxNetworkChannel.publish(fluxActiveChannelsAt);
+                });
             }, 3_000);
 
-
             // * Emit data usage
-            const fluxDataUsageNetworkChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('data-usage');
+            const fluxDataUsageNetworkChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
+                .getChannel('data-usage');
 
             let num5: number = -100;
             setInterval(() => {
@@ -181,13 +194,11 @@ export const liveUpdates = (
             }, 3_000);
 
             // * Listen to Redis health
-            const portalRedisHealthChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('protected-portal-redis-health-alerts');
+            const portalRedisHealthChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
+                .getChannel('protected-portal-redis-health-alerts');
 
-            const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('protected-mesh-redis-health-alerts');
-
-            console.log(`✅ Agent connected to network channel topics: "${fluxNetworkConnection.readConnectedChannels().join('","')}"`);
+            const meshRedisHealthAlertChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
+                .getChannel('protected-mesh-redis-health-alerts');
 
             portalRedisStatusService
                 .onAlert((alerts: string[]) => {
@@ -200,10 +211,10 @@ export const liveUpdates = (
                 });
 
             // * Listen to status
-            const portalRedisStatusChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('protected-portal-redis-status');
-            const meshRedisStatusChannel: FluxNetworkChannel = await fluxNetworkConnection
-                .joinChannel('protected-mesh-redis-status');
+            const portalRedisStatusChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
+                .getChannel('protected-portal-redis-status');
+            const meshRedisStatusChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
+                .getChannel('protected-mesh-redis-status');
 
             setInterval(async () => {
                 const portalRedisStatus = await portalRedisStatusService.getRedisStatusOrThrow();
@@ -212,5 +223,51 @@ export const liveUpdates = (
                 const meshRedisStatus = await meshRedisStatusService.getRedisStatusOrThrow();
                 meshRedisStatusChannel.publish(JSON.stringify(meshRedisStatus));
             }, 100);
+
+            const manageChannelSubscriptions = (
+                networkId: TNetworkId_S,
+            ): void => {
+
+                if (subscribedNetworkChannels.has(networkId)) {
+                    console.log('The channel is already subscribed to');
+                    return;
+                }
+
+                subscribedNetworkChannels.add(networkId);
+
+                // TODO Use fluxAuthorityNetworkConnection instead
+                void Promise.all([
+                    fluxNetworkConnection.joinChannel(`networks-${networkId}-agent-count-update`),
+                    fluxNetworkConnection.joinChannel(`networks-${networkId}-authority-count-update`),
+                    fluxNetworkConnection.joinChannel(`networks-${networkId}-channel-count-update`),
+                ])
+                    .then(([
+                        agentCountUpdateChannel,
+                        authorityCountUpdateChannel,
+                        channelUpdateChannel,
+                    ]: [FluxNetworkChannel, FluxNetworkChannel, FluxNetworkChannel]) => {
+                        void networkAgentRedisService
+                            .onAgentCountChange(
+                                networkId,
+                                agentCountUpdateChannel.publish.bind(agentCountUpdateChannel),
+                            );
+
+                        void networkAuthorityRedisService
+                            .onAuthorityCountChange(
+                                networkId,
+                                authorityCountUpdateChannel.publish.bind(authorityCountUpdateChannel),
+                            );
+
+                        void networkChannelService
+                            .onChannelCount(
+                                networkId,
+                                channelUpdateChannel.publish.bind(channelUpdateChannel),
+                            );
+                    })
+                    .catch((error: unknown) => {
+                        subscribedNetworkChannels.delete(networkId);
+                        console.error(`❌ Failed to subscribe to network channels for '${networkId}':`, error);
+                    });
+            };
         });
 };
