@@ -1,32 +1,14 @@
-<!-- <p>Hello from Angular!!</p> -->
-<!-- <span class="countdown font-mono text-6xl">
-    <span style="--value:59; --digits: 2;" aria-live="polite" aria-label="59">59</span>
-</span> -->
-
 <div class="stats stats-vertical lg:stats-horizontal shadow">
-    @if (connectedAuthoritiesCount(); as count) {
+    @if (authorityCount$$ | async; as count) {
         <app-connected-authorities [connectedAuthoritiesCount]="count" />
     }
-    @if (activeAgentCount(); as count) {
+    @if (agentCount$$ | async; as count) {
         <app-connected-agents [activeAgentCount]="count" />
     }
-    @if (activeChannelCount(); as count) {
+    @if (channelCount$$ | async; as count) {
         <app-active-channels [activeChannelCount]="count" />
     }
-    @if (totalDataUsage() !== undefined) {
-        <app-total-data-usage [totalDataUsage]="totalDataUsage()!" />
+    @if (totalDataUsage$$ | async; as totalDataUsage) {
+        <app-total-data-usage [totalDataUsage]="totalDataUsage" />
     }
 </div>
-<!-- @if (show()) {
-<p>{{ helpText() }}</p>
-
-<ul>
-    @for (todo of todos(); track todo.id) {
-    <li>
-        {{ todo.title }}
-    </li>
-    }
-</ul>
-}
-
-<button (click)="toggle()">Toggle</button> -->

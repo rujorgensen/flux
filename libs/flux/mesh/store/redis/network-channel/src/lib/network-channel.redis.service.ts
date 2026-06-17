@@ -1,7 +1,6 @@
 /**
  * Store data related to network channels
  */
-
 import type {
     TAddress,
     TClientId,
@@ -58,7 +57,7 @@ export class NetworkChannelService {
             await this._networkChannelRedisEvents
                 .advertiseChannelCount(
                     networkId,
-                    await this._networkChannelHash.readNetworkChannelCount(networkId),
+                    (await this._networkChannelHash.readNetworkChannelCount(networkId)).count,
                 );
         }
 
@@ -292,7 +291,7 @@ export class NetworkChannelService {
         await this._networkChannelRedisEvents
             .advertiseChannelCount(
                 networkId,
-                await this._networkChannelHash.readNetworkChannelCount(networkId),
+                (await this._networkChannelHash.readNetworkChannelCount(networkId)).count,
             );
 
         return deletedChannel;
@@ -331,7 +330,7 @@ export class NetworkChannelService {
     public onChannelCount(
         networkId: TNetworkId_S,
         callback: (
-            channelCount: TNetworkChannelCountAt,
+            channelCount: number,
         ) => void,
     ): Promise<void> {
         return this._networkChannelRedisEvents

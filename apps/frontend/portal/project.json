@@ -81,6 +81,7 @@
             },
             "defaultConfiguration": "development",
             "dependsOn": [
+                "@flux/mesh:serve",
                 "@flux/portal-api:serve",
                 "demo:serve",
                 "open"

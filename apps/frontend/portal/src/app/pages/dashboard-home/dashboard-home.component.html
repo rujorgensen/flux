@@ -1,5 +1,5 @@
 <app-dashboard-layout [userSession]="userSession()">
-    <app-stats [networkId]="networkId$ | async" [networkCode]="networkCode()" />
+    <app-stats />
 
     <app-dashboard>
         @let agentConfig = agentChartConfig$ | async;

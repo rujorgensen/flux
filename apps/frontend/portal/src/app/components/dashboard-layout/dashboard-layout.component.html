@@ -70,7 +70,7 @@
                                         Authorities
                                         @let authorityCount = authorityCount$ | async;
                                         @if (authorityCount !== null) {
-                                            <span class="badge badge-sm">{{ authorityCount }}</span>
+                                            <span class="badge badge-sm">{{ authorityCount.count }}</span>
                                         }
                                     </a>
                                 </li>
@@ -83,7 +83,7 @@
                                         Agents
                                         @let agentCount = agentCount$ | async;
                                         @if (agentCount !== null) {
-                                            <span class="badge badge-sm">{{ agentCount }}</span>
+                                            <span class="badge badge-sm">{{ agentCount.count }}</span>
                                         }
                                     </a>
                                 </li>
@@ -96,7 +96,7 @@
                                         Active Channels
                                         @let channelCount = channelCount$ | async;
                                         @if (channelCount !== null) {
-                                            <span class="badge badge-sm">{{ channelCount }}</span>
+                                            <span class="badge badge-sm">{{ channelCount.count }}</span>
                                         }
                                     </a>
                                 </li>

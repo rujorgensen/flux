@@ -10,8 +10,8 @@ import { NetworkIdComponent } from '../../components/network-id/network-id.compo
 import { FluxDomainComponent } from '../../components/flux-domain/flux-domain.component';
 import { NetworksService } from '../../_services/networks.service';
 import { DashboardHistoryService } from '../../_services/dashboard-history/dashboard-history.service';
-import { SidebarCountsService } from '../../_services/sidebar-counts/sidebar-counts.service';
 import { buildChartConfig, DashboardHomePageComponent } from './dashboard-home.component';
+import { NetworkStatsService } from '$lib/app/_services/sidebar-counts/sidebar-counts.service';
 
 describe('buildChartConfig', () => {
     it('should plot the live count as the latest chart value', () => {
@@ -120,11 +120,12 @@ describe('DashboardHomePageComponent', () => {
                     },
                 },
                 {
-                    provide: SidebarCountsService,
+                    provide: NetworkStatsService,
                     useValue: {
-                        agentCount$: of(7),
-                        authorityCount$: of(5),
-                        channelCount$: of(3),
+                        agentCount$$: of({ count: 7 }),
+                        authorityCount$$: of({ count: 5 }),
+                        channelCount$$: of({ count: 3 }),
+                        totalDataUsage$$: of({ count: 3 }),
                     },
                 },
             ],

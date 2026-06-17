@@ -78,4 +78,8 @@ Alpine.data('fluxAuthority', () => ({
             this.log('✅ Authority registered and waiting for clients');
         }
     },
+    disconnect() {
+        this.flux.disconnect();
+        this.log('🚪 Authority disconnected from network');
+    },
 }));
