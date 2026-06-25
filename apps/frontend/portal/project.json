@@ -90,7 +90,8 @@
         "test": {
             "executor": "@angular/build:unit-test",
             "options": {
-                "watch": false
+                "watch": false,
+                "runnerConfig": "apps/frontend/portal/vitest.config.ts"
             }
         },
         "serve-static": {
