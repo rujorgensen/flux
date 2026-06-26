@@ -258,43 +258,51 @@ export class FluxMeshServer {
                     if (_ws.data.isAuthority) {
                         PicoLogger.log(`👮 Authority connected to network '${truncateString(_ws.data.networkId)}' at address: '${_ws.data.address}'`, 'ws-connection');
 
-                        await networkAuthorityRedisCache
-                            .register(
-                                _ws.data.networkId,
-                                _ws.data.id,
-                                _ws.data.ip,
-                                _ws.data.machineUID,
-                            );
+                        try {
+                            await networkAuthorityRedisCache
+                                .register(
+                                    _ws.data.networkId,
+                                    _ws.data.id,
+                                    _ws.data.ip,
+                                    _ws.data.machineUID,
+                                );
+                        } catch (error) {
+                            PicoLogger.error(`Failed to register authority ${_ws.data.id}: ` + error, 'ws-connection');
+                        }
                     } else {
                         PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
 
-                        await networkAgentRedisCache
-                            .registerAgent(
-                                _ws.data.networkId,
-                                _ws.data.id,
-                                _ws.data.ip,
-                                _ws.data.address,
-                                _ws.data.throughput,
-                                _ws.data.uid,
-                                _ws.data.machineUID,
-                            );
-
-                        _ws.data.rtcClient = new WebRTCClient(
-                            processAddress,
-                            _ws.send.bind(_ws),
-                            (cb: TRPCResponseCallbackFunction) => {
-                                const cbs:
-                                    | Set<TRPCResponseCallbackFunction>
-                                    | undefined = clientRPCResponseCallbacks.get(
-                                        _ws.data.id
-                                    );
-
-                                clientRPCResponseCallbacks.set(
+                        try {
+                            await networkAgentRedisCache
+                                .registerAgent(
+                                    _ws.data.networkId,
                                     _ws.data.id,
-                                    cbs === undefined ? new Set([cb]) : cbs.add(cb)
+                                    _ws.data.ip,
+                                    _ws.data.address,
+                                    _ws.data.throughput,
+                                    _ws.data.uid,
+                                    _ws.data.machineUID,
                                 );
-                            }
-                        );
+
+                            _ws.data.rtcClient = new WebRTCClient(
+                                processAddress,
+                                _ws.send.bind(_ws),
+                                (cb: TRPCResponseCallbackFunction) => {
+                                    const cbs:
+                                        | Set<TRPCResponseCallbackFunction>
+                                        | undefined = clientRPCResponseCallbacks.get(
+                                            _ws.data.id
+                                        );
+
+                                    clientRPCResponseCallbacks.set(
+                                        _ws.data.id,
+                                        cbs === undefined ? new Set([cb]) : cbs.add(cb)
+                                    );
+                                }
+                            );
+                        } catch (error) {
+                            PicoLogger.error(`Failed to register agent ${_ws.data.id}: ` + error, 'ws-connection');
+                        }
                     }
                     // Let the client detect readyState. Regular ping cannot be detected by the WebSocket client in the browser 
                     _ws.send('isReady');
