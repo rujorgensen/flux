@@ -255,10 +255,10 @@ export class FluxMeshServer {
                 ): Promise<void> {
                     clientMap.set(_ws.data.id, _ws);
 
-                    if (_ws.data.isAuthority) {
-                        PicoLogger.log(`👮 Authority connected to network '${truncateString(_ws.data.networkId)}' at address: '${_ws.data.address}'`, 'ws-connection');
+                    try {
+                        if (_ws.data.isAuthority) {
+                            PicoLogger.log(`👮 Authority connected to network '${truncateString(_ws.data.networkId)}' at address: '${_ws.data.address}'`, 'ws-connection');
 
-                        try {
                             await networkAuthorityRedisCache
                                 .register(
                                     _ws.data.networkId,
@@ -266,13 +266,10 @@ export class FluxMeshServer {
                                     _ws.data.ip,
                                     _ws.data.machineUID,
                                 );
-                        } catch (error) {
-                            PicoLogger.error(`Failed to register authority ${_ws.data.id}: ` + error, 'ws-connection');
-                        }
-                    } else {
-                        PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
 
-                        try {
+                        } else {
+                            PicoLogger.log(`🤵 Agent connected: ${_ws.data.id}`, 'ws-connection');
+
                             await networkAgentRedisCache
                                 .registerAgent(
                                     _ws.data.networkId,
@@ -300,12 +297,42 @@ export class FluxMeshServer {
                                     );
                                 }
                             );
-                        } catch (error) {
-                            PicoLogger.error(`Failed to register agent ${_ws.data.id}: ` + error, 'ws-connection');
                         }
+
+                        // Let the client detect readyState. Regular ping cannot be detected by the WebSocket client in the browser 
+                        _ws.send('isReady');
+                    } catch (error) {
+                        PicoLogger.error(`Failed to register client ${_ws.data.id}: ` + error, 'ws-connection');
+
+                        clientMap.delete(_ws.data.id);
+
+                        // Unwind any partial registration so we don't leak Redis state for a connection that never came up.
+                        try {
+                            if (_ws.data.isAuthority) {
+                                await networkAuthorityRedisCache
+                                    .unregister(
+                                        _ws.data.id,
+                                        _ws.data.networkId,
+                                    );
+                            } else {
+                                await networkAgentRedisCache
+                                    .unregister(
+                                        _ws.data.id,
+                                        _ws.data.networkId,
+                                        _ws.data.uid
+                                            ? {
+                                                clientOwnUId: _ws.data.uid,
+                                                networkId: _ws.data.networkId,
+                                            }
+                                            : undefined,
+                                    );
+                            }
+                        } catch (cleanupError) {
+                            PicoLogger.error(`Failed to unregister client ${_ws.data.id} after registration error: ` + cleanupError, 'ws-connection');
+                        }
+
+                        _ws.close(1011, 'Failed to register client');
                     }
-                    // Let the client detect readyState. Regular ping cannot be detected by the WebSocket client in the browser 
-                    _ws.send('isReady');
                 },
 
                 message: async (
