@@ -1,8 +1,6 @@
 import { Component, input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { UserService } from '$lib/app/_services/auth/user.service';
-import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { StatsComponent } from '../../components/stats/stats.component';
 import { DashboardComponent } from '../../components/dashboard/dashboard.component';
 import { ChartComponent } from '../../components/chart/chart.component';
@@ -45,14 +43,6 @@ describe('buildChartConfig', () => {
         expect(config.datasets[0].data).toEqual([0]);
     });
 });
-
-@Component({
-    selector: 'app-dashboard-layout',
-    template: '<ng-content />',
-})
-class StubDashboardLayoutComponent {
-    public readonly userSession = input<unknown>();
-}
 
 @Component({
     selector: 'app-stats',
@@ -104,14 +94,6 @@ describe('DashboardHomePageComponent', () => {
                     },
                 },
                 {
-                    provide: UserService,
-                    useValue: {
-                        authClient: {
-                            getSession: vi.fn().mockResolvedValue({ data: null }),
-                        },
-                    },
-                },
-                {
                     provide: DashboardHistoryService,
                     useValue: {
                         agentHistory$: of([]),
@@ -133,7 +115,6 @@ describe('DashboardHomePageComponent', () => {
             .overrideComponent(DashboardHomePageComponent, {
                 remove: {
                     imports: [
-                        DashboardLayoutComponent,
                         StatsComponent,
                         DashboardComponent,
                         ChartComponent,
@@ -143,7 +124,6 @@ describe('DashboardHomePageComponent', () => {
                 },
                 add: {
                     imports: [
-                        StubDashboardLayoutComponent,
                         StubStatsComponent,
                         StubDashboardComponent,
                         StubChartComponent,

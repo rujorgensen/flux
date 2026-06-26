@@ -4,7 +4,6 @@ import {
     type Observable,
     map,
 } from 'rxjs';
-import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { UserService } from '$lib/app/_services/auth/user.service';
 import { NetworksService } from '../../_services/networks.service';
 import { UserNamePipe, type IUserInfo } from '../../_pipes/user-name.pipe';
@@ -44,7 +43,6 @@ export const ORG_NAME = 'Acme Labs';
     imports: [
         FormsModule,
         CommonModule,
-        DashboardLayoutComponent,
         UserNamePipe,
     ],
     templateUrl: './team-settings.component.html',
