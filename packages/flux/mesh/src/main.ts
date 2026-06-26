@@ -604,6 +604,7 @@ export class FluxMeshServer {
         this.processClass = new ProcessClass(
             this.redisConnection,
             this.networkAgentService,
+            networkAuthorityRedisCache,
         );
 
         // Check if there is any cleanup to do from previous run in case of crash
