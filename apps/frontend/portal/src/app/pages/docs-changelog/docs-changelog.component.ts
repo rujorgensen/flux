@@ -1,20 +1,9 @@
 import {
     ChangeDetectionStrategy,
     Component,
-    OnInit,
-    signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
-import { UserService } from '$lib/app/_services/auth/user.service';
-
-interface UserSession {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string;
-}
 
 interface ChangelogEntry {
     version: string;
@@ -31,15 +20,12 @@ interface ChangelogEntry {
     imports: [
         CommonModule,
         RouterLink,
-        DashboardLayoutComponent,
     ],
     templateUrl: './docs-changelog.component.html',
     styleUrls: ['./docs-changelog.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsChangelogPageComponent implements OnInit {
-    protected readonly userSession = signal<UserSession | null>(null);
-
+export class DocsChangelogPageComponent {
     protected readonly entries: ChangelogEntry[] = [
         {
             version: '0.1.0',
@@ -62,17 +48,4 @@ export class DocsChangelogPageComponent implements OnInit {
             ],
         },
     ];
-
-    constructor(
-        private readonly _userService: UserService,
-    ) {}
-
-    async ngOnInit(
-
-    ): Promise<void> {
-        const session = await this._userService.authClient.getSession();
-        if (session.data) {
-            this.userSession.set(session.data.user as UserSession);
-        }
-    }
 }

@@ -1,7 +1,5 @@
-<app-dashboard-layout [userSession]="userSession()" pageTitle="Access Tokens">
-    @if (selectedNetwork$ | async; as network) {
-        <div class="p-6 max-w-3xl">
-            <app-network-tokens [networkId]="network.id" />
-        </div>
-    }
-</app-dashboard-layout>
+@if (selectedNetwork$ | async; as network) {
+    <div class="p-6 max-w-3xl">
+        <app-network-tokens [networkId]="network.id" />
+    </div>
+}

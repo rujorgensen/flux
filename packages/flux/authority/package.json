@@ -1,6 +1,6 @@
 {
     "name": "@persistica/flux-authority",
-    "version": "0.0.29",
+    "version": "0.0.30",
     "description": "Persistica Flux Authority",
     "type": "module",
     "keywords": [],

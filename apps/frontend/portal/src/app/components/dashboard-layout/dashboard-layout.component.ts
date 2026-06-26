@@ -5,7 +5,8 @@ import {
     computed,
     ElementRef,
     Injector,
-    input,
+    OnInit,
+    Signal,
     signal,
     ViewChild,
 } from '@angular/core';
@@ -16,11 +17,13 @@ import {
     Router,
     RouterLink,
     RouterLinkActive,
+    RouterOutlet,
 } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, startWith } from 'rxjs';
 import { NetworksService, MAX_NETWORKS } from '../../_services/networks.service';
 import { NetworkStatsService } from '../../_services/sidebar-counts/sidebar-counts.service';
+import { UserService } from '../../_services/auth/user.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 import { version } from '../../../../package.json';
 import { toast } from 'ngx-sonner';
@@ -45,13 +48,14 @@ interface UserSession {
         FormsModule,
         RouterLink,
         RouterLinkActive,
+        RouterOutlet,
         NetworkSelectorComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardLayoutComponent {
-    userSession = input<UserSession | null>();
-    pageTitle = input<string>('Dashboard');
+export class DashboardLayoutComponent implements OnInit {
+    protected readonly userSession = signal<UserSession | null>(null);
+    protected readonly pageTitle: Signal<string>;
 
     protected readonly isFluxAdmin = computed(() => this.userSession()?.isFluxAdmin ?? false);
 
@@ -90,12 +94,28 @@ export class DashboardLayoutComponent {
         protected readonly networksService: NetworksService,
         private readonly router: Router,
         private readonly networkStatsService: NetworkStatsService,
+        private readonly userService: UserService,
         private readonly injector: Injector,
     ) {
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
         this.agentCount$ = this.networkStatsService.agentCount$$;
         this.authorityCount$ = this.networkStatsService.authorityCount$$;
         this.channelCount$ = this.networkStatsService.channelCount$$;
+
+        this.pageTitle = toSignal(
+            this.router.events.pipe(
+                filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+                startWith(null),
+                map(() => {
+                    let route = this.router.routerState.snapshot.root;
+                    while (route.firstChild) {
+                        route = route.firstChild;
+                    }
+                    return (route.data['title'] as string | undefined) ?? 'Dashboard';
+                }),
+            ),
+            { initialValue: 'Dashboard' },
+        );
 
         this.currentUrl = toSignal(
             this.router.events.pipe(
@@ -138,6 +158,17 @@ export class DashboardLayoutComponent {
         ).subscribe(
             () => this.router.navigate(['/no-network']),
         );
+    }
+
+    async ngOnInit(
+    ): Promise<void> {
+        const session = await this.userService
+            .authClient
+            .getSession();
+
+        if (session.data) {
+            this.userSession.set(session.data.user as UserSession);
+        }
     }
 
     protected openCreateModal(

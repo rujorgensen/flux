@@ -1,5 +1,3 @@
-<app-dashboard-layout [userSession]="userSession()">
-    @if (selectedNetwork$ | async; as network) {
-        <app-connected-agents-table [networkId]="network.id" />
-    }
-</app-dashboard-layout>
+@if (selectedNetwork$ | async; as network) {
+    <app-connected-agents-table [networkId]="network.id" />
+}

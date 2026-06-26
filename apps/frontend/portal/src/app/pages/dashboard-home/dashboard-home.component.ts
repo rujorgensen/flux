@@ -1,14 +1,11 @@
 import {
     ChangeDetectionStrategy,
     Component,
-    OnInit,
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { combineLatest, map } from 'rxjs';
-import { UserService } from '$lib/app/_services/auth/user.service';
 import type { TNetworkId_S } from '@flux/shared/types';
-import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { StatsComponent } from '../../components/stats/stats.component';
 import { DashboardComponent } from '../../components/dashboard/dashboard.component';
 import {
@@ -23,13 +20,6 @@ import {
 import { NetworkIdComponent } from '../../components/network-id/network-id.component';
 import { FluxDomainComponent, resolveFluxDomain } from '../../components/flux-domain/flux-domain.component';
 import { NetworkStatsService } from '../../_services/sidebar-counts/sidebar-counts.service';
-
-interface UserSession {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string;
-}
 
 interface IChartConfig {
     labels: string[];
@@ -75,7 +65,6 @@ export const buildChartConfig = (
     selector: 'app-dashboard-home',
     imports: [
         CommonModule,
-        DashboardLayoutComponent,
         StatsComponent,
         DashboardComponent,
         ChartComponent,
@@ -86,7 +75,7 @@ export const buildChartConfig = (
     styleUrls: ['./dashboard-home.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardHomePageComponent implements OnInit {
+export class DashboardHomePageComponent {
     private readonly resolvedDomain = resolveFluxDomain(
         typeof window !== 'undefined'
             ? window.location
@@ -94,7 +83,6 @@ export class DashboardHomePageComponent implements OnInit {
     );
 
     protected readonly networkCode = signal<string | null>(null);
-    protected readonly userSession = signal<UserSession | null>(null);
     protected readonly networkId$;
     protected readonly shouldShowDomain = this.resolvedDomain.isVisible;
 
@@ -104,7 +92,6 @@ export class DashboardHomePageComponent implements OnInit {
 
     constructor(
         private readonly networksService: NetworksService,
-        private readonly _userService: UserService,
         private readonly dashboardHistoryService: DashboardHistoryService,
         private readonly sidebarCountsService: NetworkStatsService,
     ) {
@@ -152,16 +139,5 @@ export class DashboardHomePageComponent implements OnInit {
                 'rgba(245, 158, 11, 0.08)',
             )),
         );
-    }
-
-    async ngOnInit(
-    ): Promise<void> {
-        const session = await this._userService
-            .authClient
-            .getSession();
-
-        if (session.data) {
-            this.userSession.set(session.data.user as UserSession);
-        }
     }
 }

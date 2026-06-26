@@ -1,0 +1,14 @@
+pre-commit:
+  jobs:
+    - name: Run oxlint
+        # --quiet: Suppresses all output except for errors.
+        # --no-error-on-unmatched-pattern: Prevents errors when no files match the specified (eg. if only .json files are staged)
+      run: bunx --bun oxlint --quiet --no-error-on-unmatched-pattern {staged_files}
+
+pre-push:
+  jobs:
+    - name: Run affected tests
+        # Tests only projects affected by what we're pushing, diffing against
+        # origin/main. Pre-push runs less often than pre-commit, so the full
+        # nx affected graph computation is an acceptable cost here.
+      run: bunx nx affected -t bun-test --base=origin/main --head=HEAD

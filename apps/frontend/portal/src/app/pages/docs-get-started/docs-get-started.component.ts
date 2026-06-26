@@ -1,24 +1,14 @@
 import {
     ChangeDetectionStrategy,
     Component,
-    OnInit,
     Signal,
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
-import { UserService } from '$lib/app/_services/auth/user.service';
 import { SyntaxHighlightPipe } from '$lib/app/_pipes/syntax-highlight.pipe';
 import { PackageManagerService, TPackageManager } from '$lib/app/_services/package-manager/package-manager.service';
-
-interface UserSession {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string;
-}
 
 @Component({
     selector: 'app-docs-get-started',
@@ -28,15 +18,12 @@ interface UserSession {
         RouterLink,
         // * Pipes
         SyntaxHighlightPipe,
-        // * Components
-        DashboardLayoutComponent,
     ],
     templateUrl: './docs-get-started.component.html',
     styleUrls: ['./docs-get-started.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsGetStartedPageComponent implements OnInit {
-    protected readonly userSession = signal<UserSession | null>(null);
+export class DocsGetStartedPageComponent {
     protected readonly copiedSnippet = signal<string | null>(null);
     protected readonly selectedPm: Signal<TPackageManager>;
     protected readonly packageManagers: TPackageManager[] = ['bun', 'npm', 'pnpm', 'yarn'];
@@ -100,21 +87,11 @@ channel.subscribe((message) => {
 channel.publish({ text: 'Hello, Flux!' });`;
 
     constructor(
-        private readonly _userService: UserService,
         protected readonly _packageManagerService: PackageManagerService,
     ) {
         this.selectedPm = toSignal(this._packageManagerService.selectedPm$, {
             initialValue: 'bun',
         });
-    }
-
-    async ngOnInit(
-
-    ): Promise<void> {
-        const session = await this._userService.authClient.getSession();
-        if (session.data) {
-            this.userSession.set(session.data.user as UserSession);
-        }
     }
 
     protected copyToClipboard(

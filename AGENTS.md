@@ -75,6 +75,14 @@ Notes:
 - Don't fix formatting in existing files you are applying logic changes to, unless explicitly asked to.
 - Make sure any added code is peroperly formatted.
 
+## Linting
+Always run oxlint when finishing a task to make sure everything is in order:
+
+```bash
+bunx --bun oxlint --quiet
+```
+Empty output means the code is clean. Fix any reported issues before considering the task done.
+
 ## Bump version
 Bump the version of packages if relevant, by running the convenience script:
 

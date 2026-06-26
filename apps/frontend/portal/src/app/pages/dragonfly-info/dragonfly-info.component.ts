@@ -1,21 +1,11 @@
 import {
     ChangeDetectionStrategy,
     Component,
-    OnInit,
     signal,
 } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { UserService } from '$lib/app/_services/auth/user.service';
-import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
 import { FluxNetworkChannel } from '@persistica/flux-agent';
 import { FluxStatusAgentService } from '$lib/app/_services/flux/flux-status.agent.service';
-
-interface UserSession {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string;
-}
 
 type TDragonflyStatus = {
     url: string;
@@ -59,14 +49,11 @@ type TDragonflyStatus = {
         CommonModule,
         // * Pipes
         DecimalPipe,
-        // * Components
-        DashboardLayoutComponent,
     ],
     templateUrl: './dragonfly-info.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DragonflyInfoPageComponent implements OnInit {
-    protected readonly userSession = signal<UserSession | null>(null);
+export class DragonflyInfoPageComponent {
     protected readonly statuses = signal<TDragonflyStatus[] | null>(null);
     protected readonly error = signal<string | null>(null);
 
@@ -76,7 +63,6 @@ export class DragonflyInfoPageComponent implements OnInit {
     private meshRedisStatus: TDragonflyStatus | null = null;
 
     constructor(
-        private readonly _userService: UserService,
         private readonly _fluxStatusAgentService: FluxStatusAgentService,
     ) {
         this._fluxStatusAgentService
@@ -118,17 +104,6 @@ export class DragonflyInfoPageComponent implements OnInit {
                 console.error('Failed to connect to Flux network:', error);
             })
             ;
-    }
-
-    async ngOnInit(
-
-    ): Promise<void> {
-        const session = await this._userService.authClient.getSession();
-
-        if (session.data) {
-            this.userSession.set(session.data.user as UserSession);
-        }
-
     }
 
     protected formatBytes(

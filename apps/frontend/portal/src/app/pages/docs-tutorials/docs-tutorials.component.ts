@@ -1,21 +1,11 @@
 import {
     ChangeDetectionStrategy,
     Component,
-    OnInit,
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
-import { UserService } from '$lib/app/_services/auth/user.service';
 import { SyntaxHighlightPipe } from '$lib/app/_pipes/syntax-highlight.pipe';
-
-interface UserSession {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string;
-}
 
 @Component({
     selector: 'app-docs-tutorials',
@@ -25,15 +15,12 @@ interface UserSession {
         RouterLink,
         // * Pipes
         SyntaxHighlightPipe,
-        // * Components
-        DashboardLayoutComponent,
     ],
     templateUrl: './docs-tutorials.component.html',
     styleUrls: ['./docs-tutorials.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocsTutorialsPageComponent implements OnInit {
-    protected readonly userSession = signal<UserSession | null>(null);
+export class DocsTutorialsPageComponent {
     protected readonly copiedSnippet = signal<string | null>(null);
 
     protected readonly chatMeshSnippet = `import { FluxMeshServer } from '@persistica/flux-mesh';
@@ -115,19 +102,6 @@ generalChannel.publish({
     text: 'Hey everyone! 👋',
     at: new Date().toISOString(),
 });`;
-
-    constructor(
-        private readonly _userService: UserService,
-    ) {}
-
-    async ngOnInit(
-
-    ): Promise<void> {
-        const session = await this._userService.authClient.getSession();
-        if (session.data) {
-            this.userSession.set(session.data.user as UserSession);
-        }
-    }
 
     protected copyToClipboard(
         snippetId: string,

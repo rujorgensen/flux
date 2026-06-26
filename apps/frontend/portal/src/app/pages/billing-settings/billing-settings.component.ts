@@ -1,14 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardLayoutComponent } from '../../components/dashboard-layout/dashboard-layout.component';
-import { UserService } from '$lib/app/_services/auth/user.service';
-
-interface UserSession {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string;
-}
 
 export interface IBillingTier {
     id: string;
@@ -83,24 +74,10 @@ export const BILLING_TIERS: IBillingTier[] = [
     selector: 'app-billing-settings',
     imports: [
         CommonModule,
-        DashboardLayoutComponent,
     ],
     templateUrl: './billing-settings.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BillingSettingsPageComponent implements OnInit {
-    protected readonly userSession = signal<UserSession | null>(null);
+export class BillingSettingsPageComponent {
     protected readonly tiers = BILLING_TIERS;
-
-    constructor(
-        private readonly _userService: UserService,
-    ) {}
-
-    async ngOnInit(
-    ) {
-        const session = await this._userService.authClient.getSession();
-        if (session.data) {
-            this.userSession.set(session.data.user as UserSession);
-        }
-    }
 }
