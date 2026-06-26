@@ -269,7 +269,7 @@ export class NetworkAuthorityRedisSortedSet {
     private async readNetworkIdByClientIdOrThrow(
         clientId: TClientId,
     ): Promise<TNetworkId_S> {
-        const networkId = await this._redisConnection.hash.hget(`~/authorities`, clientId);
+        const networkId = await this._redisConnection.hash.hget(`~/clients`, clientId);
 
         if (!networkId) {
             throw new Error(`Network authority not found for clientId: '${clientId}'`);
