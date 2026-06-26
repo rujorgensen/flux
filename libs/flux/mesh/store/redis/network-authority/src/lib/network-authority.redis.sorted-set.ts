@@ -22,17 +22,21 @@ export class NetworkAuthorityRedisSortedSet {
     private readonly processId: TProcessId = readProcessId();
     private readonly machineAddress: TMachineAddress = readMachineAddress();
 
-    private readonly refreshNetworkExpiry: Map<TNetworkId_S, Set<TClientId>> = new Map();
-
     constructor(
         private readonly _redisConnection: RedisConnection,
-    ) {
-        setInterval(async () => {
-            for (const networkId of this.refreshNetworkExpiry.keys()) {
-                const key: string = `networks/${networkId}/authorities`;
-                await this._redisConnection.hash.expire(key, 500);
-            }
-        }, 35_000);
+    ) {}
+
+    /**
+     * The per-process Set key tracking which authorities a given mesh process
+     * owns. The orphan reaper ({@link ProcessClass.cleanupOrphans}) reads this
+     * to remove authorities left behind when a process crashes — the crash
+     * fallback that replaces the previous TTL on the authority set.
+     */
+    private processAuthoritiesKey(
+        machineAddress: TMachineAddress,
+        processId: TProcessId,
+    ): string {
+        return `~/machines/processes/${machineAddress}/${processId}/authorities`;
     }
 
     // ****************************************************************************
@@ -53,14 +57,19 @@ export class NetworkAuthorityRedisSortedSet {
 
         await this._redisConnection.hash.sadd(key, address);
 
-        await this._redisConnection.hash.expire(key, 500);
-
         // Add to global list
         await this._redisConnection.hash.hset(
             `~/clients`,
             {
                 [clientId]: networkId,
             }
+        );
+
+        // Track on the owning process so the orphan reaper can clean up the
+        // authority if this process crashes without disconnecting cleanly.
+        await this._redisConnection.hash.sadd(
+            this.processAuthoritiesKey(this.machineAddress, this.processId),
+            clientId,
         );
 
         // Add to authority
@@ -77,14 +86,6 @@ export class NetworkAuthorityRedisSortedSet {
                 'connectedAt': new Date().toISOString(),
             },
         );
-
-        // Update the refresh interval cache
-        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
-        if (refreshNetworkExpiry) {
-            refreshNetworkExpiry.add(clientId);
-        } else {
-            this.refreshNetworkExpiry.set(networkId, new Set([clientId]));
-        }
     }
 
     // ****************************************************************************
@@ -206,15 +207,12 @@ export class NetworkAuthorityRedisSortedSet {
         // Remove from network
         await this._redisConnection.hash.srem(key, clientId);
 
-        // Update the refresh interval cache
-        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId_);
-        if (refreshNetworkExpiry) {
-            refreshNetworkExpiry.delete(clientId);
+        // Stop tracking on the owning process
+        await this._redisConnection.hash.srem(
+            this.processAuthoritiesKey(this.machineAddress, this.processId),
+            clientId,
+        );
 
-            if (refreshNetworkExpiry.size === 0) {
-                this.refreshNetworkExpiry.delete(networkId_);
-            }
-        }
         const address: TAddress = `${this.machineAddress}/${this.processId}/${clientId}`;
 
         // Remove from network
@@ -233,19 +231,13 @@ export class NetworkAuthorityRedisSortedSet {
         networkId: TNetworkId_S,
         address: TAddress,
     ): Promise<number> {
-        const [_machineAddress, _processId, clientId] = splitAddressOrThrow(address);
+        const [machineAddress, processId, clientId] = splitAddressOrThrow(address);
 
-        // Update the refresh interval cache
-        const refreshNetworkExpiry: Set<TClientId> | undefined = this.refreshNetworkExpiry.get(networkId);
-        if (refreshNetworkExpiry) {
-            try {
-                refreshNetworkExpiry.delete(clientId);
-
-                if (refreshNetworkExpiry.size === 0) {
-                    this.refreshNetworkExpiry.delete(networkId);
-                }
-            } catch {}
-        }
+        // Stop tracking on the process that owned the authority
+        await this._redisConnection.hash.srem(
+            this.processAuthoritiesKey(machineAddress, processId),
+            clientId,
+        );
 
         // Remove from global
         await this._redisConnection
@@ -269,7 +261,7 @@ export class NetworkAuthorityRedisSortedSet {
     private async readNetworkIdByClientIdOrThrow(
         clientId: TClientId,
     ): Promise<TNetworkId_S> {
-        const networkId = await this._redisConnection.hash.hget(`~/authorities`, clientId);
+        const networkId = await this._redisConnection.hash.hget(`~/clients`, clientId);
 
         if (!networkId) {
             throw new Error(`Network authority not found for clientId: '${clientId}'`);

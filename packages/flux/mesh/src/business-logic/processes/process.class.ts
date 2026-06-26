@@ -6,12 +6,14 @@ import {
 } from '@flux/shared/types';
 import { RedisConnection } from '../../routing/redis/redis-connection.class';
 import { NetworkAgentService } from '../../register/network-agent.service';
+import { NetworkAuthorityCache } from '../../register/network-authority-cache.class';
 
 export class ProcessClass {
 
     constructor(
         private readonly _redisConnection: RedisConnection,
         private readonly _networkAgentService: NetworkAgentService,
+        private readonly _networkAuthorityCache: NetworkAuthorityCache,
     ) {}
 
     /**
@@ -40,6 +42,25 @@ export class ProcessClass {
                 }
             }
 
+            // Authorities are tracked separately from agents on the owning process. Reap them 
+            // here so a crashed node's authorities don't linger.
+            const disconnectedProcessAuthorityIds = await this
+                ._redisConnection
+                .hash
+                .smembers(`~/machines/processes/${disconnectedProcess}/authorities`);
+
+            for (const clientId of disconnectedProcessAuthorityIds) {
+                try {
+                    await this._networkAuthorityCache
+                        .unregister(
+                            clientId as TClientId,
+                        );
+
+                } catch (err) {
+                    console.error(`Error unregistering authority ${clientId} for process ${disconnectedProcess}:`, err);
+                }
+            }
+
             // Stop tracking
             await this._redisConnection
                 .sortedSet
@@ -53,6 +74,12 @@ export class ProcessClass {
                 ._redisConnection
                 .hash
                 .srem(`~/machines/processes/${disconnectedProcess}/clients`);
+
+            // Remove list of authorities for the process
+            await this
+                ._redisConnection
+                .hash
+                .srem(`~/machines/processes/${disconnectedProcess}/authorities`);
         }
 
         return Promise.resolve();

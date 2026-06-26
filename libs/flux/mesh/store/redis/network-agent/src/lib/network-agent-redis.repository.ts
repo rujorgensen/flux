@@ -251,7 +251,7 @@ export class NetworkAgentRedisRepository {
     public async readAgentNetworkIdByClientIdOrThrow(
         clientId: TClientId,
     ): Promise<TNetworkId_S> {
-        const networkId = await this._redisConnection.hash.hget(`~/agents`, clientId);
+        const networkId = await this._redisConnection.hash.hget(`~/clients`, clientId);
 
         if (!networkId) {
             throw new Error(`Network agent not found for clientId: '${clientId}'`);
