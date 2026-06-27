@@ -174,6 +174,7 @@ private service = inject(MyService);
 - Use `computed()` for derived state
 - Keep state transformations pure and predictable
 - Do NOT use `mutate` on signals, use `update` or `set` instead
+- Don't reach for `toSignal()` by default. When a value originates as an `Observable` and is only consumed in the template, keep it an `Observable` and use the async pipe. Converting to a signal often adds nothing and forces a synthetic `initialValue` that hides the loading state; an `Observable` + async pipe lets the template distinguish loading (no emission yet) from a real value. Reserve `toSignal()` for cases where the value is genuinely read imperatively or combined with other signals.
 
 ## Templates
 
