@@ -1,5 +1,29 @@
 <!-- Network Selector Dropdown -->
 @if (vm$ | async; as vm) {
+@if (!vm.hasNetworks && !vm.isLoading) {
+<!-- No networks: offer to create one directly instead of an empty dropdown -->
+<button
+    class="btn btn-primary btn-sm w-full"
+    [disabled]="!vm.canCreateNetwork"
+    (click)="requestCreate()"
+    type="button"
+>
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        class="inline-block h-4 w-4 stroke-current"
+    >
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+        ></path>
+    </svg>
+    Create Network
+</button>
+} @else {
 <div class="dropdown w-full">
     <div
         tabindex="0"
@@ -71,11 +95,6 @@
                 </div>
             </li>
         }
-        @if (!vm.hasNetworks && !vm.isLoading) {
-            <li>
-                <span class="text-base-content/50 text-sm italic">No networks yet</span>
-            </li>
-        }
         <li class="mt-1">
             <button
                 class="btn btn-primary btn-sm w-full"
@@ -101,4 +120,5 @@
         </li>
     </ul>
 </div>
+}
 }

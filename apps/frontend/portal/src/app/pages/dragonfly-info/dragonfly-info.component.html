@@ -28,7 +28,7 @@
                 <div class="card bg-base-200 shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title text-lg">
-                            {{ instanceLabels[$index] }}
+                            {{ status.label }}
                             @if (status.memory.overThreshold) {
                                 <div class="badge badge-error badge-sm">High Memory</div>
                             } @else {

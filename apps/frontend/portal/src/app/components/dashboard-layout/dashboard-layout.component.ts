@@ -24,6 +24,7 @@ import { combineLatest, filter, map, startWith } from 'rxjs';
 import { NetworksService, MAX_NETWORKS } from '../../_services/networks.service';
 import { NetworkStatsService } from '../../_services/sidebar-counts/sidebar-counts.service';
 import { UserService } from '../../_services/auth/user.service';
+import { InstanceService } from '../../_services/instance.service';
 import { NetworkSelectorComponent } from '../network-selector/network-selector.component';
 import { version } from '../../../../package.json';
 import { toast } from 'ngx-sonner';
@@ -63,6 +64,8 @@ export class DashboardLayoutComponent implements OnInit {
 
     protected readonly MAX_NETWORKS = MAX_NETWORKS;
     protected readonly appVersion = version;
+    protected readonly selfHosted;
+    protected readonly isSigningOut = signal<boolean>(false);
 
     // Modal state
     protected readonly showCreateModal = signal<boolean>(false);
@@ -95,8 +98,10 @@ export class DashboardLayoutComponent implements OnInit {
         private readonly router: Router,
         private readonly networkStatsService: NetworkStatsService,
         private readonly userService: UserService,
+        private readonly instanceService: InstanceService,
         private readonly injector: Injector,
     ) {
+        this.selfHosted = toSignal(this.instanceService.selfHosted$, { initialValue: false });
         this.selectedNetwork$ = this.networksService.selectedNetwork$;
         this.agentCount$ = this.networkStatsService.agentCount$$;
         this.authorityCount$ = this.networkStatsService.authorityCount$$;
@@ -241,5 +246,23 @@ export class DashboardLayoutComponent implements OnInit {
         navigator.clipboard.writeText(this.expectedDeletePhrase()).catch((err: unknown) => {
             console.error('Failed to copy delete phrase to clipboard', err);
         });
+    }
+
+    protected async signOut(
+    ): Promise<void> {
+        if (this.isSigningOut()) {
+            return;
+        }
+
+        this.isSigningOut.set(true);
+
+        try {
+            await this.userService.authClient.signOut();
+            await this.router.navigate(['/sign-in']);
+        } catch (error: unknown) {
+            console.error('Failed to sign out', error);
+            toast.error('Failed to sign out. Please try again.');
+            this.isSigningOut.set(false);
+        }
     }
 }

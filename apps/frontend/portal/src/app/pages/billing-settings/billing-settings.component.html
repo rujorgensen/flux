@@ -1,5 +1,28 @@
     <div class="p-6 max-w-5xl space-y-8">
 
+      @if (selfHosted()) {
+
+        <!-- Header (self-hosted) -->
+        <section>
+            <h2 class="text-2xl font-bold">Billing & Plans ⚡</h2>
+            <p class="mt-1 text-base-content/70">
+                This is a self-hosted Flux instance.
+            </p>
+        </section>
+
+        <!-- Self-hosted notice -->
+        <section class="alert alert-success">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>
+                You're running Flux self-hosted — there's no subscription or billing here.
+                All features are unlocked, with no plan limits. 🚀
+            </span>
+        </section>
+
+      } @else {
+
         <!-- Header -->
         <section>
             <h2 class="text-2xl font-bold">Billing & Plans ⚡</h2>
@@ -103,5 +126,7 @@
                 </div>
             }
         </section>
+
+      }
 
     </div>

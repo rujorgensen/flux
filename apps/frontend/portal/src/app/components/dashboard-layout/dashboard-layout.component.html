@@ -207,10 +207,25 @@
                             </div>
                         }
                     </div>
-                    <div class="flex-1">
-                        <div class="text-sm font-semibold">{{ userSession()?.name || 'User' }}</div>
-                        <div class="text-xs text-base-content/70">{{ userSession()?.email || '' }}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-semibold truncate">{{ userSession()?.name || 'User' }}</div>
+                        <div class="text-xs text-base-content/70 truncate">{{ userSession()?.email || '' }}</div>
                     </div>
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm btn-square text-base-content/60 hover:bg-error/10 hover:text-error"
+                        title="Sign out"
+                        aria-label="Sign out"
+                        [disabled]="isSigningOut()"
+                        (click)="signOut()">
+                        @if (isSigningOut()) {
+                            <span class="loading loading-spinner loading-xs"></span>
+                        } @else {
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                            </svg>
+                        }
+                    </button>
                 </div>
                 }
                 <div class="text-xs text-base-content/50 text-center">Flux Portal v. {{ appVersion }}</div>
@@ -225,7 +240,11 @@
         <div class="modal-box">
             <h3 class="font-bold text-lg">Create New Network</h3>
             <p class="py-2 text-sm text-base-content/70">
-                You can create up to {{ MAX_NETWORKS }} networks.
+                @if (selfHosted()) {
+                    Self-hosted instances can create unlimited networks.
+                } @else {
+                    You can create up to {{ MAX_NETWORKS }} networks.
+                }
             </p>
             <div class="form-control w-full">
                 <label class="label" for="network-alias-input">

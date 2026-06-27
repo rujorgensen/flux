@@ -216,12 +216,23 @@ export const liveUpdates = (
             const meshRedisStatusChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
                 .getChannel('protected-mesh-redis-status');
 
-            setInterval(async () => {
-                const portalRedisStatus = await portalRedisStatusService.getRedisStatusOrThrow();
-                portalRedisStatusChannel.publish(JSON.stringify(portalRedisStatus));
+            const publishRedisStatus = async (
+                service: RedisStatusService,
+                channel: FluxNetworkChannel,
+            ): Promise<void> => {
+                try {
+                    const status = await service.getRedisStatusOrThrow();
+                    channel.publish(JSON.stringify(status));
+                } catch (error) {
+                    // In self-hosted setups one of the DragonFly instances may be
+                    // unavailable; don't let it block the other from publishing.
+                    console.error('Failed to read Redis status:', error);
+                }
+            };
 
-                const meshRedisStatus = await meshRedisStatusService.getRedisStatusOrThrow();
-                meshRedisStatusChannel.publish(JSON.stringify(meshRedisStatus));
+            setInterval(() => {
+                void publishRedisStatus(portalRedisStatusService, portalRedisStatusChannel);
+                void publishRedisStatus(meshRedisStatusService, meshRedisStatusChannel);
             }, 100);
 
             const manageChannelSubscriptions = (

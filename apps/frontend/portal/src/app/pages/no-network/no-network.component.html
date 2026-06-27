@@ -27,7 +27,11 @@
             Use the <span class="font-medium text-base-content/80">network selector</span> in the sidebar to create or select one.
         </p>
         <p class="text-sm text-base-content/40 mb-8">
-            You can create up to 3 networks per account.
+            @if (selfHosted()) {
+                Self-hosted instances can create unlimited networks.
+            } @else {
+                You can create up to {{ MAX_NETWORKS }} networks per account.
+            }
         </p>
 
         <!-- Hint arrow pointing to sidebar -->
