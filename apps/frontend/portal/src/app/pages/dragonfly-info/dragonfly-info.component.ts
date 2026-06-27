@@ -8,6 +8,7 @@ import { FluxNetworkChannel } from '@persistica/flux-agent';
 import { FluxStatusAgentService } from '$lib/app/_services/flux/flux-status.agent.service';
 
 type TDragonflyStatus = {
+    label: string;
     url: string;
     memory: {
         used: number;
@@ -57,8 +58,6 @@ export class DragonflyInfoPageComponent {
     protected readonly statuses = signal<TDragonflyStatus[] | null>(null);
     protected readonly error = signal<string | null>(null);
 
-    protected readonly instanceLabels = ['Mesh DragonFly', 'Portal DragonFly'];
-
     private portalRedisStatus: TDragonflyStatus | null = null;
     private meshRedisStatus: TDragonflyStatus | null = null;
 
@@ -75,14 +74,11 @@ export class DragonflyInfoPageComponent {
 
                 portalRedisHealthChannel
                     .onPublish((message) => {
-                        this.portalRedisStatus = JSON.parse(message as string) as TDragonflyStatus;
-
-                        if (this.meshRedisStatus) {
-                            this.statuses.set([
-                                this.meshRedisStatus,
-                                this.portalRedisStatus,
-                            ]);
-                        }
+                        this.portalRedisStatus = {
+                            label: 'Portal DragonFly',
+                            ...JSON.parse(message as string),
+                        } as TDragonflyStatus;
+                        this._publishStatuses();
                     });
 
                 const meshRedisHealthAlertChannel: FluxNetworkChannel = await connection
@@ -90,20 +86,33 @@ export class DragonflyInfoPageComponent {
 
                 meshRedisHealthAlertChannel
                     .onPublish((message) => {
-                        this.meshRedisStatus = JSON.parse(message as string) as TDragonflyStatus;
-
-                        if (this.portalRedisStatus) {
-                            this.statuses.set([
-                                this.meshRedisStatus,
-                                this.portalRedisStatus,
-                            ]);
-                        }
+                        this.meshRedisStatus = {
+                            label: 'Mesh DragonFly',
+                            ...JSON.parse(message as string),
+                        } as TDragonflyStatus;
+                        this._publishStatuses();
                     });
             })
             .catch(error => {
                 console.error('Failed to connect to Flux network:', error);
             })
             ;
+    }
+
+    /**
+     * Push whichever statuses have arrived so far. In self-hosted setups only
+     * one of the two channels may ever publish, so we must not wait for both.
+     */
+    private _publishStatuses(
+    ): void {
+        const statuses = [
+            this.meshRedisStatus,
+            this.portalRedisStatus,
+        ].filter((status): status is TDragonflyStatus => status !== null);
+
+        if (statuses.length > 0) {
+            this.statuses.set(statuses);
+        }
     }
 
     protected formatBytes(

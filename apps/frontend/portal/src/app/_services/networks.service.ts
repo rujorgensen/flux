@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import {
     type Observable,
     BehaviorSubject,
+    combineLatest,
     map,
 } from 'rxjs';
 import { api } from '../_services/api/api';
+import { InstanceService } from './instance.service';
 import type {
     INetwork_S,
 } from '@flux/shared/features/networks';
@@ -23,13 +25,19 @@ export class NetworksService {
     public readonly networks$: Observable<INetwork_S[]> = this._networks$.asObservable();
     public readonly selectedNetwork$: Observable<INetwork_S | null> = this._selectedNetwork$.asObservable();
     public readonly isLoading$: Observable<boolean> = this._isLoading$.asObservable();
-    public readonly canCreateNetwork$: Observable<boolean> = this._networks$.pipe(
-        map((nets) => nets.length < MAX_NETWORKS),
-    );
+    // Self-hosted instances are not subject to the SaaS network cap.
+    public readonly canCreateNetwork$: Observable<boolean>;
 
     constructor(
-
+        private readonly _instanceService: InstanceService,
     ) {
+        this.canCreateNetwork$ = combineLatest([
+            this._networks$,
+            this._instanceService.selfHosted$,
+        ]).pipe(
+            map(([nets, selfHosted]) => selfHosted || nets.length < MAX_NETWORKS),
+        );
+
         this.loadNetworks();
     }
 

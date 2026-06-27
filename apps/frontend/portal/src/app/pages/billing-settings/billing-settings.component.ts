@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { InstanceService } from '../../_services/instance.service';
 
 export interface IBillingTier {
     id: string;
@@ -80,4 +82,11 @@ export const BILLING_TIERS: IBillingTier[] = [
 })
 export class BillingSettingsPageComponent {
     protected readonly tiers = BILLING_TIERS;
+    protected readonly selfHosted;
+
+    constructor(
+        private readonly instanceService: InstanceService,
+    ) {
+        this.selfHosted = toSignal(this.instanceService.selfHosted$, { initialValue: false });
+    }
 }
