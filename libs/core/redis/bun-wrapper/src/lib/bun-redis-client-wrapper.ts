@@ -10,7 +10,8 @@ export class BunRedisClient extends EventEmitter<{
     end: unknown,
 }> {
     public connected = false;
-    private client: RedisClient;
+    public readonly client: RedisClient;
+
     private readonly handlers: Map<string, Set<MessageHandler>> = new Map();
     private reconnecting = false;
     private disconnected = false;
@@ -40,18 +41,6 @@ export class BunRedisClient extends EventEmitter<{
                 idleTimeout: 0,
             },
         );
-    }
-
-    /**
-     * Returns the raw Redis client.
-     * 
-     * ! Please note that this may be re-instantiated on reconnections,
-     * ! so make sure to request this continuously, if used.
-     */
-    public getClient(
-
-    ): RedisClient {
-        return this.client;
     }
 
     /**
@@ -160,18 +149,11 @@ export class BunRedisClient extends EventEmitter<{
             this.reconnectAttempts++;
 
             try {
-                /**
-                 * Bun v. 1.2.16 appears to have an issue causing requiring a new instance rather than being able to use client.connect() directly.
-                 */
-                this.client = new RedisClient(
-                    this.options.url,
-                    {
-                        // We're providing our own implementation
-                        autoReconnect: false,
-                        connectionTimeout: 20_000,
-                        // idleTimeout: 0,
-                    },
-                );
+                // Bun v1.2.16 required allocating a fresh RedisClient on every reconnect because a closed instance could not be reconnected via
+                // client.connect(). That left orphaned clients behind, each able to emit ERR_REDIS_CONNECTION_CLOSED asynchronously (bypassing
+                // try/catch) and crash the process. As of Bun 1.3.14 the same instance reconnects cleanly after both a local close() and a real
+                // server drop, so we reuse this.client and never overwrite it. Verified by bun-redis-client-wrapper.spec.ts — if that regresses,
+                // restore the re-instantiation here.
                 await this.connect_();
                 console.log('✅ Redis client reconnected');
 

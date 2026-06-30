@@ -106,8 +106,8 @@ export class RedisConnection {
                 console.warn('🚫 Redis connection closed');
             });
 
-        // this.networkAuthoritySet = new NetworkAuthorityRedisService(this.cacheClient.getClient());
-        // this.networkAgentRedisService = new NetworkAgentRedisService(this.cacheClient.getClient());
+        // this.networkAuthoritySet = new NetworkAuthorityRedisService(this.cacheClient.client);
+        // this.networkAgentRedisService = new NetworkAgentRedisService(this.cacheClient.client);
 
         // *** Create Redis subscriber
         this.pubSub = new BunRedisPubSub(
@@ -131,7 +131,7 @@ export class RedisConnection {
             .catch(() => console.error('pubsub connection failed'));
 
         // Dedicated client
-        const hashClient = this.cacheClient.getClient();
+        const hashClient = this.cacheClient.client;
 
         this.sortedSet = {
             zadd: hashClient.zadd.bind(hashClient),
