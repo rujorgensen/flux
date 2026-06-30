@@ -54,7 +54,7 @@ export class RedisStatusService {
 
     constructor(
         private readonly _redisClient: BunRedisClient,
-    ) { }
+    ) {}
 
     /**
      * Subscribe to alerts.
@@ -138,7 +138,7 @@ export class RedisStatusService {
         threshold: number = 0.9,
     ): Promise<TRedisStatus> {
         // Make sure to get this every time, as it may have been re-instantiated
-        const redisClient: RedisClient = this._redisClient.getClient();
+        const redisClient: RedisClient = this._redisClient.client;
 
         if (!redisClient.connected) {
             throw new Error('Redis client is not connected');

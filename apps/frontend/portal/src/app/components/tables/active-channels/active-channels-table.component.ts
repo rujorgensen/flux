@@ -102,6 +102,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
     protected readonly selectedMembersChannel = signal<INetworkChannel | null>(null);
     protected readonly selectedMemberAddresses = signal<string[] | null>(null);
     protected readonly membersLoading = signal<boolean>(false);
+    protected readonly membersError = signal<boolean>(false);
     protected readonly page = signal<number>(1);
     protected readonly pageSize = signal<number>(25);
     protected readonly total = signal<number>(0);
@@ -168,6 +169,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
     ): void {
         this.selectedMembersChannel.set(channel);
         this.selectedMemberAddresses.set(null);
+        this.membersError.set(false);
         this.membersLoading.set(true);
 
         api
@@ -181,12 +183,23 @@ export class ActiveChannelsTableComponent implements OnDestroy {
             .members
             .get()
             .then((response) => {
-                const memberData = response.data;
-                this.selectedMemberAddresses.set(memberData);
+                // Eden Treaty does not reject on HTTP errors; it surfaces them on
+                // `response.error` with a null `data`. Treating that as an empty
+                // member list would wrongly render "No members are currently
+                // connected" for what is actually a failed request.
+                if (response.error) {
+                    console.error('Error fetching channel members:', response.error);
+                    this.membersError.set(true);
+                    toast.error('Failed to load channel members. Please try again.');
+
+                    return;
+                }
+
+                this.selectedMemberAddresses.set(response.data);
             })
             .catch((error: unknown) => {
                 console.error('Error fetching channel members:', error);
-                this.selectedMemberAddresses.set([]);
+                this.membersError.set(true);
                 toast.error('Failed to load channel members. Please try again.');
             })
             .finally(() => {
@@ -198,6 +211,7 @@ export class ActiveChannelsTableComponent implements OnDestroy {
     ): void {
         this.selectedMembersChannel.set(null);
         this.selectedMemberAddresses.set(null);
+        this.membersError.set(false);
         this.membersLoading.set(false);
     }
 

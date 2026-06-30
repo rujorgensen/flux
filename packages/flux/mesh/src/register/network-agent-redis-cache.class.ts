@@ -30,7 +30,7 @@ export class NetworkAgentRedisCache {
 
     ) {
         this.networkAgentRedisService = new NetworkAgentRedisService(this.redisConnection);
-        this.networkUsageRedisCacheService = new NetworkUsageRedisCacheService(this.redisConnection['cacheClient'].getClient());
+        this.networkUsageRedisCacheService = new NetworkUsageRedisCacheService(this.redisConnection['cacheClient'].client);
     }
 
     /**
