@@ -101,3 +101,30 @@ Routing uses the Address to reach a Client.
 A derived classification of how a Channel's Members are spread across the topology — `same-process`,
 `same-machine`, or `distributed` — used to avoid unnecessary cross-Process/-Machine fan-out when a
 message is published.
+
+### Peering
+
+**Agent Peering**:
+A capability for two Agents to exchange data over a direct WebRTC connection, off the Mesh. The Mesh
+brokers only the signaling handshake (offer/answer/ICE) over the WS connection; once established, data
+flows Agent-to-Agent. Browser-gated (requires `RTCPeerConnection`). See ADR-0003.
+_Avoid_: direct connection
+
+**Peer Connection**:
+The direct WebRTC link between two peered Agents, carrying data off the Mesh. (An Agent acting in such
+a link is a "peer" of the other — this is the only sanctioned use of "peer"; the participant itself is
+still an Agent.)
+
+### Messaging
+
+**Message**:
+Data broadcast on a Channel. The application **payload is opaque to Flux** — the Mesh routes it without
+interpreting it. Because the Mesh is trusted (operator-hosted) but Clients are not, the Mesh — not the
+sending Client — stamps the delivered frame with the *authoritative* sender Client ID it assigned (an
+Agent cannot forge it or stamp a destination), alongside the message type and Channel name. Recipients
+can therefore trust which Client sent a Message.
+
+**Publish**:
+Broadcasting a Message to every *other* Member of a Channel. The sender is always excluded — Flux never
+echoes a Message back to the publishing Client (`publishToSelf` is off and the sender socket is passed
+for exclusion). Delivery is fire-and-forget / at-most-once (see ADR-0001).
