@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import { StringValue } from 'ms';
 import type { TNetworkId_S } from '@flux/shared/types';
 import type { TFluxClientUID } from '@flux/shared/utils';
 
@@ -18,7 +19,7 @@ export type TTokenPayloadJWT = string & { __brand: 'TokenPayloadJWT'; };
  * Generates JWT string from a token payload.
  * 
  * @param { TTokenPayload } payload - The token payload to sign
- * @param { string | number } [expiresIn] - Token expiry as a jsonwebtoken
+ * @param { StringValue | number } [expiresIn] - Token expiry as a jsonwebtoken
  *        timespan (e.g. '15m') or a number of seconds.
  *
  * @returns { string } The signed JWT string
@@ -28,7 +29,7 @@ export const generateToken = (
     // The token only gates the WS upgrade; live sockets are not re-checked, so a
     // short lifetime is safe. NB: a reconnect after expiry needs a freshly-minted
     // token (client-side auto-renewal is not yet implemented).
-    expiresIn: string | number = '15m',
+    expiresIn: StringValue | number = '15m',
 ): string => {
     return jwt.sign(payload, secret, { expiresIn });
 };
