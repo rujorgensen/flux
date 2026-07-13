@@ -1,6 +1,6 @@
 {
     "name": "@flux/portal-ui",
-    "version": "0.0.12",
+    "version": "0.0.13",
     "type": "module",
     "private": true,
     "dependencies": {

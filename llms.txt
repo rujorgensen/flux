@@ -1,0 +1,22 @@
+# Flux
+
+> Flux is a WebSocket mesh: participants connect over sockets to a distributed set of mesh processes
+> and exchange messages within named Networks and their Channels. The Mesh (`mesh.persistica.io`) is
+> the data plane; the Portal (`portal.persistica.io`) is the control plane.
+
+Key rules when connecting: an **Agent** cannot join a Network that has no **Authority** registered —
+it retries in the `waiting-for-authority` state until one appears, then fails with
+`NetworkAuthorityNotFoundError`. Agents pass a *claim* to `connect()`; only Authorities hold the
+Network Access Token. The `domain` option defaults to `https://mesh.persistica.io` and must point at
+the Mesh, with protocol — not the Portal.
+
+## SDK
+
+- [Flux Agent](./docs/sdk/flux-agent.md): join a Network, join Channels, publish/subscribe; options, connection states, error handling, and troubleshooting.
+- [Flux Authority](./docs/sdk/flux-authority.md): authorize Agents and Channels; holds the Network Access Token; must be online before Agents connect.
+- [Flux Mesh](./docs/sdk/flux-mesh.md): run a self-hosted mesh server, or use the hosted mesh.
+
+## Optional
+
+- [Domain glossary](./CONTEXT.md): the ubiquitous language of the mesh (Client, Agent, Authority, Network, Channel, Address, peering).
+- [Architecture decisions](./docs/adr): ADRs on control/data-plane separation, coordination bus, peering, and the trust model.
