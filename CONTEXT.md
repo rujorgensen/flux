@@ -115,6 +115,12 @@ The direct WebRTC link between two peered Agents, carrying data off the Mesh. (A
 a link is a "peer" of the other — this is the only sanctioned use of "peer"; the participant itself is
 still an Agent.)
 
+**Direct Publish**:
+Data received over a Peer Connection, surfaced to the application via `FluxAgent.onDirectPublish`. The
+counterpart to a Channel's `onPublish`, but off-Mesh: because the payload never traverses the Mesh, its
+sender identity is **not** Mesh-stamped (see ADR-0004) — the receiver gets whatever arrived on the data
+channel. See ADR-0003.
+
 ### Messaging
 
 **Message**:

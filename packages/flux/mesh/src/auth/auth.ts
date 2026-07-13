@@ -18,13 +18,17 @@ export type TTokenPayloadJWT = string & { __brand: 'TokenPayloadJWT'; };
  * Generates JWT string from a token payload.
  * 
  * @param { TTokenPayload } payload - The token payload to sign
- * @param { number } [expiresIn] - Token expiry time in seconds
- * 
+ * @param { string | number } [expiresIn] - Token expiry as a jsonwebtoken
+ *        timespan (e.g. '15m') or a number of seconds.
+ *
  * @returns { string } The signed JWT string
  */
 export const generateToken = (
     payload: TTokenPayload,
-    expiresIn = 60_000 // ! TODO CHANGE TO LOW VALUE AGAINGA.. FOR DEVE.. Live for 60 seconds
+    // The token only gates the WS upgrade; live sockets are not re-checked, so a
+    // short lifetime is safe. NB: a reconnect after expiry needs a freshly-minted
+    // token (client-side auto-renewal is not yet implemented).
+    expiresIn: string | number = '15m',
 ): string => {
     return jwt.sign(payload, secret, { expiresIn });
 };

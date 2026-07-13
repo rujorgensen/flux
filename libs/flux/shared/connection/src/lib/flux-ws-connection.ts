@@ -253,6 +253,7 @@ export class FluxWebSocketConnection {
             this,
             webSocketClient,
             this.stateManager.emitWebRTCState.bind(this.stateManager),
+            this.stateManager.emitDirectMessage.bind(this.stateManager),
         ));
     }
 
@@ -293,8 +294,13 @@ export class FluxWebSocketConnection {
     ): void {
 
         if (this.webSocketClient) {
-            // TODO NB! There is a risk of the string message already starting with 'o:'
-            const messageString: string = typeof message === 'string' ? message : `o:${JSON.stringify(message)}`;
+            // Every payload is tagged so the receiver can decode unambiguously:
+            //   's:' → raw string, 'o:' → JSON. Tagging strings too avoids the
+            //   collision where a string literally starting with 'o:' would be
+            //   mistaken for JSON on the receiving end.
+            const messageString: string = typeof message === 'string'
+                ? `s:${message}`
+                : `o:${JSON.stringify(message)}`;
 
             this.webSocketClient.send(`${NETWORK_CHANNEL_PUBLISH}:${channelName}:${messageString}`);
         }
@@ -463,14 +469,22 @@ export class FluxWebSocketConnection {
 
                     const topicCallbacks: Set<TMessageCallback> | undefined = this.channelCallbacks.get(channelName);
                     if (topicCallbacks) {
-                        let data: string = message_.slice(thirdColon + 1);
+                        const raw: string = message_.slice(thirdColon + 1);
 
-                        if (data.startsWith('o:')) {
+                        // Decode the payload tag written by `publish`:
+                        //   'o:' → JSON, 's:' → raw string. Untagged payloads are
+                        //   treated as legacy raw strings.
+                        let data: string;
+                        if (raw.startsWith('o:')) {
                             try {
-                                data = JSON.parse(data.substring(2));
+                                data = JSON.parse(raw.substring(2));
                             } catch {
-                                data = data.substring(2);
+                                data = raw.substring(2);
                             }
+                        } else if (raw.startsWith('s:')) {
+                            data = raw.substring(2);
+                        } else {
+                            data = raw;
                         }
 
                         for (const cb of topicCallbacks) {
