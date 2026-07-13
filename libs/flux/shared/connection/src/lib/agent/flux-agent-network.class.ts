@@ -30,11 +30,13 @@ export class FluxAgentNetworkConnection {
         private readonly _fluxWebSocketConnection: FluxWebSocketConnection,
         private readonly _fluxWebSocketClientConnection: FluxWebSocketClientConnection,
         private readonly _webRTCStateChange: (state: TRTCState) => void,
+        private readonly _onDirectMessage: (message: string) => void,
     ) {
         if (typeof RTCPeerConnection !== 'undefined') {
             this.iceConnection = new ICEConnection(
                 this._fluxWebSocketClientConnection,
                 this._webRTCStateChange,
+                this._onDirectMessage,
             );
             console.log(`RTCPeerConnection is available`);
         } else {

@@ -22,33 +22,24 @@ const peerConnectionConfig = {
 
 export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 'acceptAnswer'> {
     private readonly peerConnection = new RTCPeerConnection(peerConnectionConfig);
-    private dataChannel: any; //  = this.peerConnection.createDataChannel('flux-channel');
+    private dataChannel: RTCDataChannel | undefined;
     private offerSDP: string | undefined;
 
     constructor(
         private readonly _fluxWebSocketClientConnection: FluxWebSocketClientConnection,
         private readonly _stateChange: (state: TRTCState) => void,
+        /**
+         * Called with every message received from the peer over the data channel.
+         */
+        private readonly _onMessage: (message: string) => void,
     ) {
         // super();
 
+        // The non-initiating peer receives its data channel via this event.
         this.peerConnection.ondatachannel = (
-            event: any,
+            event: RTCDataChannelEvent,
         ) => {
-            console.log("*********** GOT DATAT SCHANNNEL ");
-
-            this.dataChannel = event.channel;
-            this.dataChannel.onopen = () => console.log('ReceiveChannel opened');
-            // this.dataChannel.onmessage = (e: any) => this.receivedMessage = e.data;
-
-            this.dataChannel.onmessage = (event: any) => {
-                console.log('Receiving ICE event', event);
-            };
-            this.dataChannel.onopen = () => {
-                console.log("Opened");
-            };
-            this.dataChannel.onclose = () => {
-                console.log("Opened");
-            };
+            this._wireDataChannel(event.channel);
         };
 
         this.peerConnection.onicecandidate = (event) => {
@@ -77,7 +68,7 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
 
     ): Promise<RTCSessionDescriptionInit> {
         console.log("creating offer and data channel");
-        this.dataChannel = this.peerConnection.createDataChannel('flux-channel');
+        this._wireDataChannel(this.peerConnection.createDataChannel('flux-channel'));
 
         this._stateChange('creating-offer');
         const offer = await this.peerConnection.createOffer();
@@ -140,8 +131,33 @@ export class ICEConnection {//extends RPCServer<'createOffer' | 'acceptOffer' | 
     }
 
     /**
+     * Wires up a data channel's lifecycle handlers. Used for both the initiator's
+     * locally-created channel and the receiver's incoming channel so inbound
+     * messages are delivered the same way on both ends.
+     *
+     * @param { RTCDataChannel } channel - The data channel to wire up
+     */
+    private _wireDataChannel(
+        channel: RTCDataChannel,
+    ): void {
+        this.dataChannel = channel;
+
+        channel.onopen = () => {
+            console.log('Data channel opened');
+        };
+
+        channel.onclose = () => {
+            console.log('Data channel closed');
+        };
+
+        channel.onmessage = (event: MessageEvent) => {
+            this._onMessage(event.data as string);
+        };
+    }
+
+    /**
      * Sends a message to the connected peer via the WebRTC data channel.
-     * 
+     *
      * @param { string } message - The message to send
      */
     public sendMessage(
