@@ -22,6 +22,11 @@ import {
 
 const DEFAULT_FLUX_DOMAIN: string = 'https://mesh.persistica.io';
 
+// How many times connect() retries while waiting for an Authority to register on the network.
+// Deliberately not exposed as an option — Agents run on untrusted client machines, so this stays
+// under the SDK's control.
+const MAX_CONNECT_ATTEMPTS: number = 100;
+
 export class FluxAgent {
     public readonly id: string = nanoid();
     public readonly networkId: TNetworkId_S;
@@ -74,6 +79,8 @@ export class FluxAgent {
                 throw new Error('Will never be thrown');
             }
 
+            let warnedWaitingForAuthority: boolean = false;
+
             const ticket = await retryOrThrow(
                 async () => {
                     return authenticateAgentOrThrow(
@@ -91,10 +98,34 @@ export class FluxAgent {
                 (error: unknown) => (error instanceof NetworkAuthorityNotFoundError),
 
                 {
-                    retries: 100,
+                    // Fixed by the SDK, not the consuming app: Agents run on untrusted client
+                    // machines, so the mesh operator — not the app — controls how long an Agent
+                    // waits for an Authority to appear.
+                    retries: MAX_CONNECT_ATTEMPTS,
                     delayMs: 500,
-                    // Backoff until 3 seconds
-                    onRetry: (attempt) => Math.min(3_000, 500 + (attempt * 200)),
+                    onRetry: (
+                        attempt: number,
+                        retries: number,
+                    ): number => {
+                        // The only retried error is NetworkAuthorityNotFoundError, so every
+                        // retry means: this Agent authenticated, but no Authority is registered
+                        // on the network yet. Surface that instead of sitting silently on
+                        // 'authorizing' — listeners can now show a meaningful state.
+                        this.stateManager.emitNetworkState('waiting-for-authority');
+
+                        if (!warnedWaitingForAuthority) {
+                            warnedWaitingForAuthority = true;
+                            console.warn(
+                                `[flux-agent] No Authority is registered on network '${this.networkId}' yet. ` +
+                                `An Authority must be running before Agents can join; retrying up to ${retries} times ` +
+                                `until one appears. If this never resolves, start your Authority process (or check its ` +
+                                `Network Access Token).`,
+                            );
+                        }
+
+                        // Backoff until 3 seconds
+                        return Math.min(3_000, 500 + (attempt * 200));
+                    },
                 },
             );
 

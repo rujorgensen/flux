@@ -3,6 +3,11 @@ export type TNetworkConnectionState =
     'connected' |
     'connecting' |
     'authorizing' |
+    // Emitted while an Agent is authenticated but no Authority is yet registered
+    // on the network. The Agent keeps retrying until an Authority appears or the
+    // connect budget is exhausted. Surfacing this avoids an indefinite, silent
+    // 'authorizing' when a project runs an Agent without an Authority.
+    'waiting-for-authority' |
     'denied' |
     'auth-error' |
     'kicked';
