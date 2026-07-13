@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { StringValue } from 'ms';
+import type { StringValue } from 'ms';
 import type { TNetworkId_S } from '@flux/shared/types';
 import type { TFluxClientUID } from '@flux/shared/utils';
 
