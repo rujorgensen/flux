@@ -20,6 +20,7 @@ export type TRTCState =
 export class StateManager {
     private readonly networkStateListeners: Set<(networkState: TNetworkConnectionState) => void> = new Set();
     private readonly webRTCStateListeners: Set<(rtcState: TRTCState) => void> = new Set();
+    private readonly directMessageListeners: Set<(message: string) => void> = new Set();
 
     /**
      * Attaches a listener for network connection state changes.
@@ -55,6 +56,37 @@ export class StateManager {
         fn: (rtcState: TRTCState) => void,
     ): void {
         this.webRTCStateListeners.delete(fn);
+    }
+
+    /**
+     * Attaches a listener for messages received directly from a peer over a
+     * WebRTC data channel (i.e. off-Mesh, peer-to-peer).
+     */
+    public attachDirectMessageListener(
+        fn: (message: string) => void,
+    ): void {
+        this.directMessageListeners.add(fn);
+    }
+
+    /**
+     * Detaches a previously registered direct-message listener.
+     */
+    public detachDirectMessageListener(
+        fn: (message: string) => void,
+    ): void {
+        this.directMessageListeners.delete(fn);
+    }
+
+    /**
+     * Emits a message received over a peer-to-peer WebRTC data channel to all
+     * registered listeners.
+     */
+    public emitDirectMessage(
+        message: string,
+    ): void {
+        for (const fn of this.directMessageListeners) {
+            fn(message);
+        }
     }
 
     /**

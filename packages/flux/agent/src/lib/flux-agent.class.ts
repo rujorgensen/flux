@@ -141,6 +141,15 @@ export class FluxAgent {
     public onWebRTConnectionState = this.stateManager.attachWebRTCStateListener.bind(this.stateManager);
 
     /**
+     * Attaches a listener for messages received directly from a peer over a
+     * WebRTC data channel (off-Mesh, peer-to-peer).
+     *
+     * NB: unlike channel messages, the sender identity is NOT Mesh-stamped
+     * (see ADR-0004) — the message is whatever arrived on the peer connection.
+     */
+    public onDirectPublish = this.stateManager.attachDirectMessageListener.bind(this.stateManager);
+
+    /**
      * Attaches a listener for network connection state changes.
      */
     public onNetworkState = this.stateManager.attachNetworkStateListener.bind(this.stateManager);

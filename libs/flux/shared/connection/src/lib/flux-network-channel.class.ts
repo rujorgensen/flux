@@ -6,6 +6,9 @@ import type {
     TChannelName,
 } from '@flux/shared/types';
 import type {
+    TMessageCallback,
+} from '@flux/shared/ws';
+import type {
     FluxWebSocketConnection,
 } from './flux-ws-connection';
 
@@ -38,7 +41,10 @@ export class FluxNetworkChannel {
         this._fluxWebSocketConnection
             .onPublish(
                 this._channelName,
-                (fn as any), // TODO
+                // The transport types payloads as `string` (TMessageCallback), but
+                // `o:`-prefixed messages are JSON-parsed before delivery, so the
+                // callback actually receives `T`. Bridge the two deliberately.
+                fn as unknown as TMessageCallback,
             );
     }
 
