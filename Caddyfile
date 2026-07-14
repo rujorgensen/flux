@@ -19,3 +19,13 @@ persistica.io {
 		respond "Caddytime!"
 	}
 }
+
+# Internal, self-hosted mesh (live dashboard counts + data usage).
+# The mesh listens on port 5101 inside the portal-api container; that port is
+# NOT published externally — only this subdomain reaches it, over the Docker
+# network. Caddy auto-provisions TLS and upgrades WebSocket connections.
+# Requires a DNS record for internal-mesh.persistica.io pointing at this host.
+internal-mesh.persistica.io {
+	encode gzip
+	reverse_proxy portal-api-prod:5101
+}

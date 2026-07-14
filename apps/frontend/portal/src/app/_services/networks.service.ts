@@ -120,6 +120,16 @@ export class NetworksService {
     private restoreSelectedNetwork(
         networks: INetwork_S[],
     ): void {
+        // Precedence: `?slug=` query param (a network id) > localStorage > first network.
+        const slug = new URLSearchParams(window.location.search).get('slug');
+        if (slug) {
+            const fromSlug = networks.find((n) => n.id === slug);
+            if (fromSlug) {
+                this.selectNetwork(fromSlug);
+                return;
+            }
+        }
+
         const savedId = localStorage.getItem(STORAGE_KEY);
         if (savedId) {
             const found = networks.find((n) => n.id === savedId);

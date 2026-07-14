@@ -11,6 +11,7 @@ import { randomUUIDv7 } from 'bun';
 import { NetworkChannelService } from '@flux/mesh/store/redis/network-channel';
 import { NetworkAuthorityRedisService } from '@flux/mesh/store/redis/network-authority';
 import { NetworkAgentRedisService } from '@flux/mesh/store/redis/network-agent';
+import { NetworkUsageRedisCacheService } from '@flux/mesh/store/redis/network-usage';
 import {
     FluxAgent,
 } from '@persistica/flux-agent';
@@ -38,6 +39,12 @@ export const liveUpdates = (
     const networkChannelService: NetworkChannelService = new NetworkChannelService(meshRedisConnection);
     const networkAuthorityRedisService: NetworkAuthorityRedisService = new NetworkAuthorityRedisService(meshRedisConnection);
     const networkAgentRedisService: NetworkAgentRedisService = new NetworkAgentRedisService(meshRedisConnection);
+    // Reads real cumulative per-network byte usage (fed by real WS traffic).
+    // The service needs the raw Bun RedisClient, accessed the same way the mesh
+    // does in `network-agent-redis-cache.class.ts`.
+    const networkUsageRedisCacheService: NetworkUsageRedisCacheService = new NetworkUsageRedisCacheService(
+        meshRedisConnection['cacheClient'].client,
+    );
 
     new FluxMeshServer({
         port: localMeshServerPort,
@@ -183,16 +190,6 @@ export const liveUpdates = (
                 });
             }, 3_000);
 
-            // * Emit data usage
-            const fluxDataUsageNetworkChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
-                .getChannel('data-usage');
-
-            let num5: number = -100;
-            setInterval(() => {
-                num5++;
-                fluxDataUsageNetworkChannel.publish(num5);
-            }, 3_000);
-
             // * Listen to Redis health
             const portalRedisHealthChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
                 .getChannel('protected-portal-redis-health-alerts');
@@ -251,12 +248,14 @@ export const liveUpdates = (
                     fluxNetworkConnection.joinChannel(`networks-${networkId}-agent-count-update`),
                     fluxNetworkConnection.joinChannel(`networks-${networkId}-authority-count-update`),
                     fluxNetworkConnection.joinChannel(`networks-${networkId}-channel-count-update`),
+                    fluxNetworkConnection.joinChannel(`networks-${networkId}-total-data-usage`),
                 ])
                     .then(([
                         agentCountUpdateChannel,
                         authorityCountUpdateChannel,
                         channelUpdateChannel,
-                    ]: [FluxNetworkChannel, FluxNetworkChannel, FluxNetworkChannel]) => {
+                        totalDataUsageChannel,
+                    ]: [FluxNetworkChannel, FluxNetworkChannel, FluxNetworkChannel, FluxNetworkChannel]) => {
                         void networkAgentRedisService
                             .onAgentCountChange(
                                 networkId,
@@ -274,6 +273,23 @@ export const liveUpdates = (
                                 networkId,
                                 channelUpdateChannel.publish.bind(channelUpdateChannel),
                             );
+
+                        // Relay the real cumulative byte usage. Unlike the counts,
+                        // network usage has no pub/sub change event yet, so poll the
+                        // Redis cache and publish the latest value periodically.
+                        const publishNetworkUsage = (): void => {
+                            void networkUsageRedisCacheService
+                                .readNetworkUsageBytes(networkId)
+                                .then((bytes: number) => {
+                                    totalDataUsageChannel.publish(bytes);
+                                })
+                                .catch((error: unknown) => {
+                                    console.error(`❌ Failed to read network usage for '${networkId}':`, error);
+                                });
+                        };
+
+                        publishNetworkUsage();
+                        setInterval(publishNetworkUsage, 3_000);
                     })
                     .catch((error: unknown) => {
                         subscribedNetworkChannels.delete(networkId);

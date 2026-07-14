@@ -3,6 +3,7 @@ import {
     type FluxAgentNetworkConnection,
     FluxAgent,
 } from '@persistica/flux-agent';
+import { resolveInternalMeshDomain } from './internal-mesh-domain.fn';
 
 @Injectable({
     providedIn: 'root',
@@ -17,7 +18,11 @@ export class FluxStatusAgentService extends FluxAgent {
         super(
             'internal-network',
             {
-                domain: 'http://localhost:5101',
+                domain: resolveInternalMeshDomain(
+                    typeof window !== 'undefined'
+                        ? window.location
+                        : undefined,
+                ),
             },
         );
     }

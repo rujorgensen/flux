@@ -14,6 +14,7 @@ import {
     switchMap,
 } from 'rxjs';
 import { NetworksService } from '../networks.service';
+import { resolveInternalMeshDomain } from './internal-mesh-domain.fn';
 import type { INetwork_S } from '@flux/shared/features/networks';
 
 @Injectable({
@@ -37,7 +38,11 @@ export class FluxNetworkAgentService {
                         agent = new FluxAgent(
                             'internal-network',
                             {
-                                domain: 'http://localhost:5101',
+                                domain: resolveInternalMeshDomain(
+                                    typeof window !== 'undefined'
+                                        ? window.location
+                                        : undefined,
+                                ),
                             });
                     }
 
