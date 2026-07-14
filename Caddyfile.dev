@@ -6,10 +6,22 @@
 
 # Optional local dev / health-check port (no TLS)
 http://:9000 {
-	reverse_proxy /api* portal-api-prod:3000
-	reverse_proxy * portal-ui-prod:3001
+	# Internal, self-hosted mesh (live dashboard counts + data usage), served
+	# SAME-ORIGIN. handle_path strips the /internal-mesh prefix so the mesh
+	# server receives requests at its root. WebSockets upgrade automatically.
+	handle_path /internal-mesh* {
+		reverse_proxy portal-api-prod:5101
+	}
+
+	handle /api* {
+		reverse_proxy portal-api-prod:3000
+	}
 
 	handle /cddy {
 		respond "Caddytime!"
+	}
+
+	handle {
+		reverse_proxy portal-ui-prod:3001
 	}
 }

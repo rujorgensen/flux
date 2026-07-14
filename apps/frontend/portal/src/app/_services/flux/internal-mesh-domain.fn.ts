@@ -2,23 +2,24 @@
  * Resolves the domain of the Portal's internal, self-hosted mesh.
  *
  * Local development connects directly to the mesh server on its port. A deployed
- * browser reaches it through a dedicated subdomain (`internal-mesh.<host>`) that
- * Caddy reverse-proxies to the internal mesh server; the mesh port itself is
- * never published externally.
+ * browser reaches it same-origin through Caddy on the `/internal-mesh` path
+ * (Caddy strips the prefix before proxying to the internal mesh server, whose
+ * port is never published externally).
  *
- * Mirrors `resolveFluxDomain` in `flux-domain.component.ts` (which derives the
- * public mesh as `mesh.<host>`).
+ * Same-origin is deliberate: the SDK's `connect()` first does an HTTP fetch to
+ * `/auth/network-client`, and a cross-origin endpoint (e.g. a subdomain) would
+ * force a CORS preflight that fails once the fetch carries credentials. Serving
+ * the mesh under the Portal's own origin avoids CORS entirely.
  */
 interface IInternalMeshLocation {
-    hostname: string;
     origin: string;
     protocol: string;
+    hostname: string;
 }
 
 const INTERNAL_MESH_SERVER_PORT: number = 5_101;
-// The subdomain label prepended to the base domain, e.g. `internal-mesh.persistica.io`.
-// Change this single constant to rename the endpoint.
-const INTERNAL_MESH_SUBDOMAIN: string = 'internal-mesh';
+// Same-origin path prefix Caddy proxies to the internal mesh (prefix stripped).
+const INTERNAL_MESH_PATH: string = '/internal-mesh';
 const DEFAULT_INTERNAL_MESH_DOMAIN: string = `http://localhost:${INTERNAL_MESH_SERVER_PORT}`;
 
 function isLocalHostname(
@@ -45,12 +46,5 @@ export function resolveInternalMeshDomain(
         return `${location.protocol}//${normalizedHostname}:${INTERNAL_MESH_SERVER_PORT}`;
     }
 
-    // Derive `internal-mesh.<base-domain>` from the current host, mirroring how
-    // `resolveFluxDomain` derives `mesh.<base-domain>`.
-    const hostnameParts: string[] = location.hostname.split('.');
-    const internalMeshHostname: string = hostnameParts.length > 2
-        ? [INTERNAL_MESH_SUBDOMAIN, ...hostnameParts.slice(1)].join('.')
-        : `${INTERNAL_MESH_SUBDOMAIN}.${location.hostname}`;
-
-    return `${location.protocol}//${internalMeshHostname}`;
+    return `${location.origin}${INTERNAL_MESH_PATH}`;
 }
