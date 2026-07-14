@@ -12,20 +12,26 @@ http://persistica.io, http://portal.persistica.io {
 portal.persistica.io,
 persistica.io {
 	encode gzip
-	reverse_proxy /api* portal-api-prod:3000
-	reverse_proxy * portal-ui-prod:3001
+
+	# Internal, self-hosted mesh (live dashboard counts + data usage), served
+	# SAME-ORIGIN so the SDK's /auth/network-client fetch needs no CORS.
+	# handle_path strips the /internal-mesh prefix so the mesh server, which
+	# expects requests at its root (WS upgrade at "/", auth at "/auth/*"),
+	# receives them unprefixed. The mesh port is never published externally.
+	# Caddy upgrades WebSocket connections automatically.
+	handle_path /internal-mesh* {
+		reverse_proxy portal-api-prod:5101
+	}
+
+	handle /api* {
+		reverse_proxy portal-api-prod:3000
+	}
 
 	handle /cddy {
 		respond "Caddytime!"
 	}
-}
 
-# Internal, self-hosted mesh (live dashboard counts + data usage).
-# The mesh listens on port 5101 inside the portal-api container; that port is
-# NOT published externally — only this subdomain reaches it, over the Docker
-# network. Caddy auto-provisions TLS and upgrades WebSocket connections.
-# Requires a DNS record for internal-mesh.persistica.io pointing at this host.
-internal-mesh.persistica.io {
-	encode gzip
-	reverse_proxy portal-api-prod:5101
+	handle {
+		reverse_proxy portal-ui-prod:3001
+	}
 }
