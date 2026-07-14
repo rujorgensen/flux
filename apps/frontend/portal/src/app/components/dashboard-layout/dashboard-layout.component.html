@@ -93,7 +93,7 @@
                                         routerLinkActive="active"
                                         [routerLinkActiveOptions]="{ exact: true }"
                                     >
-                                        Active Channels
+                                        Channels
                                         @let channelCount = channelCount$ | async;
                                         @if (channelCount !== null) {
                                             <span class="badge badge-sm">{{ channelCount.count }}</span>
