@@ -1,6 +1,6 @@
 {
     "name": "@persistica/flux-mesh",
-    "version": "0.0.31",
+    "version": "0.0.32",
     "description": "Persistica Flux Mesh",
     "type": "module",
     "keywords": [],
