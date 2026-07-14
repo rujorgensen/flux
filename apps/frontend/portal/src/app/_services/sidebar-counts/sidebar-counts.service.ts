@@ -4,7 +4,6 @@ import {
     filter,
     from,
     map,
-    of,
     shareReplay,
     startWith,
     switchMap,
@@ -17,6 +16,7 @@ import { FluxNetworkAgentService } from '../flux/flux-network.agent.service';
 import { onConnectedAgentCount$$ } from '$lib/app/data/flux/connected-agents.service.fn';
 import { onConnectedAuthorityCount$$ } from '$lib/app/data/flux/connected-authorities.service.fn';
 import { onChannelUpdate$$ } from '$lib/app/data/flux/channel-update.service.fn';
+import { onDataUsageUpdate$$ } from '$lib/app/data/flux/data-usage.service.fn';
 
 @Injectable({
     providedIn: 'root',
@@ -118,9 +118,19 @@ export class NetworkStatsService {
 
         this.totalDataUsage$$ = initialCounts$
             .pipe(
-                switchMap(() => {
-                    return of(-999);
-                }),
+                switchMap((initialCounts) =>
+                    this.fluxNetworkAgentService
+                        .networkFluxAgent$$
+                        .pipe(
+                            switchMap((fluxAgentNetworkConnection: FluxAgentNetworkConnection) =>
+                                onDataUsageUpdate$$(
+                                    initialCounts.networkId,
+                                    fluxAgentNetworkConnection,
+                                ),
+                            ),
+                            startWith(0),
+                        ),
+                ),
             );
     }
 }
