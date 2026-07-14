@@ -1,12 +1,21 @@
 # Portal Selfhosted Caddyfile
 
 http://:9000 {
-	handle {
-		reverse_proxy web-portal-sh:3000
+	# Internal, self-hosted mesh (live dashboard counts + data usage), served
+	# SAME-ORIGIN so the SDK's /auth/network-client fetch needs no CORS.
+	# The internal mesh runs inside the portal container on :5101. handle_path
+	# strips the /internal-mesh prefix so it receives requests at its root
+	# (WS upgrade at "/", auth at "/auth/*"). WebSockets upgrade automatically.
+	handle_path /internal-mesh* {
+		reverse_proxy web-portal-sh:5101
 	}
 
 	handle /cddy {
 		respond "Caddytime!"
+	}
+
+	handle {
+		reverse_proxy web-portal-sh:3000
 	}
 }
 
