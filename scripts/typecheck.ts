@@ -9,13 +9,12 @@
  * only surface during a publishable package's declaration emit — the gap that let a
  * broken `jwt.sign(...)` signature reach CI.
  *
- * Scope — `tsconfig.lib.json` only. This mirrors what CI actually typechecks with tsc
- * (the libs + the mesh/agent/authority packages). Apps are intentionally excluded: the
- * backend portal builds via esbuild (`bun run build.js`, no tsc) and the frontend portal
- * typechecks through Angular's own compiler, so checking their `tsconfig.app.json` here
- * would (a) diverge from CI and (b) surface dependency-source errors under the portal
- * app's stricter `noUncheckedIndexedAccess` flag that a real .d.ts-consuming build never
- * sees. Add app support once those apps are clean under a direct tsc pass.
+ * Scope — every `tsconfig.lib.json` plus every `tsconfig.app.json` that is clean under
+ * a direct tsgo pass (dirty apps sit in EXCLUDE until fixed). Libs mirror what CI
+ * typechecks with tsc; apps go beyond CI on purpose — the backend portal builds via
+ * esbuild (no tsc) and the frontend portal only typechecks through Angular's compiler
+ * during a build, so a wrong import (e.g. animation functions from @angular/core
+ * instead of @angular/animations) used to reach origin without any hook noticing.
  *
  * Uses `tsgo` (`@typescript/native-preview`) for speed (~3x faster than tsc). On this
  * lib surface it agrees with the tsc that CI builds with; it's a preview compiler, so if
@@ -37,13 +36,19 @@ const CONCURRENCY = 6;
 // - backend/features/network: branded-type mismatches in its *.spec.ts files (tests
 //   pass raw strings where TNetworkId_S is expected). Test-only; CI never typechecks
 //   specs and bun strips types at runtime, so these don't affect CI.
+// - apps/demo, apps/backend/portal, apps/backend/mesh: pre-existing errors (mostly
+//   `noUncheckedIndexedAccess` fallout; backend/mesh also surfaces errors in
+//   libs/flux/shared/types under its stricter flags) — 24/20/5 errors as of 2026-07-16.
 const EXCLUDE: string[] = [
     'libs/backend/features/network/',
+    'apps/demo/',
+    'apps/backend/portal/',
+    'apps/backend/mesh/',
 ];
 
 async function findProjects(): Promise<string[]> {
     const projects: string[] = [];
-    const glob = new Glob('**/tsconfig.lib.json');
+    const glob = new Glob('**/tsconfig.{lib,app}.json');
     for await (const file of glob.scan({ cwd: ROOT, dot: false })) {
         if (file.includes('node_modules')) continue;
         if (EXCLUDE.some(excluded => file.includes(excluded))) continue;
