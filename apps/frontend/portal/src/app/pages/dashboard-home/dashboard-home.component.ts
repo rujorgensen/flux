@@ -6,7 +6,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { combineLatest, map } from 'rxjs';
 import type { TNetworkId_S } from '@flux/shared/types';
-import { StatsComponent } from '../../components/stats/stats.component';
 import { DashboardComponent } from '../../components/dashboard/dashboard.component';
 import {
     type IChartDataset,
@@ -65,7 +64,6 @@ export const buildChartConfig = (
     selector: 'app-dashboard-home',
     imports: [
         CommonModule,
-        StatsComponent,
         DashboardComponent,
         ChartComponent,
         NetworkIdComponent,
@@ -89,6 +87,7 @@ export class DashboardHomePageComponent {
     protected readonly agentChartConfig$;
     protected readonly authorityChartConfig$;
     protected readonly channelChartConfig$;
+    protected readonly totalDataUsage$;
 
     constructor(
         private readonly networksService: NetworksService,
@@ -139,5 +138,7 @@ export class DashboardHomePageComponent {
                 'rgba(245, 158, 11, 0.08)',
             )),
         );
+
+        this.totalDataUsage$ = this.sidebarCountsService.totalDataUsage$$;
     }
 }

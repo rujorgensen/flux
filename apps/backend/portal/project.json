@@ -25,6 +25,7 @@
                 "parallel": true
             },
             "dependsOn": [
+                "docker-dev",
                 "backend-mesh:serve"
             ],
             "continuous": true

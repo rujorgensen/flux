@@ -1,5 +1,5 @@
-@if (dataStore(); as data) {
-    @if (data.length > 0) {
+@if (rows(); as data) {
+    @if (hasRows()) {
         <div class="flex justify-end mb-2">
             <button
                 class="btn btn-sm btn-error btn-outline"
@@ -22,24 +22,34 @@
                 </tr>
             </thead>
             <tbody>
-                @for (row of data; track row.id) {
-                    <tr>
-                        <td>{{ row.id }}</td>
-                        <td>{{ row.connectedAt | date: 'yyyy-MM-dd HH:mm' }}</td>
+                @for (row of data; track row.data.id) {
+                    <tr [@rowAnim]="row.animState" (@rowAnim.done)="onRowAnimDone($event, row.data.id)">
+                        <td>{{ row.data.id }}</td>
                         <td>
-                            <button
-                                class="btn btn-ghost btn-sm text-error"
-                                [disabled]="kickingAuthorityId() === row.id"
-                                (click)="onKickAuthority(row)"
-                                [attr.aria-label]="'Kick authority ' + row.id"
-                                title="Kick authority"
-                            >
-                                @if (kickingAuthorityId() === row.id) {
-                                    <span class="loading loading-spinner loading-xs"></span>
-                                } @else {
-                                    Kick
-                                }
-                            </button>
+                            <time class="nowrap" [attr.datetime]="row.data.connectedAt | date:'yyyy-MM-dd HH:mm'">
+                                {{ row.data.connectedAt | date: 'yyyy-MM-dd HH:mm' }}
+                            </time>
+                        </td>
+                        <td>
+                            @if (row.disconnecting) {
+                                <span class="badge badge-error badge-sm tabular-nums">
+                                    Disconnected · {{ row.secondsLeft }}s
+                                </span>
+                            } @else {
+                                <button
+                                    class="btn btn-ghost btn-sm text-error"
+                                    [disabled]="kickingAuthorityId() === row.data.id"
+                                    (click)="onKickAuthority(row)"
+                                    [attr.aria-label]="'Kick authority ' + row.data.id"
+                                    title="Kick authority"
+                                >
+                                    @if (kickingAuthorityId() === row.data.id) {
+                                        <span class="loading loading-spinner loading-xs"></span>
+                                    } @else {
+                                        Kick
+                                    }
+                                </button>
+                            }
                         </td>
                     </tr>
                 }
