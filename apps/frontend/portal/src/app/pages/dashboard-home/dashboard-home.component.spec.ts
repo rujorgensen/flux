@@ -1,7 +1,6 @@
 import { Component, input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { StatsComponent } from '../../components/stats/stats.component';
 import { DashboardComponent } from '../../components/dashboard/dashboard.component';
 import { ChartComponent } from '../../components/chart/chart.component';
 import { NetworkIdComponent } from '../../components/network-id/network-id.component';
@@ -43,15 +42,6 @@ describe('buildChartConfig', () => {
         expect(config.datasets[0].data).toEqual([0]);
     });
 });
-
-@Component({
-    selector: 'app-stats',
-    template: '',
-})
-class StubStatsComponent {
-    public readonly networkId = input<unknown>();
-    public readonly networkCode = input<unknown>();
-}
 
 @Component({
     selector: 'app-dashboard',
@@ -107,7 +97,7 @@ describe('DashboardHomePageComponent', () => {
                         agentCount$$: of({ count: 7 }),
                         authorityCount$$: of({ count: 5 }),
                         channelCount$$: of({ count: 3 }),
-                        totalDataUsage$$: of({ count: 3 }),
+                        totalDataUsage$$: of(0),
                     },
                 },
             ],
@@ -115,7 +105,6 @@ describe('DashboardHomePageComponent', () => {
             .overrideComponent(DashboardHomePageComponent, {
                 remove: {
                     imports: [
-                        StatsComponent,
                         DashboardComponent,
                         ChartComponent,
                         NetworkIdComponent,
@@ -124,7 +113,6 @@ describe('DashboardHomePageComponent', () => {
                 },
                 add: {
                     imports: [
-                        StubStatsComponent,
                         StubDashboardComponent,
                         StubChartComponent,
                         StubNetworkIdComponent,

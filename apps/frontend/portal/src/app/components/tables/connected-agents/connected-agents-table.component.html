@@ -1,5 +1,5 @@
-@if (dataStore(); as data) {
-    @if (data.length > 0) {
+@if (rows(); as data) {
+    @if (hasRows()) {
         <div class="flex justify-end mb-2">
             <button
                 class="btn btn-sm btn-error btn-outline"
@@ -17,7 +17,6 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>UID</th>
                     <th>IP</th>
                     <th>address</th>
                     <th>bytes</th>
@@ -26,32 +25,44 @@
                 </tr>
             </thead>
             <tbody>
-                @for (row of data; track row.id) {
-                    <tr>
-                        <td>{{ row.id }}</td>
-                        <td>{{ row.uid }}</td>
-                        <td>{{ row.ip }}</td>
-                        <td>{{ row.address }}</td>
-                        <td>{{ row.bytes }}</td>
-                        <td >
-                            <time class="nowrap" [attr.datetime]="row.connectedAt | date:'yyyy-MM-dd HH:mm'">
-                                {{ row.connectedAt | date:'yyyy-MM-dd HH:mm' }}
+                @for (row of data; track row.data.id) {
+                    <tr [animate.leave]="'row-leave'">
+                        <td>
+                            <div class="flex flex-col gap-1">
+                                <span class="font-mono text-sm">{{ row.data.id }}</span>
+                                @if (row.data.uid) {
+                                    <span class="badge badge-ghost badge-sm font-mono">{{ row.data.uid }}</span>
+                                }
+                            </div>
+                        </td>
+                        <td>{{ row.data.ip }}</td>
+                        <td>{{ row.data.address }}</td>
+                        <td>{{ row.data.bytes }}</td>
+                        <td>
+                            <time class="nowrap" [attr.datetime]="row.data.connectedAt | date:'yyyy-MM-dd HH:mm'">
+                                {{ row.data.connectedAt | date:'yyyy-MM-dd HH:mm' }}
                             </time>
                         </td>
                         <td>
-                            <button
-                                class="btn btn-ghost btn-sm text-error"
-                                [disabled]="kickingAgentId() === row.id"
-                                (click)="onKickAgent(row)"
-                                [attr.aria-label]="'Kick agent ' + row.id"
-                                title="Kick agent"
-                            >
-                                @if (kickingAgentId() === row.id) {
-                                    <span class="loading loading-spinner loading-xs"></span>
-                                } @else {
-                                    Kick
-                                }
-                            </button>
+                            @if (row.disconnecting) {
+                                <span class="badge badge-error badge-sm tabular-nums">
+                                    Disconnected · {{ row.secondsLeft }}s
+                                </span>
+                            } @else {
+                                <button
+                                    class="btn btn-ghost btn-sm text-error"
+                                    [disabled]="kickingAgentId() === row.data.id"
+                                    (click)="onKickAgent(row)"
+                                    [attr.aria-label]="'Kick agent ' + row.data.id"
+                                    title="Kick agent"
+                                >
+                                    @if (kickingAgentId() === row.data.id) {
+                                        <span class="loading loading-spinner loading-xs"></span>
+                                    } @else {
+                                        Kick
+                                    }
+                                </button>
+                            }
                         </td>
                     </tr>
                 }

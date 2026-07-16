@@ -1,10 +1,9 @@
 <app-dashboard>
-    <app-stats />
-
         @let agentConfig = agentChartConfig$ | async;
         @let authorityConfig = authorityChartConfig$ | async;
         @let channelConfig = channelChartConfig$ | async;
         @let networkId = networkId$ | async;
+        @let dataUsage = totalDataUsage$ | async;
 
         @if (networkId) {
             <div class="network-id-panel">
@@ -32,6 +31,20 @@
                         <app-flux-domain />
                     </div>
                 }
+                <div class="network-overview-item">
+                    <div class="network-id-header">
+                        <span class="network-id-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-4 w-4 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h7" />
+                            </svg>
+                        </span>
+                        <span class="network-id-label">Total Data Usage</span>
+                    </div>
+                    <span class="data-usage-value">
+                        {{ (dataUsage ?? 0) | number:'1.0-0' }}
+                        <span class="data-usage-unit">bytes</span>
+                    </span>
+                </div>
             </div>
         }
 
