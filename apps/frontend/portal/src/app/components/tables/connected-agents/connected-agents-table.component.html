@@ -26,7 +26,7 @@
             </thead>
             <tbody>
                 @for (row of data; track row.data.id) {
-                    <tr [@rowAnim]="row.animState" (@rowAnim.done)="onRowAnimDone($event, row.data.id)">
+                    <tr [animate.leave]="'row-leave'">
                         <td>
                             <div class="flex flex-col gap-1">
                                 <span class="font-mono text-sm">{{ row.data.id }}</span>

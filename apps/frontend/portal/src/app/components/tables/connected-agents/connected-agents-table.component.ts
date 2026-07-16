@@ -8,7 +8,6 @@ import {
     signal,
     untracked,
 } from '@angular/core';
-import { animate, state, style, transition, trigger, type AnimationEvent } from '@angular/animations';
 import { DatePipe } from '@angular/common';
 import type { TNetworkAgent } from '@flux/mesh/store/redis/network-agent';
 import { api } from '$lib/app/_services/api/api';
@@ -25,7 +24,6 @@ interface IRowEntry {
     data: TNetworkAgent;
     disconnecting: boolean;
     secondsLeft: number;
-    animState: 'visible' | 'hidden';
 }
 
 @Component({
@@ -34,13 +32,6 @@ interface IRowEntry {
     templateUrl: './connected-agents-table.component.html',
     styleUrls: ['./connected-agents-table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [
-        trigger('rowAnim', [
-            state('visible', style({ opacity: 1 })),
-            state('hidden', style({ opacity: 0 })),
-            transition('visible => hidden', animate('400ms ease-out')),
-        ]),
-    ],
 })
 export class ConnectedAgentsTableComponent {
     public readonly networkId = input.required<string>();
@@ -87,15 +78,6 @@ export class ConnectedAgentsTableComponent {
         });
 
         this._destroyRef.onDestroy(() => this._clearAllIntervals());
-    }
-
-    protected onRowAnimDone(
-        event: AnimationEvent,
-        id: string,
-    ): void {
-        if (event.toState === 'hidden') {
-            this.rows.update((current) => current?.filter((r) => r.data.id !== id));
-        }
     }
 
     protected async onKickAllAgents(): Promise<void> {
@@ -168,15 +150,15 @@ export class ConnectedAgentsTableComponent {
         const intervalId = setInterval(() => {
             this.rows.update((current) => {
                 if (!current) return current;
-                return current.map((r) => {
-                    if (r.data.id !== id) return r;
-                    const next = r.secondsLeft - 1;
-                    if (next <= 0) {
-                        this._clearInterval(id);
-                        return { ...r, secondsLeft: 0, animState: 'hidden' as const };
-                    }
-                    return { ...r, secondsLeft: next };
-                });
+                const row = current.find((r) => r.data.id === id);
+                if (!row) return current;
+                const next = row.secondsLeft - 1;
+                if (next <= 0) {
+                    this._clearInterval(id);
+                    // Remove from array — Angular's animate.leave handles the fade
+                    return current.filter((r) => r.data.id !== id);
+                }
+                return current.map((r) => r.data.id === id ? { ...r, secondsLeft: next } : r);
             });
         }, 1_000);
 
@@ -237,7 +219,6 @@ export class ConnectedAgentsTableComponent {
                     data: d,
                     disconnecting: false,
                     secondsLeft: 0,
-                    animState: 'visible',
                 }));
 
                 const stillDisconnecting = current.filter(
@@ -246,7 +227,7 @@ export class ConnectedAgentsTableComponent {
 
                 const newlyGoneRows: IRowEntry[] = current
                     .filter((r) => newlyGoneIds.has(r.data.id))
-                    .map((r) => ({ ...r, disconnecting: true, secondsLeft: DISCONNECT_LINGER_S, animState: 'visible' as const }));
+                    .map((r) => ({ ...r, disconnecting: true, secondsLeft: DISCONNECT_LINGER_S }));
 
                 this.rows.set([...activeRows, ...stillDisconnecting, ...newlyGoneRows]);
                 this.total.set(response.data.total);

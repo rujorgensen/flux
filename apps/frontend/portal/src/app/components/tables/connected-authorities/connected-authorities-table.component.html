@@ -23,7 +23,7 @@
             </thead>
             <tbody>
                 @for (row of data; track row.data.id) {
-                    <tr [@rowAnim]="row.animState" (@rowAnim.done)="onRowAnimDone($event, row.data.id)">
+                    <tr [animate.leave]="'row-leave'">
                         <td>{{ row.data.id }}</td>
                         <td>
                             <time class="nowrap" [attr.datetime]="row.data.connectedAt | date:'yyyy-MM-dd HH:mm'">
