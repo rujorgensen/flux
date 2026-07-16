@@ -97,7 +97,7 @@ describe('DashboardHomePageComponent', () => {
                         agentCount$$: of({ count: 7 }),
                         authorityCount$$: of({ count: 5 }),
                         channelCount$$: of({ count: 3 }),
-                        totalDataUsage$$: of({ count: 3 }),
+                        totalDataUsage$$: of(0),
                     },
                 },
             ],
