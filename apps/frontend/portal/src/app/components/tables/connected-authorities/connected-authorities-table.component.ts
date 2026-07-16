@@ -2,18 +2,13 @@ import {
     ChangeDetectionStrategy,
     Component,
     DestroyRef,
-    animate,
     computed,
     effect,
     input,
     signal,
-    state,
-    style,
-    transition,
-    trigger,
     untracked,
-    type AnimationEvent,
 } from '@angular/core';
+import { animate, state, style, transition, trigger, type AnimationEvent } from '@angular/animations';
 import { DatePipe } from '@angular/common';
 import type { TNetworkAuthority, TNetworkId_S } from '@flux/shared/types';
 import { api } from '$lib/app/_services/api/api';
