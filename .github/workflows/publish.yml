@@ -27,11 +27,11 @@ jobs:
             tag_prefix: flux-mesh-v
           - project_name: persistica-flux-agent
             package_dir: packages/flux/agent
-            test_target: typecheck
+            test_target: bun-test
             tag_prefix: flux-agent-v
           - project_name: persistica-flux-authority
             package_dir: packages/flux/authority
-            test_target: typecheck
+            test_target: bun-test
             tag_prefix: flux-authority-v
 
     steps:
