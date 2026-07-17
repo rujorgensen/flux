@@ -251,6 +251,17 @@ export class FluxMeshServer {
                 maxPayloadLength: 1024 * 1024, // 1 MB
                 // publishToSelf: true,
 
+                // Server-side liveness (#488, the symmetric half of the client heartbeat):
+                // Bun sends protocol pings automatically (`sendPings` defaults to true) and
+                // every WebSocket client runtime auto-pongs — no client code involved — so a
+                // quiet-but-healthy connection stays alive, while a dead/half-open one stops
+                // answering and is closed within this window. The close handler then
+                // unregisters it, which bounds how long a zombie authority/agent registration
+                // can linger (previously: until an RPC happened to be routed at it and failed).
+                // NB: this is the *websocket* idleTimeout — the server-level `idleTimeout: 0`
+                // above only governs HTTP requests. Semantics are pinned by ws-idle-timeout.spec.ts.
+                idleTimeout: 120, // Seconds
+
                 // A socket is opened, validate it
                 async open(
                     _ws: TConnectedClientSocket,
