@@ -7,6 +7,12 @@
         "lint": {
             "executor": "nx-oxlint:lint"
         },
+        "bun-test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun test {projectRoot}/"
+            }
+        },
         "build": {
             "executor": "@nx/esbuild:esbuild",
             "outputs": [

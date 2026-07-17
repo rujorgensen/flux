@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, it } from 'bun:test';
 import type { TNetworkId_S } from '@flux/shared/types';
 import {
     authenticateNetworkAuthorityOrThrow,
@@ -5,20 +6,24 @@ import {
     ConnectionError,
     EndpointNotFoundError,
 } from './register-authority.auth';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+
+const originalFetch: typeof globalThis.fetch = globalThis.fetch;
+
+const stubFetchResponse = (
+    status: number,
+    body: string,
+): void => {
+    globalThis.fetch = (async (
+    ): Promise<Response> => new Response(body, { status })) as unknown as typeof globalThis.fetch;
+};
 
 describe('authenticateNetworkAuthorityOrThrow', () => {
     afterEach(() => {
-        vi.restoreAllMocks();
-        vi.unstubAllGlobals();
+        globalThis.fetch = originalFetch;
     });
 
     it('should explain when the auth endpoint is missing', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: false,
-            status: 404,
-            text: vi.fn().mockResolvedValue('Not found'),
-        }));
+        stubFetchResponse(404, 'Not found');
 
         await expect(authenticateNetworkAuthorityOrThrow(
             'demo-network-id' as TNetworkId_S,
@@ -36,11 +41,7 @@ describe('authenticateNetworkAuthorityOrThrow', () => {
     });
 
     it('should keep invalid token failures terminal', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: false,
-            status: 401,
-            text: vi.fn().mockResolvedValue('Invalid network access token'),
-        }));
+        stubFetchResponse(401, 'Invalid network access token');
 
         await expect(authenticateNetworkAuthorityOrThrow(
             'demo-network-id' as TNetworkId_S,
@@ -51,7 +52,10 @@ describe('authenticateNetworkAuthorityOrThrow', () => {
     });
 
     it('should keep transport failures retryable', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('fetch failed')));
+        globalThis.fetch = (async (
+        ): Promise<Response> => {
+            throw new TypeError('fetch failed');
+        }) as unknown as typeof globalThis.fetch;
 
         await expect(authenticateNetworkAuthorityOrThrow(
             'demo-network-id' as TNetworkId_S,
