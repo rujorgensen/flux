@@ -3,14 +3,16 @@ import { HEARTBEAT_PING, HEARTBEAT_PONG } from '@flux/shared/types';
 import { WebSocketClient } from './ws-client';
 
 /**
- * A minimal in-process mesh stand-in. `answerPings` controls whether the server
- * behaves like a healthy mesh (echo pong) or a dead path (swallow the ping —
- * the client-side view of a half-open socket, since no close frame is sent).
+ * A minimal in-process mesh stand-in. `answerPings` controls how the server
+ * behaves: 'always' is a healthy new mesh, 'never' is an old mesh without
+ * heartbeat support, and 'once' answers the first ping then goes silent — the
+ * client-side view of a connection that died half-open (no close frame).
  */
 const startServer = (
-    options: { answerPings: boolean },
+    options: { answerPings: 'always' | 'never' | 'once' },
 ): { server: ReturnType<typeof Bun.serve>; received: string[]; stop: () => void } => {
     const received: string[] = [];
+    let pongsSent = 0;
 
     const server = Bun.serve({
         port: 0,
@@ -31,7 +33,15 @@ const startServer = (
             ) {
                 received.push(String(message));
 
-                if (options.answerPings && message === HEARTBEAT_PING) {
+                if (message !== HEARTBEAT_PING) {
+                    return;
+                }
+
+                const shouldPong: boolean = options.answerPings === 'always'
+                    || (options.answerPings === 'once' && pongsSent === 0);
+
+                if (shouldPong) {
+                    pongsSent++;
                     ws.send(HEARTBEAT_PONG);
                 }
             },
@@ -92,7 +102,7 @@ describe('WebSocketClient heartbeat (#488)', () => {
     });
 
     it('pings on the interval and stays connected while the server pongs', async () => {
-        const harness = startServer({ answerPings: true });
+        const harness = startServer({ answerPings: 'always' });
         servers.push(harness);
 
         let closed = false;
@@ -108,7 +118,7 @@ describe('WebSocketClient heartbeat (#488)', () => {
     });
 
     it('does not deliver heartbeat pongs to message listeners', async () => {
-        const harness = startServer({ answerPings: true });
+        const harness = startServer({ answerPings: 'always' });
         servers.push(harness);
 
         const messages: string[] = [];
@@ -124,7 +134,8 @@ describe('WebSocketClient heartbeat (#488)', () => {
     });
 
     it('treats a missed pong as a disconnect (the half-open case) and emits close', async () => {
-        const harness = startServer({ answerPings: false });
+        // Pongs once (proving heartbeat support), then goes silent — a dead path.
+        const harness = startServer({ answerPings: 'once' });
         servers.push(harness);
 
         let closed = false;
@@ -135,14 +146,13 @@ describe('WebSocketClient heartbeat (#488)', () => {
 
         await client.connect();
 
-        // First tick sends the ping, second tick sees the missing pong.
         await waitFor(() => closed, 1_000);
 
         expect(closed).toBe(true);
     });
 
     it('re-enters the connect loop after a heartbeat-detected death when autoReconnect is on', async () => {
-        const harness = startServer({ answerPings: false });
+        const harness = startServer({ answerPings: 'once' });
         servers.push(harness);
 
         let connectingEvents = 0;
@@ -159,8 +169,26 @@ describe('WebSocketClient heartbeat (#488)', () => {
         expect(connectingEvents).toBeGreaterThanOrEqual(2);
     });
 
+    it('keeps the connection alive against a server without heartbeat support (old mesh)', async () => {
+        const harness = startServer({ answerPings: 'never' });
+        servers.push(harness);
+
+        let closed = false;
+        const client = makeClient(`ws://localhost:${harness.server.port}`, 20);
+        client.on('close', () => {
+            closed = true;
+        });
+
+        await client.connect();
+
+        // Enough time for several would-be deadlines to pass.
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        expect(closed).toBe(false);
+    });
+
     it('does not heartbeat when the interval is disabled (0)', async () => {
-        const harness = startServer({ answerPings: true });
+        const harness = startServer({ answerPings: 'always' });
         servers.push(harness);
 
         const client = makeClient(`ws://localhost:${harness.server.port}`, 0);

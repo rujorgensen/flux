@@ -45,6 +45,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     // disconnect signal itself — it cannot rely on `ws.close()` producing an event.
     private heartbeatTimer: ReturnType<typeof setInterval> | undefined;
     private awaitingPong: boolean = false;
+    private pongSeen: boolean = false; // The server proved it answers pings on this connection
     private closeHandled: boolean = false; // Guards against running the close path twice (heartbeat + late onclose)
 
     constructor(
@@ -109,6 +110,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
                 // Swallow heartbeat pongs — protocol-internal, never for listeners
                 if (event.data === HEARTBEAT_PONG) {
                     this.awaitingPong = false;
+                    this.pongSeen = true;
 
                     return;
                 }
@@ -193,6 +195,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     private startHeartbeat(
     ): void {
         this.stopHeartbeat();
+        this.pongSeen = false;
 
         const interval: number | undefined = this.options.heartbeatInterval;
         if (interval === undefined || interval <= 0) {
@@ -201,6 +204,17 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 
         this.heartbeatTimer = setInterval(() => {
             if (this.awaitingPong) {
+                // A server that has never ponged is an older mesh without heartbeat
+                // support — disable detection for this connection instead of killing
+                // a healthy socket (keeps either deploy order safe).
+                if (!this.pongSeen) {
+                    console.warn('💛 Server does not answer heartbeat pings — dead-connection detection disabled for this connection');
+
+                    this.stopHeartbeat();
+
+                    return;
+                }
+
                 console.warn(`💔 No heartbeat pong within ${interval}ms — treating the connection as dead`);
 
                 this.stopHeartbeat();
