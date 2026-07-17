@@ -1,8 +1,9 @@
 export type TFluxClientUID = string & { __brand: 'flux-client-uid'; };
 
-// Make TypeScript happy
+// Make TypeScript happy. `undefined` is in the type because a fresh process has
+// never assigned the global at all.
 declare global {
-    var __flux_client_id: TFluxClientUID | null;
+    var __flux_client_id: TFluxClientUID | null | undefined;
 }
 
 /**
@@ -40,11 +41,13 @@ export const getMachineUID = async (
         throw new Error('Flux can only be used in an environment with globalThis');
     }
 
-    if (globalThis.__flux_client_id !== null) {
+    // The never-set case is `undefined`, which must not take the "reuse" branch
+    // (it used to return undefined while logging "Reusing existing id").
+    if (globalThis.__flux_client_id !== null && globalThis.__flux_client_id !== undefined) {
         console.log('[flux-client] Reusing existing id');
         return globalThis.__flux_client_id as unknown as TFluxClientUID;
     }
 
     globalThis.__flux_client_id = null;
-    return globalThis.__flux_client_id as unknown as TFluxClientUID;
+    return null;
 };

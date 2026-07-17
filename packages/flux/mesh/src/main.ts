@@ -19,6 +19,8 @@ import {
     UNSUBSCRIBE_NETWORK_CHANNEL_NAME,
     UNSUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_DISCONNECT_AGENT,
+    HEARTBEAT_PING,
+    HEARTBEAT_PONG,
     TNetworkId_S,
     VALIDATION_ERROR_NO_NETWORK_AUTHORITY_SOCKET_PACKAGE,
     isClientId,
@@ -352,6 +354,14 @@ export class FluxMeshServer {
                     const packageType: string | undefined = message_.split(':')[0];
 
                     switch (packageType) {
+                        case HEARTBEAT_PING: {
+                            // Client-driven keepalive: echo so the client can arm a pong
+                            // deadline and detect a half-open socket (see #488).
+                            ws.send(HEARTBEAT_PONG);
+
+                            return;
+                        }
+
                         case AUTHORITY_DISCONNECT_AGENT: {
                             if (!ws.data.isAuthority) {
                                 ws.close(4000, 'Bad behavior');
