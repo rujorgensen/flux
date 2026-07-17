@@ -3,6 +3,8 @@
  */
 
 import {
+    HEARTBEAT_PING,
+    HEARTBEAT_PONG,
     type TFluxWebSocketClientMessage,
 } from '@flux/shared/types';
 import {
@@ -38,6 +40,13 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     private ws: WebSocket | undefined;
     private isOpen: boolean = false; // Is the connection open
 
+    // * Heartbeat (see #488): a half-open socket (1006, no close frame) never fires
+    // `onclose`, so the client pings on an interval and treats a missed pong as the
+    // disconnect signal itself — it cannot rely on `ws.close()` producing an event.
+    private heartbeatTimer: ReturnType<typeof setInterval> | undefined;
+    private awaitingPong: boolean = false;
+    private closeHandled: boolean = false; // Guards against running the close path twice (heartbeat + late onclose)
+
     constructor(
         options: WebSocketClientOptions,
     ) {
@@ -58,69 +67,67 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     public connect(
     ): Promise<void> {
         return new Promise((resolve, reject) => {
+            this.closeHandled = false;
             this.emit('connecting', this.reconnectAttempts);
-            this.ws = new WebSocket(
+
+            // Kept in a local so every handler can ignore events from a superseded
+            // socket — a heartbeat-forced close may fire this socket's `onclose`
+            // long after a reconnect has already replaced it.
+            const socket = new WebSocket(
                 this.options.url,
             );
+            this.ws = socket;
 
             const timeout = setTimeout(() => {
-                if (this.ws?.readyState !== WebSocket.OPEN) {
-                    this.ws?.close();
+                if (socket.readyState !== WebSocket.OPEN) {
+                    socket.close();
 
                     reject(new Error('Connection timeout'));
                 }
             }, this.options.connectionTimeout);
 
-            this.ws.onopen = () => {
+            socket.onopen = () => {
                 clearTimeout(timeout);
+
+                if (this.ws !== socket) {
+                    return;
+                }
+
                 this.reconnectAttempts = 0;
                 this.isOpen = true;
+                this.startHeartbeat();
                 this.emit('open');
 
                 resolve();
             };
 
-            this.ws.onmessage = (event) => {
+            socket.onmessage = (event) => {
+                if (this.ws !== socket) {
+                    return;
+                }
+
+                // Swallow heartbeat pongs — protocol-internal, never for listeners
+                if (event.data === HEARTBEAT_PONG) {
+                    this.awaitingPong = false;
+
+                    return;
+                }
+
                 this.emit('message', event.data);
             };
 
-            this.ws.onclose = (closeEvent) => {
-                const wasKicked = closeEvent.reason === 'Kicked by process';
-
+            socket.onclose = (closeEvent) => {
                 // Cancel timeout
                 clearTimeout(timeout);
 
-                // Only emit, if the connection was open before
-                if (this.isOpen) {
-                    this.emit(
-                        'close',
-                        wasKicked ? 'kicked' : undefined,
-                    );
-                    this.isOpen = false;
+                if (this.ws !== socket) {
+                    return;
                 }
 
-                if (
-                    this.options.autoReconnect &&
-                    ((this.options.retries === undefined) || (this.reconnectAttempts < this.options.retries))
-                ) {
-                    const delay: number = wasKicked ?
-                        RECONNECTION_DELAY_ON_KICK_MS
-                        :
-                        Math.min(
-                            this.options.reconnectDelay ?? Number.POSITIVE_INFINITY,
-                            (this.options.reconnectDelay ?? 0) * (this.reconnectAttempts || 1),
-                        );
-
-                    setTimeout(() => {
-                        this.reconnectAttempts++;
-                        void this.connect();
-                    }, delay);
-                } else if (this.options.autoReconnect) {
-                    this.emit('error', new Error('Connection failed: retries exhausted'));
-                }
+                this.handleConnectionClosed(closeEvent.reason === 'Kicked by process');
             };
 
-            this.ws.onerror = (event) => {
+            socket.onerror = (event) => {
 
                 // Don't log, this is to be expected if the server is unavailable
                 if ((<any>event)?.message?.includes('Failed to connect')) {
@@ -130,6 +137,97 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
                 }
             };
         });
+    }
+
+    /**
+     * The single close path, reachable from `onclose` AND from a missed heartbeat
+     * pong (where `onclose` never fires): emit `close` once, then schedule the
+     * reconnect per the retry policy.
+     */
+    private handleConnectionClosed(
+        wasKicked: boolean,
+    ): void {
+        if (this.closeHandled) {
+            return;
+        }
+        this.closeHandled = true;
+
+        this.stopHeartbeat();
+
+        // Only emit, if the connection was open before
+        if (this.isOpen) {
+            this.emit(
+                'close',
+                wasKicked ? 'kicked' : undefined,
+            );
+            this.isOpen = false;
+        }
+
+        if (
+            this.options.autoReconnect &&
+            ((this.options.retries === undefined) || (this.reconnectAttempts < this.options.retries))
+        ) {
+            const delay: number = wasKicked ?
+                RECONNECTION_DELAY_ON_KICK_MS
+                :
+                Math.min(
+                    this.options.reconnectDelay ?? Number.POSITIVE_INFINITY,
+                    (this.options.reconnectDelay ?? 0) * (this.reconnectAttempts || 1),
+                );
+
+            setTimeout(() => {
+                this.reconnectAttempts++;
+                void this.connect();
+            }, delay);
+        } else if (this.options.autoReconnect) {
+            this.emit('error', new Error('Connection failed: retries exhausted'));
+        }
+    }
+
+    /**
+     * Starts the keepalive: every `heartbeatInterval` send an app-level ping (the
+     * browser/Bun `WebSocket` exposes no ping frame) and require the mesh's pong
+     * before the next tick. A missed pong means the socket is dead — force the
+     * close path directly, since a half-open socket produces no `onclose`.
+     */
+    private startHeartbeat(
+    ): void {
+        this.stopHeartbeat();
+
+        const interval: number | undefined = this.options.heartbeatInterval;
+        if (interval === undefined || interval <= 0) {
+            return;
+        }
+
+        this.heartbeatTimer = setInterval(() => {
+            if (this.awaitingPong) {
+                console.warn(`💔 No heartbeat pong within ${interval}ms — treating the connection as dead`);
+
+                this.stopHeartbeat();
+                try {
+                    this.ws?.close(4000, 'Heartbeat timeout');
+                } catch {
+                    // The socket may already be unusable — the manual close path below is the real signal
+                }
+                this.handleConnectionClosed(false);
+
+                return;
+            }
+
+            if (this.ws?.readyState === WebSocket.OPEN) {
+                this.awaitingPong = true;
+                this.ws.send(HEARTBEAT_PING);
+            }
+        }, interval);
+    }
+
+    private stopHeartbeat(
+    ): void {
+        if (this.heartbeatTimer !== undefined) {
+            clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = undefined;
+        }
+        this.awaitingPong = false;
     }
 
     /**
@@ -191,6 +289,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 
     ) {
         this.options.autoReconnect = false;
+        this.stopHeartbeat();
         this.ws?.close();
         this.clearEventSubscribers();
     }

@@ -22,12 +22,18 @@ export const AUTHORITY_ON_EMPTY_CHANNEL = 'aec';
 export const AUTHORITY_CHANNEL_SUBSCRIBE = 'acs';
 export const AUTHORITY_DISCONNECT_AGENT = 'ada';
 
+// * Heartbeat — client-driven keepalive so a half-open socket (close code 1006,
+// no close frame) is detected; the mesh echoes every ping with a pong.
+export const HEARTBEAT_PING = 'hb-ping';
+export const HEARTBEAT_PONG = 'hb-pong';
+
 // * Errors
 export const ERROR = 'e';
 
 // Allowed message types on the ws interface
 export type TFluxWebSocketClientMessage =
     | typeof AUTHORITY_CHANNEL_SUBSCRIBE
+    | typeof HEARTBEAT_PING
     | `${typeof AUTHORITY_DISCONNECT_AGENT}:${string}`
     | `${typeof CONNECT_TO_CLIENT}:${TAgentOwnUId}`
     | `${typeof NETWORK_CHANNEL_PUBLISH}:${TChannelName}:${string}`
