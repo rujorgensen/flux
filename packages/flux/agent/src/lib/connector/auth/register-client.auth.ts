@@ -9,6 +9,12 @@ import { encrypt } from '../../utils/obscuring/encyprt.utils';
 import {
     type TFluxClientUID,
     validateMachineUID,
+    AuthenticationError,
+    ConnectionError,
+    EndpointNotFoundError,
+    RetryableError,
+    asConnectionError,
+    isRetryableAuthStatus,
 } from '@flux/shared/utils';
 
 /**
@@ -74,41 +80,75 @@ export const authenticateAgentOrThrow = async (
         url.searchParams.set('machineUID', clientInfo.machineUID);
     }
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain',
-            'x-flux-content-type': typeof unknownIdentificationPayload === 'string' ?
-                'text/plain' :
-                'application/json',
-            'Accept': 'text/plain',
-        },
-        body: customPayload,
-    });
+    // Classified the same way the Authority classifies it — see the taxonomy in
+    // @flux/shared/utils. A throw from `fetch` here is transport (DNS, refused,
+    // reset): the mesh never answered, so the failure says nothing about whether
+    // a later attempt would succeed, and the caller retries it.
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain',
+                'x-flux-content-type': typeof unknownIdentificationPayload === 'string' ?
+                    'text/plain' :
+                    'application/json',
+                'Accept': 'text/plain',
+            },
+            body: customPayload,
+        });
 
-    if (!response.ok) {
-        const textResponse = await response.text();
+        if (!response.ok) {
+            const textResponse = await response.text();
 
-        if (response.status === 401) {
-            if (textResponse.startsWith(NetworkAuthorityNotFoundError.message)) {
-                throw new NetworkAuthorityNotFoundError(networkId);
+            if (response.status === 401) {
+                if (textResponse.startsWith(NetworkAuthorityNotFoundError.message)) {
+                    throw new NetworkAuthorityNotFoundError(networkId);
+                }
+
+                throw new AuthenticationError(textResponse
+                    ? `Auth failed: 401 - ${textResponse}`
+                    : 'Auth failed: 401');
             }
+
+            if (response.status === 404) {
+                throw new EndpointNotFoundError(`Mesh server not found at ${url.origin}.`);
+            }
+
+            const message: string = textResponse
+                ? `Auth failed: ${response.status} - ${textResponse}`
+                : `Auth failed: ${response.status}`;
+
+            if (isRetryableAuthStatus(response.status)) {
+                throw new ConnectionError(message, response.status);
+            }
+
+            throw new Error(message);
         }
 
-        if (response.status === 404) {
-            throw new Error(`Mesh server not found at ${url.origin}.`);
+        const result = await response.text();
+
+        if (!checkAuthTicketShape(result)) {
+            throw new Error('Auth failed: unexpected response');
         }
 
-        throw new Error(textResponse
-            ? `Auth failed: ${response.status} - ${textResponse}`
-            : `Auth failed: ${response.status}`);
+        return result;
+    } catch (error) {
+        // Already classified — including NetworkAuthorityNotFoundError, which the
+        // Agent retries under its own (longer) policy.
+        if (
+            (error instanceof NetworkAuthorityNotFoundError) ||
+            (error instanceof AuthenticationError) ||
+            (error instanceof EndpointNotFoundError) ||
+            (error instanceof RetryableError)
+        ) {
+            throw error;
+        }
+
+        // A bad payload is our own bug, not the network's — never retried.
+        if ((error instanceof Error) && error.message.startsWith('Auth failed:')) {
+            throw error;
+        }
+
+        throw asConnectionError(error, url.origin);
     }
-
-    const result = await response.text();
-
-    if (!checkAuthTicketShape(result)) {
-        throw new Error('Auth failed: unexpected response');
-    }
-
-    return result;
 };

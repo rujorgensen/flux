@@ -4,34 +4,23 @@ import type {
 import {
     type TFluxClientUID,
     validateMachineUID,
+    AuthenticationError,
+    ConnectionError,
+    EndpointNotFoundError,
+    RetryableError,
+    asConnectionError,
+    isRetryableAuthStatus,
 } from '@flux/shared/utils';
 
-export class RetryableError extends Error {}
-export class ConnectionError extends RetryableError {
-    constructor(
-        message: string,
-        public readonly statusCode?: number,
-    ) {
-        super(message);
-        this.name = 'ConnectionError';
-    }
-}
-export class AuthenticationError extends Error {
-    constructor(
-        message: string,
-    ) {
-        super(message);
-        this.name = 'AuthenticationError';
-    }
-}
-export class EndpointNotFoundError extends Error {
-    constructor(
-        message: string,
-    ) {
-        super(message);
-        this.name = 'EndpointNotFoundError';
-    }
-}
+// Re-exported, not redefined: the Agent authenticates against the same mesh and
+// must classify failures identically. These used to live here, which is how the
+// two packages ended up disagreeing about what is worth retrying.
+export {
+    RetryableError,
+    ConnectionError,
+    AuthenticationError,
+    EndpointNotFoundError,
+} from '@flux/shared/utils';
 
 /**
  * Authenticates with the server and returns a ticket for connecting the websocket.
@@ -82,7 +71,7 @@ export const authenticateNetworkAuthorityOrThrow = async (
                 ? `Auth failed: ${response.status} - ${responseText}`
                 : `Auth failed: ${response.status}`;
 
-            if ((response.status >= 500) || (response.status === 429)) {
+            if (isRetryableAuthStatus(response.status)) {
                 throw new ConnectionError(message, response.status);
             }
 
@@ -104,8 +93,6 @@ export const authenticateNetworkAuthorityOrThrow = async (
             throw error;
         }
 
-        throw new ConnectionError(
-            `Failed to reach mesh server at ${url.origin}: ${error instanceof Error ? error.message : 'Unknown connection error'}`,
-        );
+        throw asConnectionError(error, url.origin);
     }
 };

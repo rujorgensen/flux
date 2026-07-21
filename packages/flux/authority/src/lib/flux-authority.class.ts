@@ -94,6 +94,11 @@ export class FluxAuthority {
                 {
                     retries: 10_000,
                     delayMs: 500,
+                    // Without backoff these 10_000 retries were 500ms apart for the
+                    // whole outage — every Authority hitting a downed mesh twice a
+                    // second, indefinitely, and logging each attempt.
+                    backoffFactor: 2,
+                    maxDelayMs: 30_000,
                     onRetry: (
                         attempt: number,
                         retries: number,
