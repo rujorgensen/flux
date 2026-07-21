@@ -197,7 +197,14 @@ export class FluxWebSocketConnection {
             .on('connecting', this.socketConnectingHandler)
             .on('error', this.socketErrorHandler);
 
-        void this.socket.connect();
+        // * The first attempt rejects if the mesh is unreachable. `connectPromise`
+        // resolves only once a socket actually opens, so this rejection has no
+        // caller to reach — unhandled, it terminates the process under Bun. Route it
+        // to the same handler as later failures and let the socket's own retry loop
+        // keep working towards an open connection.
+        this.socket
+            .connect()
+            .catch(this.socketErrorHandler);
 
         return this.connectPromise;
     }
