@@ -18,7 +18,8 @@ type WebSocketEvent = 'open' | 'message' | 'close' | 'connecting' | 'error';
 type WebSocketClientOptions = {
     url: string;
     autoReconnect?: boolean;
-    reconnectDelay?: number; // Does you backoff though
+    reconnectDelay?: number; // Base delay; doubles per attempt up to `maxReconnectDelay`
+    maxReconnectDelay?: number; // Ceiling for the backoff
     retries?: number; // Undefined; will try forever
     heartbeatInterval?: number;
     connectionTimeout?: number;
@@ -56,6 +57,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         this.options = {
             autoReconnect: true,
             reconnectDelay: 1_000,
+            maxReconnectDelay: 30_000,
             heartbeatInterval: 60_000,
             connectionTimeout: 5_000,
             ...options
@@ -173,13 +175,26 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
                 RECONNECTION_DELAY_ON_KICK_MS
                 :
                 Math.min(
-                    this.options.reconnectDelay ?? Number.POSITIVE_INFINITY,
-                    (this.options.reconnectDelay ?? 0) * (this.reconnectAttempts || 1),
+                    this.options.maxReconnectDelay ?? Number.POSITIVE_INFINITY,
+                    (this.options.reconnectDelay ?? 0) * (2 ** this.reconnectAttempts),
                 );
 
             setTimeout(() => {
                 this.reconnectAttempts++;
-                void this.connect();
+
+                // * `connect()` rejects with `Connection timeout` when the socket never
+                // opens (see the timeout above). This promise is created inside a timer
+                // the consumer does not own, so no caller-side `.catch()` can ever reach
+                // it — leaving it unhandled terminates the process under Bun. The retry
+                // loop continues regardless: the timeout path closes the socket, which
+                // re-enters `handleConnectionClosed` and schedules the next attempt.
+                this.connect()
+                    .catch((error: unknown) => {
+                        this.emit(
+                            'error',
+                            error instanceof Error ? error : new Error(String(error)),
+                        );
+                    });
             }, delay);
         } else if (this.options.autoReconnect) {
             this.emit('error', new Error('Connection failed: retries exhausted'));
