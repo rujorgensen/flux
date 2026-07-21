@@ -3,6 +3,15 @@ export {
     retryOrThrow,
 } from './lib/promises.utils';
 export {
+    RetryableError,
+    ConnectionError,
+    AuthenticationError,
+    EndpointNotFoundError,
+    isRetryableConnectionError,
+    isRetryableAuthStatus,
+    asConnectionError,
+} from './lib/connection-errors';
+export {
     EventEmitter,
 } from './lib/eventemitter';
 export {

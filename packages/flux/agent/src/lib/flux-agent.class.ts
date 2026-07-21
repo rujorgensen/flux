@@ -16,6 +16,7 @@ import { authenticateAgentOrThrow } from './connector/auth/register-client.auth'
 import { FluxClientData } from './connector/flux-client-data.class';
 import {
     getMachineUID,
+    isRetryableConnectionError,
     retryOrThrow,
     StateManager,
 } from '@flux/shared/utils';
@@ -80,6 +81,11 @@ export class FluxAgent {
             }
 
             let warnedWaitingForAuthority: boolean = false;
+            let warnedMeshUnreachable: boolean = false;
+
+            // Which failure caused the pending retry — the two have different
+            // meanings for a listener and must not share a message.
+            let lastError: unknown;
 
             const ticket = await retryOrThrow(
                 async () => {
@@ -94,8 +100,17 @@ export class FluxAgent {
                     );
                 },
 
-                // Retry if no authority was found yet
-                (error: unknown) => (error instanceof NetworkAuthorityNotFoundError),
+                // Retry while no Authority has appeared yet, and while the mesh
+                // itself is unreachable. The latter used to fall straight through
+                // to the caller, so a network blip during startup left the Agent
+                // permanently disconnected while an Authority in the same
+                // situation would have retried through it.
+                (error: unknown) => {
+                    lastError = error;
+
+                    return (error instanceof NetworkAuthorityNotFoundError)
+                        || isRetryableConnectionError(error);
+                },
 
                 {
                     // Fixed by the SDK, not the consuming app: Agents run on untrusted client
@@ -107,8 +122,28 @@ export class FluxAgent {
                         attempt: number,
                         retries: number,
                     ): number => {
-                        // The only retried error is NetworkAuthorityNotFoundError, so every
-                        // retry means: this Agent authenticated, but no Authority is registered
+                        // An unreachable mesh means this Agent never authenticated at
+                        // all, which is a different thing to tell a listener than
+                        // "authenticated, but nobody is home".
+                        if (isRetryableConnectionError(lastError)) {
+                            this.stateManager.emitNetworkState('authorizing');
+
+                            if (!warnedMeshUnreachable) {
+                                warnedMeshUnreachable = true;
+                                console.warn(
+                                    `[flux-agent] Cannot reach the mesh at '${domain}'. Retrying in the background ` +
+                                    `up to ${retries} times; the Agent connects on its own once the mesh answers. ` +
+                                    `If this never resolves, check the 'domain' option points at the Mesh (not the Portal).`,
+                                );
+                            }
+
+                            // Longer ceiling than the waiting-for-Authority case: an
+                            // outage lasts minutes, and a down mesh must not be hit
+                            // twice a second by every Agent that survived it.
+                            return Math.min(30_000, 500 * (2 ** attempt));
+                        }
+
+                        // Otherwise: this Agent authenticated, but no Authority is registered
                         // on the network yet. Surface that instead of sitting silently on
                         // 'authorizing' — listeners can now show a meaningful state.
                         this.stateManager.emitNetworkState('waiting-for-authority');
