@@ -4,10 +4,12 @@
 > and exchange messages within named Networks and their Channels. The Mesh (`mesh.persistica.io`) is
 > the data plane; the Portal (`portal.persistica.io`) is the control plane.
 
-Key rules when connecting: an **Agent** cannot join a Network that has no **Authority** registered —
-it retries in the `waiting-for-authority` state until one appears, then fails with
-`NetworkAuthorityNotFoundError`. Agents pass a *claim* to `connect()`; only Authorities hold the
-Network Access Token. The `domain` option defaults to `https://mesh.persistica.io` and must point at
+Key rules when connecting: an **Agent** cannot join a Network until **at least one Authority** is
+registered — it retries in the `waiting-for-authority` state until at least one exists, then fails
+with `NetworkAuthorityNotFoundError`. A Network may have **any number of Authorities**; they share
+the load, and **any Authority may authorize any Agent on that Network**. Do not assume a Network is
+owned by, or served by, a single Authority. Agents pass a *claim* to `connect()`; only Authorities
+hold the Network Access Token. The `domain` option defaults to `https://mesh.persistica.io` and must point at
 the Mesh, with protocol — not the Portal.
 
 ## SDK
