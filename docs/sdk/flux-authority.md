@@ -31,3 +31,4 @@ await authority.registerAuthority({
 - `authorizeAgentConnection` receives the Agent's claim and returns an identification string that is later passed to `authorizeChannelAccess`. Use a signed JWT in production.
 - `registerAuthority` rejects on an invalid token. Wrap it in `try/catch` so a bad token does not crash the process silently.
 - `authority.onNetworkState(cb)` — subscribe to connection state. `authority.disconnect()` to leave.
+- Reconnects re-run the auth handshake, so the Network Access Token must stay valid for the lifetime of the process — an Authority that survives a mesh restart or network blip authenticates again from scratch. Rotating the token away from a running Authority leaves it unable to come back after its next disconnect.

@@ -81,43 +81,22 @@ export class FluxAuthority {
         try {
             const domain: string = this.options?.domain ?? DEFAULT_FLUX_DOMAIN;
 
-            const ticket: string = await retryOrThrow<any>(
-                () => authenticateNetworkAuthorityOrThrow(
-                    this.networkId as TNetworkId_S,
-                    domain,
-                    registerAuthorityConfiguration.networkAccessToken,
-                    {
-                        machineUID,
-                    },
-                ),
-                (err: unknown) => err instanceof RetryableError,
-                {
-                    retries: 10_000,
-                    delayMs: 500,
-                    // Without backoff these 10_000 retries were 500ms apart for the
-                    // whole outage — every Authority hitting a downed mesh twice a
-                    // second, indefinitely, and logging each attempt.
-                    backoffFactor: 2,
-                    maxDelayMs: 30_000,
-                    onRetry: (
-                        attempt: number,
-                        retries: number,
-                    ) => {
-                        console.log(`[RegisterAuthority] Retrying... (attempt: ${attempt} of ${retries})`);
-                    },
-                },
+            // The same handshake serves the first connect and every reconnect: the
+            // mesh's upgrade ticket expires long before a long-lived Authority does,
+            // so the socket has to be able to mint a new one on its own (#497).
+            const mintTicket = (): Promise<string> => this.mintTicket(
+                domain,
+                registerAuthorityConfiguration.networkAccessToken as TNetworkToken_S,
+                machineUID,
             );
+
+            const ticket: string = await mintTicket();
 
             this.fluxWebSocketConnection = createWSConnection(
                 this.id,
                 ticket,
+                mintTicket,
                 this.stateManager,
-                // For reconnection logic
-                async () =>
-                    this.registerAuthority({
-                        ...registerAuthorityConfiguration,
-                        networkAccessToken: registerAuthorityConfiguration.networkAccessToken as TNetworkToken_S
-                    }),
                 {
                     ...this.options,
                     domain,
@@ -137,6 +116,45 @@ export class FluxAuthority {
         } catch (error) {
             return Promise.reject(error);
         }
+    }
+
+    /**
+     * Authenticates against the mesh and returns a ticket for the WebSocket
+     * upgrade, retrying through an unreachable or restarting mesh.
+     */
+    private async mintTicket(
+        domain: string,
+        networkAccessToken: TNetworkToken_S,
+        machineUID: TFluxClientUID | undefined,
+    ): Promise<string> {
+        this.stateManager.emitNetworkState('authorizing');
+
+        return retryOrThrow<any>(
+            () => authenticateNetworkAuthorityOrThrow(
+                this.networkId as TNetworkId_S,
+                domain,
+                networkAccessToken,
+                {
+                    machineUID,
+                },
+            ),
+            (err: unknown) => err instanceof RetryableError,
+            {
+                retries: 10_000,
+                delayMs: 500,
+                // Without backoff these 10_000 retries were 500ms apart for the
+                // whole outage — every Authority hitting a downed mesh twice a
+                // second, indefinitely, and logging each attempt.
+                backoffFactor: 2,
+                maxDelayMs: 30_000,
+                onRetry: (
+                    attempt: number,
+                    retries: number,
+                ) => {
+                    console.log(`[RegisterAuthority] Retrying... (attempt: ${attempt} of ${retries})`);
+                },
+            },
+        );
     }
 
     /**

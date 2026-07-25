@@ -81,6 +81,88 @@ const startHangingServer = (
     };
 };
 
+/**
+ * A mesh that only completes the upgrade for the token it currently considers
+ * valid — the shape of the real mesh, whose upgrade JWT expires after 15
+ * minutes. `rotate()` stands in for that expiry.
+ */
+const startTokenGatedServer = (
+    firstValidToken: string,
+): {
+    server: ReturnType<typeof Bun.serve>;
+    rotate: (nextValidToken: string) => void;
+    rejectedTokens: (string | null)[];
+    upgrades: number;
+    closeAllSockets: () => void;
+    stop: () => void;
+} => {
+    let validToken: string = firstValidToken;
+    const sockets: Bun.ServerWebSocket<undefined>[] = [];
+    const state = {
+        rejectedTokens: [] as (string | null)[],
+        upgrades: 0,
+    };
+
+    const server = Bun.serve({
+        port: 0,
+        fetch(
+            request,
+            server_,
+        ) {
+            const token: string | null = new URL(request.url).searchParams.get('token');
+
+            if (token !== validToken) {
+                state.rejectedTokens.push(token);
+
+                // What the mesh answers an expired token with.
+                return new Response('Token verification failed', { status: 500 });
+            }
+
+            if (server_.upgrade(request)) {
+                state.upgrades++;
+
+                return undefined;
+            }
+
+            return new Response('Upgrade failed', { status: 500 });
+        },
+        websocket: {
+            open(
+                ws,
+            ) {
+                sockets.push(ws as Bun.ServerWebSocket<undefined>);
+            },
+            message(
+            ) {
+                // Nothing to answer: these tests never exercise the heartbeat.
+            },
+        },
+    });
+
+    return {
+        server,
+        rotate: (
+            nextValidToken: string,
+        ) => {
+            validToken = nextValidToken;
+        },
+        get rejectedTokens() {
+            return state.rejectedTokens;
+        },
+        get upgrades() {
+            return state.upgrades;
+        },
+        closeAllSockets: () => {
+            for (const socket of sockets.splice(0)) {
+                socket.close();
+            }
+        },
+        stop: () => {
+            server.stop(true);
+        },
+    };
+};
+
 const waitFor = async (
     predicate: () => boolean,
     timeoutMs: number,
@@ -221,6 +303,108 @@ describe('WebSocketClient heartbeat (#488)', () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         expect(harness.received.filter((message) => message === HEARTBEAT_PING)).toHaveLength(0);
+    });
+});
+
+describe('WebSocketClient reconnect with an expired upgrade token (#497)', () => {
+    const clients: WebSocketClient<string>[] = [];
+    const servers: { stop: () => void }[] = [];
+    const unhandled: unknown[] = [];
+
+    const recordUnhandled = (
+        reason: unknown,
+    ): void => {
+        unhandled.push(reason);
+    };
+
+    beforeEach(() => {
+        unhandled.splice(0);
+        process.on('unhandledRejection', recordUnhandled);
+    });
+
+    afterEach(() => {
+        process.off('unhandledRejection', recordUnhandled);
+
+        for (const client of clients.splice(0)) {
+            client.close();
+        }
+        for (const server of servers.splice(0)) {
+            server.stop();
+        }
+    });
+
+    it('re-dials with a freshly minted token instead of the expired one', async () => {
+        // The mesh's upgrade token lives 15 minutes; a socket that dies after that
+        // can only come back if the reconnect carries a new one. Re-dialling the
+        // original URL is what left `njord` authority-less: every attempt was
+        // rejected with 'jwt expired', forever.
+        const harness = startTokenGatedServer('token-1');
+        servers.push(harness);
+
+        const client = new WebSocketClient<string>({
+            url: `ws://localhost:${harness.server.port}?token=token-1`,
+            autoReconnect: true,
+            reconnectDelay: 10,
+            heartbeatInterval: 0,
+            connectionTimeout: 500,
+            resolveUrl: async () => `ws://localhost:${harness.server.port}?token=token-2`,
+        });
+        clients.push(client);
+
+        await client.connect();
+        expect(harness.upgrades).toBe(1);
+
+        // The original token expires and the socket drops.
+        harness.rotate('token-2');
+        harness.closeAllSockets();
+
+        await waitFor(() => harness.upgrades >= 2, 3_000);
+
+        expect(harness.upgrades).toBeGreaterThanOrEqual(2);
+        expect(unhandled).toHaveLength(0);
+    });
+
+    it('keeps retrying when minting a fresh token fails', async () => {
+        // A mesh that is down when the socket drops must not end the retry loop:
+        // no socket is created on that attempt, so nothing else can schedule the
+        // next one.
+        const harness = startTokenGatedServer('token-1');
+        servers.push(harness);
+
+        let mintAttempts: number = 0;
+        const errors: Error[] = [];
+
+        const client = new WebSocketClient<string>({
+            url: `ws://localhost:${harness.server.port}?token=token-1`,
+            autoReconnect: true,
+            reconnectDelay: 10,
+            heartbeatInterval: 0,
+            connectionTimeout: 500,
+            resolveUrl: async () => {
+                mintAttempts++;
+
+                if (mintAttempts < 3) {
+                    throw new Error('Mesh unreachable');
+                }
+
+                return `ws://localhost:${harness.server.port}?token=token-2`;
+            },
+        });
+        clients.push(client);
+        client.on('error', (error: Error) => {
+            errors.push(error);
+        });
+
+        await client.connect();
+
+        harness.rotate('token-2');
+        harness.closeAllSockets();
+
+        await waitFor(() => harness.upgrades >= 2, 5_000);
+
+        expect(mintAttempts).toBeGreaterThanOrEqual(3);
+        expect(errors.map((error) => error.message)).toContain('Mesh unreachable');
+        expect(unhandled).toHaveLength(0);
     });
 });
 

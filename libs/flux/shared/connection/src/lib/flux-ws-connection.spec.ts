@@ -43,9 +43,9 @@ describe('FluxWebSocketConnection', () => {
     it('reuses the same pending connect promise and socket listeners', async () => {
         const connection = new FluxWebSocketConnection(
             'flux-instance',
-            () => {},
             new StateManager(),
             'token',
+            async () => 'fresh-token',
             {
                 domain: 'https://flux.test',
             },
@@ -90,15 +90,11 @@ describe('FluxWebSocketConnection', () => {
     });
 
     it('keeps a single ready interceptor across reconnect cycles', async () => {
-        let reconnectCalls = 0;
-
         const connection = new FluxWebSocketConnection(
             'flux-instance',
-            () => {
-                reconnectCalls++;
-            },
             new StateManager(),
             'token',
+            async () => 'fresh-token',
             {
                 domain: 'https://flux.test',
             },
@@ -124,7 +120,38 @@ describe('FluxWebSocketConnection', () => {
 
         readyInterceptor('isReady');
         await secondConnect;
+    });
 
-        expect(reconnectCalls).toBe(1);
+    it('hands the socket a resolver that re-dials with a freshly minted ticket', async () => {
+        // The ticket the connection is built with expires (15 minutes, mesh-side),
+        // so the socket must be able to authenticate again on its own — otherwise
+        // every reconnect after expiry is rejected and the Authority never comes
+        // back (#497).
+        let mints: number = 0;
+
+        const connection = new FluxWebSocketConnection(
+            'flux-instance',
+            new StateManager(),
+            'first-ticket',
+            async () => {
+                mints++;
+
+                return `fresh-ticket-${mints}`;
+            },
+            {
+                domain: 'https://flux.test',
+            },
+        );
+
+        const socketOptions = Reflect.get(getSocketStub(connection), 'options') as {
+            url: string;
+            resolveUrl?: () => Promise<string>;
+        };
+
+        expect(socketOptions.url).toBe('wss://flux.test/?token=first-ticket');
+        expect(mints).toBe(0);
+
+        expect(await socketOptions.resolveUrl?.()).toBe('wss://flux.test/?token=fresh-ticket-1');
+        expect(await socketOptions.resolveUrl?.()).toBe('wss://flux.test/?token=fresh-ticket-2');
     });
 });

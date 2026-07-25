@@ -1,4 +1,5 @@
 import type * as Bun from 'bun';
+import type { StringValue } from 'ms';
 import * as nodeURL from 'node:url';
 import { PicoLogger } from '@utils/pico-logger';
 import { generateToken } from '../../auth/auth';
@@ -37,11 +38,13 @@ const getNetworkTokenCache = (
  * deletion — so no database round-trip is unless it doesn't exist locally.
  *
  * @param { Bun.BunRequest } request - The incoming HTTP request
+ * @param { StringValue | number } upgradeTokenTTL - How long the issued upgrade token stays valid
  *
  * @returns { Promise<Response> } The HTTP response with auth token or error
  */
 export const authorizeNetworkAuthority = async (
     request: Bun.BunRequest,
+    upgradeTokenTTL: StringValue | number,
     hardcodedNetworkCredentials?: Map<TNetworkId_S, string>,
 ): Promise<Response> => {
     const urlWithParsedQuery: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);
@@ -86,11 +89,14 @@ export const authorizeNetworkAuthority = async (
     }
 
     return new Response(
-        generateToken({
-            networkId,
-            isAuthority: true,
-            machineUID: machineUID,
-        }),
+        generateToken(
+            {
+                networkId,
+                isAuthority: true,
+                machineUID: machineUID,
+            },
+            upgradeTokenTTL,
+        ),
         {
             headers: {
                 'Content-Type': 'text/plain',

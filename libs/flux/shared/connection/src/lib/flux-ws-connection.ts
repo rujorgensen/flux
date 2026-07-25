@@ -40,12 +40,18 @@ interface IOptions {
 
 /**
  * Creates a WebSocket connection to the Flux platform.
+ *
+ * `mintTicket` is deliberately required rather than optional: the ticket handed
+ * in as `ticket` outlives its own validity (the mesh signs it for 15 minutes),
+ * so a caller that cannot re-mint one has a connection that dies permanently at
+ * the first disconnect after expiry. An optional parameter would let that
+ * compile silently — see #497.
  */
 export const createWSConnection = (
     id: string,
     ticket: string,
+    mintTicket: () => Promise<string>,
     stateManager: StateManager,
-    onReconnectCallback: () => void,
     options: {
         domain: string,
         secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -54,9 +60,9 @@ export const createWSConnection = (
 ): FluxWebSocketConnection => {
     return new FluxWebSocketConnection(
         id,
-        onReconnectCallback,
         stateManager,
         ticket,
+        mintTicket,
         {
             domain: options.domain,
             secretKey: options.secretKey,
@@ -81,7 +87,6 @@ export class FluxWebSocketConnection {
     private webSocketClient: FluxWebSocketClientConnection | undefined;
     private connectPromise: Promise<FluxWebSocketClientConnection> | undefined;
     private connectPromiseResolver: ((socket: FluxWebSocketClientConnection) => void) | undefined;
-    private first: boolean = true;
 
     private readonly channelStateManager: ChannelStateManager = new ChannelStateManager();
 
@@ -89,15 +94,13 @@ export class FluxWebSocketConnection {
     // *** Reused socket callbacks
     // ****************************************************************************
 
+    // A reconnect needs no re-registration hook: it dials with a freshly minted
+    // ticket, so the mesh registers the Authority (or Agent) again on `open`, and
+    // the RPC methods live on this same socket instance across reconnects. The
+    // hook that used to run here re-ran the whole connect flow, leaving the
+    // previous socket open — one extra live registration per reconnect (#497).
     private readonly readyInterceptor: TMessageCallback = () => {
         this.resolveConnectedSocket();
-
-        if (this.first) {
-            this.first = false;
-            return;
-        }
-
-        this.onReconnectCallback();
     };
     private readonly socketMessageHandler: TMessageCallback = this.handleMessage.bind(this);
     private readonly socketCloseHandler = (reason?: 'kicked'): void => this.handleSocketClose(reason);
@@ -106,9 +109,9 @@ export class FluxWebSocketConnection {
 
     constructor(
         private readonly fluxInstanceId: string,
-        private readonly onReconnectCallback: () => void,
         private readonly stateManager: StateManager,
-        private readonly token: string,
+        token: string,
+        private readonly mintTicket: () => Promise<string>,
         private readonly options: IOptions,
     ) {
         this.options = {
@@ -116,22 +119,37 @@ export class FluxWebSocketConnection {
             secretKey: this.options.secretKey,
             retries: this.options.retries ?? 10_000,
         };
-        const url = new URL(this.options.domain);
-
-        url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-        url.searchParams.set('token', this.token);
 
         // 1. Connect to websocket
         this.socket = new FluxWebSocketClientConnection(
             {
-                url: url.toString(),
+                url: this.buildUrl(token),
                 autoReconnect: true,
                 reconnectDelay: 2_000,
                 retries: this.options.retries,
+                // The mesh signs the upgrade ticket for 15 minutes, so a reconnect
+                // after that must carry a new one — re-dialling the original URL is
+                // rejected with 'jwt expired' every time, and the network is left
+                // without an Authority until the process is restarted (#497).
+                resolveUrl: async () => this.buildUrl(await this.mintTicket()),
             },
         );
 
         this.interceptPackageTypeMessages('isReady', this.readyInterceptor);
+    }
+
+    /**
+     * The mesh WebSocket URL carrying the given upgrade ticket.
+     */
+    private buildUrl(
+        ticket: string,
+    ): string {
+        const url = new URL(this.options.domain);
+
+        url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+        url.searchParams.set('token', ticket);
+
+        return url.toString();
     }
 
     /**

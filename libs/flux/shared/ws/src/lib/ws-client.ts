@@ -17,6 +17,17 @@ type WebSocketEvent = 'open' | 'message' | 'close' | 'connecting' | 'error';
 
 type WebSocketClientOptions = {
     url: string;
+    /**
+     * Mints the URL to dial for a *reconnect*.
+     *
+     * The mesh carries a short-lived upgrade token in the query string, so
+     * re-dialling the URL this client was constructed with is only correct until
+     * that token expires (#497). After that every attempt is rejected with
+     * 'jwt expired' and the retry loop can never recover — which is how a network
+     * left an Authority-less mesh behind after a single blip. Consumers that
+     * authenticate pass a resolver here that re-runs the auth handshake.
+     */
+    resolveUrl?: () => Promise<string>;
     autoReconnect?: boolean;
     reconnectDelay?: number; // Base delay; doubles per attempt up to `maxReconnectDelay`
     maxReconnectDelay?: number; // Ceiling for the backoff
@@ -38,6 +49,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         connecting: [],
     };
     private reconnectAttempts = 0;
+    private url: string; // The URL of the *next* dial; re-minted per reconnect when a resolver is given
     private ws: WebSocket | undefined;
     private isOpen: boolean = false; // Is the connection open
 
@@ -62,22 +74,35 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
             connectionTimeout: 5_000,
             ...options
         };
+        this.url = this.options.url;
     }
 
     /**
      * Opens the WebSocket connection.
      */
-    public connect(
+    public async connect(
     ): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.closeHandled = false;
-            this.emit('connecting', this.reconnectAttempts);
+        this.closeHandled = false;
+        this.emit('connecting', this.reconnectAttempts);
 
+        let url: string;
+        try {
+            url = await this.resolveUrl();
+        } catch (error) {
+            // No socket exists on this path, so no `onclose` will ever arrive to
+            // drive the retry loop — schedule the next attempt here, or a mesh that
+            // happens to be down while we re-authenticate ends the loop silently.
+            this.scheduleReconnect(false);
+
+            throw error instanceof Error ? error : new Error(String(error));
+        }
+
+        return new Promise((resolve, reject) => {
             // Kept in a local so every handler can ignore events from a superseded
             // socket — a heartbeat-forced close may fire this socket's `onclose`
             // long after a reconnect has already replaced it.
             const socket = new WebSocket(
-                this.options.url,
+                url,
             );
             this.ws = socket;
 
@@ -167,6 +192,31 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
             this.isOpen = false;
         }
 
+        this.scheduleReconnect(wasKicked);
+    }
+
+    /**
+     * The URL for the attempt about to be made. The first dial uses what the
+     * consumer handed us; every reconnect re-mints it, because the token it
+     * carries has a shorter life than the connection it authorizes (#497).
+     */
+    private async resolveUrl(
+    ): Promise<string> {
+        if ((this.reconnectAttempts === 0) || !this.options.resolveUrl) {
+            return this.url;
+        }
+
+        this.url = await this.options.resolveUrl();
+
+        return this.url;
+    }
+
+    /**
+     * Schedules the next connection attempt per the retry policy.
+     */
+    private scheduleReconnect(
+        wasKicked: boolean,
+    ): void {
         if (
             this.options.autoReconnect &&
             ((this.options.retries === undefined) || (this.reconnectAttempts < this.options.retries))

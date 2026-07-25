@@ -26,6 +26,7 @@ import {
     isClientId,
 } from '@flux/shared/types';
 import * as Bun from 'bun';
+import type { StringValue } from 'ms';
 import { nanoid } from 'nanoid';
 import { OutgoingMessageRouter } from './routing/outgoing-message-router.class';
 import { NetworkAuthorityCache } from './register/network-authority-cache.class';
@@ -105,7 +106,15 @@ type TOptions = {
     port?: number;
     redisConnectionString?: string;
     hardcodedNetworkCredentials?: Map<TNetworkId_S, string>,
+    /**
+     * How long the WebSocket upgrade token stays valid, as a jsonwebtoken
+     * timespan ('15m') or a number of seconds. The token gates the upgrade only;
+     * clients re-authenticate for every reconnect, so this is short by design.
+     */
+    upgradeTokenTTL?: StringValue | number,
 };
+
+const DEFAULT_UPGRADE_TOKEN_TTL: StringValue = '15m';
 
 export class FluxMeshServer {
 
@@ -122,6 +131,9 @@ export class FluxMeshServer {
         private readonly optionsOrPort?: TOptions | number,
     ) {
         const port: number = typeof this.optionsOrPort === 'number' ? this.optionsOrPort : (this.optionsOrPort?.port ?? 5_100);
+        const upgradeTokenTTL: StringValue | number = (
+            typeof this.optionsOrPort === 'object' ? this.optionsOrPort.upgradeTokenTTL : undefined
+        ) ?? DEFAULT_UPGRADE_TOKEN_TTL;
 
         const networkAuthorityRedisCache: NetworkAuthorityCache = new NetworkAuthorityCache();
         const networkAgentRedisCache: NetworkAgentRedisCache = new NetworkAgentRedisCache();
@@ -159,6 +171,7 @@ export class FluxMeshServer {
                     POST: (request: Bun.BunRequest) =>
                         authorizeNetworkAuthority(
                             request,
+                            upgradeTokenTTL,
                             optionsOrPort instanceof Object ? optionsOrPort.hardcodedNetworkCredentials : undefined,
                         ),
                 },
@@ -173,6 +186,7 @@ export class FluxMeshServer {
                             request,
                             networkAuthorityRedisCache,
                             globalRPCClient,
+                            upgradeTokenTTL,
                         ),
                 },
 

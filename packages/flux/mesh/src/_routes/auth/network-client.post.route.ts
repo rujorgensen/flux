@@ -1,4 +1,5 @@
 import type { BunRequest } from 'bun';
+import type { StringValue } from 'ms';
 import * as nodeURL from 'node:url';
 import {
     type TAddress,
@@ -28,6 +29,7 @@ import { PicoLogger } from '@utils/pico-logger';
  * @param { BunRequest } request - The incoming HTTP request
  * @param { NetworkAuthorityCache } networkAuthorityManager - The network authority manager
  * @param { GlobalRPCClient<'authorizeAgentConnection'> } globalRPCClient - The global RPC client
+ * @param { StringValue | number } upgradeTokenTTL - How long the issued upgrade token stays valid
  * 
  * @returns { Promise<Response> } The HTTP response with auth token or error
  */
@@ -35,6 +37,7 @@ export const authorizeAgentConnection = async (
     request: BunRequest,
     networkAuthorityManager: NetworkAuthorityCache,
     globalRPCClient: GlobalRPCClient<'authorizeAgentConnection'>,
+    upgradeTokenTTL: StringValue | number,
 ) => {
     const urlWithParsedQuery: nodeURL.UrlWithParsedQuery = nodeURL.parse(request.url, true);
 
@@ -161,12 +164,15 @@ export const authorizeAgentConnection = async (
             }
 
             return new Response(
-                generateToken({
-                    networkId,
-                    claim: authorizedJWT,
-                    agentUID: requestedAgentUidString as string,
-                    machineUID: machineUID,
-                }),
+                generateToken(
+                    {
+                        networkId,
+                        claim: authorizedJWT,
+                        agentUID: requestedAgentUidString as string,
+                        machineUID: machineUID,
+                    },
+                    upgradeTokenTTL,
+                ),
                 {
                     headers: {
                         'Content-Type': 'text/plain',

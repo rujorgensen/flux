@@ -73,107 +73,25 @@ export class FluxAgent {
     ): Promise<FluxAgentNetworkConnection> {
         const domain: string = this.options?.domain ?? DEFAULT_FLUX_DOMAIN;
 
-        this.stateManager.emitNetworkState('authorizing');
-
         try {
             if (clientUId && !validateAgentUIDOrThrow(clientUId)) {
                 throw new Error('Will never be thrown');
             }
 
-            let warnedWaitingForAuthority: boolean = false;
-            let warnedMeshUnreachable: boolean = false;
-
-            // Which failure caused the pending retry — the two have different
-            // meanings for a listener and must not share a message.
-            let lastError: unknown;
-
-            const ticket = await retryOrThrow(
-                async () => {
-                    return authenticateAgentOrThrow(
-                        this.networkId,
-                        domain,
-                        identification,
-                        {
-                            clientUId: clientUId as TAgentOwnUId,
-                            machineUID: (await getMachineUID()) ?? undefined,
-                        },
-                    );
-                },
-
-                // Retry while no Authority has appeared yet, and while the mesh
-                // itself is unreachable. The latter used to fall straight through
-                // to the caller, so a network blip during startup left the Agent
-                // permanently disconnected while an Authority in the same
-                // situation would have retried through it.
-                (error: unknown) => {
-                    lastError = error;
-
-                    return (error instanceof NetworkAuthorityNotFoundError)
-                        || isRetryableConnectionError(error);
-                },
-
-                {
-                    // Fixed by the SDK, not the consuming app: Agents run on untrusted client
-                    // machines, so the mesh operator — not the app — controls how long an Agent
-                    // waits for an Authority to appear.
-                    retries: MAX_CONNECT_ATTEMPTS,
-                    delayMs: 500,
-                    onRetry: (
-                        attempt: number,
-                        retries: number,
-                    ): number => {
-                        // An unreachable mesh means this Agent never authenticated at
-                        // all, which is a different thing to tell a listener than
-                        // "authenticated, but nobody is home".
-                        if (isRetryableConnectionError(lastError)) {
-                            this.stateManager.emitNetworkState('authorizing');
-
-                            if (!warnedMeshUnreachable) {
-                                warnedMeshUnreachable = true;
-                                console.warn(
-                                    `[flux-agent] Cannot reach the mesh at '${domain}'. Retrying in the background ` +
-                                    `up to ${retries} times; the Agent connects on its own once the mesh answers. ` +
-                                    `If this never resolves, check the 'domain' option points at the Mesh (not the Portal).`,
-                                );
-                            }
-
-                            // Longer ceiling than the waiting-for-Authority case: an
-                            // outage lasts minutes, and a down mesh must not be hit
-                            // twice a second by every Agent that survived it.
-                            return Math.min(30_000, 500 * (2 ** attempt));
-                        }
-
-                        // Otherwise: this Agent authenticated, but no Authority is registered
-                        // on the network yet. Surface that instead of sitting silently on
-                        // 'authorizing' — listeners can now show a meaningful state.
-                        this.stateManager.emitNetworkState('waiting-for-authority');
-
-                        if (!warnedWaitingForAuthority) {
-                            warnedWaitingForAuthority = true;
-                            console.warn(
-                                `[flux-agent] No Authority is registered on network '${this.networkId}' yet. ` +
-                                `An Authority must be running before Agents can join; retrying up to ${retries} times ` +
-                                `until one appears. If this never resolves, start your Authority process (or check its ` +
-                                `Network Access Token).`,
-                            );
-                        }
-
-                        // Backoff until 3 seconds
-                        return Math.min(3_000, 500 + (attempt * 200));
-                    },
-                },
+            // The same handshake serves the first connect and every reconnect: the
+            // mesh's upgrade ticket expires long before a long-lived Agent does, so
+            // the socket has to be able to mint a new one on its own (#497).
+            const mintTicket = (): Promise<string> => this.mintTicket(
+                domain,
+                identification,
+                clientUId as TAgentOwnUId | undefined,
             );
 
             this.fluxWebSocketConnection = createWSConnection(
                 this.id,
-                ticket,
+                await mintTicket(),
+                mintTicket,
                 this.stateManager,
-                async () => {
-                    await this.connect(
-                        identification,
-                        clientUId,
-                    );
-                },
                 {
                     ...this.options,
                     domain,
@@ -190,6 +108,103 @@ export class FluxAgent {
             this.stateManager.emitNetworkState('auth-error');
             return Promise.reject(error);
         }
+    }
+
+    /**
+     * Authenticates against the mesh and returns a ticket for the WebSocket
+     * upgrade, retrying while the mesh is unreachable and while no Authority has
+     * registered on the network yet.
+     */
+    private async mintTicket(
+        domain: string,
+        identification: unknown,
+        clientUId: TAgentOwnUId | undefined,
+    ): Promise<string> {
+        this.stateManager.emitNetworkState('authorizing');
+
+        let warnedWaitingForAuthority: boolean = false;
+        let warnedMeshUnreachable: boolean = false;
+
+        // Which failure caused the pending retry — the two have different
+        // meanings for a listener and must not share a message.
+        let lastError: unknown;
+
+        return retryOrThrow(
+            async () => {
+                return authenticateAgentOrThrow(
+                    this.networkId,
+                    domain,
+                    identification,
+                    {
+                        clientUId: clientUId as TAgentOwnUId,
+                        machineUID: (await getMachineUID()) ?? undefined,
+                    },
+                );
+            },
+
+            // Retry while no Authority has appeared yet, and while the mesh
+            // itself is unreachable. The latter used to fall straight through
+            // to the caller, so a network blip during startup left the Agent
+            // permanently disconnected while an Authority in the same
+            // situation would have retried through it.
+            (error: unknown) => {
+                lastError = error;
+
+                return (error instanceof NetworkAuthorityNotFoundError)
+                    || isRetryableConnectionError(error);
+            },
+
+            {
+                // Fixed by the SDK, not the consuming app: Agents run on untrusted client
+                // machines, so the mesh operator — not the app — controls how long an Agent
+                // waits for an Authority to appear.
+                retries: MAX_CONNECT_ATTEMPTS,
+                delayMs: 500,
+                onRetry: (
+                    attempt: number,
+                    retries: number,
+                ): number => {
+                    // An unreachable mesh means this Agent never authenticated at
+                    // all, which is a different thing to tell a listener than
+                    // "authenticated, but nobody is home".
+                    if (isRetryableConnectionError(lastError)) {
+                        this.stateManager.emitNetworkState('authorizing');
+
+                        if (!warnedMeshUnreachable) {
+                            warnedMeshUnreachable = true;
+                            console.warn(
+                                `[flux-agent] Cannot reach the mesh at '${domain}'. Retrying in the background ` +
+                                `up to ${retries} times; the Agent connects on its own once the mesh answers. ` +
+                                `If this never resolves, check the 'domain' option points at the Mesh (not the Portal).`,
+                            );
+                        }
+
+                        // Longer ceiling than the waiting-for-Authority case: an
+                        // outage lasts minutes, and a down mesh must not be hit
+                        // twice a second by every Agent that survived it.
+                        return Math.min(30_000, 500 * (2 ** attempt));
+                    }
+
+                    // Otherwise: this Agent authenticated, but no Authority is registered
+                    // on the network yet. Surface that instead of sitting silently on
+                    // 'authorizing' — listeners can now show a meaningful state.
+                    this.stateManager.emitNetworkState('waiting-for-authority');
+
+                    if (!warnedWaitingForAuthority) {
+                        warnedWaitingForAuthority = true;
+                        console.warn(
+                            `[flux-agent] No Authority is registered on network '${this.networkId}' yet. ` +
+                            `An Authority must be running before Agents can join; retrying up to ${retries} times ` +
+                            `until one appears. If this never resolves, start your Authority process (or check its ` +
+                            `Network Access Token).`,
+                        );
+                    }
+
+                    // Backoff until 3 seconds
+                    return Math.min(3_000, 500 + (attempt * 200));
+                },
+            },
+        );
     }
 
     /**
