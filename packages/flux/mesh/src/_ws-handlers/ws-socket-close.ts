@@ -16,12 +16,18 @@ export const onSocketClosed = (
         if (ws.data.isAuthority) {
             PicoLogger.log(`🛑 Authority socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
 
+            // `.catch()` with no handler does NOT handle the rejection — it returns
+            // a fresh rejected promise nobody owns. An Authority disconnecting while
+            // Redis is unreachable therefore raised an unhandled rejection, which is
+            // fatal under Bun (and made the portal specs fail at random).
             void networkAuthorityRedisCache
                 .unregister(
                     ws.data.id,
                     ws.data.networkId,
                 )
-                .catch();
+                .catch(() => {
+                    PicoLogger.error(`Caught error while unregistering authority.`, 'ws-disconnect');
+                });
         } else {
             PicoLogger.log(`🛑🤵 Agent socket disconnecting ${code} ${ws.data.id}`, 'ws-disconnect'); // 1001
 
