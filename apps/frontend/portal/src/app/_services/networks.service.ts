@@ -14,6 +14,23 @@ import type {
 const STORAGE_KEY = 'flux_selected_network_id';
 export const MAX_NETWORKS = 3;
 
+/**
+ * Networks are listed alphabetically wherever they are shown. The API returns
+ * them in creation order, which reads as unordered in the sidebar selector once
+ * there are more than a couple.
+ *
+ * `sensitivity: 'base'` so casing does not split the list — 'biograf' sorts next
+ * to 'Biograf' instead of after every capitalised name.
+ */
+export const sortByAlias = (
+    networks: INetwork_S[],
+): INetwork_S[] => {
+    return [...networks].sort((
+        a: INetwork_S,
+        b: INetwork_S,
+    ) => a.alias.localeCompare(b.alias, undefined, { sensitivity: 'base' }));
+};
+
 @Injectable({
     providedIn: 'root',
 })
@@ -52,8 +69,10 @@ export class NetworksService {
             .get()
             .then((response) => {
                 if (response.data) {
-                    this._networks$.next(response.data);
-                    this.restoreSelectedNetwork(response.data);
+                    const networks: INetwork_S[] = sortByAlias(response.data);
+
+                    this._networks$.next(networks);
+                    this.restoreSelectedNetwork(networks);
                 }
                 this._isLoading$.next(false);
             })
@@ -75,7 +94,7 @@ export class NetworksService {
             .then((response) => {
                 const network = response.data;
                 if (network) {
-                    this._networks$.next([...this._networks$.getValue(), network]);
+                    this._networks$.next(sortByAlias([...this._networks$.getValue(), network]));
                     this.selectNetwork(network);
                 }
             })
