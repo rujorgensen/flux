@@ -27,6 +27,15 @@ const getReadyInterceptors = (
     return interceptors.get('isReady') ?? new Set();
 };
 
+// Mirrors RECONNECT_DELAY_MS in the implementation.
+const RECONNECT_DELAY_MS: number = 2_000;
+
+const getCloseHandler = (
+    connection: FluxWebSocketConnection,
+): ((reason?: 'kicked') => void) => {
+    return Reflect.get(connection, 'socketCloseHandler') as (reason?: 'kicked') => void;
+};
+
 const getReadyInterceptor = (
     connection: FluxWebSocketConnection,
 ): TMessageCallback => {
@@ -90,13 +99,9 @@ describe('FluxWebSocketConnection', () => {
     });
 
     it('keeps a single ready interceptor across reconnect cycles', async () => {
-        let reconnectCalls = 0;
-
         const connection = new FluxWebSocketConnection(
             'flux-instance',
-            () => {
-                reconnectCalls++;
-            },
+            () => {},
             new StateManager(),
             'token',
             {
@@ -124,7 +129,58 @@ describe('FluxWebSocketConnection', () => {
 
         readyInterceptor('isReady');
         await secondConnect;
+    });
 
-        expect(reconnectCalls).toBe(1);
+    it('signs on again when the socket closes', async () => {
+        // The ticket in the socket URL expires long before the connection does, so
+        // a dropped socket can only come back through a fresh sign-on — and it has
+        // to be the disconnect that starts it. Hanging this off a successful
+        // reconnect (the old ready-interceptor path) means an expired ticket never
+        // reaches it: the mesh rejects every re-dial with 'jwt expired' (#497).
+        let signOns = 0;
+
+        const connection = new FluxWebSocketConnection(
+            'flux-instance',
+            () => {
+                signOns++;
+            },
+            new StateManager(),
+            'token',
+            {
+                domain: 'https://flux.test',
+            },
+        );
+        const socket = getSocketStub(connection);
+
+        socket.clearEventSubscribers = () => {};
+        socket.on = () => socket;
+        socket.connect = async () => {};
+        socket.close = () => {};
+
+        getCloseHandler(connection)();
+
+        expect(signOns).toBe(0); // Not synchronously — the mesh gets breathing room first.
+
+        await new Promise((resolve) => setTimeout(resolve, RECONNECT_DELAY_MS + 250));
+
+        expect(signOns).toBe(1);
+    });
+
+    it('does not sign on again after the socket auto-reconnects on its own', () => {
+        // Auto-reconnect is off precisely because it would re-dial the expired
+        // ticket. If it is ever turned back on, the sign-on path double-connects.
+        const connection = new FluxWebSocketConnection(
+            'flux-instance',
+            () => {},
+            new StateManager(),
+            'token',
+            {
+                domain: 'https://flux.test',
+            },
+        );
+
+        const socketOptions = Reflect.get(getSocketStub(connection), 'options') as { autoReconnect?: boolean; };
+
+        expect(socketOptions.autoReconnect).toBe(false);
     });
 });

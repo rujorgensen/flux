@@ -32,6 +32,10 @@ import { PicoLogger } from '@utils/pico-logger';
 import { RECONNECTION_DELAY_ON_KICK_MS } from '../../../ws/src/lib/ws-client';
 import { ChannelStateManager } from './channel-state-manager';
 
+// Breathing room before signing on again, so a mesh that is restarting is not hit
+// the instant it drops the socket. The sign-on itself retries with backoff from there.
+const RECONNECT_DELAY_MS: number = 2_000;
+
 interface IOptions {
     domain: string; // Override the domain for self hosted Flux instances. Should include protocol, e.g. "https://my-flux-instance.com"
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -81,7 +85,6 @@ export class FluxWebSocketConnection {
     private webSocketClient: FluxWebSocketClientConnection | undefined;
     private connectPromise: Promise<FluxWebSocketClientConnection> | undefined;
     private connectPromiseResolver: ((socket: FluxWebSocketClientConnection) => void) | undefined;
-    private first: boolean = true;
 
     private readonly channelStateManager: ChannelStateManager = new ChannelStateManager();
 
@@ -91,13 +94,6 @@ export class FluxWebSocketConnection {
 
     private readonly readyInterceptor: TMessageCallback = () => {
         this.resolveConnectedSocket();
-
-        if (this.first) {
-            this.first = false;
-            return;
-        }
-
-        this.onReconnectCallback();
     };
     private readonly socketMessageHandler: TMessageCallback = this.handleMessage.bind(this);
     private readonly socketCloseHandler = (reason?: 'kicked'): void => this.handleSocketClose(reason);
@@ -125,8 +121,11 @@ export class FluxWebSocketConnection {
         this.socket = new FluxWebSocketClientConnection(
             {
                 url: url.toString(),
-                autoReconnect: true,
-                reconnectDelay: 2_000,
+                // The URL carries a mesh-issued ticket that expires (15 minutes)
+                // long before this connection does. Re-dialling it is pointless —
+                // the mesh answers 'jwt expired' every time — so coming back is
+                // `onReconnectCallback`'s job: it signs on again from scratch.
+                autoReconnect: false,
                 retries: this.options.retries,
             },
         );
@@ -417,6 +416,28 @@ export class FluxWebSocketConnection {
         );
 
         this.stateManager.emitNetworkState(reason === 'kicked' ? 'kicked' : 'disconnected');
+
+        // Sign on again from scratch: new handshake, new ticket, new connection.
+        // Driven by the disconnect, not by a successful reconnect — with an
+        // expired ticket there is no successful reconnect to hang this off.
+        //
+        // `disconnect()` does not reach here: it clears the socket's event
+        // subscribers, so no 'close' is emitted and nothing signs on again.
+        setTimeout(
+            () => {
+                Promise
+                    .resolve(this.onReconnectCallback())
+                    .catch((error: unknown) => {
+                        // Owned by a timer, so an unhandled rejection here would
+                        // take the process down (see #493).
+                        PicoLogger.error(
+                            `Failed to sign on again: ${error instanceof Error ? error.message : String(error)}`,
+                            this.fluxInstanceId,
+                        );
+                    });
+            },
+            reason === 'kicked' ? RECONNECTION_DELAY_ON_KICK_MS : RECONNECT_DELAY_MS,
+        );
     }
 
     private handleSocketConnecting(
