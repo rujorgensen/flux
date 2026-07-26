@@ -108,7 +108,7 @@
         "nx-oxlint": "^0.1.1",
         "open-cli": "9.0.0",
         "oxlint": "1.75.0",
-        "oxlint-tsgolint": "^0.25.0",
+        "oxlint-tsgolint": "^7.0.0",
         "testcontainers": "12.0.4",
         "tslib": "2.8.1",
         "vite": "catalog:",
