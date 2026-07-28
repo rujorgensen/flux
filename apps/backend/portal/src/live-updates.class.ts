@@ -17,13 +17,33 @@ import {
 } from '@persistica/flux-agent';
 interface IAgentJWTPayload extends jwt.JwtPayload {
     user: {
-        allowAllChannels: boolean;
+        isFluxAdmin?: true;
     };
+}
+
+interface IInternalMeshClaim extends jwt.JwtPayload {
+    isFluxAdmin?: true;
 }
 
 const NETWORK_ID: TNetworkId_S = 'internal-network' as TNetworkId_S; // Key to register a network, known to flux
 const NETWORK_ACCESS_TOKEN: TNetworkToken_S = randomUUIDv7() as TNetworkToken_S; // Key to register an authority, known to flux
-const FLUX_AUTHORITY_JWT_SECRET: string = randomUUIDv7(); // The authority uses this to sign the success payload
+// Stable across restarts when configured, so already-issued claims keep verifying.
+const FLUX_AUTHORITY_JWT_SECRET: string = process.env['FLUX_AUTHORITY_JWT_SECRET'] ?? randomUUIDv7();
+// Pinned on both sign and verify, so a token cannot pick a weaker algorithm.
+const JWT_ALGORITHM: jwt.Algorithm = 'HS256';
+
+/**
+ * Mints the claim an agent presents to join the internal network. Only the Portal
+ * can issue one, so `isFluxAdmin` cannot be forged by the browser.
+ */
+export const signInternalMeshClaim = (
+    isFluxAdmin: boolean,
+): string =>
+    jwt.sign(
+        isFluxAdmin ? { isFluxAdmin: true } : {},
+        FLUX_AUTHORITY_JWT_SECRET,
+        { expiresIn: '15m', algorithm: JWT_ALGORITHM },
+    );
 
 const subscribedNetworkChannels: Set<TNetworkId_S> = new Set();
 
@@ -75,28 +95,33 @@ export const liveUpdates = (
                     networkAccessToken: NETWORK_ACCESS_TOKEN,
 
                     /**
-                     * This is basically allowed for anyone as this is a 'network' meant for internal  Portal events
-                     * security happens in the individual channel subscriptions below.
+                     * The network itself is open — it only carries internal Portal events.
+                     * The claim decides admin rights; the channel authorizer enforces them.
                      */
                     authorizeAgentConnection: (
                         auth: unknown,
                     ): Promise<string> => {
-                        console.log('🔑 A client is trying to access the network', auth);
+                        console.log('🔑 A client is trying to access the network');
 
-                        // Test the agents claim to access network
-                        if (
-                            (auth !== CODE_TO_ACCESS_NETWORK)
-                        ) {
-                            return Promise.reject(new Error('Not allowed, bad agent claim'));
+                        let isFluxAdmin: boolean = false;
+
+                        if (auth !== CODE_TO_ACCESS_NETWORK) {
+                            try {
+                                isFluxAdmin = (jwt.verify(
+                                    auth as string,
+                                    FLUX_AUTHORITY_JWT_SECRET,
+                                    { algorithms: [JWT_ALGORITHM] },
+                                ) as IInternalMeshClaim).isFluxAdmin === true;
+                            } catch {
+                                return Promise.reject(new Error('Not allowed, bad agent claim'));
+                            }
                         }
 
-                        console.log('✅ Network access authorized');
+                        console.log(`✅ Network access authorized (flux admin: ${isFluxAdmin})`);
 
                         return Promise.resolve(jwt.sign({
-                            user: {
-                                allowAllChannels: true,
-                            },
-                        }, FLUX_AUTHORITY_JWT_SECRET, { expiresIn: 120_000 }));
+                            user: isFluxAdmin ? { isFluxAdmin: true } : {},
+                        }, FLUX_AUTHORITY_JWT_SECRET, { expiresIn: '15m', algorithm: JWT_ALGORITHM }));
                     },
 
                     // * Authorize channel
@@ -104,13 +129,16 @@ export const liveUpdates = (
                         channelTopic: string,
                         identification: string,
                     ): Promise<boolean> => {
-                        // `FLUX_AUTHORITY_JWT_SECRET` is regenerated per process, so a JWT
-                        // minted before a restart no longer verifies. Deny rather than throw
-                        // out of the authorization RPC.
-                        let agentJWT: IAgentJWTPayload;
+                        // The signing secret is per-process: a JWT held across a restart
+                        // no longer verifies. Deny rather than throw out of the RPC.
+                        let agentJWT: IAgentJWTPayload | undefined;
 
                         try {
-                            agentJWT = jwt.verify(identification, FLUX_AUTHORITY_JWT_SECRET) as IAgentJWTPayload;
+                            agentJWT = jwt.verify(
+                                identification,
+                                FLUX_AUTHORITY_JWT_SECRET,
+                                { algorithms: [JWT_ALGORITHM] },
+                            ) as IAgentJWTPayload;
                         } catch (error) {
                             console.error(`❌ Rejecting channel '${channelTopic}': could not verify the agent claim.`, error);
 
@@ -121,13 +149,14 @@ export const liveUpdates = (
 
                         // console.error(`✅ Client suscribed to channel with identification`);
 
+                        // Redis health and any other 'protected' channel is admin-only.
                         if (channelTopic.startsWith('protected')) {
-                            if (agentJWT.user.allowAllChannels) {
-                                console.log('✅ Agent is allowed on all channels');
+                            if (agentJWT.user.isFluxAdmin) {
+                                console.log('✅ Agent is a flux admin');
                                 return Promise.resolve(true);
                             }
 
-                            console.log('TODO: check if this agent is allowed to access the channel');
+                            console.log(`⛔ Rejecting '${channelTopic}': agent is not a flux admin`);
                             return Promise.resolve(false);
                         }
 
@@ -158,7 +187,8 @@ export const liveUpdates = (
                 },
             )
                 .connect(
-                    CODE_TO_ACCESS_NETWORK,
+                    // The Portal publishes on the protected channels, so it joins as admin.
+                    signInternalMeshClaim(true),
                     'backend-agent',
                 );
 
@@ -201,14 +231,8 @@ export const liveUpdates = (
                 });
             }, 3_000);
 
-            // The mesh only forwards a publish from a client that has *joined* the
-            // channel, and `getChannel()` on the authority connection never sends a
-            // subscribe frame — so publishing through it is silently discarded. Join
-            // these through the agent connection instead, the same way the per-network
-            // count channels below do.
-            // Joined one at a time: each join waits on an `authorizeChannelAccess` RPC
-            // round-trip, and the SDK's subscribe timeout is only 2s — enough headroom
-            // for one in flight, not four.
+            // Must join: the mesh drops publishes from non-members, and the authority's
+            // `getChannel()` never subscribes. One at a time — the subscribe timeout is 2s.
             const portalRedisHealthChannel: FluxNetworkChannel = await fluxNetworkConnection
                 .joinChannel('protected-portal-redis-health-alerts');
             const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
@@ -248,10 +272,8 @@ export const liveUpdates = (
                 void publishRedisStatus(meshRedisStatusService, meshRedisStatusChannel);
             };
 
-            // Matches the cadence of every other status channel in this file. This used to
-            // run every 100 ms — 30x the traffic for a panel a human reads at ~1 Hz.
             publishBothRedisStatuses();
-            setInterval(publishBothRedisStatuses, 3_000);
+            setInterval(publishBothRedisStatuses, 1_000);
 
             const manageChannelSubscriptions = (
                 networkId: TNetworkId_S,

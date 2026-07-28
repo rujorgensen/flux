@@ -5,7 +5,7 @@ import { Elysia, NotFoundError } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { RedisStatusService } from './_services/redis-status.service';
-import { liveUpdates } from './live-updates.class';
+import { liveUpdates, signInternalMeshClaim } from './live-updates.class';
 import { networkChannelController } from './api/networks/networks-channels.controller';
 import { getMeshBunRedisConnection } from '@flux/mesh/core/redis';
 import { getPortalRedisConnection } from '@flux/portal/core/redis';
@@ -148,6 +148,20 @@ export const app = new Elysia()
     })
 
     .get('/api/ping', () => 'pong')
+
+    /**
+     * Mints the claim the browser presents when joining the internal mesh. The
+     * admin flag is read from the session here so it cannot be set client-side.
+     */
+    .get(
+        '/api/internal-mesh/claim',
+        ({ user }): { claim: string; } => ({
+            claim: signInternalMeshClaim(user.isFluxAdmin === true),
+        }),
+        {
+            auth: true,
+        })
+
     .use(networkAuthorityController)
     .use(networkAgentController)
     .use(networkChannelController)
