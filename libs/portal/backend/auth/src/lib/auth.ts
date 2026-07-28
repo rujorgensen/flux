@@ -92,6 +92,23 @@ if (process.env['FLUX_MASTER_PASSWORD']) {
     } catch {
         console.warn('Admin user already exists, skipping creation.');
     }
+
+    // * `isFluxAdmin` is `input: false`, so sign-up can never set it. The master
+    // * password holder owns the deployment, so grant it here — on every boot,
+    // * so installs whose admin predates this also get promoted.
+    const { count } = await prisma.user.updateMany({
+        where: {
+            email: MASTER_PASSWORD_ADMIN_EMAIL,
+            isFluxAdmin: false,
+        },
+        data: {
+            isFluxAdmin: true,
+        },
+    });
+
+    if (count > 0) {
+        console.log(`Granted flux-admin to ${MASTER_PASSWORD_ADMIN_EMAIL}.`);
+    }
 } else {
     console.log('FLUX_MASTER_PASSWORD not set, skipping admin user creation.');
 }
