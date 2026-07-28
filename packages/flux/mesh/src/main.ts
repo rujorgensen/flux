@@ -419,6 +419,11 @@ export class FluxMeshServer {
                                             channelName,
                                             packageSize,
                                         );
+                                } else {
+                                    // Publishing to a channel you never joined is dropped by
+                                    // design, but dropping it silently makes the sender look
+                                    // healthy while nothing is delivered. Say so.
+                                    PicoLogger.warn(`Client '${ws.data.id}' published to channel '${channelName}' without having joined it. Message dropped.`, 'channel-publish');
                                 }
                             }
 

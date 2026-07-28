@@ -2,8 +2,10 @@ import {
     FluxAuthority
 } from '@persistica/flux-authority';
 import {
+    type FluxAgentNetworkConnection,
     FluxAgent
 } from '@persistica/flux-agent';
+import * as jwt from 'jsonwebtoken';
 import {
     describe,
     it,
@@ -158,5 +160,83 @@ describe('persistica-flux-api-agents', () => {
             'backend-agent-2',
         ]);
     });
+
+    /**
+     * The DragonFly page reads `protected-*-redis-status`. The portal used to publish
+     * those through its authority connection, and the mesh drops publishes from a
+     * client that never joined — so the page spun forever, with no error anywhere.
+     */
+    it('publishes DragonFly status on the protected redis-status channel', async () => {
+        const connection = await connectToInternalMesh(true, 'redis-status-reader');
+
+        const channel = await connection
+            .joinChannel('protected-portal-redis-status');
+
+        const received: string = await new Promise<string>((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('No DragonFly status published within 10s')), 10_000);
+
+            channel.onPublish((message) => {
+                clearTimeout(timeout);
+                resolve(message as string);
+            });
+        });
+
+        const status = JSON.parse(received);
+
+        expect(status.url).toBeString();
+        expect(status.memory.used).toBeNumber();
+        expect(status.clients).toBeDefined();
+    });
+
+    /**
+     * DragonFly health is for the flux admin who owns the deployment. `isFluxAdmin`
+     * is read from the session when the claim is minted, so nobody else can subscribe.
+     */
+    it('refuses the protected redis-status channel to a non-admin', async () => {
+        const connection = await connectToInternalMesh(false, 'non-admin-reader');
+
+        expect(await didJoin(connection, 'protected-portal-redis-status')).toBeFalse();
+    });
+
+    /**
+     * The network itself stays open so every portal user keeps receiving the dashboard
+     * counts. Joining with the bare network code must not confer admin rights.
+     */
+    it('refuses the protected redis-status channel to a plain network claim', async () => {
+        const connection = await new FluxAgent('internal-network', { domain: fluxDomain })
+            .connect(CODE_TO_ACCESS_NETWORK, 'plain-claim-reader');
+
+        expect(await didJoin(connection, 'protected-portal-redis-status')).toBeFalse();
+
+        // ...but the unprotected dashboard channels still work for that same client.
+        expect(await didJoin(connection, 'networks-some-network-channel-count-update')).toBeTrue();
+    });
+
+    const didJoin = (
+        connection: FluxAgentNetworkConnection,
+        channelName: string,
+    ): Promise<boolean> =>
+        connection
+            .joinChannel(channelName)
+            .then(() => true)
+            .catch(() => false);
+
+    /**
+     * Mints the same claim `/api/internal-mesh/claim` hands the browser. Signed with
+     * the shared `FLUX_AUTHORITY_JWT_SECRET`, so the portal process accepts it.
+     */
+    const connectToInternalMesh = (
+        isFluxAdmin: boolean,
+        agentUId: string,
+    ): Promise<FluxAgentNetworkConnection> => {
+        const claim = jwt.sign(
+            isFluxAdmin ? { isFluxAdmin: true } : {},
+            process.env['FLUX_AUTHORITY_JWT_SECRET']!,
+            { expiresIn: '15m' },
+        );
+
+        return new FluxAgent('internal-network', { domain: fluxDomain })
+            .connect(claim, agentUId);
+    };
 
 });

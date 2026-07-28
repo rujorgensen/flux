@@ -4,6 +4,7 @@ import {
     FluxAgent,
 } from '@persistica/flux-agent';
 import { resolveInternalMeshDomain } from './internal-mesh-domain.fn';
+import { apiBaseUrl } from '../api/api-base';
 
 @Injectable({
     providedIn: 'root',
@@ -13,8 +14,6 @@ export class FluxStatusAgentService extends FluxAgent {
     constructor(
 
     ) {
-        // ! TODO This is an internally used live connection for getting 
-        // ! Redis status data. Validate the user (check if they're flux admins) to check access rights.
         super(
             'internal-network',
             {
@@ -27,10 +26,25 @@ export class FluxStatusAgentService extends FluxAgent {
         );
     }
 
-    public override connect(
+    public override async connect(
 
     ): Promise<FluxAgentNetworkConnection> {
+        // The claim carries the session's `isFluxAdmin`, which gates the protected
+        // channels. It is minted server-side, so the browser cannot grant itself access.
+        const response: Response = await fetch(
+            `${apiBaseUrl}/api/internal-mesh/claim`,
+            {
+                credentials: 'include',
+            },
+        );
+
+        if (!response.ok) {
+            throw new Error(`Could not obtain an internal mesh claim (${response.status}).`);
+        }
+
+        const { claim } = await response.json() as { claim: string; };
+
         return super
-            .connect('code-to-access-network');
+            .connect(claim);
     }
 }

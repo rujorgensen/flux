@@ -64,6 +64,14 @@ export class DragonflyInfoPageComponent {
     constructor(
         private readonly _fluxStatusAgentService: FluxStatusAgentService,
     ) {
+        // A page that only ever spins looks identical whether the mesh is down, the
+        // channel join was denied, or nothing is publishing. Say which it is.
+        const noStatusTimeout = setTimeout(() => {
+            if (!this.statuses()) {
+                this.error.set('No DragonFly status received. The portal backend may not be reachable, or it is not publishing on the redis-status channels.');
+            }
+        }, 10_000);
+
         this._fluxStatusAgentService
             .connect()
             .then(async (connection) => {
@@ -93,8 +101,11 @@ export class DragonflyInfoPageComponent {
                         this._publishStatuses();
                     });
             })
-            .catch(error => {
+            .catch((error: unknown) => {
                 console.error('Failed to connect to Flux network:', error);
+
+                clearTimeout(noStatusTimeout);
+                this.error.set(`Could not subscribe to the DragonFly status channels: ${error instanceof Error ? error.message : String(error)}`);
             })
             ;
     }
@@ -112,6 +123,7 @@ export class DragonflyInfoPageComponent {
 
         if (statuses.length > 0) {
             this.statuses.set(statuses);
+            this.error.set(null);
         }
     }
 
