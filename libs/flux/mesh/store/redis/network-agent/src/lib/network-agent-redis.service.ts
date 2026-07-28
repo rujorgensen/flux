@@ -141,6 +141,18 @@ export class NetworkAgentRedisService {
             );
     }
 
+    /**
+     * Resolves which network an agent belongs to, from its client ID alone.
+     *
+     * @throws 'Network agent not found for clientId ...'
+     */
+    public async readAgentNetworkIdByClientIdOrThrow(
+        clientId: TClientId,
+    ): Promise<TNetworkId_S> {
+        return this._networkAgentRedisRepository
+            .readAgentNetworkIdByClientIdOrThrow(clientId);
+    }
+
     // ****************************************************************************
     // * Delete
     // ****************************************************************************

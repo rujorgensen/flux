@@ -105,21 +105,41 @@ describe('portal-visibility', () => {
      * (no networkId). That resolves the networkId from the global `~/clients` hash.
      * Regression guard for the `~/authorities` / `~/agents` rename leftover.
      */
-    it('unregisters an agent and authority by clientId alone', async () => {
+    it('unregisters an authority by clientId alone', async () => {
         const redis = getMeshRedisConnection();
-        const agentService = new NetworkAgentRedisService(redis);
         const authorityService = new NetworkAuthorityRedisService(redis);
 
-        const [agent] = await agentService.readAgents(NETWORK_ID);
         const [authority] = await authorityService.readAuthorities(NETWORK_ID);
-        expect(agent).toBeTruthy();
         expect(authority).toBeTruthy();
 
         // No networkId passed — forces the `~/clients` lookup that was broken.
-        await agentService.unregisterAgentOrThrow(agent!.id);
         await authorityService.unregisterAuthority(authority!.id);
 
-        expect((await agentService.readAgents(NETWORK_ID)).some((a) => a.id === agent!.id)).toBeFalse();
         expect((await authorityService.readAuthorities(NETWORK_ID)).some((a) => a.id === authority!.id)).toBeFalse();
+    });
+
+    /**
+     * The reaper knows only a dead process's clientIds. If it can't resolve the rest,
+     * the portal keeps listing channels (with members!) on a network with no agents.
+     */
+    it('reaping an agent by clientId alone deletes the channels it was the last member of', async () => {
+        const redis = getMeshRedisConnection();
+        const agentService = new NetworkAgentRedisService(redis);
+        const channelService = new NetworkChannelService(redis);
+
+        const [agent] = await agentService.readAgents(NETWORK_ID);
+        expect(agent).toBeTruthy();
+        expect((await channelService.readNetworkChannelCount(NETWORK_ID)).count).toBeGreaterThan(0);
+
+        // Backdate the heartbeat past the 10s liveness window: the reaper now sees a
+        // crashed node and must clean up from the clientId alone.
+        const [machineAddress, processId] = agent!.address.split('/');
+        await redis.sortedSet.zadd('~machines/processes', 0, `${machineAddress}/${processId}`);
+
+        await fluxMeshServer.cleanupOrphans();
+
+        expect((await agentService.readAgents(NETWORK_ID)).some((a) => a.id === agent!.id)).toBeFalse();
+        expect(await channelService.readChannelNamesForClientId(NETWORK_ID, agent!.id)).toBeEmpty();
+        expect((await channelService.readNetworkChannelCount(NETWORK_ID)).count).toBe(0);
     });
 });

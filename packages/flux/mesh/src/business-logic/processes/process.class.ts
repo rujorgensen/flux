@@ -73,13 +73,13 @@ export class ProcessClass {
             await this
                 ._redisConnection
                 .hash
-                .srem(`~/machines/processes/${disconnectedProcess}/clients`);
+                .del(`~/machines/processes/${disconnectedProcess}/clients`);
 
             // Remove list of authorities for the process
             await this
                 ._redisConnection
                 .hash
-                .srem(`~/machines/processes/${disconnectedProcess}/authorities`);
+                .del(`~/machines/processes/${disconnectedProcess}/authorities`);
         }
 
         return Promise.resolve();

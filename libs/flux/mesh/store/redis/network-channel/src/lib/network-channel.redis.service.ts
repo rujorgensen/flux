@@ -226,7 +226,9 @@ export class NetworkChannelService {
         clientAddress: TAddress,
         channelNames: Set<TChannelName>,
     ): Promise<void> {
-        await Promise.all(
+        // Settled, not all: `leaveNetworkChannel` rejects on an already-removed member,
+        // which must not abort the remaining channels.
+        await Promise.allSettled(
             [...channelNames]
                 .map((channelName) =>
                     this.leaveNetworkChannel(
