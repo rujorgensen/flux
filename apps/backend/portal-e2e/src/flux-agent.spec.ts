@@ -159,4 +159,41 @@ describe('persistica-flux-api-agents', () => {
         ]);
     });
 
+    /**
+     * The admin DragonFly page reads its data off `protected-*-redis-status`. The
+     * portal used to publish those through its authority connection, and the mesh
+     * drops any publish from a client that never joined the channel — so the page
+     * spun forever with no error anywhere. Assert a payload actually arrives.
+     */
+    it('publishes DragonFly status on the protected redis-status channel', async () => {
+        const connection = await new FluxAgent(
+            'internal-network',
+            {
+                domain: fluxDomain,
+            },
+        )
+            .connect(
+                'code-to-access-network',
+                'redis-status-reader',
+            );
+
+        const channel = await connection
+            .joinChannel('protected-portal-redis-status');
+
+        const received: string = await new Promise<string>((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('No DragonFly status published within 10s')), 10_000);
+
+            channel.onPublish((message) => {
+                clearTimeout(timeout);
+                resolve(message as string);
+            });
+        });
+
+        const status = JSON.parse(received);
+
+        expect(status.url).toBeString();
+        expect(status.memory.used).toBeNumber();
+        expect(status.clients).toBeDefined();
+    });
+
 });

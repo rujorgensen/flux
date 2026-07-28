@@ -17,7 +17,7 @@
             </div>
         }
 
-        @if (!statuses()) {
+        @if (!statuses() && !error()) {
             <div class="flex justify-center py-12">
                 <span class="loading loading-spinner loading-lg"></span>
             </div>

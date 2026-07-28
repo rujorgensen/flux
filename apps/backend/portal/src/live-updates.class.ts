@@ -104,7 +104,18 @@ export const liveUpdates = (
                         channelTopic: string,
                         identification: string,
                     ): Promise<boolean> => {
-                        const agentJWT = jwt.verify(identification, FLUX_AUTHORITY_JWT_SECRET) as IAgentJWTPayload;
+                        // `FLUX_AUTHORITY_JWT_SECRET` is regenerated per process, so a JWT
+                        // minted before a restart no longer verifies. Deny rather than throw
+                        // out of the authorization RPC.
+                        let agentJWT: IAgentJWTPayload;
+
+                        try {
+                            agentJWT = jwt.verify(identification, FLUX_AUTHORITY_JWT_SECRET) as IAgentJWTPayload;
+                        } catch (error) {
+                            console.error(`❌ Rejecting channel '${channelTopic}': could not verify the agent claim.`, error);
+
+                            return Promise.resolve(false);
+                        }
 
                         console.log(`🔒 A client is attempting to subscribe to channel name '${channelTopic}', using identification '${JSON.stringify(agentJWT.user)}'`);
 
@@ -190,13 +201,24 @@ export const liveUpdates = (
                 });
             }, 3_000);
 
+            // The mesh only forwards a publish from a client that has *joined* the
+            // channel, and `getChannel()` on the authority connection never sends a
+            // subscribe frame — so publishing through it is silently discarded. Join
+            // these through the agent connection instead, the same way the per-network
+            // count channels below do.
+            // Joined one at a time: each join waits on an `authorizeChannelAccess` RPC
+            // round-trip, and the SDK's subscribe timeout is only 2s — enough headroom
+            // for one in flight, not four.
+            const portalRedisHealthChannel: FluxNetworkChannel = await fluxNetworkConnection
+                .joinChannel('protected-portal-redis-health-alerts');
+            const meshRedisHealthAlertChannel: FluxNetworkChannel = await fluxNetworkConnection
+                .joinChannel('protected-mesh-redis-health-alerts');
+            const portalRedisStatusChannel: FluxNetworkChannel = await fluxNetworkConnection
+                .joinChannel('protected-portal-redis-status');
+            const meshRedisStatusChannel: FluxNetworkChannel = await fluxNetworkConnection
+                .joinChannel('protected-mesh-redis-status');
+
             // * Listen to Redis health
-            const portalRedisHealthChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
-                .getChannel('protected-portal-redis-health-alerts');
-
-            const meshRedisHealthAlertChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
-                .getChannel('protected-mesh-redis-health-alerts');
-
             portalRedisStatusService
                 .onAlert((alerts: string[]) => {
                     portalRedisHealthChannel.publish(JSON.stringify(alerts));
@@ -206,12 +228,6 @@ export const liveUpdates = (
                 .onAlert((alerts: string[]) => {
                     meshRedisHealthAlertChannel.publish(JSON.stringify(alerts));
                 });
-
-            // * Listen to status
-            const portalRedisStatusChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
-                .getChannel('protected-portal-redis-status');
-            const meshRedisStatusChannel: FluxNetworkChannel = fluxAuthorityNetworkConnection
-                .getChannel('protected-mesh-redis-status');
 
             const publishRedisStatus = async (
                 service: RedisStatusService,
@@ -227,10 +243,15 @@ export const liveUpdates = (
                 }
             };
 
-            setInterval(() => {
+            const publishBothRedisStatuses = (): void => {
                 void publishRedisStatus(portalRedisStatusService, portalRedisStatusChannel);
                 void publishRedisStatus(meshRedisStatusService, meshRedisStatusChannel);
-            }, 100);
+            };
+
+            // Matches the cadence of every other status channel in this file. This used to
+            // run every 100 ms — 30x the traffic for a panel a human reads at ~1 Hz.
+            publishBothRedisStatuses();
+            setInterval(publishBothRedisStatuses, 3_000);
 
             const manageChannelSubscriptions = (
                 networkId: TNetworkId_S,
