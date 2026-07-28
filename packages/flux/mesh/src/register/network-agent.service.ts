@@ -12,6 +12,7 @@ import { NetworkAgentRedisCache } from './network-agent-redis-cache.class';
 import { NetworkAgentRedisRepository } from '../../../../../libs/flux/mesh/store/redis/network-agent/src/lib/network-agent-redis.repository';
 import { NetworkChannelManager } from '../business-logic/channels/channel-manager.class';
 import { RedisConnection } from '../routing/redis/redis-connection.class';
+import { PicoLogger } from '@utils/pico-logger';
 
 export class NetworkAgentService {
     private readonly networkAgentRedisRepository: NetworkAgentRedisRepository;
@@ -66,12 +67,14 @@ export class NetworkAgentService {
         const networkId_: TNetworkId_S = networkId ?? await this.networkAgentRedisRepository
             .readAgentNetworkIdByClientIdOrThrow(clientId);
 
-        await this.networkAgentRedisCache
-            .unregister(
-                clientId,
-                networkId_,
-                clientOwnUId,
-            );
+        // The orphan reaper has no socket, so no address. Read it back from the agent
+        // hash, which still exists until we unregister below.
+        const clientAddress_: TAddress | undefined = clientAddress
+            ?? (await this.networkAgentRedisRepository
+                .readAgentByClientId(
+                    networkId_,
+                    clientId,
+                ))?.address;
 
         const channelNames_ = networkChannels ?? await this.networkChannelManager
             .readChannelNamesForClientId(
@@ -79,15 +82,24 @@ export class NetworkAgentService {
                 clientId,
             );
 
-        if (!clientAddress) {
-            throw new Error('Resolve client address if not provided.');
+        if (clientAddress_) {
+            // Leave channels before unregistering: on failure the agent stays visible
+            // for the next reaper pass, rather than orphaning its memberships forever.
+            await this.networkChannelManager
+                .leaveAllNetworkChannels(
+                    networkId_,
+                    clientAddress_,
+                    channelNames_,
+                );
+        } else if (channelNames_.size > 0) {
+            PicoLogger.warn(`Could not resolve an address for client '${clientId}' on network '${networkId_}'; leaving ${channelNames_.size} channel membership(s) behind.`, 'network-agent');
         }
 
-        await this.networkChannelManager
-            .leaveAllNetworkChannels(
+        await this.networkAgentRedisCache
+            .unregister(
+                clientId,
                 networkId_,
-                clientAddress,
-                channelNames_,
+                clientOwnUId,
             );
     }
 

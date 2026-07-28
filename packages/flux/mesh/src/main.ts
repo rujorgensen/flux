@@ -691,6 +691,16 @@ export class FluxMeshServer {
     }
 
     /**
+     * Reaps clients left behind by processes that died without disconnecting.
+     * Runs on a timer internally; public so tests can drive it deterministically.
+     */
+    public cleanupOrphans(
+    ): Promise<void> {
+        return this.processClass
+            .cleanupOrphans(machineAddress);
+    }
+
+    /**
      * Gracefully shuts down the server.
      */
     public async stop(
