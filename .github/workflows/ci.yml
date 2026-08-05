@@ -83,6 +83,11 @@ jobs:
           fetch-depth: 0
 
       - uses: nrwl/nx-set-shas@v5
+        with:
+          # Gitea Actions doesn't expose the workflow id the way GitHub's API does, so the
+          # action resolves it to 'undefined' and exits 1. Naming the file explicitly works
+          # on both forges -- GitHub derives the same value on its own.
+          workflow-id: ci.yml
 
       - name: 💾 Install Bun
         uses: oven-sh/setup-bun@v2
@@ -137,6 +142,8 @@ jobs:
           fetch-depth: 0
 
       - uses: nrwl/nx-set-shas@v5
+        with:
+          workflow-id: ci.yml # Same reason as above.
 
       - name: 💾 Install Bun
         uses: oven-sh/setup-bun@v2
@@ -191,6 +198,8 @@ jobs:
           fetch-depth: 0    # 👈 Required to retrieve git history
 
       - uses: nrwl/nx-set-shas@v5
+        with:
+          workflow-id: ci.yml # Same reason as above.
 
       - name: 💾 Install Bun
         uses: oven-sh/setup-bun@v2
