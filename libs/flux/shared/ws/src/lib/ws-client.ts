@@ -13,7 +13,7 @@ import {
 // import { decrypt } from '../../utils/obscuring/decrypt.utils';
 // import { encrypt } from '../../utils/obscuring/encyprt.utils';
 
-type WebSocketEvent = 'open' | 'message' | 'close' | 'connecting' | 'error';
+type WebSocketEvent = 'open' | 'message' | 'close' | 'connect-failed' | 'connecting' | 'error';
 
 type WebSocketClientOptions = {
     url: string;
@@ -34,6 +34,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         open: [],
         message: [],
         close: [],
+        'connect-failed': [],
         error: [],
         connecting: [],
     };
@@ -48,6 +49,11 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     private awaitingPong: boolean = false;
     private pongSeen: boolean = false; // The server proved it answers pings on this connection
     private closeHandled: boolean = false; // Guards against running the close path twice (heartbeat + late onclose)
+
+    // The current `connect()` promise's reject, held so the close path can settle a
+    // socket that dies before it opens — `onclose` cancels the connection timeout,
+    // so without this the promise has nothing left to settle it (see #508).
+    private pendingConnectReject: ((error: Error) => void) | undefined;
 
     constructor(
         options: WebSocketClientOptions,
@@ -71,6 +77,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
     ): Promise<void> {
         return new Promise((resolve, reject) => {
             this.closeHandled = false;
+            this.pendingConnectReject = reject;
             this.emit('connecting', this.reconnectAttempts);
 
             // Kept in a local so every handler can ignore events from a superseded
@@ -85,6 +92,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
                 if (socket.readyState !== WebSocket.OPEN) {
                     socket.close();
 
+                    this.pendingConnectReject = undefined;
                     reject(new Error('Connection timeout'));
                 }
             }, this.options.connectionTimeout);
@@ -98,6 +106,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 
                 this.reconnectAttempts = 0;
                 this.isOpen = true;
+                this.pendingConnectReject = undefined;
                 this.startHeartbeat();
                 this.emit('open');
 
@@ -158,6 +167,8 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
 
         this.stopHeartbeat();
 
+        const neverOpened: boolean = !this.isOpen;
+
         // Only emit, if the connection was open before
         if (this.isOpen) {
             this.emit(
@@ -167,10 +178,26 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
             this.isOpen = false;
         }
 
-        if (
-            this.options.autoReconnect &&
-            ((this.options.retries === undefined) || (this.reconnectAttempts < this.options.retries))
-        ) {
+        const willRetry: boolean = (this.options.autoReconnect === true) &&
+            ((this.options.retries === undefined) || (this.reconnectAttempts < this.options.retries));
+
+        if (neverOpened) {
+            // A socket that dies before it opens has no 'close' to emit — there was no
+            // open connection to lose — and `onclose` has already cancelled the
+            // connection timeout, so `connect()` would otherwise never settle. Settle
+            // it, and when nothing here will retry, tell the owner of the connection:
+            // it holds the ticket and is the only layer that can dial again (#508).
+            const rejectPendingConnect = this.pendingConnectReject;
+
+            this.pendingConnectReject = undefined;
+            rejectPendingConnect?.(new Error('WebSocket closed before the connection was established'));
+
+            if (!willRetry) {
+                this.emit('connect-failed');
+            }
+        }
+
+        if (willRetry) {
             const delay: number = wasKicked ?
                 RECONNECTION_DELAY_ON_KICK_MS
                 :
@@ -294,6 +321,7 @@ export class WebSocketClient<T extends string> extends RPCServer<T> {
         this.eventListeners.open = [];
         this.eventListeners.message = [];
         this.eventListeners.close = [];
+        this.eventListeners['connect-failed'] = [];
         this.eventListeners.connecting = [];
         this.eventListeners.error = [];
     }
