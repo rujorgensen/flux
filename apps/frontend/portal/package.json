@@ -23,14 +23,8 @@
         "daisyui": "catalog:",
         "highlight.js": "catalog:",
         "ngx-sonner": "catalog:",
-        "open-props": "catalog:",
         "postcss": "catalog:",
-        "rollup-plugin-visualizer": "catalog:",
-        "tailwind-merge": "catalog:",
-        "tailwind-variants": "catalog:",
-        "tailwindcss": "catalog:",
-        "tw-animate-css": "catalog:",
-        "zod": "catalog:"
+        "tailwindcss": "catalog:"
     },
     "devDependencies": {
         "@tailwindcss/vite": "catalog:",
