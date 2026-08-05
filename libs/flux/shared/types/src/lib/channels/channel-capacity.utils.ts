@@ -1,6 +1,6 @@
 import type {
     TSubscription_S,
-} from '@flux/shared/types';
+} from '../network.type';
 
 export const MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE: {
     [key in TSubscription_S]: number

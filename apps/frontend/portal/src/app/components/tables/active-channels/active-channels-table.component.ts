@@ -10,8 +10,9 @@ import {
     signal,
 } from '@angular/core';
 import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
-import type {
-    INetworkChannel,
+import {
+    type INetworkChannel,
+    MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE,
 } from '@flux/shared/types';
 import { api } from '$lib/app/_services/api/api';
 import { apiBaseUrl } from '$lib/app/_services/api/api-base';
@@ -23,7 +24,6 @@ import {
 import { NetworksService } from '$lib/app/_services/networks.service';
 import { filter, map, type Observable } from 'rxjs';
 import type { INetwork_S } from '@flux/shared/features/networks';
-import { MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE } from '@flux/shared/features/channels';
 
 const MAX_SNIFF_PACKETS = 50;
 

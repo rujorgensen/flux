@@ -81,6 +81,11 @@ export type {
     TNetworkChannelCountAt,
 } from './lib/channels/network-channel.type';
 
+export {
+    MAX_CHANNEL_MEMBERS,
+    MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE,
+} from './lib/channels/channel-capacity.utils';
+
 export type {
     TNetworkAuthority,
     TNetworkAuthorityCountAt,

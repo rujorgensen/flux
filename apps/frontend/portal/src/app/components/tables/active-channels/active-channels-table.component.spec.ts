@@ -4,7 +4,7 @@ import {
 } from './channel-capacity.utils';
 import {
     MAX_CHANNEL_MEMBERS,
-} from '@flux/shared/features/channels';
+} from '@flux/shared/types';
 
 describe('deriveChannelFillPercent', () => {
     it('should return 0 for empty channels', () => {

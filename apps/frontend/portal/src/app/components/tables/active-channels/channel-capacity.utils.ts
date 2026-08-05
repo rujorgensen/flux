@@ -1,9 +1,7 @@
-import type {
-    TSubscription_S,
-} from '@flux/shared/types';
 import {
+    type TSubscription_S,
     MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE,
-} from '@flux/shared/features/channels';
+} from '@flux/shared/types';
 
 /**
  * Calculates the current channel capacity fill as a percentage.
