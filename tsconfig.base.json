@@ -62,9 +62,6 @@
             "@flux/shared/types": [
                 "./libs/flux/shared/types/src/index.ts"
             ],
-            "@flux/shared/features/channels": [
-                "./libs/flux/shared/features/channels/src/index.ts"
-            ],
             "@flux/shared/features/networks": [
                 "./libs/shared/features/networks/src/index.ts"
             ],

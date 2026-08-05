@@ -5,7 +5,7 @@ import {
     resolveSubscriptionTypeOrDefault,
 } from './business-logic/channels/channel-manager.utils';
 import { normalizeAuthorityClaimOrThrow } from './auth/auth';
-import { MAX_CHANNEL_MEMBERS, MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE } from '@flux/shared/features/channels';
+import { MAX_CHANNEL_MEMBERS, MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE } from '@flux/shared/types';
 
 const ONE_MILLION_MESSAGES = 1_000_000;
 
