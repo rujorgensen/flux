@@ -36,6 +36,12 @@ const getCloseHandler = (
     return Reflect.get(connection, 'socketCloseHandler') as (reason?: 'kicked') => void;
 };
 
+const getConnectFailedHandler = (
+    connection: FluxWebSocketConnection,
+): (() => void) => {
+    return Reflect.get(connection, 'socketConnectFailedHandler') as () => void;
+};
+
 const getReadyInterceptor = (
     connection: FluxWebSocketConnection,
 ): TMessageCallback => {
@@ -164,6 +170,77 @@ describe('FluxWebSocketConnection', () => {
         await new Promise((resolve) => setTimeout(resolve, RECONNECT_DELAY_MS + 250));
 
         expect(signOns).toBe(1);
+    });
+
+    it('signs on again when the socket dies before it opens', async () => {
+        // The pre-open sibling of the case above (#508): a socket that never opens
+        // emits no 'close', so nothing signed on again and the Authority stayed up,
+        // silent and unregistered, until someone restarted it.
+        let signOns = 0;
+
+        const connection = new FluxWebSocketConnection(
+            'flux-instance',
+            () => {
+                signOns++;
+            },
+            new StateManager(),
+            'token',
+            {
+                domain: 'https://flux.test',
+            },
+        );
+        const socket = getSocketStub(connection);
+
+        socket.clearEventSubscribers = () => {};
+        socket.on = () => socket;
+        socket.connect = async () => {};
+        socket.close = () => {};
+
+        getConnectFailedHandler(connection)();
+
+        expect(signOns).toBe(0); // Not synchronously — the mesh gets breathing room first.
+
+        await new Promise((resolve) => setTimeout(resolve, RECONNECT_DELAY_MS + 250));
+
+        expect(signOns).toBe(1);
+    });
+
+    it('drops the unsettleable connect promise when the socket dies before it opens', async () => {
+        // Nothing can resolve a `connect()` awaiting a socket that never opened — a
+        // later call has to dial a fresh one instead of joining that dead promise.
+        const connection = new FluxWebSocketConnection(
+            'flux-instance',
+            () => {},
+            new StateManager(),
+            'token',
+            {
+                domain: 'https://flux.test',
+            },
+        );
+        const socket = getSocketStub(connection);
+
+        let connectCalls = 0;
+
+        socket.clearEventSubscribers = () => {};
+        socket.on = () => socket;
+        socket.connect = async () => {
+            connectCalls++;
+        };
+        socket.close = () => {};
+
+        void connection.connect();
+
+        expect(connectCalls).toBe(1);
+
+        getConnectFailedHandler(connection)();
+
+        const secondConnect = connection.connect();
+
+        expect(connectCalls).toBe(2);
+
+        getReadyInterceptor(connection)('isReady');
+
+        await secondConnect;
     });
 
     it('does not sign on again after the socket auto-reconnects on its own', () => {

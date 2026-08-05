@@ -81,6 +81,30 @@ const startHangingServer = (
     };
 };
 
+/**
+ * A mesh that answers the upgrade request with an error instead of switching
+ * protocols: the socket closes without ever opening (code 1002). This is the
+ * shape of the outage in #508 — the browser/Bun message is 'WebSocket is closed
+ * before the connection is established'.
+ */
+const startUpgradeRefusingServer = (
+): { server: ReturnType<typeof Bun.serve>; stop: () => void } => {
+    const server = Bun.serve({
+        port: 0,
+        fetch(
+        ) {
+            return new Response('Upgrade refused', { status: 500 });
+        },
+    });
+
+    return {
+        server,
+        stop: () => {
+            server.stop(true);
+        },
+    };
+};
+
 const waitFor = async (
     predicate: () => boolean,
     timeoutMs: number,
@@ -315,6 +339,98 @@ describe('WebSocketClient reconnect against an unreachable mesh (#493)', () => {
         const thirdGap: number = attemptAt[3] - attemptAt[2];
 
         expect(thirdGap).toBeGreaterThan(firstGap + 60);
+    });
+
+    it('settles `connect()` when the socket dies before it opens', async () => {
+        // `onclose` cancels the connection timeout, so a pre-open death used to leave
+        // this promise pending forever — and with it the `await` in `registerAuthority`.
+        const harness = startUpgradeRefusingServer();
+        servers.push(harness);
+
+        const client = new WebSocketClient<string>({
+            url: `ws://localhost:${harness.server.port}`,
+            autoReconnect: false,
+            heartbeatInterval: 0,
+        });
+        clients.push(client);
+
+        await expect(client.connect()).rejects.toThrow('WebSocket closed before the connection was established');
+    });
+
+    it('emits `connect-failed` for a pre-open death nothing will retry', async () => {
+        // No 'close' is emitted (the connection was never open), and autoReconnect is
+        // off for ticketed URLs — without this event the owner of the ticket never
+        // learns the socket is gone and never dials again (#508).
+        const harness = startUpgradeRefusingServer();
+        servers.push(harness);
+
+        let connectFailures = 0;
+        let closes = 0;
+        const client = new WebSocketClient<string>({
+            url: `ws://localhost:${harness.server.port}`,
+            autoReconnect: false,
+            heartbeatInterval: 0,
+        });
+        clients.push(client);
+        client.on('connect-failed', () => {
+            connectFailures++;
+        });
+        client.on('close', () => {
+            closes++;
+        });
+
+        await client.connect().catch(() => undefined);
+        await waitFor(() => connectFailures > 0, 1_000);
+
+        expect(connectFailures).toBe(1);
+        expect(closes).toBe(0);
+    });
+
+    it('does not emit `connect-failed` while it is still retrying on its own', async () => {
+        // With autoReconnect on, the retry loop is the recovery — handing the failure
+        // upwards as well would sign on again in parallel and double-connect.
+        const harness = startUpgradeRefusingServer();
+        servers.push(harness);
+
+        let connectFailures = 0;
+        let connectingEvents = 0;
+        const client = makeReconnectingClient(`ws://localhost:${harness.server.port}`, 20);
+        client.on('connect-failed', () => {
+            connectFailures++;
+        });
+        client.on('connecting', () => {
+            connectingEvents++;
+        });
+
+        await client.connect().catch(() => undefined);
+        await waitFor(() => connectingEvents >= 3, 3_000);
+
+        expect(connectFailures).toBe(0);
+        expect(unhandled).toHaveLength(0);
+    });
+
+    it('reports a pre-open death once the retries are exhausted', async () => {
+        const harness = startUpgradeRefusingServer();
+        servers.push(harness);
+
+        let connectFailures = 0;
+        const client = new WebSocketClient<string>({
+            url: `ws://localhost:${harness.server.port}`,
+            autoReconnect: true,
+            reconnectDelay: 10,
+            heartbeatInterval: 0,
+            retries: 2,
+        });
+        clients.push(client);
+        client.on('connect-failed', () => {
+            connectFailures++;
+        });
+
+        await client.connect().catch(() => undefined);
+        await waitFor(() => connectFailures > 0, 3_000);
+
+        expect(connectFailures).toBe(1);
+        expect(unhandled).toHaveLength(0);
     });
 
     it('stops retrying once `retries` is exhausted and reports it', async () => {

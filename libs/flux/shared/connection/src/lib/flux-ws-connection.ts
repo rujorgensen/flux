@@ -97,6 +97,7 @@ export class FluxWebSocketConnection {
     };
     private readonly socketMessageHandler: TMessageCallback = this.handleMessage.bind(this);
     private readonly socketCloseHandler = (reason?: 'kicked'): void => this.handleSocketClose(reason);
+    private readonly socketConnectFailedHandler = (): void => this.handleSocketConnectFailed();
     private readonly socketConnectingHandler = (retryAttempt: number): void => this.handleSocketConnecting(retryAttempt);
     private readonly socketErrorHandler = (error: Error): void => this.handleSocketError(error);
 
@@ -193,6 +194,7 @@ export class FluxWebSocketConnection {
         this.socket
             .on('message', this.socketMessageHandler)
             .on('close', this.socketCloseHandler)
+            .on('connect-failed', this.socketConnectFailedHandler)
             .on('connecting', this.socketConnectingHandler)
             .on('error', this.socketErrorHandler);
 
@@ -417,12 +419,44 @@ export class FluxWebSocketConnection {
 
         this.stateManager.emitNetworkState(reason === 'kicked' ? 'kicked' : 'disconnected');
 
-        // Sign on again from scratch: new handshake, new ticket, new connection.
-        // Driven by the disconnect, not by a successful reconnect — with an
-        // expired ticket there is no successful reconnect to hang this off.
-        //
-        // `disconnect()` does not reach here: it clears the socket's event
-        // subscribers, so no 'close' is emitted and nothing signs on again.
+        this.scheduleSignOn(reason === 'kicked' ? RECONNECTION_DELAY_ON_KICK_MS : RECONNECT_DELAY_MS);
+    }
+
+    /**
+     * A socket that died before it ever opened. It emits no 'close' — there was no
+     * open connection to lose — and the low-level client does not re-dial it, since
+     * the ticket in its URL is single-use and expiring. Signing on again is the only
+     * way back, and nothing else will start it: before this, a socket that failed
+     * this way left the Authority up, silent and unregistered, until a human
+     * restarted the process (#508).
+     */
+    private handleSocketConnectFailed(
+    ): void {
+        this.webSocketClient = undefined;
+
+        // Nothing can resolve the pending `connect()` any more — drop it, so a later
+        // call dials a fresh socket instead of awaiting a promise no one will settle.
+        this.connectPromiseResolver = undefined;
+        this.connectPromise = undefined;
+
+        PicoLogger.log('🔌🔴 The connection failed before it was established', this.fluxInstanceId);
+
+        this.stateManager.emitNetworkState('disconnected');
+
+        this.scheduleSignOn(RECONNECT_DELAY_MS);
+    }
+
+    /**
+     * Signs on again from scratch: new handshake, new ticket, new connection.
+     * Driven by the disconnect, not by a successful reconnect — with an expired
+     * ticket there is no successful reconnect to hang this off.
+     *
+     * `disconnect()` does not reach here: it clears the socket's event subscribers,
+     * so nothing is emitted and nothing signs on again.
+     */
+    private scheduleSignOn(
+        delayMs: number,
+    ): void {
         setTimeout(
             () => {
                 Promise
@@ -436,7 +470,7 @@ export class FluxWebSocketConnection {
                         );
                     });
             },
-            reason === 'kicked' ? RECONNECTION_DELAY_ON_KICK_MS : RECONNECT_DELAY_MS,
+            delayMs,
         );
     }
 
