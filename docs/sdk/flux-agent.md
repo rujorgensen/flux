@@ -61,7 +61,7 @@ because Agents run on untrusted machines.
 | `connecting` | Opening the WebSocket. |
 | `connected` | Ready to join channels and exchange messages. |
 | `auth-error` | `connect()` rejected (bad claim, unreachable mesh, or authority never appeared). |
-| `disconnected` / `kicked` | Socket closed / removed by an Authority. |
+| `disconnected` / `kicked` | Socket closed / removed by an Authority. Not terminal: the SDK signs on again by itself — after ~2 s for a plain disconnect, after 30 min for a kick — and if an attempt fails it keeps retrying with backoff (capped at 30 s), forever. Do not build reconnection app-side; just listen for the state changes. |
 
 ## Error-handling pattern
 

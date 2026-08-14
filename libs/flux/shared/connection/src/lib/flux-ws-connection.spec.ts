@@ -243,6 +243,43 @@ describe('FluxWebSocketConnection', () => {
         await secondConnect;
     });
 
+    it('keeps re-scheduling sign-on with capped backoff when an attempt fails', async () => {
+        // One shot per disconnect used to be the client's last (#516): if the
+        // scheduled sign-on itself failed — laptop waking before its network,
+        // mesh outage outlasting the inner retry budget — the catch only
+        // logged and the client was permanently offline. A failed attempt must
+        // schedule the next one; a successful one must schedule nothing.
+        let signOns = 0;
+
+        const connection = new FluxWebSocketConnection(
+            'flux-instance',
+            () => {
+                signOns++;
+
+                if (signOns < 3) {
+                    return Promise.reject(new Error('mesh unreachable'));
+                }
+
+                return Promise.resolve();
+            },
+            new StateManager(),
+            'token',
+            {
+                domain: 'https://flux.test',
+            },
+        );
+
+        // Called directly with a tiny delay so the doubling retries stay
+        // test-fast — the backoff logic is the same at any starting delay.
+        (Reflect.get(connection, 'scheduleSignOn') as (delayMs: number) => void).call(connection, 10);
+
+        await new Promise((resolve) => setTimeout(resolve, 250));
+
+        // 10ms → fails → 20ms → fails → 40ms → succeeds. Well within the wait,
+        // so a fourth attempt would have fired by now if success re-scheduled.
+        expect(signOns).toBe(3);
+    });
+
     it('does not sign on again after the socket auto-reconnects on its own', () => {
         // Auto-reconnect is off precisely because it would re-dial the expired
         // ticket. If it is ever turned back on, the sign-on path double-connects.
