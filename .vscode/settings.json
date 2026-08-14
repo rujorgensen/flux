@@ -26,5 +26,6 @@
     },
     "cssVariables.lookupFiles": [
         "node_modules/open-props/open-props.min.css"
-	]
+    ],
+    "js/ts.tsdk.path": "node_modules/@typescript/native-preview"
 }
