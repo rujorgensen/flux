@@ -25,14 +25,17 @@ jobs:
             package_dir: packages/flux/mesh
             test_target: bun-test
             tag_prefix: flux-mesh-v
+            watch_paths: packages/flux/mesh libs/flux/mesh libs/flux/shared
           - project_name: persistica-flux-agent
             package_dir: packages/flux/agent
             test_target: bun-test
             tag_prefix: flux-agent-v
+            watch_paths: packages/flux/agent libs/flux/shared
           - project_name: persistica-flux-authority
             package_dir: packages/flux/authority
             test_target: bun-test
             tag_prefix: flux-authority-v
+            watch_paths: packages/flux/authority libs/flux/shared
 
     steps:
       - name: Checkout repository
@@ -126,6 +129,27 @@ jobs:
           echo "npm_tag=${NPM_TAG}" >> "$GITHUB_OUTPUT"
           echo "should_release=${SHOULD_RELEASE}" >> "$GITHUB_OUTPUT"
           echo "already_published=${ALREADY_PUBLISHED}" >> "$GITHUB_OUTPUT"
+
+      - name: Fail if skipping the publish strands changes
+        if: steps.release.outputs.already_published == 'true'
+        shell: bash
+        run: |
+          # ponytail: path-list dependency map, switch to `nx show project` if it drifts
+          TAG="${{ steps.release.outputs.release_tag }}"
+
+          if ! git rev-parse --quiet --verify "refs/tags/${TAG}" > /dev/null; then
+            echo "::warning::${{ steps.release.outputs.package_name }}@${{ steps.release.outputs.version }} is on npm but tag ${TAG} does not exist, cannot check for stranded changes"
+            exit 0
+          fi
+
+          CHANGED="$(git diff --name-only "${TAG}..HEAD" -- ${{ matrix.watch_paths }})"
+
+          if [[ -n "$CHANGED" ]]; then
+            echo "::error::${{ steps.release.outputs.package_name }}@${{ steps.release.outputs.version }} is already on npm, but its sources changed since ${TAG}. Bump the version in ${{ matrix.package_dir }}/package.json to publish them."
+            echo "Changed since ${TAG}:"
+            echo "$CHANGED"
+            exit 1
+          fi
 
       - name: Run package tests
         if: steps.release.outputs.already_published != 'true'
