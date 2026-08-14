@@ -5,7 +5,8 @@
         "oxc.oxc-vscode",
         "pomdtr.excalidraw-editor",
         "vunguyentuan.vscode-css-variables",
-        "ms-playwright.playwright"
+        "ms-playwright.playwright",
+        "typescriptteam.native-preview"
     ],
     "unwantedRecommendations": [
         "esbenp.prettier-vscode"
