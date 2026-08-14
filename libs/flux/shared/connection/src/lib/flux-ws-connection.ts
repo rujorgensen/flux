@@ -36,6 +36,10 @@ import { ChannelStateManager } from './channel-state-manager';
 // the instant it drops the socket. The sign-on itself retries with backoff from there.
 const RECONNECT_DELAY_MS: number = 2_000;
 
+// Ceiling for the sign-on retry backoff. Matches the inner connect loop's
+// ceiling: a down mesh must not be hit twice a second by every survivor.
+const MAX_SIGN_ON_RETRY_DELAY_MS: number = 30_000;
+
 interface IOptions {
     domain: string; // Override the domain for self hosted Flux instances. Should include protocol, e.g. "https://my-flux-instance.com"
     secretKey?: string; // For encrypting/decrypting packages. Not known to Flux.
@@ -468,6 +472,14 @@ export class FluxWebSocketConnection {
                             `Failed to sign on again: ${error instanceof Error ? error.message : String(error)}`,
                             this.fluxInstanceId,
                         );
+
+                        // Offline is a phase, not a destination: a failed
+                        // attempt schedules the next one with capped backoff,
+                        // forever. Without this the one shot per disconnect
+                        // was the client's last — a laptop waking before its
+                        // network, or a mesh outage outlasting the inner
+                        // retry budget, left it permanently offline (#516).
+                        this.scheduleSignOn(Math.min(delayMs * 2, MAX_SIGN_ON_RETRY_DELAY_MS));
                     });
             },
             delayMs,
