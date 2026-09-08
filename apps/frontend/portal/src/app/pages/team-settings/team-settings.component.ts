@@ -20,11 +20,6 @@ interface UserSession {
 export interface IOrgMember {
     userId: string;
     primaryRole: string;
-    networks: {
-        networkId: string;
-        alias: string;
-        role: string;
-    }[];
 }
 
 const ROLE_PRIORITY: Record<string, number> = { owner: 3, admin: 2, member: 1 };
@@ -51,7 +46,7 @@ export const ORG_NAME = 'Acme Labs';
 export class TeamSettingsPageComponent implements OnInit {
     protected readonly ORG_NAME = ORG_NAME;
     protected readonly userSession = signal<UserSession | null>(null);
-    protected readonly networks$: Observable<INetwork_S[]>;
+    private readonly networks$: Observable<INetwork_S[]>;
     protected readonly orgMembers$: Observable<IOrgMember[]>;
 
     /**
@@ -63,8 +58,6 @@ export class TeamSettingsPageComponent implements OnInit {
     protected readonly showInviteModal = signal<boolean>(false);
     protected readonly inviteEmail = signal<string>('');
     protected readonly addByEmailInput = signal<string>('');
-    protected readonly memberToManage = signal<IOrgMember | null>(null);
-    protected readonly networkToggleState = signal<Record<string, boolean>>({});
 
     constructor(
         private readonly networksService: NetworksService,
@@ -80,15 +73,9 @@ export class TeamSettingsPageComponent implements OnInit {
                             memberMap.set(user.userId, {
                                 userId: user.userId,
                                 primaryRole: user.role,
-                                networks: [],
                             });
                         }
                         const entry = memberMap.get(user.userId)!;
-                        entry.networks.push({
-                            networkId: network.id,
-                            alias: network.alias,
-                            role: user.role,
-                        });
                         if (getRolePriority(user.role) > getRolePriority(entry.primaryRole)) {
                             entry.primaryRole = user.role;
                         }
@@ -151,29 +138,5 @@ export class TeamSettingsPageComponent implements OnInit {
         value: string,
     ): void {
         this.inviteEmail.set(value);
-    }
-
-    protected openNetworkModal(
-        member: IOrgMember,
-        allNetworks: INetwork_S[],
-    ): void {
-        this.memberToManage.set(member);
-        const state: Record<string, boolean> = {};
-        for (const network of allNetworks) {
-            state[network.id] = member.networks.some((n) => n.networkId === network.id);
-        }
-        this.networkToggleState.set(state);
-    }
-
-    protected closeNetworkModal(
-    ): void {
-        this.memberToManage.set(null);
-    }
-
-    protected toggleNetwork(
-        networkId: string,
-    ): void {
-        const current = this.networkToggleState();
-        this.networkToggleState.set({ ...current, [networkId]: !current[networkId] });
     }
 }
