@@ -82,7 +82,7 @@ describe('mesh websocket idleTimeout + sendPings semantics (#488)', () => {
         });
 
         return {
-            port: server.port,
+            port: server.port!,
             closedSockets: state.closed,
             onClose: () => state.closed,
         };
