@@ -108,23 +108,30 @@ export class FluxAuthority {
                 },
             );
 
-            this.fluxWebSocketConnection = createWSConnection(
-                this.id,
-                ticket,
-                this.stateManager,
-                // For reconnection logic
-                async () =>
-                    this.registerAuthority({
-                        ...registerAuthorityConfiguration,
-                        networkAccessToken: registerAuthorityConfiguration.networkAccessToken as TNetworkToken_S
-                    }),
-                {
-                    ...this.options,
-                    domain,
-                },
-            );
+            if (this.fluxWebSocketConnection) {
+                // Re-sign-on: keep the SAME connection object. A new one would
+                // strand every emitter holding the old one — its interceptors
+                // would never fire again (#536).
+                this.fluxWebSocketConnection.reconnect(ticket);
+            } else {
+                this.fluxWebSocketConnection = createWSConnection(
+                    this.id,
+                    ticket,
+                    this.stateManager,
+                    // For reconnection logic
+                    async () =>
+                        this.registerAuthority({
+                            ...registerAuthorityConfiguration,
+                            networkAccessToken: registerAuthorityConfiguration.networkAccessToken as TNetworkToken_S
+                        }),
+                    {
+                        ...this.options,
+                        domain,
+                    },
+                );
 
-            this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
+                this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
+            }
 
             await this
                 .fluxWebSocketConnection

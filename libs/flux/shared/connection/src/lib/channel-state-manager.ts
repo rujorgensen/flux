@@ -90,6 +90,21 @@ export class ChannelStateManager {
     }
 
     /**
+     * Re-subscribes every joined channel on a fresh socket. The mesh ties
+     * channel membership to the socket, so after a re-sign-on nothing is joined
+     * even though the channels — and their use counts — live on here unchanged.
+     * The mesh answers each with a subscribe ack nobody awaits, which
+     * `FluxWebSocketConnection.handleMessage` swallows.
+     */
+    public resubscribeJoinedChannels(
+        webSocketClient: FluxWebSocketClientConnection,
+    ): void {
+        for (const channelName of this.joinedChannels.keys()) {
+            webSocketClient.send(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:${channelName}`);
+        }
+    }
+
+    /**
      * Leave a channel.
      */
     public async leaveChannel(
