@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'bun:test';
 import type { TMessageCallback } from '@flux/shared/ws';
+import {
+    NETWORK_CHANNEL_PUBLISH,
+    ON_NETWORK_CHANNEL_PUBLISH,
+    SUBSCRIBE_NETWORK_CHANNEL_NAME,
+    SUBSCRIBED_NETWORK_CHANNEL_NAME,
+    validateChannelNameOrThrow,
+} from '@flux/shared/types';
 import { StateManager } from '@flux/shared/utils';
 import { FluxWebSocketConnection } from './flux-ws-connection';
 
@@ -25,6 +32,60 @@ const getReadyInterceptors = (
     const interceptors = Reflect.get(connection, 'packageTypeInterceptorCallbacks') as Map<string, Set<TMessageCallback>>;
 
     return interceptors.get('isReady') ?? new Set();
+};
+
+type TStubbedSocket = {
+    socket: TSocketStub & { send: (message: string) => void };
+    sent: string[];
+    listeners: Map<string, Set<(...args: unknown[]) => void>>;
+};
+
+// A socket that records sends and listeners instead of touching the network.
+const stubSocket = (): TStubbedSocket => {
+    const listeners = new Map<string, Set<(...args: unknown[]) => void>>();
+    const sent: string[] = [];
+
+    const socket: TSocketStub & { send: (message: string) => void } = {
+        clearEventSubscribers: () => {
+            listeners.clear();
+        },
+        connect: async () => {},
+        close: () => {},
+        on: (
+            event: string,
+            listener: (...args: unknown[]) => void,
+        ) => {
+            const eventListeners = listeners.get(event) ?? new Set();
+
+            eventListeners.add(listener);
+            listeners.set(event, eventListeners);
+
+            return socket;
+        },
+        send: (message: string) => {
+            sent.push(message);
+        },
+    };
+
+    return { socket, sent, listeners };
+};
+
+// Delivers a message the way the low-level socket would: through the
+// connection's message handler.
+const deliver = (
+    connection: FluxWebSocketConnection,
+    stub: TStubbedSocket,
+    message: string,
+): void => {
+    const messageListeners = stub.listeners.get('message');
+
+    if (!messageListeners || messageListeners.size === 0) {
+        throw new Error('No message listener on the socket');
+    }
+
+    for (const listener of messageListeners) {
+        listener(message);
+    }
 };
 
 // Mirrors RECONNECT_DELAY_MS in the implementation.
@@ -296,5 +357,108 @@ describe('FluxWebSocketConnection', () => {
         const socketOptions = Reflect.get(getSocketStub(connection), 'options') as { autoReconnect?: boolean; };
 
         expect(socketOptions.autoReconnect).toBe(false);
+    });
+
+    it('keeps channel handles and listeners working across a re-sign-on (#536)', async () => {
+        // A sign-on used to build a whole new connection, whose empty channel
+        // state left the old handles pointing at a dead socket: publish() was a
+        // silent no-op and onPublish listeners never fired again. Reconnect()
+        // must keep the object and only swap the socket underneath it.
+        const connection = new FluxWebSocketConnection(
+            'flux-instance',
+            () => {},
+            new StateManager(),
+            'token',
+            {
+                domain: 'https://flux.test',
+            },
+        );
+
+        const firstStub = stubSocket();
+        // The constructor built a real socket before the stub existed — swap it
+        // out, and serve the re-sign-on's fresh socket from the stub too.
+        Reflect.set(connection, 'socket', firstStub.socket);
+        Reflect.set(connection, 'createSocket', () => firstStub.socket);
+
+        const firstConnect = connection.connect();
+        getReadyInterceptor(connection)('isReady');
+        await firstConnect;
+
+        const channelName = 't';
+
+        if (!validateChannelNameOrThrow(channelName)) {
+            throw new Error('Will never be thrown');
+        }
+
+        const channelPromise = connection.joinChannel(channelName);
+
+        // The ack the mesh sends for that subscription — through the connection's
+        // message handler, like every other socket message.
+        deliver(connection, firstStub, `${SUBSCRIBED_NETWORK_CHANNEL_NAME}:t`);
+
+        const channel = await channelPromise;
+
+        expect(firstStub.sent).toContain(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:t`);
+
+        const received: string[] = [];
+        channel.onPublish<string>((message: string) => {
+            received.push(message);
+        });
+
+        // A re-sign-on: fresh ticket, fresh socket, same connection object.
+        const secondStub = stubSocket();
+        Reflect.set(connection, 'createSocket', () => secondStub.socket);
+
+        connection.reconnect('token-2');
+        const connectPromise = connection.connect();
+        getReadyInterceptor(connection)('isReady');
+        // Identity, not truthiness: the promise must resolve to the NEW socket.
+        expect((await connectPromise) === secondStub.socket).toBe(true);
+
+        // The new socket starts with a blank registry on the mesh — every joined
+        // channel is subscribed again once the socket is ready.
+        expect(secondStub.sent).toContain(`${SUBSCRIBE_NETWORK_CHANNEL_NAME}:t`);
+
+        // The handle still publishes, over the new socket.
+        channel.publish('after-reconnect');
+        expect(secondStub.sent).toContain(`${NETWORK_CHANNEL_PUBLISH}:t:s:after-reconnect`);
+
+        // The listener still receives, from the new socket.
+        deliver(connection, secondStub, `${ON_NETWORK_CHANNEL_PUBLISH}:some-agent:t:s:hello-again`);
+        expect(received).toEqual(['hello-again']);
+    });
+
+    it('warns instead of silently dropping a publish while disconnected', () => {
+        const connection = new FluxWebSocketConnection(
+            'flux-instance',
+            () => {},
+            new StateManager(),
+            'token',
+            {
+                domain: 'https://flux.test',
+            },
+        );
+
+        const warnings: unknown[][] = [];
+        const originalWarn = console.warn;
+
+        console.warn = (...args: unknown[]) => {
+            warnings.push(args);
+        };
+
+        try {
+            const channelName = 't';
+
+            if (!validateChannelNameOrThrow(channelName)) {
+                throw new Error('Will never be thrown');
+            }
+
+            connection.publish(channelName, 'lost');
+        } finally {
+            console.warn = originalWarn;
+        }
+
+        expect(warnings.length).toBe(1);
+        expect(String(warnings[0][0])).toContain('t');
     });
 });

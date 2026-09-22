@@ -15,43 +15,17 @@ import {
     expect,
 } from 'bun:test';
 import {
-    seedNetworkTokens,
     generateRandomSafePort,
 } from '@flux/mesh/test/setup/infrastructure';
+import {
+    killSocket,
+    startMesh,
+    waitFor,
+} from './reconnect-helpers';
 
 const NETWORK_ID: string = 'reconnect-network';
 const NETWORK_ACCESS_TOKEN: string = 'reconnect-network-access-token';
 const CODE_TO_ACCESS_NETWORK: string = 'code-to-access-network';
-
-/**
- * Reaches through the Authority to the live WebSocket so the test can kill it the
- * way a mesh redeploy or a NAT timeout does. There is no public API for "drop the
- * socket but come back" — `disconnect()` deliberately stays down.
- */
-const killAuthoritySocket = (
-    authority: FluxAuthority,
-): void => {
-    const connection = Reflect.get(authority, 'fluxWebSocketConnection') as object;
-    const socket = Reflect.get(connection, 'socket') as object;
-
-    (Reflect.get(socket, 'ws') as WebSocket).close();
-};
-
-const waitFor = async (
-    predicate: () => boolean,
-    timeoutMs: number,
-    description: string,
-): Promise<void> => {
-    const startedAt: number = Date.now();
-
-    while (!predicate()) {
-        if ((Date.now() - startedAt) > timeoutMs) {
-            throw new Error(`Timed out waiting for: ${description}`);
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 25));
-    }
-};
 
 describe('authority sign-on after a dropped socket (#497)', () => {
     let fluxMeshServer: FluxMeshServer;
@@ -59,25 +33,7 @@ describe('authority sign-on after a dropped socket (#497)', () => {
     const fluxDomain: string = `http://localhost:${fluxServerPort}`;
 
     beforeAll(async () => {
-        const redisURL: string = globalThis['infrastructureRedisURL']!;
-
-        process.env.FLUX_MESH_REDIS_URL = redisURL;
-
-        await seedNetworkTokens(redisURL, NETWORK_ID, [NETWORK_ACCESS_TOKEN]);
-
-        fluxMeshServer = new FluxMeshServer(fluxServerPort);
-
-        await new Promise((resolve, reject) => {
-            const timeout = setTimeout(
-                () => reject(new Error('Timeout waiting for Mesh server to be ready')),
-                2_000,
-            );
-
-            fluxMeshServer.onReady(() => {
-                clearTimeout(timeout);
-                resolve(void 0);
-            });
-        });
+        fluxMeshServer = await startMesh(fluxServerPort, NETWORK_ID, NETWORK_ACCESS_TOKEN);
     });
 
     afterAll(async () => {
@@ -120,7 +76,7 @@ describe('authority sign-on after a dropped socket (#497)', () => {
 
         const connectionsBeforeDrop: number = states.filter((state) => state === 'connected').length;
 
-        killAuthoritySocket(fluxAuthority);
+        killSocket(fluxAuthority);
 
         await waitFor(
             () => states.filter((state) => state === 'connected').length > connectionsBeforeDrop,

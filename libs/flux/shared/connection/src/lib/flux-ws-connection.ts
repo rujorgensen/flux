@@ -13,6 +13,7 @@ import {
     NETWORK_CHANNEL_PUBLISH,
     validateChannelNameOrThrow,
     ON_NETWORK_CHANNEL_PUBLISH,
+    SUBSCRIBED_NETWORK_CHANNEL_NAME,
     AUTHORITY_CHANNEL_SUBSCRIBE,
     AUTHORITY_DISCONNECT_AGENT,
     ERROR,
@@ -78,7 +79,10 @@ export class FluxWebSocketConnection {
     // *** State
     // ****************************************************************************
 
-    private readonly socket: FluxWebSocketClientConnection;
+    // Mutable: a re-sign-on builds a fresh socket — the ticket is baked into its
+    // URL — but keeps this connection object, so every handle and listener
+    // registered against it survives (#536).
+    private socket: FluxWebSocketClientConnection;
     private readonly callbacks: Set<TMessageCallback> = new Set();
 
     private readonly channelCallbacks: Map<TChannelName, Set<TMessageCallback>> = new Map();
@@ -91,6 +95,10 @@ export class FluxWebSocketConnection {
     private connectPromiseResolver: ((socket: FluxWebSocketClientConnection) => void) | undefined;
 
     private readonly channelStateManager: ChannelStateManager = new ChannelStateManager();
+
+    // Whether the authority-side channel-change subscription was requested. The
+    // mesh ties it to the socket, so a re-signed-on connection has to ask again.
+    private subscribedToChannelChanges: boolean = false;
 
     // ****************************************************************************
     // *** Reused socket callbacks
@@ -117,13 +125,26 @@ export class FluxWebSocketConnection {
             secretKey: this.options.secretKey,
             retries: this.options.retries ?? 10_000,
         };
+
+        this.socket = this.createSocket(this.token);
+
+        this.interceptPackageTypeMessages('isReady', this.readyInterceptor);
+    }
+
+    /**
+     * Builds the low-level socket. The URL embeds the single-use, expiring
+     * ticket, so every sign-on — the first one and every one after a drop —
+     * needs its own socket. `reconnect()` swaps the fresh one in.
+     */
+    private createSocket(
+        ticket: string,
+    ): FluxWebSocketClientConnection {
         const url = new URL(this.options.domain);
 
         url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-        url.searchParams.set('token', this.token);
+        url.searchParams.set('token', ticket);
 
-        // 1. Connect to websocket
-        this.socket = new FluxWebSocketClientConnection(
+        return new FluxWebSocketClientConnection(
             {
                 url: url.toString(),
                 // The URL carries a mesh-issued ticket that expires (15 minutes)
@@ -134,8 +155,6 @@ export class FluxWebSocketConnection {
                 retries: this.options.retries,
             },
         );
-
-        this.interceptPackageTypeMessages('isReady', this.readyInterceptor);
     }
 
     /**
@@ -212,6 +231,32 @@ export class FluxWebSocketConnection {
             .catch(this.socketErrorHandler);
 
         return this.connectPromise;
+    }
+
+    /**
+     * Signs on again with a fresh ticket, keeping this connection object — and
+     * with it every channel handle and listener registered before the drop.
+     *
+     * A sign-on used to build a whole new connection, whose empty channel state
+     * left the old handles pointing at a dead socket: `publish()` was a silent
+     * no-op and `onPublish` listeners never fired again (#536).
+     *
+     * Only swaps the socket in; the caller's next `connect()` dials it.
+     */
+    public reconnect(
+        ticket: string,
+    ): void {
+        // Detach the old socket's handlers while discarding it: one closed by
+        // `handleSocketClose` must not re-enter the close path, and a still-live
+        // one (a manual second sign-on) must close silently rather than start a
+        // second sign-on of its own.
+        this.socket.close();
+
+        this.webSocketClient = undefined;
+        this.connectPromise = undefined;
+        this.connectPromiseResolver = undefined;
+
+        this.socket = this.createSocket(ticket);
     }
 
     /**
@@ -315,6 +360,8 @@ export class FluxWebSocketConnection {
                 : `o:${JSON.stringify(message)}`;
 
             this.webSocketClient.send(`${NETWORK_CHANNEL_PUBLISH}:${channelName}:${messageString}`);
+        } else {
+            console.warn(`Cannot publish to channel "${channelName}": the connection is down. Message dropped.`);
         }
     }
 
@@ -367,6 +414,8 @@ export class FluxWebSocketConnection {
      */
     public subscribeToChannelChanges(
     ): void {
+        this.subscribedToChannelChanges = true;
+
         if (this.webSocketClient) {
             this.webSocketClient.send(AUTHORITY_CHANNEL_SUBSCRIBE);
         } else {
@@ -399,6 +448,18 @@ export class FluxWebSocketConnection {
     ): void {
         this.stateManager.emitNetworkState('connected');
         this.webSocketClient = this.socket;
+
+        // The mesh ties channel membership to the socket, so a re-signed-on
+        // socket starts with no channels joined. Re-subscribe every channel
+        // joined before the drop — the handles, listeners and use counts live
+        // on this object and survive untouched (#536). On a first connect
+        // there is nothing to re-subscribe.
+        this.channelStateManager.resubscribeJoinedChannels(this.socket);
+
+        // Same for the authority-side channel-change subscription.
+        if (this.subscribedToChannelChanges) {
+            this.socket.send(AUTHORITY_CHANNEL_SUBSCRIBE);
+        }
 
         const connectPromiseResolver = this.connectPromiseResolver;
 
@@ -567,6 +628,13 @@ export class FluxWebSocketConnection {
                     }
                 }
 
+                return;
+            }
+
+            case SUBSCRIBED_NETWORK_CHANNEL_NAME: {
+                // The ack for a re-subscribe issued from `resolveConnectedSocket`:
+                // the join it belongs to resolved long before the drop, so no
+                // interceptor is waiting for it. Expected, not an unhandled type.
                 return;
             }
 

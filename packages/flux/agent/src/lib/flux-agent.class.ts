@@ -164,23 +164,30 @@ export class FluxAgent {
                 },
             );
 
-            this.fluxWebSocketConnection = createWSConnection(
-                this.id,
-                ticket,
-                this.stateManager,
-                async () => {
-                    await this.connect(
-                        identification,
-                        clientUId,
-                    );
-                },
-                {
-                    ...this.options,
-                    domain,
-                },
-            );
+            if (this.fluxWebSocketConnection) {
+                // Re-sign-on: keep the SAME connection object. Channel handles
+                // and listeners registered before the drop point at it — a new
+                // object would strand them on the dead connection (#536).
+                this.fluxWebSocketConnection.reconnect(ticket);
+            } else {
+                this.fluxWebSocketConnection = createWSConnection(
+                    this.id,
+                    ticket,
+                    this.stateManager,
+                    async () => {
+                        await this.connect(
+                            identification,
+                            clientUId,
+                        );
+                    },
+                    {
+                        ...this.options,
+                        domain,
+                    },
+                );
 
-            this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
+                this.fluxClientData.updateWsConnection(this.fluxWebSocketConnection);
+            }
 
             return await this
                 .fluxWebSocketConnection
