@@ -148,7 +148,7 @@ services:
   # *** Proxy
   # ******************************************************************************
   caddy-sh:
-    image: 'caddy:2.11.4'
+    image: 'caddy:2.11.6'
     container_name: flux-caddy-proxy-full-selfhosted
     restart: unless-stopped
     ports:
