@@ -34,7 +34,7 @@ RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/mesh'
 ENV FLUX_DATABASE_URL=postgres://user:pw@localhost:1234/db?schema=none
 
 #   --generator: only run the 'client' generator to avoid generating dbml output
-RUN bunx --bun prisma generate --config=./prisma/prisma.config.ts --generator=client
+RUN bunx --bun prisma generate@7.10.1 --config=./prisma/prisma.config.ts --generator=client
 
 # ******************************************************************************
 # *** BUILD STAGE
