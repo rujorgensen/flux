@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test';
+import { afterEach, describe, expect, it, spyOn } from 'bun:test';
 import type { TNetworkId_S } from '@flux/shared/types';
 import {
     authenticateNetworkAuthorityOrThrow,
@@ -63,5 +63,33 @@ describe('authenticateNetworkAuthorityOrThrow', () => {
             'token',
             {},
         )).rejects.toBeInstanceOf(ConnectionError);
+    });
+
+    it('should treat a mesh that never answers as retryable, instead of hanging forever (#541)', async () => {
+        // Accepts the request, never responds — what a mid-restart mesh can do.
+        const server = Bun.serve({
+            port: 0,
+            fetch: (): Promise<Response> => new Promise<Response>(() => undefined),
+        });
+
+        // Shorten the real timeout so the test does not wait a full minute.
+        const timeoutSpy = spyOn(AbortSignal, 'timeout').mockImplementation((): AbortSignal => {
+            const controller: AbortController = new AbortController();
+            setTimeout(() => controller.abort(new DOMException('The operation timed out.', 'TimeoutError')), 50);
+
+            return controller.signal;
+        });
+
+        try {
+            await expect(authenticateNetworkAuthorityOrThrow(
+                'demo-network-id' as TNetworkId_S,
+                `http://localhost:${server.port}`,
+                'token',
+                {},
+            )).rejects.toBeInstanceOf(ConnectionError);
+        } finally {
+            timeoutSpy.mockRestore();
+            server.stop(true);
+        }
     });
 });

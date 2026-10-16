@@ -10,6 +10,7 @@ import {
     RetryableError,
     asConnectionError,
     isRetryableAuthStatus,
+    AUTH_FETCH_TIMEOUT_MS,
 } from '@flux/shared/utils';
 
 // Re-exported, not redefined: the Agent authenticates against the same mesh and
@@ -55,6 +56,8 @@ export const authenticateNetworkAuthorityOrThrow = async (
                 'Accept': 'text/plain',
             },
             body: networkAccessToken,
+            // A timeout rejects like any transport failure, so the caller retries it (#541).
+            signal: AbortSignal.timeout(AUTH_FETCH_TIMEOUT_MS),
         });
 
         if (response.status === 401) {

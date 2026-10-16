@@ -10,6 +10,7 @@ export {
     isRetryableConnectionError,
     isRetryableAuthStatus,
     asConnectionError,
+    AUTH_FETCH_TIMEOUT_MS,
 } from './lib/connection-errors';
 export {
     EventEmitter,
