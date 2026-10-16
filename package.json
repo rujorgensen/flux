@@ -106,7 +106,7 @@
         "nx": "23.3.0",
         "nx-oxlint": "^0.1.1",
         "open-cli": "9.0.0",
-        "oxlint": "1.85.0",
+        "oxlint": "1.88.0",
         "oxlint-tsgolint": "^7.0.2004",
         "testcontainers": "12.2.1",
         "tslib": "2.8.1",
