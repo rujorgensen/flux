@@ -4,7 +4,7 @@ ARG FLUX_DATABASE_URL
 # *** BASE STAGE
 # ******************************************************************************
 # use the official Bun image, see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1.4.2-alpine AS base
+FROM oven/bun:1.4.3-alpine AS base
 
 WORKDIR /src
 
@@ -40,7 +40,7 @@ RUN bun install --frozen-lockfile --ignore-scripts --filter='@flux/portal-api' -
 ENV FLUX_DATABASE_URL=postgres://user:pw@localhost:1234/db?schema=none
 
 #   --generator: only run the 'client' generator to avoid generating dbml output
-RUN bunx --bun prisma generate --config=./prisma/prisma.config.ts --generator=client
+RUN bunx --bun prisma@7.10.1 generate --config=./prisma/prisma.config.ts --generator=client
 
 # ******************************************************************************
 # *** BUILD STAGE

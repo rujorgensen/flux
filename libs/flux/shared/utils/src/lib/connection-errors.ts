@@ -72,6 +72,15 @@ export const isRetryableAuthStatus = (
 ): boolean => (status >= 500) || (status === 429);
 
 /**
+ * Upper bound on one auth `fetch`. Without it, a mesh that accepts the TCP
+ * connection but never answers (e.g. mid-restart) parks the attempt forever:
+ * `retryOrThrow` only retries rejections, so nothing ever tries again (#541).
+ * Generous on purpose — the mesh may itself retry an unresponsive Authority
+ * for ~55s (11 RPC attempts at a 5s timeout) before answering an Agent.
+ */
+export const AUTH_FETCH_TIMEOUT_MS: number = 60_000;
+
+/**
  * Wrap a `fetch` failure as retryable. A throw from `fetch` is always transport
  * (DNS, refused, reset, TLS) — the mesh never got to answer, so the attempt says
  * nothing about whether a later one would succeed.

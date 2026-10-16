@@ -15,6 +15,7 @@ import {
     RetryableError,
     asConnectionError,
     isRetryableAuthStatus,
+    AUTH_FETCH_TIMEOUT_MS,
 } from '@flux/shared/utils';
 
 /**
@@ -95,6 +96,8 @@ export const authenticateAgentOrThrow = async (
                 'Accept': 'text/plain',
             },
             body: customPayload,
+            // A timeout rejects like any transport failure, so the caller retries it (#541).
+            signal: AbortSignal.timeout(AUTH_FETCH_TIMEOUT_MS),
         });
 
         if (!response.ok) {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test';
+import { afterEach, describe, expect, it, spyOn } from 'bun:test';
 import {
     AuthenticationError,
     ConnectionError,
@@ -97,6 +97,28 @@ describe('authenticateAgentOrThrow — failure classification', () => {
 
         expect(error).toBeInstanceOf(NetworkAuthorityNotFoundError);
         expect(error).not.toBeInstanceOf(RetryableError);
+    });
+
+    it('treats a mesh that never answers as retryable, instead of hanging forever (#541)', async () => {
+        // Accepts the request, never responds — what a mid-restart mesh can do.
+        const mesh = startMesh(() => new Promise<Response>(() => undefined) as unknown as Response);
+        servers.push(mesh);
+
+        // Shorten the real timeout so the test does not wait a full minute.
+        const timeoutSpy = spyOn(AbortSignal, 'timeout').mockImplementation((): AbortSignal => {
+            const controller: AbortController = new AbortController();
+            setTimeout(() => controller.abort(new DOMException('The operation timed out.', 'TimeoutError')), 50);
+
+            return controller.signal;
+        });
+
+        try {
+            const error: unknown = await authenticate(mesh.url).catch((e: unknown) => e);
+
+            expect(error).toBeInstanceOf(ConnectionError);
+        } finally {
+            timeoutSpy.mockRestore();
+        }
     });
 
     it('does not retry other 4xx — the mesh answered, and the answer was "no"', async () => {
