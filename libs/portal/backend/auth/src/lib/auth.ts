@@ -93,6 +93,21 @@ if (process.env['FLUX_MASTER_PASSWORD']) {
         console.warn('Admin user already exists, skipping creation.');
     }
 
+    // * Sign-up runs only once, so a changed FLUX_MASTER_PASSWORD never reached the stored hash and
+    // * the new value was refused at sign-in. The env is the source of truth: write its hash on every boot.
+    const { password } = await auth.$context;
+    await prisma.account.updateMany({
+        where: {
+            providerId: 'credential',
+            user: {
+                email: MASTER_PASSWORD_ADMIN_EMAIL,
+            },
+        },
+        data: {
+            password: await password.hash(MASTER_PASSWORD),
+        },
+    });
+
     // * `isFluxAdmin` is `input: false`, so sign-up can never set it. The master
     // * password holder owns the deployment, so grant it here — on every boot,
     // * so installs whose admin predates this also get promoted.
