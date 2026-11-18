@@ -10,6 +10,7 @@ import {
     signal,
 } from '@angular/core';
 import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { ConfirmButtonComponent } from '../../confirm-button/confirm-button.component';
 import {
     type INetworkChannel,
     MAX_CHANNEL_MEMBERS_BY_SUBSCRIPTION_TYPE,
@@ -85,6 +86,7 @@ export class DeriveChannelFillPercent implements PipeTransform {
 @Component({
     selector: 'app-active-channels-table',
     imports: [
+        ConfirmButtonComponent,
         DatePipe,
         AsyncPipe,
         DecimalPipe,
