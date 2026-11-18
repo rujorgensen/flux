@@ -39,14 +39,17 @@ export const appRoutes: Route[] = [
                 children: [
                     {
                         path: 'connected-agents',
+                        data: { title: 'Agents' },
                         loadComponent: () => import('./pages/connected-agents/connected-agents.component').then(m => m.ConnectedAgentsPageComponent),
                     },
                     {
                         path: 'connected-authorities',
+                        data: { title: 'Authorities' },
                         loadComponent: () => import('./pages/connected-authorities/connected-authorities.component').then(m => m.ConnectedAuthoritiesPageComponent),
                     },
                     {
                         path: 'active-channels',
+                        data: { title: 'Channels' },
                         loadComponent: () => import('./pages/active-channels/active-channels.component').then(m => m.ActiveChannelsPageComponent),
                     },
                 ],

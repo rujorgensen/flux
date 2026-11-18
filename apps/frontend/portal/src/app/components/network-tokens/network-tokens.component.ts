@@ -8,6 +8,7 @@ import {
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ConfirmButtonComponent } from '../confirm-button/confirm-button.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
 import { toast } from 'ngx-sonner';
@@ -28,7 +29,7 @@ const MAX_TOKENS = 3;
 
 @Component({
     selector: 'app-network-tokens',
-    imports: [CommonModule],
+    imports: [CommonModule, ConfirmButtonComponent],
     templateUrl: './network-tokens.component.html',
     styleUrls: ['./network-tokens.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,

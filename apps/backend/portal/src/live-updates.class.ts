@@ -74,6 +74,80 @@ export const liveUpdates = (
     })
         .onReady(async () => {
 
+            // The authority answers channel requests before the Portal's own agent is
+            // connected: open browser tabs rejoin within seconds of a restart. Declared
+            // first, so those early requests queue on the agent instead of throwing.
+            let resolveAgentConnection: (connection: FluxAgentNetworkConnection) => void = () => undefined;
+            const agentConnection: Promise<FluxAgentNetworkConnection> = new Promise((resolve) => {
+                resolveAgentConnection = resolve;
+            });
+
+            const manageChannelSubscriptions = (
+                networkId: TNetworkId_S,
+            ): void => {
+
+                if (subscribedNetworkChannels.has(networkId)) {
+                    console.log('The channel is already subscribed to');
+                    return;
+                }
+
+                subscribedNetworkChannels.add(networkId);
+
+                // TODO Use fluxAuthorityNetworkConnection instead
+                void agentConnection
+                    .then((fluxNetworkConnection: FluxAgentNetworkConnection) => Promise.all([
+                        fluxNetworkConnection.joinChannel(`networks-${networkId}-agent-count-update`),
+                        fluxNetworkConnection.joinChannel(`networks-${networkId}-authority-count-update`),
+                        fluxNetworkConnection.joinChannel(`networks-${networkId}-channel-count-update`),
+                        fluxNetworkConnection.joinChannel(`networks-${networkId}-total-data-usage`),
+                    ]))
+                    .then(([
+                        agentCountUpdateChannel,
+                        authorityCountUpdateChannel,
+                        channelUpdateChannel,
+                        totalDataUsageChannel,
+                    ]: [FluxNetworkChannel, FluxNetworkChannel, FluxNetworkChannel, FluxNetworkChannel]) => {
+                        void networkAgentRedisService
+                            .onAgentCountChange(
+                                networkId,
+                                agentCountUpdateChannel.publish.bind(agentCountUpdateChannel),
+                            );
+
+                        void networkAuthorityRedisService
+                            .onAuthorityCountChange(
+                                networkId,
+                                authorityCountUpdateChannel.publish.bind(authorityCountUpdateChannel),
+                            );
+
+                        void networkChannelService
+                            .onChannelCount(
+                                networkId,
+                                channelUpdateChannel.publish.bind(channelUpdateChannel),
+                            );
+
+                        // Relay the real cumulative byte usage. Unlike the counts,
+                        // network usage has no pub/sub change event yet, so poll the
+                        // Redis cache and publish the latest value periodically.
+                        const publishNetworkUsage = (): void => {
+                            void networkUsageRedisCacheService
+                                .readNetworkUsageBytes(networkId)
+                                .then((bytes: number) => {
+                                    totalDataUsageChannel.publish(bytes);
+                                })
+                                .catch((error: unknown) => {
+                                    console.error(`❌ Failed to read network usage for '${networkId}':`, error);
+                                });
+                        };
+
+                        publishNetworkUsage();
+                        setInterval(publishNetworkUsage, 3_000);
+                    })
+                    .catch((error: unknown) => {
+                        subscribedNetworkChannels.delete(networkId);
+                        console.error(`❌ Failed to subscribe to network channels for '${networkId}':`, error);
+                    });
+            };
+
             // ****************************************************************************
             // * Setup Authority
             // ****************************************************************************
@@ -242,6 +316,9 @@ export const liveUpdates = (
             const meshRedisStatusChannel: FluxNetworkChannel = await fluxNetworkConnection
                 .joinChannel('protected-mesh-redis-status');
 
+            // After the protected joins, which must not overlap the queued network joins.
+            resolveAgentConnection(fluxNetworkConnection);
+
             // * Listen to Redis health
             portalRedisStatusService
                 .onAlert((alerts: string[]) => {
@@ -274,70 +351,5 @@ export const liveUpdates = (
 
             publishBothRedisStatuses();
             setInterval(publishBothRedisStatuses, 1_000);
-
-            const manageChannelSubscriptions = (
-                networkId: TNetworkId_S,
-            ): void => {
-
-                if (subscribedNetworkChannels.has(networkId)) {
-                    console.log('The channel is already subscribed to');
-                    return;
-                }
-
-                subscribedNetworkChannels.add(networkId);
-
-                // TODO Use fluxAuthorityNetworkConnection instead
-                void Promise.all([
-                    fluxNetworkConnection.joinChannel(`networks-${networkId}-agent-count-update`),
-                    fluxNetworkConnection.joinChannel(`networks-${networkId}-authority-count-update`),
-                    fluxNetworkConnection.joinChannel(`networks-${networkId}-channel-count-update`),
-                    fluxNetworkConnection.joinChannel(`networks-${networkId}-total-data-usage`),
-                ])
-                    .then(([
-                        agentCountUpdateChannel,
-                        authorityCountUpdateChannel,
-                        channelUpdateChannel,
-                        totalDataUsageChannel,
-                    ]: [FluxNetworkChannel, FluxNetworkChannel, FluxNetworkChannel, FluxNetworkChannel]) => {
-                        void networkAgentRedisService
-                            .onAgentCountChange(
-                                networkId,
-                                agentCountUpdateChannel.publish.bind(agentCountUpdateChannel),
-                            );
-
-                        void networkAuthorityRedisService
-                            .onAuthorityCountChange(
-                                networkId,
-                                authorityCountUpdateChannel.publish.bind(authorityCountUpdateChannel),
-                            );
-
-                        void networkChannelService
-                            .onChannelCount(
-                                networkId,
-                                channelUpdateChannel.publish.bind(channelUpdateChannel),
-                            );
-
-                        // Relay the real cumulative byte usage. Unlike the counts,
-                        // network usage has no pub/sub change event yet, so poll the
-                        // Redis cache and publish the latest value periodically.
-                        const publishNetworkUsage = (): void => {
-                            void networkUsageRedisCacheService
-                                .readNetworkUsageBytes(networkId)
-                                .then((bytes: number) => {
-                                    totalDataUsageChannel.publish(bytes);
-                                })
-                                .catch((error: unknown) => {
-                                    console.error(`❌ Failed to read network usage for '${networkId}':`, error);
-                                });
-                        };
-
-                        publishNetworkUsage();
-                        setInterval(publishNetworkUsage, 3_000);
-                    })
-                    .catch((error: unknown) => {
-                        subscribedNetworkChannels.delete(networkId);
-                        console.error(`❌ Failed to subscribe to network channels for '${networkId}':`, error);
-                    });
-            };
         });
 };

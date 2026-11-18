@@ -9,6 +9,7 @@ import {
     untracked,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ConfirmButtonComponent } from '../../confirm-button/confirm-button.component';
 import type { TNetworkAuthority, TNetworkId_S } from '@flux/shared/types';
 import { api } from '$lib/app/_services/api/api';
 import { toast } from 'ngx-sonner';
@@ -27,7 +28,7 @@ interface IRowEntry {
 
 @Component({
     selector: 'app-connected-authorities-table',
-    imports: [DatePipe],
+    imports: [DatePipe, ConfirmButtonComponent],
     templateUrl: './connected-authorities-table.component.html',
     styleUrls: ['./connected-authorities-table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,

@@ -3,14 +3,14 @@
     <div class="drawer-content flex flex-col">
         <!-- Page header -->
         <header class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b border-base-300 bg-base-100 px-4 transition-[width,height] ease-linear lg:h-16">
-            <div class="flex items-center gap-2">
+            <div class="flex min-w-0 flex-1 items-center gap-2">
                 <label for="app-drawer" class="btn btn-ghost btn-circle drawer-button lg:hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-5 w-5 stroke-current">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </label>
                 <!-- Breadcrumbs -->
-                <div class="breadcrumbs text-sm">
+                <div class="breadcrumbs min-w-0 flex-1 text-sm">
                     <ul>
                         <li class="hidden md:block">
                             @if (selectedNetwork$ | async; as network) {

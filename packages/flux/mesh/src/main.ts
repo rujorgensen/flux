@@ -68,6 +68,7 @@ import {
 import { PicoLogger } from '@utils/pico-logger';
 import { TConnectedClientSocket } from './connected-client-socket.types';
 import { AgentManager } from './_managers/agent.manager';
+import { AuthorityManager } from './_managers/authority.manager';
 import { interactWithNpc } from './_routes/npc-interact.get.route';
 import { truncateString } from '@flux/shared/utils';
 import { ProcessClass } from './business-logic/processes/process.class';
@@ -115,6 +116,8 @@ export class FluxMeshServer {
     private readonly globalChannelPubsub: GlobalChannelPubsub;
     private readonly channelManager: NetworkChannelManager;
     private readonly agentManager: AgentManager;
+    // Listens for kicks sent by the Portal; without it an authority kick reaches no process.
+    private readonly authorityManager: AuthorityManager;
     private readonly processClass: ProcessClass;
     private readonly networkAgentService: NetworkAgentService;
 
@@ -670,6 +673,11 @@ export class FluxMeshServer {
             this.redisConnection,
             clientMap,
             this.networkAgentService,
+        );
+        this.authorityManager = new AuthorityManager(
+            this.redisConnection,
+            clientMap,
+            networkAuthorityRedisCache,
         );
         this.processClass = new ProcessClass(
             this.redisConnection,

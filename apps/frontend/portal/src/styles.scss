@@ -321,3 +321,12 @@ small {
 small {
     color: var(--foreground-5);
 }
+/**
+ * An armed confirm button grows over its neighbour, which fades.
+ * Flex siblings, and the other cells of a table row.
+ */
+:has(> app-confirm-button.armed) > :not(app-confirm-button),
+tr:has(app-confirm-button.armed) > td:not(:has(app-confirm-button)) {
+    opacity: 0.3;
+    transition: opacity 180ms ease-out;
+}

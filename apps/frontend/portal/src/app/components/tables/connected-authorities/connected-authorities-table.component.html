@@ -1,24 +1,24 @@
 @if (rows(); as data) {
     @if (hasRows()) {
-        <div class="flex justify-end mb-2">
-            <button
-                class="btn btn-sm btn-error btn-outline"
-                [disabled]="kickingAll()"
-                (click)="onKickAllAuthorities()"
-                title="Kick all authorities"
-            >
-                @if (kickingAll()) {
-                    <span class="loading loading-spinner loading-xs"></span>
-                }
-                Kick All
-            </button>
+        <div class="flex items-center justify-between gap-4 px-4 pt-4 pb-2">
+            <p class="text-sm text-base-content/70" aria-live="polite">
+                {{ total() }} connected {{ total() === 1 ? 'authority' : 'authorities' }}
+            </p>
+            <app-confirm-button
+                label="Kick all"
+                [armedLabel]="'Kick all ' + total() + '?'"
+                ariaLabel="Kick all authorities"
+                variant="outline"
+                [busy]="kickingAll()"
+                (confirmed)="onKickAllAuthorities()"
+            />
         </div>
         <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Connected At</th>
-                    <th></th>
+                    <th><span class="sr-only">Actions</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -30,32 +30,27 @@
                                 {{ row.data.connectedAt | date: 'yyyy-MM-dd HH:mm' }}
                             </time>
                         </td>
-                        <td>
+                        <td class="text-right">
                             @if (row.disconnecting) {
                                 <span class="badge badge-error badge-sm tabular-nums">
                                     Disconnected · {{ row.secondsLeft }}s
                                 </span>
                             } @else {
-                                <button
-                                    class="btn btn-ghost btn-sm text-error"
-                                    [disabled]="kickingAuthorityId() === row.data.id"
-                                    (click)="onKickAuthority(row)"
-                                    [attr.aria-label]="'Kick authority ' + row.data.id"
-                                    title="Kick authority"
-                                >
-                                    @if (kickingAuthorityId() === row.data.id) {
-                                        <span class="loading loading-spinner loading-xs"></span>
-                                    } @else {
-                                        Kick
-                                    }
-                                </button>
+                                <app-confirm-button
+                                    label="Kick"
+                                    armedLabel="Kick authority?"
+                                    [ariaLabel]="'Kick authority ' + row.data.id"
+                                    variant="ghost"
+                                    [busy]="kickingAuthorityId() === row.data.id"
+                                    (confirmed)="onKickAuthority(row)"
+                                />
                             }
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
-        <div class="flex items-center justify-end mt-4">
+        <div class="flex items-center justify-end mt-4 px-4 pb-4">
             <div class="flex items-center gap-2 text-sm">
                 <div class="flex items-center gap-2 text-sm">
                     <span class="whitespace-nowrap">Rows per page:</span>
