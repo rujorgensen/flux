@@ -59,7 +59,7 @@ services:
 
   # *** PostgreSQL
   postgres-sh:
-    image: 'postgres:18.7-alpine'
+    image: 'postgres:19.0-alpine'
     container_name: flux-postgres-full-selfhosted
     restart: always
     environment:
