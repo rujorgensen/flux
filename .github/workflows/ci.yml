@@ -130,6 +130,10 @@ jobs:
         timeout-minutes: 2
         run: bun nx affected -t bun-test test lint # --no-agents
 
+      - name: 📦 Check the publish setup
+        timeout-minutes: 5
+        run: bun test scripts/
+
   e2e-test:
     runs-on: ubuntu-26.04
     timeout-minutes: 5

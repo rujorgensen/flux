@@ -36,6 +36,11 @@ jobs:
             test_target: bun-test
             tag_prefix: flux-authority-v
             watch_paths: packages/flux/authority libs/flux/shared
+          - project_name: persistica-flux-lite
+            package_dir: packages/flux/lite
+            test_target: bun-test
+            tag_prefix: flux-lite-v
+            watch_paths: packages/flux/lite
 
     steps:
       - name: Checkout repository
