@@ -70,8 +70,10 @@
             ]
         },
         "nx-release-publish": {
+            "//": "npm publish, not @nx/js:release-publish: from 24.0.4 it calls `bun info` with --@persistica:registry, a flag bun does not have",
+            "executor": "nx:run-commands",
             "options": {
-                "packageRoot": "dist/{projectRoot}"
+                "command": "npm publish dist/{projectRoot} --access public"
             },
             "dependsOn": [
                 "build"

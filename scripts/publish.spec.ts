@@ -1,7 +1,7 @@
 /*
  * The publish setup for every npm package in packages/. Two faults this catches, both seen:
  * - a package that CI does not publish (flux-lite was not in publish.yml);
- * - a local publish script that cannot work (`nx-release-publish` calls `bun info` with a flag bun does not have).
+ * - a local publish that cannot work (@nx/js:release-publish calls `bun info` with a flag bun does not have).
  */
 import { describe, expect, test } from 'bun:test';
 import { Glob } from 'bun';
@@ -10,6 +10,7 @@ import { dirname } from 'node:path';
 
 interface IPackage {
 	project: string;
+	publishTarget: { executor?: string; options?: { command?: string; }; dependsOn?: string[]; } | undefined;
 	dir: string; // packages/flux/lite
 	name: string; // @persistica/flux-lite
 	main: string;
@@ -20,13 +21,13 @@ const read = (path: string): string => readFileSync(`${root}/${path}`, 'utf8');
 
 const packages: IPackage[] = Array.from(new Glob('packages/**/project.json').scanSync({ cwd: root }))
 	.filter((path: string): boolean => !path.includes('node_modules'))
-	.map((path: string): { path: string; project: { name: string; tags?: string[]; }; } => ({ path: path, project: JSON.parse(read(path)) }))
+	.map((path: string): { path: string; project: { name: string; tags?: string[]; targets: Record<string, IPackage['publishTarget']>; }; } => ({ path: path, project: JSON.parse(read(path)) }))
 	.filter((p): boolean => (p.project.tags ?? []).includes('type:npm-package'))
 	.map((p): IPackage => {
 		const dir: string = dirname(p.path);
 		const manifest: { name: string; main: string; } = JSON.parse(read(`${dir}/package.json`));
 
-		return { project: p.project.name, dir: dir, name: manifest.name, main: manifest.main.replace(/^\.\//, '') };
+		return { project: p.project.name, publishTarget: p.project.targets['nx-release-publish'], dir: dir, name: manifest.name, main: manifest.main.replace(/^\.\//, '') };
 	});
 
 const matrix: { project_name: string; package_dir: string; }[] = Bun.YAML.parse(read('.github/workflows/publish.yml')).jobs.release.strategy.matrix.include;
@@ -42,10 +43,11 @@ describe('publish setup', () => {
 			expect(matrix).toContainEqual(expect.objectContaining({ project_name: p.project, package_dir: p.dir }));
 		});
 
-		test('the local publish script builds it and publishes the build with npm, as CI does', () => {
-			const script: string | undefined = scripts[`publish:${p.dir.split('/').pop()}`];
-			expect(script).toContain(`nx run ${p.project}:build`);
-			expect(script).toContain(`npm publish ./dist/${p.dir}`);
+		test('the local publish script runs an Nx target that builds it and publishes the build with npm, as CI does', () => {
+			expect(scripts[`publish:${p.dir.split('/').pop()}`]).toBe(`bunx nx run ${p.project}:nx-release-publish`);
+			expect(p.publishTarget?.executor).toBe('nx:run-commands');
+			expect(p.publishTarget?.options?.command).toStartWith('npm publish dist/{projectRoot}');
+			expect(p.publishTarget?.dependsOn).toContain('build');
 		});
 
 		test('the build is a package npm can pack', () => {
