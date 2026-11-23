@@ -39,6 +39,7 @@
         "//-06b": "// *** NPM Publish                                                             ",
         "//-06c": "// ****************************************************************************",
         "publish:agent": "bunx nx run persistica-flux-agent:nx-release-publish",
+        "publish:lite": "bunx nx run persistica-flux-lite:nx-release-publish",
         "publish:authority": "bunx nx run persistica-flux-authority:nx-release-publish",
         "publish:mesh": "bunx nx run persistica-flux-mesh:nx-release-publish",
         "//-07a": "// ****************************************************************************",

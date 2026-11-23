@@ -6,6 +6,7 @@ import { argv } from 'node:process'
 
 const PACKAGES = [
   'packages/flux/agent',
+  'packages/flux/lite',
   'packages/flux/authority',
   'packages/flux/mesh',
   'apps/frontend/portal',
