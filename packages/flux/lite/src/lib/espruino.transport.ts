@@ -1,7 +1,7 @@
 /*
  * The flux-lite transport on Espruino: an HTTP/1.0 POST and a minimal WebSocket client, both over `net` or `tls`. The
  * POST owns its socket, so a timeout can close it: the `http` module has no abort, and a hung request kept its TLS
- * session, which left no heap for the retry (seen on the TTGO, 2026-11-20). TLS on the TTGO needs the firmware that keeps 65 KB of heap free (see tools/build-firmware.sh), and only one
+ * session, which left no heap for the retry (seen on the TTGO, 2026-11-20). TLS on the TTGO needs the firmware that keeps 65 KB of heap free (a custom Espruino build), and only one
  * TLS connection fits at a time: flux-lite posts the claim first, and opens the socket after the POST has closed.
  *
  * The WebSocket side is only what the Flux mesh needs: text frames, ping, close. No handshake hash check (Espruino has

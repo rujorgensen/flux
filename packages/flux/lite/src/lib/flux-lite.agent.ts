@@ -147,7 +147,7 @@ export const createFluxLiteAgent = (
 				setState('connected', null);
 				joinMissing();
 				// A setTimeout chain, not setInterval: on Espruino an interval fires again and again to catch up after the
-				// SNTP clock jump, and keeps the device busy (probe display, 2026-11-18)
+				// SNTP clock jump, and keeps the device busy (seen on an ESP32, 2026-11-18)
 				tickTimer = setTimeout(tick, TICK_MS);
 				break;
 			case 'pong':

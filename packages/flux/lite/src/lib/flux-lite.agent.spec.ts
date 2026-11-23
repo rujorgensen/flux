@@ -52,7 +52,7 @@ describe('createFluxLiteAgent', () => {
 			{ domain: 'https://mesh.test', networkId: 'net', claim: 'dev-1', agentUid: 'dev-1', transport: f.transport },
 			{ state: (s: string): number => states.push(s), message: (c: string, d: unknown): number => received.push([c, d]), error: (): void => {} },
 		);
-		agent.join('probe-5-1');
+		agent.join('sensor-1');
 
 		expect(f.posts).toEqual(['https://mesh.test/auth/network-client?networkId=net&requestedAgentUid=dev-1 dev-1']);
 		f.answerPost(200, 'ticket-1');
@@ -60,10 +60,10 @@ describe('createFluxLiteAgent', () => {
 		expect(f.sent).toEqual([]); // nothing before the mesh says it is ready
 
 		f.events().message('isReady');
-		expect(f.sent).toEqual(['subscribe-to-nc-name:probe-5-1']);
-		f.events().message('subscribed-to-nc-name:probe-5-1');
-		f.events().message('nc-on-pub:server:probe-5-1:o:{"m":[7.1]}');
-		expect(received).toEqual([['probe-5-1', { m: [7.1] }]]);
+		expect(f.sent).toEqual(['subscribe-to-nc-name:sensor-1']);
+		f.events().message('subscribed-to-nc-name:sensor-1');
+		f.events().message('nc-on-pub:server:sensor-1:o:{"m":[7.1]}');
+		expect(received).toEqual([['sensor-1', { m: [7.1] }]]);
 
 		// A dropped socket signs on again after 2 s, with a new ticket, and joins the channel again
 		f.events().close('');
@@ -71,7 +71,7 @@ describe('createFluxLiteAgent', () => {
 		jest.advanceTimersByTime(2_000);
 		f.answerPost(200, 'ticket-2');
 		f.events().message('isReady');
-		expect(f.sent.slice(-1)).toEqual(['subscribe-to-nc-name:probe-5-1']);
+		expect(f.sent.slice(-1)).toEqual(['subscribe-to-nc-name:sensor-1']);
 		expect(states).toEqual(['authorizing', 'connecting', 'connected', 'disconnected', 'authorizing', 'connecting', 'connected']);
 		agent.stop();
 	});

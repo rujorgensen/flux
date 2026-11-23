@@ -18,7 +18,7 @@ const agent: IFluxLiteAgent = createFluxLiteAgent(
 	{ domain: 'https://mesh.persistica.io', networkId: 'my-network', claim: 'device-id', agentUid: 'device-id', transport },
 	{ state: (state, detail) => {}, message: (channel, data) => {}, error: (message) => {} },
 );
-agent.join('probe-5-123');
+agent.join('sensor-1');
 ```
 
 The lightweight alternative to `@persistica/flux-agent`. `espruinoFluxTransport` is the transport for Espruino (ESP32: `tls`/`net`); other runtimes pass their own.

@@ -36,8 +36,8 @@ const agent: IFluxLiteAgent = createFluxLiteAgent(
     },
 );
 
-agent.join('probe-5-1');
-agent.publish('probe-5-1', { t: 21.5 });
+agent.join('sensor-1');
+agent.publish('sensor-1', { t: 21.5 });
 ```
 
 `createFluxLiteAgent` signs on at once. `join` and `leave` work at any time: flux-lite keeps the list of
