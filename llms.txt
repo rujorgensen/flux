@@ -15,6 +15,7 @@ the Mesh, with protocol — not the Portal.
 ## SDK
 
 - [Flux Agent](./docs/sdk/flux-agent.md): join a Network, join Channels, publish/subscribe; options, connection states, error handling, and troubleshooting.
+- [Flux Lite](./docs/sdk/flux-lite.md): a small Agent for microcontrollers (Espruino on ESP32); the transport interface, reconnect behaviour, and what it does not support (encryption, WebRTC, RPC).
 - [Flux Authority](./docs/sdk/flux-authority.md): authorize Agents and Channels; holds the Network Access Token; must be online before Agents connect.
 - [Flux Mesh](./docs/sdk/flux-mesh.md): run a self-hosted mesh server, or use the hosted mesh.
 

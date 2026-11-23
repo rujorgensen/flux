@@ -1,0 +1,65 @@
+{
+    "name": "persistica-flux-lite",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/flux/lite/src",
+    "projectType": "library",
+    "tags": [
+        "type:npm-package",
+        "scope:any"
+    ],
+    "targets": {
+        "lint": {
+            "executor": "nx-oxlint:lint"
+        },
+        "bun-test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun test {projectRoot}/"
+            }
+        },
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/packages/flux/lite",
+                "main": "packages/flux/lite/src/index.ts",
+                "tsConfig": "packages/flux/lite/tsconfig.lib.json",
+                "assets": [
+                    "{projectRoot}/README.md"
+                ],
+                "format": [
+                    "esm"
+                ]
+            }
+        },
+        "link": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd ./dist/{projectRoot} && bun link"
+            },
+            "dependsOn": [
+                "build"
+            ]
+        },
+        "nx-release-publish": {
+            "options": {
+                "packageRoot": "dist/{projectRoot}"
+            },
+            "dependsOn": [
+                "build"
+            ]
+        }
+    },
+    "release": {
+        "version": {
+            "currentVersionResolver": "git-tag",
+            "fallbackCurrentVersionResolver": "disk",
+            "preserveLocalDependencyProtocols": false,
+            "manifestRootsToUpdate": [
+                "dist/{projectRoot}"
+            ]
+        }
+    }
+}

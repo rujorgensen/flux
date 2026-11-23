@@ -199,6 +199,65 @@
                 <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript" [innerHTML]="agentSnippet | syntaxHighlight: 'typescript'"></code></pre>
             </div>
 
+            <h3>On a small device</h3>
+
+            <p>
+                A microcontroller cannot run <code>&#64;persistica/flux-agent</code>. Use <code>&#64;persistica/flux-lite</code>:
+                it signs on, joins channels, publishes and receives, and reconnects. It has no payload encryption, no
+                WebRTC and no RPC. It runs on Espruino (ESP32) with the transport it includes.
+            </p>
+
+            <!-- Install: flux-lite -->
+            <div class="not-prose my-6">
+                <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                        @for (pm of packageManagers; track pm) {
+                            <button
+                                type="button"
+                                class="btn btn-xs"
+                                [class.btn-primary]="selectedPm() === pm"
+                                [class.btn-ghost]="selectedPm() !== pm"
+                                (click)="_packageManagerService.select(pm)"
+                            >{{ pm }}</button>
+                        }
+                    </div>
+                    <button
+                        class="btn btn-ghost btn-xs gap-1"
+                        type="button"
+                        (click)="copyToClipboard('install-lite', _packageManagerService.installCommands[selectedPm()]('@persistica/flux-lite'))"
+                    >
+                        @if (copiedSnippet() === 'install-lite') {
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-success"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Copied!
+                        } @else {
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            Copy
+                        }
+                    </button>
+                </div>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-bash" [innerHTML]="_packageManagerService.installCommands[selectedPm()]('@persistica/flux-lite') | syntaxHighlight: 'bash'"></code></pre>
+            </div>
+
+            <div class="not-prose my-6">
+                <div class="bg-base-300 rounded-t-xl px-4 py-2 flex items-center justify-between">
+                    <span class="text-xs font-mono text-base-content/60">device.ts</span>
+                    <button
+                        class="btn btn-ghost btn-xs gap-1"
+                        type="button"
+                        (click)="copyToClipboard('lite-code', liteSnippet)"
+                    >
+                        @if (copiedSnippet() === 'lite-code') {
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-success"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Copied!
+                        } @else {
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            Copy
+                        }
+                    </button>
+                </div>
+                <pre class="bg-base-300 rounded-b-xl px-4 pb-4 pt-0 m-0 text-sm overflow-x-auto"><code class="language-typescript" [innerHTML]="liteSnippet | syntaxHighlight: 'typescript'"></code></pre>
+            </div>
+
             <h2>You're live! 🎉</h2>
 
             <p>

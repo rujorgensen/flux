@@ -86,6 +86,26 @@ channel.subscribe((message) => {
 // Publish a message
 channel.publish({ text: 'Hello, Flux!' });`;
 
+    protected readonly liteSnippet = `import { createFluxLiteAgent, espruinoFluxTransport } from '@persistica/flux-lite';
+
+const agent = createFluxLiteAgent(
+    {
+        domain: 'https://mesh.persistica.io',
+        networkId: 'your-network-id',
+        claim: 'device-1', // what your Authority checks
+        agentUid: 'device-1',
+        transport: espruinoFluxTransport,
+    },
+    {
+        state: (state, detail) => console.log(state, detail),
+        message: (channel, data) => console.log(channel, data),
+        error: (message) => console.log('mesh error', message),
+    },
+);
+
+agent.join('general');
+agent.publish('general', { text: 'Hello from a device' });`;
+
     constructor(
         protected readonly _packageManagerService: PackageManagerService,
     ) {
