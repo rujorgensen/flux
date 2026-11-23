@@ -81,7 +81,7 @@ describe('Espruino flux-lite transport', () => {
 
 	test('gives the agent the reason from the close frame, and no reason after a plain close', () => {
 		const reasons: string[] = [];
-		const events = { open: (): void => {}, message: (): void => {}, close: (reason: string): number => reasons.push(reason) };
+		const events = { message: (): void => {}, close: (reason: string): number => reasons.push(reason) };
 		espruinoFluxTransport.open('ws://h/?token=t', events);
 		socket.handlers['data']!(`HTTP/1.1 101 Switching Protocols\r\n\r\n${serverFrame(8, `${String.fromCharCode(1002 >> 8, 1002 & 255)}Kicked by process`, true)}`);
 		socket.handlers['close']!(); // the socket's own close after the frame: no second event

@@ -9,7 +9,6 @@ export interface IFluxLiteSocket {
 }
 
 export interface IFluxLiteSocketEvents {
-	open(): void;
 	message(text: string): void;
 	// Also after a failed open, so the agent always learns that the socket is gone. `reason` is the reason in the
 	// server's close frame ('Kicked by process' after a kick), or '' when there is none.
@@ -29,7 +28,7 @@ export interface IFluxLiteOptions {
 	networkId: string;
 	claim: string; // what the network's Authority checks in authorizeAgentConnection
 	agentUid: string; // the agent's own stable id
-	transport: IFluxLiteTransport;
+	transport?: IFluxLiteTransport; // default: espruinoFluxTransport
 }
 
 // No 'waiting-for-authority' of its own: the mesh answers that with a 401, and flux-lite retries every sign-on failure

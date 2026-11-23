@@ -243,7 +243,6 @@ const open = (
 			}
 			upgraded = true;
 			buffer = buffer.slice(end + 4);
-			events.open();
 		}
 		const decoded: IDecoded = decodeFrames(buffer);
 		buffer = decoded.rest;

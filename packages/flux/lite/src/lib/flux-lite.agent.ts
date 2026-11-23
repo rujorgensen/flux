@@ -1,8 +1,9 @@
 /*
  * A Flux Agent in plain functions and closures: no classes, no async, no Map. See ../../README.md for the scope.
  */
-import type { IFluxLiteAgent, IFluxLiteHandlers, IFluxLiteOptions, IFluxLiteSocket, TFluxLiteState } from './flux-lite.interfaces';
+import type { IFluxLiteAgent, IFluxLiteHandlers, IFluxLiteOptions, IFluxLiteSocket, IFluxLiteTransport } from './flux-lite.interfaces';
 import { authUrl, encodePayload, parseFrame, socketUrl, type TFluxLiteFrame } from './flux-lite.utils';
+import { espruinoFluxTransport } from './espruino.transport';
 
 // The mesh tickets expire; a sign-on is cheap, so every drop signs on again from the start
 const RECONNECT_MS: number = 2_000;
@@ -25,6 +26,7 @@ export const createFluxLiteAgent = (
 	o: IFluxLiteOptions,
 	h: IFluxLiteHandlers,
 ): IFluxLiteAgent => {
+	const transport: IFluxLiteTransport = o.transport || espruinoFluxTransport;
 	const joined: Record<string, boolean | undefined> = {}; // every wanted channel → the mesh acknowledged it on this socket
 	let socket: IFluxLiteSocket | null = null;
 	let ready: boolean = false;
@@ -35,11 +37,6 @@ export const createFluxLiteAgent = (
 	let tickTimer: any = null;
 	let awaitingPong: boolean = false;
 	let pongSeen: boolean = false; // a mesh that never answers a ping is older than the heartbeat: no dead-socket check
-
-	const setState = (
-		state: TFluxLiteState,
-		detail: string | null,
-	): void => h.state(state, detail);
 
 	const send = (
 		text: string,
@@ -77,7 +74,7 @@ export const createFluxLiteAgent = (
 		detail: string,
 	): void => {
 		failures++;
-		setState('auth-error', detail);
+		h.state('auth-error', detail);
 		signOnLater(Math.min(MAX_RETRY_MS, RECONNECT_MS * Math.pow(2, failures - 1)));
 	};
 
@@ -97,13 +94,13 @@ export const createFluxLiteAgent = (
 			return;
 		}
 		if (reason === KICK_REASON) {
-			setState('disconnected', 'kicked');
+			h.state('disconnected', 'kicked');
 			signOnLater(KICK_DELAY_MS);
 		} else if (wasReady) {
-			setState('disconnected', null);
+			h.state('disconnected', null);
 			signOnLater(RECONNECT_MS);
 		} else {
-			fail(reason ? `socket closed before the mesh was ready: ${reason}` : 'socket closed before the mesh was ready');
+			fail(`socket closed before the mesh was ready${reason ? `: ${reason}` : ''}`);
 		}
 	};
 
@@ -144,7 +141,7 @@ export const createFluxLiteAgent = (
 				failures = 0;
 				awaitingPong = false;
 				pongSeen = false;
-				setState('connected', null);
+				h.state('connected', null);
 				joinMissing();
 				// A setTimeout chain, not setInterval: on Espruino an interval fires again and again to catch up after the
 				// SNTP clock jump, and keeps the device busy (seen on an ESP32, 2026-11-18)
@@ -166,7 +163,7 @@ export const createFluxLiteAgent = (
 				h.error(frame.message);
 				break;
 			default:
-				// 'left', and RPC requests (WebRTC peering), which flux-lite does not offer
+				// 'unsubscribed-nc-name', and RPC requests (WebRTC peering), which flux-lite does not offer
 				break;
 		}
 	};
@@ -174,12 +171,11 @@ export const createFluxLiteAgent = (
 	const connect = (
 		ticket: string,
 	): void => {
-		setState('connecting', null);
+		h.state('connecting', null);
 		const mine: number = ++generation;
 		// tickTimer is free until 'isReady'. Set before open(), so a close inside open() clears it in dropped().
 		tickTimer = setTimeout((): void => kill('no isReady in 20 s'), READY_TIMEOUT_MS);
-		socket = o.transport.open(socketUrl(o.domain, ticket), {
-			open: (): void => {},
+		socket = transport.open(socketUrl(o.domain, ticket), {
 			message: (text: string): void => {
 				if (mine === generation) {
 					onFrame(parseFrame(text));
@@ -196,8 +192,8 @@ export const createFluxLiteAgent = (
 	function signOn(
 	): void {
 		signOnTimer = null;
-		setState('authorizing', null);
-		o.transport.post(authUrl(o.domain, o.networkId, o.agentUid), o.claim, AUTH_HEADERS, (status: number, body: string): void => {
+		h.state('authorizing', null);
+		transport.post(authUrl(o.domain, o.networkId, o.agentUid), o.claim, AUTH_HEADERS, (status: number, body: string): void => {
 			if (stopped) {
 				return;
 			}

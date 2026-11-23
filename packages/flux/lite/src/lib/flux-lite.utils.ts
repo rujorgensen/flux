@@ -6,7 +6,6 @@ export type TFluxLiteFrame =
 	{ kind: 'ready'; }
 	| { kind: 'pong'; }
 	| { kind: 'joined'; channel: string; }
-	| { kind: 'left'; channel: string; }
 	| { kind: 'publish'; channel: string; data: unknown; }
 	| { kind: 'error'; message: string; }
 	| { kind: 'other'; text: string; };
@@ -59,8 +58,6 @@ export const parseFrame = (
 	switch (type) {
 		case 'subscribed-to-nc-name':
 			return { kind: 'joined', channel: rest };
-		case 'unsubscribed-nc-name':
-			return { kind: 'left', channel: rest };
 		case 'e':
 			return { kind: 'error', message: rest };
 		case 'nc-on-pub': {

@@ -86,7 +86,7 @@ channel.subscribe((message) => {
 // Publish a message
 channel.publish({ text: 'Hello, Flux!' });`;
 
-    protected readonly liteSnippet = `import { createFluxLiteAgent, espruinoFluxTransport } from '@persistica/flux-lite';
+    protected readonly liteSnippet = `import { createFluxLiteAgent } from '@persistica/flux-lite';
 
 const agent = createFluxLiteAgent(
     {
@@ -94,7 +94,6 @@ const agent = createFluxLiteAgent(
         networkId: 'your-network-id',
         claim: 'device-1', // what your Authority checks
         agentUid: 'device-1',
-        transport: espruinoFluxTransport,
     },
     {
         state: (state, detail) => console.log(state, detail),

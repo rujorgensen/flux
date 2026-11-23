@@ -2,8 +2,8 @@
 
 A small Flux **Agent** for devices that cannot run [`@persistica/flux-agent`](./flux-agent.md):
 microcontrollers such as an ESP32 with Espruino. It signs on, joins Channels, publishes and receives,
-keeps a heartbeat, and reconnects. It has no dependencies. The caller gives it a *transport* for HTTP and
-WebSocket, so the same code runs on Espruino, Bun or a browser.
+keeps a heartbeat, and reconnects. It has no dependencies. It uses the Espruino transport by default.
+Another runtime (Bun, a browser) gives its own *transport* for HTTP and WebSocket.
 
 Install: `npm i @persistica/flux-lite` (or `bun add @persistica/flux-lite`).
 
@@ -19,7 +19,7 @@ Without one, the mesh answers the sign-on with 401, and flux-lite retries with b
 ## Connect and exchange messages
 
 ```ts
-import { createFluxLiteAgent, espruinoFluxTransport, type IFluxLiteAgent } from '@persistica/flux-lite';
+import { createFluxLiteAgent, type IFluxLiteAgent } from '@persistica/flux-lite';
 
 const agent: IFluxLiteAgent = createFluxLiteAgent(
     {
@@ -27,7 +27,7 @@ const agent: IFluxLiteAgent = createFluxLiteAgent(
         networkId: 'my-network-id',
         claim: 'device-1', // what the Authority's authorizeAgentConnection checks
         agentUid: 'device-1', // the device's own stable id
-        transport: espruinoFluxTransport,
+        // transport: omitted, so espruinoFluxTransport
     },
     {
         state: (state, detail) => console.log(state, detail),
@@ -82,6 +82,8 @@ than the heartbeat; flux-lite then does no dead-socket check.
 
 ## The transport interface — `IFluxLiteTransport`
 
+Set `transport` in the options only on a runtime other than Espruino, or to give a fake in a test.
+
 ```ts
 interface IFluxLiteTransport {
     // One HTTP POST. done() gets the status and the body; status 0 means no answer.
@@ -90,7 +92,6 @@ interface IFluxLiteTransport {
 }
 
 interface IFluxLiteSocketEvents {
-    open(): void;
     message(text: string): void;
     close(reason: string): void; // the close frame's reason, or ''
 }
