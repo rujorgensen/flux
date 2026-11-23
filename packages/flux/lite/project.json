@@ -31,7 +31,8 @@
                 ],
                 "format": [
                     "esm"
-                ]
+                ],
+                "bundle": false
             }
         },
         "link": {

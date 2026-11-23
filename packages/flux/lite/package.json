@@ -1,6 +1,6 @@
 {
     "name": "@persistica/flux-lite",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Persistica Flux Agent for small devices (Espruino): no dependencies, ES5 after a down-level build",
     "type": "module",
     "keywords": [],

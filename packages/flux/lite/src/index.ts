@@ -1,4 +1,4 @@
-export { createFluxLiteAgent } from './lib/flux-lite.agent';
+export { createFluxLiteAgent } from './lib/flux-lite.agent.js';
 export type {
 	IFluxLiteAgent,
 	IFluxLiteHandlers,
@@ -7,5 +7,5 @@ export type {
 	IFluxLiteSocketEvents,
 	IFluxLiteTransport,
 	TFluxLiteState,
-} from './lib/flux-lite.interfaces';
-export { espruinoFluxTransport } from './lib/espruino.transport';
+} from './lib/flux-lite.interfaces.js';
+export { espruinoFluxTransport } from './lib/espruino.transport.js';
