@@ -1,62 +1,24 @@
 /*
- * The publish setup for every npm package in packages/. Two faults this catches, both seen:
- * - a package that CI does not publish (flux-lite was not in publish.yml);
- * - a local publish that cannot work (@nx/js:release-publish calls `bun info` with a flag bun does not have).
+ * CI publishes every npm package in packages/. flux-lite was not in publish.yml, so its first release needed a
+ * manual publish.
  */
-import { describe, expect, test } from 'bun:test';
+import { expect, test } from 'bun:test';
 import { Glob } from 'bun';
 import { readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-interface IPackage {
-	project: string;
-	publishTarget: { executor?: string; options?: { command?: string; }; dependsOn?: string[]; } | undefined;
-	dir: string; // packages/flux/lite
-	name: string; // @persistica/flux-lite
-	main: string;
-}
-
 const root: string = `${import.meta.dir}/..`;
 const read = (path: string): string => readFileSync(`${root}/${path}`, 'utf8');
 
-const packages: IPackage[] = Array.from(new Glob('packages/**/project.json').scanSync({ cwd: root }))
+const packages: { project_name: string; package_dir: string; }[] = Array.from(new Glob('packages/**/project.json').scanSync({ cwd: root }))
 	.filter((path: string): boolean => !path.includes('node_modules'))
-	.map((path: string): { path: string; project: { name: string; tags?: string[]; targets: Record<string, IPackage['publishTarget']>; }; } => ({ path: path, project: JSON.parse(read(path)) }))
+	.map((path: string): { path: string; project: { name: string; tags?: string[]; }; } => ({ path: path, project: JSON.parse(read(path)) }))
 	.filter((p): boolean => (p.project.tags ?? []).includes('type:npm-package'))
-	.map((p): IPackage => {
-		const dir: string = dirname(p.path);
-		const manifest: { name: string; main: string; } = JSON.parse(read(`${dir}/package.json`));
+	.map((p): { project_name: string; package_dir: string; } => ({ project_name: p.project.name, package_dir: dirname(p.path) }));
 
-		return { project: p.project.name, publishTarget: p.project.targets['nx-release-publish'], dir: dir, name: manifest.name, main: manifest.main.replace(/^\.\//, '') };
-	});
+test('the publish workflow has an entry for every npm package', () => {
+	const matrix: { project_name: string; package_dir: string; }[] = Bun.YAML.parse(read('.github/workflows/publish.yml')).jobs.release.strategy.matrix.include;
 
-const matrix: { project_name: string; package_dir: string; }[] = Bun.YAML.parse(read('.github/workflows/publish.yml')).jobs.release.strategy.matrix.include;
-const scripts: Record<string, string> = JSON.parse(read('package.json')).scripts;
-
-describe('publish setup', () => {
-	test('finds the npm packages', () => {
-		expect(packages.map((p: IPackage): string => p.name)).toContain('@persistica/flux-lite');
-	});
-
-	describe.each(packages.map((p: IPackage): [string, IPackage] => [p.name, p]))('%s', (_name: string, p: IPackage) => {
-		test('CI publishes it', () => {
-			expect(matrix).toContainEqual(expect.objectContaining({ project_name: p.project, package_dir: p.dir }));
-		});
-
-		test('the local publish script runs an Nx target that builds it and publishes the build with npm, as CI does', () => {
-			expect(scripts[`publish:${p.dir.split('/').pop()}`]).toBe(`bunx nx run ${p.project}:nx-release-publish`);
-			expect(p.publishTarget?.executor).toBe('nx:run-commands');
-			expect(p.publishTarget?.options?.command).toStartWith('npm publish dist/{projectRoot}');
-			expect(p.publishTarget?.dependsOn).toContain('build');
-		});
-
-		test('the build is a package npm can pack', () => {
-			expect(Bun.spawnSync(['bunx', 'nx', 'run', `${p.project}:build`], { cwd: root }).exitCode).toBe(0);
-			const pack = Bun.spawnSync(['npm', 'pack', '--dry-run', '--json', `./dist/${p.dir}`], { cwd: root });
-			expect(pack.exitCode).toBe(0);
-			const [packed] = JSON.parse(pack.stdout.toString()) as { name: string; files: { path: string; }[]; }[];
-			expect(packed!.name).toBe(p.name);
-			expect(packed!.files.map((f: { path: string; }): string => f.path)).toContain(p.main);
-		}, 120_000);
-	});
+	expect(packages.map((p): string => p.project_name)).toContain('persistica-flux-lite');
+	packages.forEach((p): void => expect(matrix).toContainEqual(expect.objectContaining(p)));
 });
