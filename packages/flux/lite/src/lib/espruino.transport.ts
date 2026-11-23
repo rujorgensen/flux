@@ -7,7 +7,7 @@
  * The WebSocket side is only what the Flux mesh needs: text frames, ping, close. No handshake hash check (Espruino has
  * no SHA1 here); the server's "101" status line is the check. Frames over 65535 bytes close the socket.
  */
-import type { IFluxLiteSocket, IFluxLiteSocketEvents, IFluxLiteTransport } from './flux-lite.interfaces';
+import type { IFluxLiteSocket, IFluxLiteSocketEvents, IFluxLiteTransport } from './flux-lite.interfaces.js';
 
 const POST_TIMEOUT_MS: number = 20_000;
 

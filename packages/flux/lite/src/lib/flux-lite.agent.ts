@@ -1,9 +1,9 @@
 /*
  * A Flux Agent in plain functions and closures: no classes, no async, no Map. See ../../README.md for the scope.
  */
-import type { IFluxLiteAgent, IFluxLiteHandlers, IFluxLiteOptions, IFluxLiteSocket, IFluxLiteTransport } from './flux-lite.interfaces';
-import { authUrl, encodePayload, parseFrame, socketUrl, type TFluxLiteFrame } from './flux-lite.utils';
-import { espruinoFluxTransport } from './espruino.transport';
+import type { IFluxLiteAgent, IFluxLiteHandlers, IFluxLiteOptions, IFluxLiteSocket, IFluxLiteTransport } from './flux-lite.interfaces.js';
+import { authUrl, encodePayload, parseFrame, socketUrl, type TFluxLiteFrame } from './flux-lite.utils.js';
+import { espruinoFluxTransport } from './espruino.transport.js';
 
 // The mesh tickets expire; a sign-on is cheap, so every drop signs on again from the start
 const RECONNECT_MS: number = 2_000;
